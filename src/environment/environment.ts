@@ -11,10 +11,12 @@ export const environment = {
   cacheVersion: '01',
   nameKeyBlockStorage: `sw-blocks`,
   nameKeyNodeSelected: `sw-selected-node-testnet`,
+  nameKeyWalletStorage: `sw`,
   nameKeyNodeStorage: `sw-nodes-testnet`,
   nameKeyNamespaces: `sw-namespaces-testnet`,
   nameKeyMosaicStorage: `sw-mosaics-testnet`,
   nameKeyVersion: 'sw-version-testnet',
+  nameKeyWalletTransactionsNis: 'sw-transactions-nis',
   activeModulesBox: {
     voting: {
       viewChildrenParam: true,
