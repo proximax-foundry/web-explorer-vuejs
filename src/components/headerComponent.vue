@@ -1,14 +1,14 @@
 <template>
   <header class="z-10 fixed w-full">
     <div class="bg-blue-theme">
-      <div class="container mx-auto py-2">
+      <div class="container px-2 mx-auto py-2">
         <div class="flex justify-between">
           <div class="flex items-center">
             <router-link :to="{name: 'Home'}"><img src="@/assets/img/proximax-logo.svg" class="w-40 mr-7"></router-link>
             <router-link :to="{name : 'Home'}"><img src="@/assets/img/icon-home.svg" class="h-5 w-5"></router-link>
             <selectNetwork class="ml-5" />
           </div>
-          <div class="hidden md:flex">
+          <div class="hidden sm:flex">
             <button class="gray-default-btn my-2 mr-2">Create Wallet</button>
             <button class="default-btn my-2">Get XPX</button>
           </div>
@@ -16,8 +16,8 @@
       </div>
     </div>
     <div class="bg-gray-50">
-      <div class="container mx-auto">
-        <div class="sm:flex sm:justify-between sm:items-center m-2 sm:m-0">
+      <div class="container px-2 mx-auto">
+        <div class="sm:flex sm:justify-between sm:items-center my-2 sm:m-0">
           <div class="header-links">
             <a href="#">Blocks</a>
             <a href="#">Transactions</a>
