@@ -1,4 +1,4 @@
-// import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 // import { HomeRoutes } from '@/modules/home/routingHome';
 // import { DashboardRoutes } from '@/modules/dashboard/routingDashboard';
 // import { TransferRoutes } from '@/modules/transfer/routingTransfer';
@@ -17,9 +17,21 @@
 //   ...TransactionRoutes,
 // ]
 
-// const router = createRouter({
-//   history: createWebHashHistory(process.env.BASE_URL),
-//   routes
-// })
+const routes = [
+  {
+    path: '/',
+    name: 'Home',
+    props: true,
+    component: () => import('@/modules/home/views/ViewHome.vue'),
+    meta: {
+      title: "Welcome to Sirius Explorer",
+    }
+  },
+];
 
-// export default router
+const router = createRouter({
+  history: createWebHashHistory(process.env.BASE_URL),
+  routes
+})
+
+export default router

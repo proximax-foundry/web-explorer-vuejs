@@ -1,26 +1,24 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div class="flex flex-col justify-between min-h-screen">
+    <headerComponent class=" flex-grow-0" />
+    <router-view class="flex-grow container mx-auto pt-48 sm:pt-40"></router-view>
+    <footerComponent class=" flex-grow-0" />
+  </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
 
+import headerComponent from '@/components/headerComponent.vue'
+import footerComponent from '@/components/footerComponent.vue'
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    headerComponent,
+    footerComponent,
   }
 }
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+
 </style>

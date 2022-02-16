@@ -7,7 +7,7 @@ switch(process.env.NODE_ENV){
         publicPath = '/web-wallet-vuejs'
         break;
     case 'production':
-        publicPath = '/'
+        publicPath = ''
         break;
     case 'development':
         publicPath = '/'
@@ -37,7 +37,7 @@ module.exports = {
       config
           .plugin('html')
           .tap(args => {
-              args[0].title = "ProximaX Web Wallet";
+              args[0].title = "ProximaX Sirius Explorer";
               return args;
           })
     }
