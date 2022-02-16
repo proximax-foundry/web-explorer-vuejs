@@ -37,10 +37,11 @@ module.exports = {
       },
       colors:{
         gray:{
-          primary: '#444444'
+          primary: '#393A53'
         },
         blue:{
           primary:'#007CFF',
+          theme: '#11122C',
           link: '#007CFF'
         },
         red:{

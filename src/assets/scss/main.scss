@@ -74,11 +74,11 @@ body{
 }
 
 .blue-btn{
-  @apply bg-blue-primary text-xs text-white font-bold rounded-md transition-all duration-500 hover:bg-opacity-90 hover:shadow-lg focus:outline-none;
+  @apply bg-blue-primary text-xs text-white font-bold rounded-sm transition-all duration-500 hover:bg-opacity-90 hover:shadow-lg focus:outline-none;
 }
 
 .gray-btn{
-  @apply bg-gray-primary text-xs text-white transition-all duration-500 hover:bg-opacity-90 hover:shadow-lg focus:outline-none;
+  @apply bg-gray-primary text-xs text-white font-bold rounded-sm transition-all duration-500 hover:bg-opacity-90 hover:shadow-lg focus:outline-none;
 }
 
 .small-default-btn{
@@ -87,6 +87,10 @@ body{
 
 .default-btn{
   @apply blue-btn py-3 px-10;
+}
+
+.gray-default-btn{
+  @apply gray-btn py-3 px-10;
 }
 
 .default-secondary-btn{
