@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col justify-between min-h-screen">
     <headerComponent class=" flex-grow-0" />
-    <router-view class="flex-grow container px-2 mx-auto pt-48 sm:pt-40"></router-view>
+    <router-view class="flex-grow container mx-auto pt-48 sm:pt-40"></router-view>
     <footerComponent class=" flex-grow-0" />
   </div>
 </template>

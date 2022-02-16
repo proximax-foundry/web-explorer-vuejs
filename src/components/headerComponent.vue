@@ -1,7 +1,7 @@
 <template>
   <header class="z-10 fixed w-full">
     <div class="bg-blue-theme">
-      <div class="container px-2 mx-auto py-2">
+      <div class="container mx-auto py-2">
         <div class="flex justify-between">
           <div class="flex items-center">
             <router-link :to="{name: 'Home'}"><img src="@/assets/img/proximax-logo.svg" class="w-40 mr-7"></router-link>
@@ -16,7 +16,7 @@
       </div>
     </div>
     <div class="bg-gray-50">
-      <div class="container px-2 mx-auto">
+      <div class="container mx-auto">
         <div class="sm:flex sm:justify-between sm:items-center my-2 sm:m-0">
           <div class="header-links">
             <a href="#">Blocks</a>

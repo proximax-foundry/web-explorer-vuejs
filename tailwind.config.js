@@ -6,6 +6,15 @@ module.exports = {
   ],
   darkMode: false, // or 'media' or 'class'
   theme: {
+    container:{
+      padding: {
+        DEFAULT: '5px',
+        sm: '10px',
+        lg: '35px',
+        xl: '80px',
+        '2xl': '180px',
+      }
+    },
     inset:{
       '0': 0,
       auto: 'auto',
