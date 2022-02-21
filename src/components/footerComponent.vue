@@ -5,7 +5,7 @@
         <div class="flex py-10 col-span-2">
           <div class="mr-7"><img src="@/assets/img/proximax-logo-footer.svg" class="w-7"></div>
           <div>
-            <div class="text-tsm text-white mb-5">Copyright 2022 ProximaX. All rights reserved.</div>
+            <div class="text-xs text-white mb-5">Copyright 2022 ProximaX. All rights reserved.</div>
             <div>
               <p class="media-link">
                 <a href="http://t.me/ProximaXio" target=_new><font-awesome-icon :icon="faTelegramPlane" class="w-4 h-4" /></a>
