@@ -1,9 +1,9 @@
 <template>
-  <div class="w-60">
-    <div @click='toggleSelection = !toggleSelection' class= "ml-auto mr-auto py-3 px-2 cursor-pointer">
+  <div class="w-48">
+    <div @click='toggleSelection = !toggleSelection' class= "ml-auto mr-auto py-1 cursor-pointer">
       <div class="flex justify-between">
-        <div class="flex flex-col ml-2 text-left mr-5">
-          <div v-if='selectedNetwork.name!=""' class='mt-1 text-tsm text-white'>{{selectedNetwork.name}}<div class="text-txs text-yellow-400 mt-1">{{ selectedNetwork.node }}</div></div>
+        <div class="flex flex-col ml-2 text-left">
+          <div v-if='selectedNetwork.name!=""' class='mt-1 text-xs text-white'>{{selectedNetwork.name}}<div class="text-xxs text-yellow-400 mt-1">{{ selectedNetwork.node }}</div></div>
           <div v-else class="text-tsm font-bold">Select Network</div>
         </div>
         <img src="@/assets/img/icon-caret-down.svg" class="ml-2 transition-all duration-200" :class="`${toggleSelection?'rotate-180 transform':''}`">

@@ -1,6 +1,6 @@
 <template>
   <div class="w-32 bg-gray-50">
-    <div @click='toggleSelection = !toggleSelection' class= "ml-auto mr-auto py-3 px-2 cursor-pointer">
+    <div @click='toggleSelection = !toggleSelection' class= "ml-auto mr-auto py-2 px-2 cursor-pointer">
       <div class="flex justify-between items-center">
         <div class="flex flex-col ml-2 text-left mr-5">
           <div class='mt-1 text-xs'>{{ selectedFilterTerm }}</div>
