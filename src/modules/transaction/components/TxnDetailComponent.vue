@@ -7,7 +7,7 @@
     <div>
       <div>Status</div>
       <div>
-        <div class="flex items-center px-2 py-1 rounded-sm border border-blue-100 bg-blue-100 text-blue-primary text-xs"><span class="material-icons md-16">done</span>&nbsp;Success</div>
+        <div class="flex items-center px-2 py-1 rounded-sm border border-green-100 bg-green-100 text-green-700 text-xs"><span class="material-icons md-16">done</span>&nbsp;Success</div>
       </div>
     </div>
     <div>
