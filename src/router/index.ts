@@ -21,10 +21,19 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    props: true,
     component: () => import('@/modules/home/views/ViewHome.vue'),
     meta: {
       title: "Welcome to Sirius Explorer",
+    }
+  },
+
+  {
+    path: '/txn/:hash',
+    name: 'ViewTransaction',
+    props: true,
+    component: () => import('@/modules/transaction/views/ViewTransaction.vue'),
+    meta: {
+      title: "View Transaction",
     }
   },
 ];

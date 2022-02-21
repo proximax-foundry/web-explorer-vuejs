@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col justify-between min-h-screen">
+  <div class="flex flex-col justify-between min-h-screen bg-white">
     <headerComponent class=" flex-grow-0" />
     <router-view class="flex-grow container mx-auto pt-48 sm:pt-40"></router-view>
     <footerComponent class=" flex-grow-0" />

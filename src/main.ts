@@ -41,8 +41,5 @@ app.component('ConfirmDialog', ConfirmDialog);
 app.component('Toast', Toast);
 
 
-
-
-
 // NetworkStateUtils.checkDefaultNetwork();
 
