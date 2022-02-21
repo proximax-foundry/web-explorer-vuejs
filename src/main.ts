@@ -3,8 +3,7 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router';
 import 'animate.css';
-import vueDebounce from 'vue-debounce'
-import { VuePassword } from 'vue-password';
+import vueDebounce from 'vue-debounce';
 import mitt from 'mitt';
 import PrimeVue from 'primevue/config';
 import "primeicons/primeicons.css";
@@ -41,8 +40,6 @@ app.mount('#app');
 app.component('ConfirmDialog', ConfirmDialog);
 app.component('Toast', Toast);
 app.component('font-awesome-icon', FontAwesomeIcon);
-app.component(VuePassword);
-
 
 
 // NetworkStateUtils.checkDefaultNetwork();

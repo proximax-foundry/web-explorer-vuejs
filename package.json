@@ -54,7 +54,6 @@
     "vue-debounce": "^3.0.1",
     "vue-i18n": "^9.1.6",
     "vue-loading-overlay": "^5.0.1",
-    "vue-password": "^3.0.0",
     "vue-router": "^4.0.0-0",
     "vue-tippy": "^6.0.0-alpha.29",
     "vue3-blocks-tree": "^0.6.1",
