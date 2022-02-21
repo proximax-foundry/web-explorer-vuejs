@@ -37,8 +37,8 @@
 <script>
 import selectNetwork from '@/components/selectNetwork.vue';
 import selectFilter from '@/components/selectFilter.vue';
-import { computed, defineComponent, getCurrentInstance, inject, ref, watch } from "vue";
-export default defineComponent({
+import { defineComponent, getCurrentInstance, inject, ref, watch } from "vue";
+export default {
   components: {
     selectNetwork,
     selectFilter
@@ -54,7 +54,7 @@ export default defineComponent({
     }
   }
 
-});
+}
 </script>
 
 <style lang="scss">
