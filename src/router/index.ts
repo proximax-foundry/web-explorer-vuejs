@@ -1,21 +1,4 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
-// import { HomeRoutes } from '@/modules/home/routingHome';
-// import { DashboardRoutes } from '@/modules/dashboard/routingDashboard';
-// import { TransferRoutes } from '@/modules/transfer/routingTransfer';
-// import { WalletRoutes } from '@/modules/wallet/routingWallet';
-// import { AccountRoutes } from '@/modules/account/routingAccount';
-// import { ServiceRoutes  } from '@/modules/services/routingService';
-// import { TransactionRoutes  } from '@/modules/transaction/routingTransaction';
-
-// const routes: RouteRecordRaw[] = [
-//   ...HomeRoutes,
-//   ...WalletRoutes,
-//   ...DashboardRoutes,
-//   ...TransferRoutes,
-//   ...AccountRoutes,
-//   ...ServiceRoutes,
-//   ...TransactionRoutes,
-// ]
 
 const routes = [
   {
@@ -34,6 +17,16 @@ const routes = [
     component: () => import('@/modules/transaction/views/ViewTransaction.vue'),
     meta: {
       title: "View Transaction",
+    }
+  },
+
+  {
+    path: '/asset/:id',
+    name: 'ViewAsset',
+    props: true,
+    component: () => import('@/modules/asset/views/ViewAsset.vue'),
+    meta: {
+      title: "View Asset",
     }
   },
 ];
