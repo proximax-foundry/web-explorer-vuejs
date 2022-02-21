@@ -3,8 +3,8 @@
     <p class="text-gray-500 mb-5 text-sm font-bold">
       Asset <span class="text-blue-primary font-bold">[[ namespacename ]]</span>
     </p>
-    <div class="grid grid-cols-2">
-      <div class="filter shadow-xl border border-gray-50 p-5 mb-15 mr-2">
+    <div class="md:grid md:grid-cols-2">
+      <div class="filter shadow-xl border border-gray-50 p-5 mb-15 md:mr-2">
         <div class="text-xs font-bold mb-5">Overview</div>
         <div class="txn-div">
           <div>
@@ -21,7 +21,7 @@
           </div>
         </div>
       </div>
-      <div class="filter shadow-xl border border-gray-50 p-5 mb-15 ml-2">
+      <div class="filter shadow-xl border border-gray-50 p-5 mb-15 sm:ml-2">
         <div class="text-xs font-bold mb-5">More Info</div>
         <div class="txn-div">
           <div>
