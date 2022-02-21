@@ -244,45 +244,6 @@ body{
   box-shadow: 0 0 4pt 2pt #CDE3FC;
 }
 
-.navbar{
-  background: var(--blue);
-  background: linear-gradient(180deg, #2C71BF 0%, #215590 80%);
-  padding-top: 3px;
-
-  a{
-    font-weight: bold;
-    font-size: 15px;
-    display: block;
-    padding: 4px 18px;
-    padding-top: 5px;
-    transition: all;
-    transition-duration: 50ms;
-    color: var(--white);
-  }
-}
-
-.navbar{
-  a.router-link-active, a:hover{
-    background:var(--white);
-    color: var(--black) #{!important};
-  }
-}
-
-@screen md {
-  .navbar{
-    a.router-link-active, a:hover{
-      background: linear-gradient(180deg, #2C71BF 0%, #215590 80%) !important;
-      border-bottom: 3px solid var(--white);
-      color: var(--white) #{!important};
-    }
-
-    a{
-      display: inline-block;
-      color: var(--white) #{!important};
-      font-size: 16px;
-    }
-  }
-}
 .p-link{
   @apply text-gray-400 p-2 mt-5;
 }
