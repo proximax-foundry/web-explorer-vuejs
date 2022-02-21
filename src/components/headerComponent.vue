@@ -5,28 +5,22 @@
         <div class="flex justify-between">
           <div class="flex items-center">
             <router-link :to="{name: 'Home'}"><img src="@/assets/img/proximax-logo.svg" class="w-40 mr-7"></router-link>
-            <router-link :to="{name : 'Home'}"><img src="@/assets/img/icon-home.svg" class="h-5 w-5"></router-link>
-            <selectNetwork class="ml-5" />
           </div>
-          <div class="hidden sm:flex">
-            <button class="gray-default-btn my-2 mr-2">Create Wallet</button>
-            <button class="default-btn my-2">Get XPX</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="bg-gray-50">
-      <div class="container mx-auto">
-        <div class="sm:flex sm:justify-between sm:items-center my-2 sm:m-0">
-          <div class="header-links">
-            <a href="#">Blocks</a>
-            <a href="#">Transactions</a>
-            <a href="#">Accounts</a>
-          </div>
-          <div class="border border-gray-300 my-2 searchbar flex">
-            <selectFilter v-model="searchFilter" class="inline-block border-r border-gray-300" />
-            <input type="text" placeholder="Search by Address / Txn Hash / Namespace / Asset ID" class="text-tsm sm:w-48 lg:w-96 outline-none p-2 flex-grow">
-            <img src="@/assets/img/icon-search.svg" class="ml-2 w-4 inline-block mr-2">
+          <div>
+            <div class="border border-gray-300 my-1 searchbar flex bg-white">
+              <selectFilter v-model="searchFilter" class="inline-block border-r border-gray-300" />
+              <input type="text" placeholder="Search by Address / Txn Hash / Namespace / Asset ID" class="text-tsm sm:w-48 lg:w-96 outline-none px-2 py-1 flex-grow">
+              <img src="@/assets/img/icon-search.svg" class="ml-2 w-4 inline-block mr-3">
+            </div>
+            <div class="flex items-center justify-end">
+              <router-link :to="{name : 'Home'}"><img src="@/assets/img/icon-home.svg" class="h-5 w-5 mr-4"></router-link>
+              <div class="header-links">
+                <a href="#">Blocks</a>
+                <a href="#">Transactions</a>
+                <a href="#">Accounts</a>
+              </div>
+              <selectNetwork class="ml-5" />
+            </div>
           </div>
         </div>
       </div>
@@ -61,7 +55,7 @@ export default {
 .header-links{
   @apply my-2;
   a{
-    @apply mr-4 hover:opacity-20 duration-200 transition-all md:text-sm sm:text-tsm text-xs
+    @apply mr-4 hover:opacity-20 duration-200 transition-all text-xs text-gray-200
   }
 }
 
