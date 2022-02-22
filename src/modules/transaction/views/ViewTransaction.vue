@@ -1,7 +1,7 @@
 <template>
   <div>
     <p class="text-gray-500 mb-5 text-sm font-bold">
-      Transaction Details {{AppState.networkType}}
+      Transaction Details
     </p>
     <div class="filter shadow-xl border border-gray-50 p-5 mb-15">
       <div class="flex items-center mb-4 border-b border-gray-100 relative">
@@ -20,7 +20,7 @@
 import { computed, defineComponent, getCurrentInstance, inject, ref, watch } from "vue";
 import TxnDetailComponent from '@/modules/transaction/components/TxnDetailComponent.vue';
 import InnerTxnComponent from '@/modules/transaction/components/InnerTxnComponent.vue';
-import { AppState } from '@/state/appState'
+import { AppState } from '@/state/appState';
 export default {
   name: 'ViewTransaction',
   components: {
