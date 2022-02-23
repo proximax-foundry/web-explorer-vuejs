@@ -1,5 +1,5 @@
 <template>
-  <div class="w-48">
+  <div class="w-52">
     <div @click='toggleSelection = !toggleSelection' class= "ml-auto mr-auto py-1 cursor-pointer">
       <div class="flex justify-between">
         <div class="flex flex-col ml-2 text-left">
@@ -14,7 +14,7 @@
       <div v-if='toggleSelection' class="absolute border border-t-0 w-full z-50 bg-white max-h-40 overflow-auto px-1 filter drop-shodow-xl pb-2">
         <div v-if='networks.length > 0' class="pl-2 pt-4 text-xxs text-gray-400">SELECT NETWORK</div>
         <div v-else class="text-xxs pt-2 pl-2 pb-2">The list is empty.</div>
-        <div v-for='(items, index) in networks' :key="items" class="px-2 py-3 flex cursor-pointer items-center hover:bg-gray-50 transition-all duration-300" @click="selectNetwork(items.name, items.node);$emit('update:modelValue', selectedNetwork);$emit('select-network', selectedNetwork);" :class='`${(index != networks.length - 1)?"border-b border-gray-200":""}`'>
+        <div v-for='(items, index) in networks' :key="items" class="px-2 py-3 flex cursor-pointer items-center hover:bg-gray-50 transition-all duration-300" @click="selectNetwork(items.name, items.node, items.index);$emit('update:modelValue', selectedNetwork);$emit('select-network', selectedNetwork);" :class='`${(index != networks.length - 1)?"border-b border-gray-200":""}`'>
           <div>
             <div class='text-xs ml-2 font-semibold'>{{items.name}}</div>
             <div class='text-txs mt-1 ml-2 text-gray-400'>{{items.node}}</div>
@@ -26,7 +26,11 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref } from 'vue';
+import { networkState } from '@/state/networkState';
+import { computed, defineComponent, ref, watch } from 'vue';
+import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
+import { ChainProfile } from "@/models/stores/chainProfile";
+import { AppState } from '@/state/appState';
 
 export default defineComponent({
   name: 'SelectNetwork',
@@ -35,23 +39,54 @@ export default defineComponent({
   ],
   setup(){
     const toggleSelection = ref(false);
-    const selectedNetwork = ref({name:'Sirius Testnet 1', node: 'bctestnet1.brimstone.xpxsirius.io'});
 
-    const networks = ref([
-      {
-        name: 'Sirius Testnet 1',
-        node: 'bctestnet1.brimstone.xpxsirius.io'
-      },
-      {
-        name: 'Sirius Testnet 2',
-        node: 'api-1.testnet2.xpxsirius.io'
-      }
-    ]);
+    const networks = computed(()=> {
+      let options = [];
+      networkState.availableNetworks.forEach((network, index) => {
+        let chainProfile = new ChainProfile(network);
+        chainProfile.init();
+        options.push({ name: network, node: chainProfile.apiNodes[0], index: index });
+      });
+      return options;
+    });
 
-    const selectNetwork = (name, node) => {
+    // const networks = ref([
+    //   {
+    //     name: 'Sirius Testnet 1',
+    //     node: 'bctestnet1.brimstone.xpxsirius.io'
+    //   },
+    //   {
+    //     name: 'Sirius Testnet 2',
+    //     node: 'api-1.testnet2.xpxsirius.io'
+    //   }
+    // ]);
+
+    const selectNetwork = (name, node, index) => {
       selectedNetwork.value.name = name;
       selectedNetwork.value.node = node;
+      NetworkStateUtils.changeNetworkByIndex(parseInt(index));
       toggleSelection.value = false;
+    }
+
+    const node = ref('')
+    const selectedNetwork = computed(()=>{ return {name: networkState.chainNetworkName, node: node.value }});
+
+    const init = ()=>{
+      let currentChainProfile = new ChainProfile(networkState.chainNetworkName);
+      currentChainProfile.init();
+      node.value = currentChainProfile.apiNodes[0];
+    }
+
+    if(AppState.isReady){
+      init();
+    }
+    else{
+      let readyWatcher = watch(AppState, (value) => {
+        if(value.isReady){
+          init();
+          readyWatcher();
+        }
+      });
     }
 
     return {

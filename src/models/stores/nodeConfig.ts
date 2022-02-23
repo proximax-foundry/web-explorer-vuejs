@@ -1,6 +1,4 @@
 import { StoreProperties } from "./storeProperties";
-// import { Network } from "../network";
-// import { ChainExplorer } from "../chainExplorer";
 
 export class nodeConfig extends StoreProperties{
 
