@@ -11,7 +11,7 @@ const routes = [
   },
 
   {
-    path: '/txn/:hash',
+    path: '/tx/:hash',
     name: 'ViewTransaction',
     props: true,
     component: () => import('@/modules/transaction/views/ViewTransaction.vue'),

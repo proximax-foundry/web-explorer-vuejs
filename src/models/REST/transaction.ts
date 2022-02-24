@@ -2,7 +2,7 @@ import {
     TransactionHttp,
     SignedTransaction, CosignatureSignedTransaction,
     TransactionAnnounceResponse, Transaction, TransactionStatus, TransactionGroupType,
-    TransactionQueryParams, TransactionType, TransactionSearch, TransactionCount
+    TransactionQueryParams, TransactionType, TransactionSearch, TransactionCount, AggregateTransaction
 } from "tsjs-xpx-chain-sdk";
 
 export class TransactionAPI {

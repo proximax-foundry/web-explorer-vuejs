@@ -61,15 +61,17 @@ import {
   TransactionSearch
 } from "tsjs-xpx-chain-sdk";
 // import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
-import { networkState } from "../state/networkState";
-import { ChainUtils } from "../util/chainUtils";
-import { ChainAPICall } from "../REST/chainAPICall";
+import { networkState } from "@/state/networkState";
+import { ChainUtils } from "@/util/chainUtils";
+import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { Helper } from "./typeHelper";
 import { Duration } from "js-joda";
-import { BuildTransactions } from "../util/buildTransactions";
+import { AppState } from '@/state/appState';
+
 
 const networkAPIEndpoint = computed(() => ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile?.httpPort));
 const localNetworkType = computed(() => ChainUtils.getNetworkType(networkState.currentNetworkProfile?.network.type));
+
 
 export const transactionTypeName = {
   transfer: {
@@ -270,19 +272,19 @@ export class TransactionUtils {
     return transactions;
   }
 
-  static announceTransaction(signedTx: SignedTransaction): void {
+  // static announceTransaction(signedTx: SignedTransaction): void {
 
-    ChainUtils.announceTransaction(signedTx);
-  }
+  //   ChainUtils.announceTransaction(signedTx);
+  // }
 
-  static announceBondedTransaction(signedTx: SignedTransaction): void {
+  // static announceBondedTransaction(signedTx: SignedTransaction): void {
 
-    ChainUtils.announceBondedTransaction(signedTx);
-  }
+  //   ChainUtils.announceBondedTransaction(signedTx);
+  // }
 
-  static announceCosignatureSignedTransaction(signedTx: CosignatureSignedTransaction) :void {
-    ChainUtils.announceCosignTransaction(signedTx);
-  }
+  // static announceCosignatureSignedTransaction(signedTx: CosignatureSignedTransaction) :void {
+  //   ChainUtils.announceCosignTransaction(signedTx);
+  // }
 
   static getTransactionTypeName(type: number): string | null {
 
@@ -385,17 +387,21 @@ export class TransactionUtils {
     return typeName;
   }
 
-  static getLockFundFee = (networkType: NetworkType, generationHash: string):number => {
-    let buildTransactions = new BuildTransactions(networkType, generationHash);
-    let tempAcc = Account.generateNewAccount(networkType);
-    let txn = buildTransactions.transfer(tempAcc.address, PlainMessage.create('hello'));
-    let abt = buildTransactions.aggregateBonded([txn.toAggregate(tempAcc.publicAccount)])
-    let signedTxn = tempAcc.sign(abt, generationHash);
-    return buildTransactions.hashLock(new Mosaic(new NamespaceId('prx.xpx'), UInt64.fromUint(10)), UInt64.fromUint(10), signedTxn).maxFee.compact();
-  }
-
-  static castToAggregate(tx :Transaction){
-    return tx as AggregateTransaction;
+  static async  getTransaction(hash: string) : Promise<any|boolean> {
+    try {
+      let txn = {};
+      let txnStatus = await AppState.chainAPI.transactionAPI.getTransactionStatus(hash);
+      if(txnStatus.group == 'partial'){
+        txn = await AppState.chainAPI.transactionAPI.getPartialTransaction(hash);
+      }else{
+        txn = await AppState.chainAPI.transactionAPI.getTransaction(hash);
+      }
+      return {txn, txnStatus, status: true};
+    }catch (e){
+      return { status: false };
+      console.error(e)
+    }
   }
 }
+
 
