@@ -53,12 +53,15 @@ export default {
       signer: '',
       version: '',
       isMissingSignature: false,
-      cosigners: []
+      cosigners: [],
+      amount: '',
+      amountTransfer: []
     });
     const innerTransaction = ref({});
 
     (async() => {
       let transaction = await TransactionUtils.getTransaction(props.hash);
+      console.log(transaction.txn)
       if(transaction.isFound){
         formattedTransaction.value = {
           hash: props.hash,
@@ -72,11 +75,20 @@ export default {
           version: transaction.txn.version,
           isMissingSignature: transaction.txn.hasMissingSignatures(),
           group: transaction.txnStatus.group,
-          isFound: transaction.isFound
+          isFound: transaction.isFound,
         }
         if(transaction.txn.cosignatures!=undefined){
           formattedTransaction.value.cosigners = transaction.txn.cosignatures;
         }
+
+        if(transaction.txn.amountTransfer!=undefined){
+          formattedTransaction.value.amountTransfer = transaction.txn.amountTransfer;
+        }
+
+        if(transaction.txn.amount!=undefined){
+          formattedTransaction.value.amount = transaction.txn.amount;
+        }
+
         innerTransaction.value = transaction.txn.innerTransactions;
       }else{
         formattedTransaction.value = transaction;

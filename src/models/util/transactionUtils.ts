@@ -8,6 +8,7 @@ import {
   // FeeCalculationStrategy,
   Mosaic,
   MosaicId,
+  MosaicInfo,
   UInt64,
   MosaicProperties,
   MosaicSupplyType,
@@ -23,6 +24,7 @@ import {
   FeeCalculationStrategy,
   NetworkType,
   NamespaceId,
+  NamespaceInfo,
   Transaction,
   TransactionType,
   AggregateTransaction,
@@ -58,7 +60,8 @@ import {
   SignedTransaction,
   CosignatureSignedTransaction,
   TransactionGroupType,
-  TransactionSearch
+  TransactionSearch,
+  MosaicNames
 } from "tsjs-xpx-chain-sdk";
 // import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
 import { networkState } from "@/state/networkState";
@@ -67,11 +70,14 @@ import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { Helper } from "./typeHelper";
 import { Duration } from "js-joda";
 import { AppState } from '@/state/appState';
+import { SDA } from '@/models/transactions/sda';
+
 
 
 const networkAPIEndpoint = computed(() => ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile?.httpPort));
 const localNetworkType = computed(() => ChainUtils.getNetworkType(networkState.currentNetworkProfile?.network.type));
-
+const namespaceIdFirstCharacterString = "89ABCDEF";
+const nativeTokenNamespaceId = computed(()=> new NamespaceId(AppState.nativeToken.fullNamespace).toHex());
 
 export const transactionTypeName = {
   transfer: {
@@ -389,18 +395,90 @@ export class TransactionUtils {
 
   static async  getTransaction(hash: string) : Promise<any|boolean> {
     try {
-      let txn = {};
+      let txn:any = {};
       let txnStatus = await AppState.chainAPI.transactionAPI.getTransactionStatus(hash);
       if(txnStatus.group == 'partial'){
         txn = await AppState.chainAPI.transactionAPI.getPartialTransaction(hash);
       }else{
         txn = await AppState.chainAPI.transactionAPI.getTransaction(hash);
       }
+      if(txn.type == TransactionType.TRANSFER){
+        let sdas: SDA[] = [];
+        for(let y = 0; y < txn.mosaics.length; ++y){
+          let rawAmount = txn.mosaics[y].amount.compact();
+          let actualAmount = rawAmount;
+          let assetId:MosaicId;
+          let isSendWithNamespace = TransactionUtils.isNamespace(txn.mosaics[y].id);
+          if(isSendWithNamespace){
+            let namespaceId = new NamespaceId(txn.mosaics[y].id.toDTO().id);
+            assetId = await TransactionUtils.getAssetAlias(namespaceId);
+          }
+          else{
+            assetId = txn.mosaics[y].id;
+          }
+
+          let assetIdHex = assetId.toHex();
+          txn.amountTransfer = 0;
+          if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
+            txn.amountTransfer += TransactionUtils.convertToExactNativeAmount(actualAmount);
+            continue;
+          }
+
+          let assetInfo = await TransactionUtils.getAssetInfo(txn.mosaics[y].id.toHex());
+
+          let newSDA: any = {
+            amount: rawAmount/Math.pow(10, assetInfo.divisibility),
+            id: assetIdHex,
+          };
+          let assetName = await TransactionUtils.getAssetName(assetIdHex);
+          if(assetName){
+            newSDA.name = assetName[0].names[0].name;
+          }
+          sdas.push(newSDA);
+        }
+        txn.amount = sdas;
+      }
       return {txn, txnStatus, isFound: true};
     }catch (e){
       return { isFound: false };
       console.error(e)
     }
+  }
+
+  static isNamespace(mosaicId: MosaicId): boolean{
+    console.log(mosaicId.toHex())
+    return Array.from(namespaceIdFirstCharacterString).includes(mosaicId.toHex().toUpperCase().substring(0, 1));
+  }
+
+  static async getAssetAlias(namespaceId: NamespaceId): Promise<MosaicId>{
+
+    let assetId = await AppState.chainAPI.namespaceAPI.getLinkedMosaicId(namespaceId);
+
+   return assetId;
+  }
+
+  static async getAssetInfo(assetId: string): Promise<MosaicInfo>{
+    let mosaicId = new MosaicId(assetId);
+    let assetInfo = await AppState.chainAPI.assetAPI.getMosaic(mosaicId);
+    return assetInfo;
+ }
+
+ static async getAssetName(assetId: string): Promise<MosaicNames[]>{
+  let mosaicId = new MosaicId(assetId);
+  let assetName = await AppState.chainAPI.assetAPI.getMosaicsNames([mosaicId]);
+  return assetName;
+}
+
+  static async getNamespaces(namespaceId: NamespaceId): Promise<NamespaceInfo>{
+    let namespaceInfo = await AppState.chainAPI.namespaceAPI.getNamespace(namespaceId);
+    return namespaceInfo;
+  }
+
+  static convertToExactNativeAmount(amount: number){
+    if(AppState.nativeToken.divisibility === 0){
+      return amount;
+    }
+    return amount > 0 ? amount / Math.pow(10, AppState.nativeToken.divisibility) : 0;
   }
 }
 
