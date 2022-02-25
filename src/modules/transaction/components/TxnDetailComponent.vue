@@ -46,8 +46,8 @@
         <img src="@/assets/img/icon-copy.svg" @click="copy('signerAddress')" class="cursor-pointer" />
       </div>
     </div>
-    <div v-if="txnDetail.cosigners.length > 0">
-      <div>Cosigner</div>
+    <div v-if="txnDetail.cosigners">
+      <div>Cosigner{{ (txnDetail.cosigners.length>1)?'s':'' }}</div>
       <div class="flex justify-start">
         <div class="text-blue-primary mr-2" v-for="cosigner, item in txnDetail.cosigners" :key="item">{{ Helper.createAddress(cosigner.signer.address.address).pretty() }}</div>
       </div>

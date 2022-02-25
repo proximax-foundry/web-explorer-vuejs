@@ -29,6 +29,16 @@ const routes = [
       title: "View Asset",
     }
   },
+
+  {
+    path: '/tx',
+    name: 'ViewTransactionList',
+    props: true,
+    component: () => import('@/modules/transaction/views/ViewTransactionList.vue'),
+    meta: {
+      title: "View Transactions",
+    }
+  },
 ];
 
 const router = createRouter({

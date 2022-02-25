@@ -18,7 +18,7 @@
         <TxnDetailComponent v-if="currentPage == 'detail'" :txnDetail="formattedTransaction" />
         <InnerTxnComponent v-else :innerTxn="innerTransaction" />
       </div>
-      <div v-if="!formattedTransaction.status" class="p-3 bg-yellow-100 text-yellow-700">Transaction not found</div>
+      <div v-if="!formattedTransaction.isFound" class="p-3 bg-yellow-100 text-yellow-700">Transaction not found</div>
     </div>
   </div>
 </template>
@@ -53,13 +53,13 @@ export default {
       signer: '',
       version: '',
       isMissingSignature: false,
-      cosigners: 0
+      cosigners: []
     });
     const innerTransaction = ref({});
 
     (async() => {
       let transaction = await TransactionUtils.getTransaction(props.hash);
-      if(transaction.status){
+      if(transaction.isFound){
         formattedTransaction.value = {
           hash: props.hash,
           status: transaction.txn.isConfirmed(),
@@ -71,8 +71,11 @@ export default {
           signer: transaction.txn.signer.address.address,
           version: transaction.txn.version,
           isMissingSignature: transaction.txn.hasMissingSignatures(),
-          cosigners: transaction.txn.cosignatures,
           group: transaction.txnStatus.group,
+          isFound: transaction.isFound
+        }
+        if(transaction.txn.cosignatures!=undefined){
+          formattedTransaction.value.cosigners = transaction.txn.cosignatures;
         }
         innerTransaction.value = transaction.txn.innerTransactions;
       }else{
