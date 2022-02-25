@@ -1,0 +1,279 @@
+<template>
+  <div>
+    <p class="text-gray-500 mb-5 text-sm font-bold">
+      Transactions
+    </p>
+     <DataTable
+      :value="transactions"
+      :paginator="true"
+      :rows="10"
+      scrollDirection="horizontal"
+      :alwaysShowPaginator="false"
+      responsiveLayout="scroll"
+      paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+      currentPageReportTemplate=""
+      :globalFilterFields="['recipient','sender', 'signerAddress', 'type']"
+      >
+      <Column style="width: 200px" v-if="!wideScreen">
+        <template #body="{data}">
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Tx Hash</div>
+            <div class="uppercase font-bold text-txs"><span class="text-txs" v-tooltip.right="data.hash">{{data.hash }}</span></div>
+          </div>
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Type</div>
+            <div class="flex items-center">
+              <div class="uppercase font-bold text-txs mr-2">{{data.type}}</div>
+              <div>
+                <img src="@/modules/transaction/img/icon-txn-in.svg" class="inline-block w-5" v-if="data.in_out === true">
+                <img src="@/modules/transaction/img/icon-txn-out.svg" class="inline-block w-5" v-else-if="data.in_out === false">
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5" v-if="data.recipient != '' && data.recipient != null">Receipient</div>
+            <div class="uppercase font-bold text-txs">
+              <span v-if="data.recipient === '' || data.recipient === null"></span>
+              <span v-tooltip.right="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs">{{ data.recipient }}</span>
+            </div>
+          </div>
+        </template>
+      </Column>
+      <Column style="width: 200px" v-if="!wideScreen">
+        <template #body="{data}">
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Timestamp</div>
+            <div class="uppercase font-bold text-txs">{{ Helper.convertDisplayDateTimeFormat24(data.timestamp) }}</div>
+          </div>
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Sender</div>
+            <div class="uppercase font-bold text-txs">
+              <span v-if="data.sender === '' || data.sender === null"></span>
+              <span v-else v-tooltip.right="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-txs">
+                {{ data.sender.substring(0, 20) }}...
+              </span>
+            </div>
+          </div>
+          <div>
+            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Tx Amount</div>
+            <div class="text-txs uppercase font-bold" >{{ data.amountTransfer ? data.amountTransfer:'-' }} <b v-if="data.amountTransfer">{{ nativeTokenName }}</b></div>
+          </div>
+        </template>
+      </Column>
+      <Column header="IN/OUT" headerStyle="width:40px" v-if="wideScreen">
+        <template #body="{data}">
+          <div class="ml-2">
+            <img src="@/modules/transaction/img/icon-txn-in.svg" class="inline-block" v-if="data.in_out === true">
+            <img src="@/modules/transaction/img/icon-txn-out.svg" class="inline-block" v-else-if="data.in_out === false">
+          </div>
+        </template>
+      </Column>
+      <Column field="hash" header="TX HASH" headerStyle="width:100px" v-if="wideScreen">
+        <template #body="{data}">
+          <span class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
+        </template>
+      </Column>
+      <Column field="timestamp" v-if="wideScreen" header="TIMESTAMP" headerStyle="width:110px">
+        <template #body="{data}">
+          <span class="text-txs">{{ Helper.convertDisplayDateTimeFormat24(data.timestamp) }}</span>
+        </template>
+      </Column>
+      <Column field="type" header="TYPE" headerStyle="width:110px" v-if="wideScreen">
+        <template #body="{data}">
+          <span class="text-txs">{{data.type}}</span>
+        </template>
+      </Column>
+      <Column field="block" v-if="wideScreen" header="BLOCK" headerStyle="width:110px">
+        <template #body="{data}">
+          <div class="text-txs">{{ data.block }}</div>
+        </template>
+      </Column>
+      <Column field="signer" header="SENDER" headerStyle="width:110px" v-if="wideScreen">
+        <template #body="{data}">
+          <span v-if="data.sender === '' || data.sender === null"></span>
+          <span v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-txs">
+            {{ data.sender }}
+          </span>
+        </template>
+      </Column>
+      <Column field="recipient" header="RECIPIENT" headerStyle="width:110px" v-if="wideScreen">
+        <template #body="{data}">
+          <span v-if="data.recipient === '' || data.recipient === null"></span>
+          <span v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs">{{ data.recipient }}</span>
+        </template>
+      </Column>
+      <Column header="TX FEE" v-if="wideScreen" headerStyle="width:110px">
+        <template #body="{data}">
+          <div class="text-txs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
+        </template>
+      </Column>
+      <Column header="AMOUNT" headerStyle="width:110px" v-if="wideScreen">
+        <template #body="{data}">
+          <div class="text-txs" >{{ data.amountTransfer ? data.amountTransfer:'-' }} <b v-if="data.amountTransfer">{{ nativeTokenName }}</b></div>
+        </template>
+      </Column>
+      <Column header="SDA" headerStyle="width:40px" v-if="wideScreen">
+        <template #body="{data}">
+          <div>
+            <img src="@/modules/transaction/img/icon-sda.svg" class="inline-block" v-if="checkOtherAsset(data.sda)" v-tooltip.left="'<tiptitle>Sirius Digital Asset</tiptitle><tiptext>' + displaySDAs(data.sda) + '</tiptext>'">
+            <span v-else>-</span>
+          </div>
+        </template>
+      </Column>
+      <Column header="MESSAGE" headerStyle="width:40px" v-if="wideScreen">
+        <template #body="{data}">
+          <div>
+            <img src="@/modules/transaction/img/icon-message.svg" v-tooltip.left="'<tiptitle>' + data.messageTypeTitle + '</tiptitle><tiptext>' + data.message + '</tiptext>'" class="inline-block" v-if="data.message && data.messageType !== 1">
+            <div v-else class="w-full text-center">-</div>
+          </div>
+        </template>
+      </Column>
+      <Column header="" headerStyle="width:20px">
+        <template>
+          <div class="flex justify-center">
+            <img src="@/modules/transaction/img/icon-open_in_new_black.svg" class="cursor-pointer">
+          </div>
+        </template>
+      </Column>
+      <template #empty>
+        No transaction found
+      </template>
+      <template #loading>
+        Fetching transactions
+      </template>
+    </DataTable>
+  </div>
+</template>
+
+<script>
+import { computed, defineComponent, getCurrentInstance, inject, ref, watch, onMounted, onUnmounted } from "vue";
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import { AppState } from '@/state/appState';
+import { Helper } from "@/util/typeHelper";
+import Tooltip from 'primevue/tooltip';
+
+export default {
+  name: 'ViewTransactionList',
+  components: {
+    DataTable,
+    Column
+  },
+  directives: {
+    'tooltip': Tooltip
+  },
+  props: {
+    hash: String
+  },
+  setup(){
+    const wideScreen = ref(false);
+    const screenResizeHandler = () => {
+      if(window.innerWidth < 1024){
+        wideScreen.value = false;
+      }else{
+        wideScreen.value = true;
+      }
+    };
+    screenResizeHandler();
+
+    onUnmounted(() => {
+      window.removeEventListener("resize", screenResizeHandler);
+    });
+
+    onMounted(() => {
+      window.addEventListener("resize", screenResizeHandler);
+    });
+
+    const nativeTokenName = computed(()=> AppState.nativeToken.label);
+
+    const displaySDAs = (sdas) => {
+      let sda_rows = [];
+      if(sdas.length > 0){
+        for(const sda of sdas){
+          let asset_div = displayAssetDiv(sda);
+          sda_rows.push(asset_div);
+        }
+        return sda_rows.join("<br>");
+      }
+    }
+
+    const checkOtherAsset = (assets) => {
+      if(assets){
+        if(assets.length > 0){
+          return true;
+        }
+      }
+      return false;
+    }
+
+    const displayAssetDiv = (sda) => {
+      let asset_div;
+      let assetArray = []
+      assetArray.push(sda.id);
+
+      if(sda.currentAlias && sda.currentAlias.length){
+        asset_div = (sda.amount + ' ' + sda.currentAlias[0].name);
+      }
+      else{
+        asset_div = (sda.amount + ' - ' + sda.id);
+      }
+      return asset_div;
+    }
+
+    const transactions = ref([
+      {
+        hash: '1234',
+        type: '',
+        in_out: true,
+        recipient: 'XDHJWHP4IY25PADFXQ2RUX5D5CULJGMQS4MIDVG3',
+        timestamp: '1234',
+        sender: 'XDHJWHP4IY25PADFXQ2RUX5D5CULJGMQS4MIDVG3',
+        amountTransfer: '1234',
+        block: 1234,
+        fee: 23,
+        amountTransfer: 123.34,
+        sda: {},
+        messageTypeTitle: '',
+        message: '234'
+      }
+    ]);
+
+    return {
+      wideScreen,
+      transactions,
+      nativeTokenName,
+      checkOtherAsset,
+      displaySDAs,
+      Helper
+    }
+  }
+}
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped lang="scss">
+
+
+.txn-div{
+  @apply text-gray-800 text-xs;
+  > div{
+    @apply flex justify-start items-center border-b border-gray-100 py-4;
+
+    > div:first-child{
+      @apply w-40 text-xs pl-4 font-bold;
+    }
+
+    > div:nth-child(2){
+      @apply text-xs;
+    }
+
+    > div:nth-child(3){
+      @apply ml-7 w-36 text-xs pl-4 font-bold;
+    }
+
+    > div:last-child{
+      @apply border-none;
+    }
+  }
+}
+</style>

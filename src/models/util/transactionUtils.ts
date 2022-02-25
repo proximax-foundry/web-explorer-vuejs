@@ -396,9 +396,9 @@ export class TransactionUtils {
       }else{
         txn = await AppState.chainAPI.transactionAPI.getTransaction(hash);
       }
-      return {txn, txnStatus, status: true};
+      return {txn, txnStatus, isFound: true};
     }catch (e){
-      return { status: false };
+      return { isFound: false };
       console.error(e)
     }
   }
