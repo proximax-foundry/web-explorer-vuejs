@@ -43,7 +43,7 @@
       <div>SDA Amount</div>
       <div class="relative">
         <div v-for="sda, item in txnDetail.amount" :key="item">
-          <span class="font-bold">{{ sdaAmount[item][0] }}</span>{{ sdaAmount[item][1]?'.':'' }}<span class="text-xxs">{{ sdaAmount[item][1] }}</span> <span class="text-gray-400 text-txs hover:text-gray-700 duration-300 transition-all">{{ sda.name?sda.name:'' }} / {{ sda.id }} </span>
+          <span class="font-bold">{{ sdaAmount[item][0] }}</span>{{ sdaAmount[item][1]?'.':'' }}<span class="text-xxs">{{ sdaAmount[item][1] }}</span> <span class="text-gray-400 text-txs hover:text-gray-700 duration-300 transition-all">{{ sda.name?(sda.name + ' / '):'' }} {{ sda.id }} </span>
         </div>
       </div>
     </div>
