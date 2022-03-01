@@ -13,7 +13,7 @@ import { computed } from "vue";
 const currentEndPoint = computed(() => networkState.selectedAPIEndpoint);
 const connectionPort = computed(() => networkState.currentNetworkProfile.httpPort);
 const currentNetworkType = computed(() => networkState.currentNetworkProfile.network.type);
-
+console.log(networkState.currentNetworkProfile);
 export class ChainUtils{
 
     static buildWSEndpoint(endpoint :string, port: number | undefined){
