@@ -16,7 +16,7 @@
           <div class="w-32 font-bold text-xs text-center p-2 relative" :class="`${ (currentPage != 'inner')?'cursor-pointer':'' }`" @click="currentPage = 'inner'" v-if="innerTransaction">Inner Txns<div v-if="currentPage == 'inner'" class="absolute w-full border-b border-yellow-500 transition-all duration-200" style="bottom: -1px;"></div></div>
         </div>
         <TxnDetailComponent v-if="currentPage == 'detail'" :txnDetail="formattedTransaction" />
-        <InnerTxnComponent v-else :innerTxn="innerTransaction" />
+        <InnerTxnComponent v-else :innerTxn="innerTransaction" :txn="txn" :txnGroup="formattedTransaction.group" />
       </div>
       <div v-if="!formattedTransaction.isFound" class="p-3 bg-yellow-100 text-yellow-700">Transaction not found</div>
     </div>
@@ -42,6 +42,7 @@ export default {
   setup(props){
     const currentPage = ref('detail');
     const isFetching = ref(true);
+    const txn = ref({});
     const formattedTransaction = ref({
       hash: '',
       status: '',
@@ -53,30 +54,61 @@ export default {
       signer: '',
       version: '',
       isMissingSignature: false,
-      cosigners: []
+      cosigners: [],
+      amount: '',
+      amountTransfer: [],
+      assetAmount: '',
+      assetId: '',
+      assetName: {},
     });
     const innerTransaction = ref({});
 
     (async() => {
       let transaction = await TransactionUtils.getTransaction(props.hash);
+      txn.value = transaction.txn;
       if(transaction.isFound){
         formattedTransaction.value = {
           hash: props.hash,
           status: transaction.txn.isConfirmed(),
-          timestamp: Helper.formatDeadline(transaction.txn.deadline.adjustedValue.compact()),
+          timestamp: Helper.convertDisplayDateTimeFormat(transaction.txn.timestamp),
           height: transaction.txn.transactionInfo.height.compact(),
           type: TransactionUtils.getTransactionTypeName(transaction.txn.type),
-          fee: Helper.convertToExact(transaction.txn.maxFee.compact(), AppState.nativeToken.divisibility),
+          fee: Helper.convertToExact(transaction.txn.fee, AppState.nativeToken.divisibility),
           signature: transaction.txn.signature,
           signer: transaction.txn.signer.address.address,
           version: transaction.txn.version,
           isMissingSignature: transaction.txn.hasMissingSignatures(),
           group: transaction.txnStatus.group,
-          isFound: transaction.isFound
+          isFound: transaction.isFound,
         }
         if(transaction.txn.cosignatures!=undefined){
           formattedTransaction.value.cosigners = transaction.txn.cosignatures;
+        }else{
+          formattedTransaction.value.cosigners = {}
         }
+
+        if(transaction.txn.amountTransfer!=undefined){
+          formattedTransaction.value.amountTransfer = transaction.txn.amountTransfer;
+        }
+
+        if(transaction.txn.mosaic!=undefined){
+          formattedTransaction.value.assetAmount = Helper.convertToExact(transaction.txn.mosaic.amount.compact(), AppState.nativeToken.divisibility);
+          formattedTransaction.value.assetId = transaction.txn.mosaic.id.toHex();
+          console.log(formattedTransaction.value.assetId)
+          let isNamespace = TransactionUtils.isNamespace(transaction.txn.mosaic.id);
+          if(isNamespace){
+            let namespaceId = Helper.createNamespaceId(transaction.txn.mosaic.id.toDTO().id);
+            let nsNames = await TransactionUtils.getNamespacesName([namespaceId]);
+            formattedTransaction.value.assetName = nsNames[0].name;
+          }
+          // formattedTransaction.value.assetName = await TransactionUtils.getAssetsName([transaction.txn.mosaic.id]);
+          console.log(formattedTransaction.value.assetName)
+        }
+
+        if(transaction.txn.amount!=undefined){
+          formattedTransaction.value.amount = transaction.txn.amount;
+        }
+
         innerTransaction.value = transaction.txn.innerTransactions;
       }else{
         formattedTransaction.value = transaction;
@@ -91,6 +123,7 @@ export default {
       formattedTransaction,
       innerTransaction,
       isFetching,
+      txn
     }
   }
 }
