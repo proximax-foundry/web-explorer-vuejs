@@ -556,10 +556,10 @@ export class TransactionUtils {
             continue;
           }
 
-          let assetInfo = await TransactionUtils.getAssetInfo(txn.mosaics[y].id.toHex());
+          let assetInfo = await TransactionUtils.getAssetInfo(assetId.toHex());
 
           let newSDA: any = {
-            amount: rawAmount/Math.pow(10, assetInfo.divisibility),
+            amount: Helper.convertToCurrency(rawAmount, assetInfo.divisibility),
             id: assetIdHex,
           };
           let assetName = await TransactionUtils.getAssetName(assetIdHex);
@@ -578,7 +578,6 @@ export class TransactionUtils {
   }
 
   static isNamespace(mosaicId: MosaicId): boolean{
-    console.log(mosaicId.toHex())
     return Array.from(namespaceIdFirstCharacterString).includes(mosaicId.toHex().toUpperCase().substring(0, 1));
   }
 
