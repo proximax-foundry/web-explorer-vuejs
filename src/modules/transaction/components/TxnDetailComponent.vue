@@ -38,6 +38,10 @@
     <div v-if="txnDetail.amountTransfer">
       <div>Amount</div>
       <div class="relative"><span class="font-bold">{{ transferAmount[0] }}</span>{{ transferAmount[1]>0?'.':'' }}<span class="text-xxs">{{ transferAmount[1] }}</span> <span class="font-bold">{{ nativeTokenNamespace }}</span> <img src="@/assets/img/icon-xpx.svg" class="ml-2 inline-block absolute" style="top: -1px; width:14px;" /></div>
+    </div>{{txnDetail.mosaicAmount}}
+    <div v-if="txnDetail.assetAmount">
+      <div>Amount</div>
+      <div class="relative"><span class="font-bold">{{ assetAmount[0] }}</span>{{ assetAmount[1]>0?'.':'' }}<span class="text-xxs">{{ assetAmount[1] }}</span> <span class="text-gray-400 text-txs hover:text-gray-700 duration-300 transition-all">{{ txnDetail.assetName?( txnDetail.assetName + ' / '):'' }} {{ txnDetail.assetId }} </span></div>
     </div>
     <div v-if="txnDetail.amount">
       <div>SDA Amount</div>
@@ -96,6 +100,14 @@ export default {
       toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
     };
 
+    const assetAmount = computed(() => {
+      if(props.txnDetail.assetAmount){
+        return props.txnDetail.assetAmount.toString().split('.');
+      }else{
+        return '';
+      }
+    });
+
     const sdaAmount = computed(() => {
       let formattedSDA = [];
       if(props.txnDetail.amount){
@@ -113,6 +125,7 @@ export default {
       copy,
       transferAmount,
       sdaAmount,
+      assetAmount,
     }
   }
 }

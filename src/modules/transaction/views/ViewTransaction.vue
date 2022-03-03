@@ -56,7 +56,10 @@ export default {
       isMissingSignature: false,
       cosigners: [],
       amount: '',
-      amountTransfer: []
+      amountTransfer: [],
+      assetAmount: '',
+      assetId: '',
+      assetName: {},
     });
     const innerTransaction = ref({});
 
@@ -86,6 +89,20 @@ export default {
 
         if(transaction.txn.amountTransfer!=undefined){
           formattedTransaction.value.amountTransfer = transaction.txn.amountTransfer;
+        }
+
+        if(transaction.txn.mosaic!=undefined){
+          formattedTransaction.value.assetAmount = Helper.convertToExact(transaction.txn.mosaic.amount.compact(), AppState.nativeToken.divisibility);
+          formattedTransaction.value.assetId = transaction.txn.mosaic.id.toHex();
+          console.log(formattedTransaction.value.assetId)
+          let isNamespace = TransactionUtils.isNamespace(transaction.txn.mosaic.id);
+          if(isNamespace){
+            let namespaceId = Helper.createNamespaceId(transaction.txn.mosaic.id.toDTO().id);
+            let nsNames = await TransactionUtils.getNamespacesName([namespaceId]);
+            formattedTransaction.value.assetName = nsNames[0].name;
+          }
+          // formattedTransaction.value.assetName = await TransactionUtils.getAssetsName([transaction.txn.mosaic.id]);
+          console.log(formattedTransaction.value.assetName)
         }
 
         if(transaction.txn.amount!=undefined){
