@@ -4,7 +4,7 @@ let publicPath = '/';
 
 switch(process.env.NODE_ENV){
     case 'staging':
-        publicPath = '/web-wallet-vuejs'
+        publicPath = '/web-explorer-vuejs'
         break;
     case 'production':
         publicPath = ''
@@ -19,8 +19,7 @@ module.exports = {
     publicPath: publicPath,
     assetsDir: './assets/',
     devServer: {
-      host: 'localhost',
-      proxy: 'https://bctestnetswap.xpxsirius.io/',
+      host: 'localhost'
     },
     pluginOptions: {
       i18n: {
