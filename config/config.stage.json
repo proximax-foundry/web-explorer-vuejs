@@ -1,0 +1,57 @@
+{
+  "Coin": {
+    "name": "XPX",
+    "mosaic": {
+      "id": "6ad1fa3645ee1987",
+      "name": "xpx"
+    },
+    "namespace": {
+      "id": "bffb42a19116bdf6",
+      "name": "prx.xpx"
+    }
+  },
+  "Nodes": [
+    "bcstage1.xpxsirius.io",
+    "bcstage2.xpxsirius.io"
+  ],
+  "NetworkType": {
+    "name": "Public_Test",
+    "number": 168
+  },
+  "RentalFeeInfo": {
+    "namespaceRentalFee": {
+      "name": "Namespace Rental Fee Sink",
+      "address": "XA7KWF-N5CMLV-G7W3OH-Z5CV3G-3VYH3N-5EQQTK-OVJH",
+      "publicKey": "9FF38184F03950C09FFFF4A90C171E4C3C566985EEACA486A59CC8B607C10BF6"
+    },
+    "mosaicRentalFee": {
+      "name": "Mosaic Rental Fee Sink",
+      "address": "XBO3L3-K5AQTX-DXO6Z6-W6KAPO-RI4XHN-65J5VG-HOQU",
+      "publicKey": "94A9BB9660037E622C8F626E061DB1557CBBED0338402E82E796168E80EF9765"
+    }
+  },
+  "MapsInfo": [
+    {
+      "name": "18.138.51.117",
+      "ip": "18.138.51.117",
+      "urlNode": "http://18.138.51.117:3000",
+      "icon": "proximax.svg"
+    },
+    {
+      "name": "13.229.155.165",
+      "ip": "13.229.155.165",
+      "urlNode": "http://13.229.155.165:3000",
+      "icon": "proximax.svg"
+    },
+    {
+      "name": "13.251.128.180",
+      "ip": "13.251.128.180",
+      "urlNode": "http://13.251.128.180:3000",
+      "icon": "proximax.svg"
+    }
+  ],
+  "ModuleActive": {
+    "networkStats": true,
+    "map": true
+  }
+}
