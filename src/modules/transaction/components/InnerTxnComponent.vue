@@ -42,10 +42,10 @@
           <div>Info</div>
           <div>{{ innerTxnExtractedData[index].infoInfoList.map(info => info.short ? info.short : info.value).join(", ") }}</div>
         </div>
-        <div v-if="item.sdas.length > 0">
+        <!-- <div v-if="item.sdas.length > 0">
           <div>SDAs</div>
           <div>{{ item.sdas.join("<br>") }}</div>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
