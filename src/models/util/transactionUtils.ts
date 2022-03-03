@@ -494,7 +494,6 @@ export class TransactionUtils {
       }else{
         txn = await AppState.chainAPI.transactionAPI.getTransaction(hash);
       }
-      console.log(txn);
 
       // get fee
       let transactionInfo: TransactionInfo | AggregateTransactionInfo = txn.transactionInfo;
@@ -505,16 +504,14 @@ export class TransactionUtils {
       let deadline = null;
 
       if(transactionInfo instanceof AggregateTransactionInfo){
-        console.log(txn)
-        console.log(TransactionUtils.getTransactionTypeName(txn.type))
+
         //let aggregateTxn = await this.autoFindAggregateTransaction(txnHash);
         blockHeight = transactionInfo.height.compact();
         //txnBytes = aggregateTxn.serialize().length / 2;
         //deadline = aggregateTxn.deadline.adjustedValue.compact();
       }
       else if(txn.type === TransactionType.AGGREGATE_BONDED || txn.type === TransactionType.AGGREGATE_COMPLETE){
-        console.log(txn)
-        console.log(TransactionUtils.getTransactionTypeName(txn.type))
+
         let aggregateTxn = await TransactionUtils.autoFindAggregateTransaction(txnHash);
         blockHeight = aggregateTxn.transactionInfo.height.compact();
         txnBytes = aggregateTxn.serialize().length / 2;
@@ -535,9 +532,7 @@ export class TransactionUtils {
       let blockInfo = await AppState.chainAPI.blockAPI.getBlockByHeight(blockHeight);
       txn.fee = txnBytes * blockInfo.feeMultiplier;
       txn.deadline = deadline;
-      txn.timestamp = new Date(blockInfo.timestamp.compact() + Deadline.timestampNemesisBlock * 1000).toISOString()
-
-      console.log(txn)
+      txn.timestamp = new Date(blockInfo.timestamp.compact() + Deadline.timestampNemesisBlock * 1000).toISOString();
 
       if(txn.type == TransactionType.TRANSFER){
         let sdas: SDA[] = [];

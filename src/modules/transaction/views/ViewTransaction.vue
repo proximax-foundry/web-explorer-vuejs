@@ -67,7 +67,6 @@ export default {
         formattedTransaction.value = {
           hash: props.hash,
           status: transaction.txn.isConfirmed(),
-          // timestamp: Helper.formatDeadline(transaction.txn.deadline.adjustedValue.compact()),
           timestamp: Helper.convertDisplayDateTimeFormat(transaction.txn.timestamp),
           height: transaction.txn.transactionInfo.height.compact(),
           type: TransactionUtils.getTransactionTypeName(transaction.txn.type),
@@ -99,8 +98,6 @@ export default {
       }
 
       isFetching.value = false;
-      console.log('formattedTransaction');
-      console.log(formattedTransaction.value);
     })();
 
     return {

@@ -42,10 +42,10 @@
           <div>Info</div>
           <div>{{ innerTxnExtractedData[index].infoInfoList.map(info => info.short ? info.short : info.value).join(", ") }}</div>
         </div>
-        <!-- <div v-if="item.sdas.length > 0">
+        <div v-if="item.sdas.length > 0">
           <div>SDAs</div>
           <div>{{ item.sdas.join("<br>") }}</div>
-        </div> -->
+        </div>
       </div>
     </div>
   </div>
@@ -67,7 +67,6 @@ export default {
   },
   setup(props) {
 
-    console.log(props.innerTxn.length);
     let allCosigners = []; // hold all the final cosigners public Keys
     let cosignedSigner = []; // all the cosigned final signers, include multisig account (calculated)
     let oriSignedSigners = []; // all the cosigned final signers + initiator
@@ -87,8 +86,6 @@ export default {
       cosignedSigner = castedAggregateTxn.cosignatures.map(cosigner=> cosigner.signer.publicKey);
       oriSignedSigners = cosignedSigner.concat([props.txn.signer.publicKey]);
       signedSigners = [...oriSignedSigners];
-      console.log('signedSigners')
-      console.log(signedSigners)
 
       props.innerTxn.forEach(async(txn, item) => {
         let extractedData = await TransactionUtils.extractPartialInnerTransaction(txn);
@@ -97,7 +94,6 @@ export default {
         extractedData.infoRedList = extractedData.infos.filter(info => !info.label && info.type === MsgType.RED);
         extractedData.infoList = extractedData.infos.filter(info => info.type === MsgType.NONE);
         innerTxnExtractedData.value[item] = extractedData;
-        // console.log(allInnerTransactions.value[item])
       });
     }
 
@@ -132,12 +128,8 @@ export default {
             }
           }
           signedSigners = Array.from(new Set(signedSigners));
-          console.log(signedSigners)
-          console.log('flatCosigners')
-          console.log(flatCosigners)
           let isSigned = flatCosigners.every((val) => signedSigners.includes(val));
           innerSignedList.value.push(isSigned);
-          // innerRelatedList.push(allDeepCosigners.includes(currentPublicKey));
         }
       });
     }
