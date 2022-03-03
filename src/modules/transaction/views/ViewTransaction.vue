@@ -16,7 +16,7 @@
           <div class="w-32 font-bold text-xs text-center p-2 relative" :class="`${ (currentPage != 'inner')?'cursor-pointer':'' }`" @click="currentPage = 'inner'" v-if="innerTransaction">Inner Txns<div v-if="currentPage == 'inner'" class="absolute w-full border-b border-yellow-500 transition-all duration-200" style="bottom: -1px;"></div></div>
         </div>
         <TxnDetailComponent v-if="currentPage == 'detail'" :txnDetail="formattedTransaction" />
-        <InnerTxnComponent v-else :innerTxn="innerTransaction" />
+        <InnerTxnComponent v-else :innerTxn="innerTransaction" :txn="txn" :txnGroup="formattedTransaction.group" />
       </div>
       <div v-if="!formattedTransaction.isFound" class="p-3 bg-yellow-100 text-yellow-700">Transaction not found</div>
     </div>
@@ -42,6 +42,7 @@ export default {
   setup(props){
     const currentPage = ref('detail');
     const isFetching = ref(true);
+    const txn = ref({});
     const formattedTransaction = ref({
       hash: '',
       status: '',
@@ -61,15 +62,16 @@ export default {
 
     (async() => {
       let transaction = await TransactionUtils.getTransaction(props.hash);
-      console.log(transaction.txn)
+      txn.value = transaction.txn;
       if(transaction.isFound){
         formattedTransaction.value = {
           hash: props.hash,
           status: transaction.txn.isConfirmed(),
-          timestamp: Helper.formatDeadline(transaction.txn.deadline.adjustedValue.compact()),
+          // timestamp: Helper.formatDeadline(transaction.txn.deadline.adjustedValue.compact()),
+          timestamp: Helper.convertDisplayDateTimeFormat(transaction.txn.timestamp),
           height: transaction.txn.transactionInfo.height.compact(),
           type: TransactionUtils.getTransactionTypeName(transaction.txn.type),
-          fee: Helper.convertToExact(transaction.txn.maxFee.compact(), AppState.nativeToken.divisibility),
+          fee: Helper.convertToExact(transaction.txn.fee, AppState.nativeToken.divisibility),
           signature: transaction.txn.signature,
           signer: transaction.txn.signer.address.address,
           version: transaction.txn.version,
@@ -79,6 +81,8 @@ export default {
         }
         if(transaction.txn.cosignatures!=undefined){
           formattedTransaction.value.cosigners = transaction.txn.cosignatures;
+        }else{
+          formattedTransaction.value.cosigners = {}
         }
 
         if(transaction.txn.amountTransfer!=undefined){
@@ -95,6 +99,8 @@ export default {
       }
 
       isFetching.value = false;
+      console.log('formattedTransaction');
+      console.log(formattedTransaction.value);
     })();
 
     return {
@@ -103,6 +109,7 @@ export default {
       formattedTransaction,
       innerTransaction,
       isFetching,
+      txn
     }
   }
 }

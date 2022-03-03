@@ -76,6 +76,8 @@ import {
   Convert,
   MetadataQueryParams,
   MetadataEntry,
+  AggregateTransactionInfo,
+  TransactionInfo,
 } from "tsjs-xpx-chain-sdk";
 // import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
 import { networkState } from "@/state/networkState";
@@ -119,6 +121,10 @@ export interface InnerTxnDetails{
   infos: TxnDetails[];
   legendType: InnerTxnLegendType;
   sdas: string[];
+  infoInfoList?: [];
+  infoGreenList?: [];
+  infoRedList?: [];
+  infoList?: [];
 }
 
 const networkAPIEndpoint = computed(() => ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile?.httpPort));
@@ -246,6 +252,7 @@ export const transactionTypeName = {
 };
 
 export class TransactionUtils {
+
 
   static async getAccInfo(address: Address): Promise<AccountInfo> {
 
@@ -488,6 +495,50 @@ export class TransactionUtils {
         txn = await AppState.chainAPI.transactionAPI.getTransaction(hash);
       }
       console.log(txn);
+
+      // get fee
+      let transactionInfo: TransactionInfo | AggregateTransactionInfo = txn.transactionInfo;
+      let txnHash = transactionInfo instanceof AggregateTransactionInfo ? transactionInfo.aggregateHash : transactionInfo.hash;
+
+      let blockHeight: number = 0;
+      let txnBytes: number = 0;
+      let deadline = null;
+
+      if(transactionInfo instanceof AggregateTransactionInfo){
+        console.log(txn)
+        console.log(TransactionUtils.getTransactionTypeName(txn.type))
+        //let aggregateTxn = await this.autoFindAggregateTransaction(txnHash);
+        blockHeight = transactionInfo.height.compact();
+        //txnBytes = aggregateTxn.serialize().length / 2;
+        //deadline = aggregateTxn.deadline.adjustedValue.compact();
+      }
+      else if(txn.type === TransactionType.AGGREGATE_BONDED || txn.type === TransactionType.AGGREGATE_COMPLETE){
+        console.log(txn)
+        console.log(TransactionUtils.getTransactionTypeName(txn.type))
+        let aggregateTxn = await TransactionUtils.autoFindAggregateTransaction(txnHash);
+        blockHeight = aggregateTxn.transactionInfo.height.compact();
+        txnBytes = aggregateTxn.serialize().length / 2;
+        deadline = aggregateTxn.deadline.adjustedValue.compact();
+      }
+      else{
+        blockHeight = transactionInfo.height.compact();
+
+        // wait SDK to fix
+        try {
+            txnBytes = txn.serialize().length / 2;
+        } catch (error) {
+            console.log(error);
+        }
+        deadline = txn.deadline.adjustedValue.compact();
+      }
+
+      let blockInfo = await AppState.chainAPI.blockAPI.getBlockByHeight(blockHeight);
+      txn.fee = txnBytes * blockInfo.feeMultiplier;
+      txn.deadline = deadline;
+      txn.timestamp = new Date(blockInfo.timestamp.compact() + Deadline.timestampNemesisBlock * 1000).toISOString()
+
+      console.log(txn)
+
       if(txn.type == TransactionType.TRANSFER){
         let sdas: SDA[] = [];
         for(let y = 0; y < txn.mosaics.length; ++y){
@@ -2825,6 +2876,54 @@ static async extractPartialTransfer(transferTxn: TransferTransaction): Promise<I
     return txnDetails;
   }
 
+  static async autoFindAggregateTransaction(hash: string): Promise<AggregateTransaction> | null{
+
+    let statusGroup = "";
+    let txn: Transaction = null;
+
+    while (txn === null && statusGroup !== "confirmed" && statusGroup !== "error"){
+
+      try {
+        let txnStatus = await AppState.chainAPI.transactionAPI.getTransactionStatus(hash);
+
+        statusGroup = txnStatus.group;
+
+        switch (statusGroup) {
+          case TransactionGroupType.CONFIRMED:
+            try {
+              txn = await AppState.chainAPI.transactionAPI.getTransaction(hash);
+            } catch (error) {
+              statusGroup = "error"
+            }
+            break;
+
+          case TransactionGroupType.UNCONFIRMED:
+            try {
+              txn = await AppState.chainAPI.transactionAPI.getUnconfirmedTransaction(hash);
+            } catch (error) {}
+            break;
+          case TransactionGroupType.PARTIAL:
+            try {
+              txn = await AppState.chainAPI.transactionAPI.getPartialTransaction(hash);
+            } catch (error) {}
+            break;
+          default:
+            statusGroup = "error";
+            break;
+        }
+      } catch (error) {
+        statusGroup = "error";
+      }
+    }
+
+    if(statusGroup === "error" || txn === null){
+      return null;
+    }
+    else{
+      let aggregateTxn = txn as AggregateTransaction
+      return aggregateTxn;
+    }
+  }
 }
 
 

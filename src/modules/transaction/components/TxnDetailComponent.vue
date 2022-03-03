@@ -33,17 +33,17 @@
     </div>
     <div>
       <div>Tx Fee</div>
-      <div class="relative"><span class="font-bold">{{ maxFee[0] }}</span>.<span class="text-xxs">{{ maxFee[1] }}</span> <span class="font-bold">{{ nativeTokenNamespace }}</span> <img src="@/assets/img/icon-xpx.svg" class="ml-2 inline-block absolute" style="top: -1px; width:14px;" /></div>
+      <div class="relative"><span class="font-bold">{{ maxFee[0] }}</span>{{ maxFee[1]>0?'.':'' }}<span class="text-xxs">{{ maxFee[1] }}</span> <span class="font-bold">{{ nativeTokenNamespace }}</span> <img src="@/assets/img/icon-xpx.svg" class="ml-2 inline-block absolute" style="top: -1px; width:14px;" /></div>
     </div>
     <div v-if="txnDetail.amountTransfer">
       <div>Amount</div>
-      <div class="relative"><span class="font-bold">{{ transferAmount[0] }}</span>{{ transferAmount[1]?'.':'' }}<span class="text-xxs">{{ transferAmount[1] }}</span> <span class="font-bold">{{ nativeTokenNamespace }}</span> <img src="@/assets/img/icon-xpx.svg" class="ml-2 inline-block absolute" style="top: -1px; width:14px;" /></div>
+      <div class="relative"><span class="font-bold">{{ transferAmount[0] }}</span>{{ transferAmount[1]>0?'.':'' }}<span class="text-xxs">{{ transferAmount[1] }}</span> <span class="font-bold">{{ nativeTokenNamespace }}</span> <img src="@/assets/img/icon-xpx.svg" class="ml-2 inline-block absolute" style="top: -1px; width:14px;" /></div>
     </div>
     <div v-if="txnDetail.amount">
       <div>SDA Amount</div>
       <div class="relative">
         <div v-for="sda, item in txnDetail.amount" :key="item">
-          <span class="font-bold">{{ sdaAmount[item][0] }}</span>{{ sdaAmount[item][1]?'.':'' }}<span class="text-xxs">{{ sdaAmount[item][1] }}</span> <span class="text-gray-400 text-txs hover:text-gray-700 duration-300 transition-all">{{ sda.name?(sda.name + ' / '):'' }} {{ sda.id }} </span>
+          <span class="font-bold">{{ sdaAmount[item][0] }}</span>{{ sdaAmount[item][1]>0?'.':'' }}<span class="text-xxs">{{ sdaAmount[item][1] }}</span> <span class="text-gray-400 text-txs hover:text-gray-700 duration-300 transition-all">{{ sda.name?(sda.name + ' / '):'' }} {{ sda.id }} </span>
         </div>
       </div>
     </div>
@@ -58,7 +58,7 @@
         <img src="@/assets/img/icon-copy.svg" @click="copy('signerAddress')" class="cursor-pointer" />
       </div>
     </div>
-    <div v-if="txnDetail.cosigners">
+    <div v-if="txnDetail.cosigners.length > 0">
       <div>Cosigner{{ (txnDetail.cosigners.length>1)?'s':'' }}</div>
       <div class="flex justify-start">
         <div class="text-blue-primary mr-2" v-for="cosigner, item in txnDetail.cosigners" :key="item">{{ Helper.createAddress(cosigner.signer.address.address).pretty() }}</div>
