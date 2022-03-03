@@ -61,9 +61,10 @@ export default defineComponent({
     //   }
     // ]);
 
-    const selectNetwork = (name, node, index) => {
-      selectedNetwork.value.name = name;
-      selectedNetwork.value.node = node;
+    const selectNetwork = (networkName, networkNode, index) => {
+      selectedNetwork.value.name = networkName;
+      selectedNetwork.value.node = networkNode;
+      node.value = networkNode;
       NetworkStateUtils.changeNetworkByIndex(parseInt(index));
       toggleSelection.value = false;
     }
