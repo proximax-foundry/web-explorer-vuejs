@@ -103,6 +103,7 @@ export default {
 
     if(props.innerTxn.length > 0){
       props.innerTxn.forEach(async(txn) => {
+        let innerSigner = txn.signer;
         if(txn.type === TransactionType.MODIFY_MULTISIG_ACCOUNT){
           let allDeepCosigners = await CosignUtils.getAllDeepModifyMultisigCosigners(txn);
           currentInnerSigners = allDeepCosigners;
@@ -130,7 +131,35 @@ export default {
           }
           signedSigners = Array.from(new Set(signedSigners));
           let isSigned = flatCosigners.every((val) => signedSigners.includes(val));
+          console.log(isSigned)
           innerSignedList.value.push(isSigned);
+        }else{
+          try {
+            let accountMultisigGraphInfo = await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(innerSigner.address);
+
+            let allMultisigKey = Array.from(accountMultisigGraphInfo.multisigAccounts.keys()).sort((a, b)=>{return a-b}); // ascending keys
+
+            for(let y =0; y < allMultisigKey.length ;++y){
+              const level = allMultisigKey[y];
+              const multisigAccountsInfo = accountMultisigGraphInfo.multisigAccounts.get(level);
+
+              let cosigners = CosignUtils.findCosigners(multisigAccountsInfo);
+              currentInnerSigners = currentInnerSigners.concat(cosigners);
+
+              for(let x =0; x < multisigAccountsInfo.length ;++x){
+                if(CosignUtils.isFulllySigned(multisigAccountsInfo[x], signedSigners)){
+                  signedSigners.push(multisigAccountsInfo[x].account.publicKey);
+                }
+              }
+            }
+
+            signedSigners = Array.from(new Set(signedSigners));
+            currentInnerSigners = Array.from(new Set(currentInnerSigners));
+          } catch (error) {
+            currentInnerSigners = [innerSigner.publicKey];
+            //console.log(error);
+          }
+          innerSignedList.value.push(signedSigners.includes(innerSigner.publicKey));
         }
       });
     }
