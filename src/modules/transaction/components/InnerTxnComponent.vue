@@ -42,10 +42,10 @@
           <div>Info</div>
           <div>{{ innerTxnExtractedData[index].infoInfoList.map(info => info.short ? info.short : info.value).join(", ") }}</div>
         </div>
-        <!-- <div v-if="item.sdas.length > 0">
+        <div v-if="innerTxnExtractedData[index].sdas.length > 0">
           <div>SDAs</div>
-          <div>{{ item.sdas.join("<br>") }}</div>
-        </div> -->
+          <div>{{ innerTxnExtractedData[index].sdas.join("<br>") }}</div>
+        </div>
       </div>
     </div>
   </div>
@@ -77,7 +77,8 @@ export default {
       infoInfoList: {},
       infoGreenList: {},
       infoRedList: {},
-      infoList: {}
+      infoList: {},
+      sdas: []
     }]);
 
     if(props.txn.type == TransactionType.AGGREGATE_BONDED){
