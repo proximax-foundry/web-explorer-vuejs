@@ -720,7 +720,7 @@ export class TransactionUtils {
     return newType;
   }
 
-  static async extractPartialInnerTransaction(innerTransaction: InnerTransaction): Promise<InnerTxnDetails> {
+  static async extractInnerTransaction(innerTransaction: InnerTransaction): Promise<InnerTxnDetails> {
 
     let transactionDetails: InnerTxnDetails;
 

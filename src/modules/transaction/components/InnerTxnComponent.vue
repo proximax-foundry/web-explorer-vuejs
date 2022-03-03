@@ -19,7 +19,7 @@
           <div>{{ innerSignedList[index] }}</div>
         </div>
       </div>
-      <div v-if="txn.type == TransactionType.AGGREGATE_BONDED" class="table_div">
+      <div class="table_div" v-if="innerTxnExtractedData[index]!=undefined">
         <div v-for="(info, infoListindex) in innerTxnExtractedData[index].infoList" :key="infoListindex">
           <div>{{ info.label ? info.label : '' }}</div>
           <div>{{ info.short ? info.short : info.value }}</div>
@@ -52,7 +52,7 @@
 </template>
 
 <script>
-import { computed, defineComponent, getCurrentInstance, inject, ref, watch, toRefs } from "vue";
+import { computed, defineComponent, getCurrentInstance, inject, ref, watch, toRefs, onBeforeMount  } from "vue";
 import { TransactionType } from "tsjs-xpx-chain-sdk";
 import { TransactionUtils, MsgType, InnerTxnLegendType } from '@/models/util/transactionUtils';
 import { TransactionUtils as TxnUtils } from '@/util/transactionUtils';
@@ -71,53 +71,77 @@ export default {
     let cosignedSigner = []; // all the cosigned final signers, include multisig account (calculated)
     let oriSignedSigners = []; // all the cosigned final signers + initiator
     let signedSigners = []; // all the cosigned final signers + initiator, include multisig account (calculated)
+    const innerSignedList = ref([]);
+    let currentInnerSigners = [];
+
 
     const  allInnerTransactions = ref(props.innerTxn);
     const innerTxnExtractedData = ref([{
       infoInfoList: {},
       infoGreenList: {},
       infoRedList: {},
-      infoList: {},
-      sdas: []
+      sdas: {}
     }]);
 
-    if(props.txn.type == TransactionType.AGGREGATE_BONDED){
-      let castedAggregateTxn = TxnUtils.castToAggregate(props.txn);
-      allCosigners.push(castedAggregateTxn.signer.publicKey);
-      cosignedSigner = castedAggregateTxn.cosignatures.map(cosigner=> cosigner.signer.publicKey);
-      oriSignedSigners = cosignedSigner.concat([props.txn.signer.publicKey]);
-      signedSigners = [...oriSignedSigners];
+    onBeforeMount ( () => {
+      if(props.innerTxn.length > 0){
+        let castedAggregateTxn = TxnUtils.castToAggregate(props.txn);
 
-      props.innerTxn.forEach(async(txn, item) => {
-        let extractedData = await TransactionUtils.extractPartialInnerTransaction(txn);
-        extractedData.infoInfoList = extractedData.infos.filter(info => !info.label && info.type === MsgType.INFO);
-        extractedData.infoGreenList = extractedData.infos.filter(info => !info.label && info.type === MsgType.GREEN);
-        extractedData.infoRedList = extractedData.infos.filter(info => !info.label && info.type === MsgType.RED);
-        extractedData.infoList = extractedData.infos.filter(info => info.type === MsgType.NONE);
-        innerTxnExtractedData.value[item] = extractedData;
-      });
-    }
+        props.innerTxn.forEach(async(txn, item) => {
+          allCosigners.push(castedAggregateTxn.signer.publicKey);
+          cosignedSigner = castedAggregateTxn.cosignatures.map(cosigner=> cosigner.signer.publicKey);
+          oriSignedSigners = cosignedSigner.concat([txn.signer.publicKey]);
+          signedSigners = [...oriSignedSigners];
 
-    const innerSignedList = ref([]);
-    let currentInnerSigners = [];
+          let extractedData = await TransactionUtils.extractInnerTransaction(txn);
+            extractedData.infoInfoList = extractedData.infos.filter(info => !info.label && info.type === MsgType.INFO);
+            extractedData.infoGreenList = extractedData.infos.filter(info => !info.label && info.type === MsgType.GREEN);
+            extractedData.infoRedList = extractedData.infos.filter(info => !info.label && info.type === MsgType.RED);
+            extractedData.infoList = extractedData.infos.filter(info => info.type === MsgType.NONE);
+            innerTxnExtractedData.value[item] = extractedData;
 
-    if(props.innerTxn.length > 0){
-      props.innerTxn.forEach(async(txn) => {
-        let innerSigner = txn.signer;
-        if(txn.type === TransactionType.MODIFY_MULTISIG_ACCOUNT){
-          let allDeepCosigners = await CosignUtils.getAllDeepModifyMultisigCosigners(txn);
-          currentInnerSigners = allDeepCosigners;
-          let flatCosigners = await CosignUtils.getAllFlatModifyMultisigCosigners(txn);
+          let innerSigner = txn.signer;
+          if(txn.type === TransactionType.MODIFY_MULTISIG_ACCOUNT){
+            let allDeepCosigners = await CosignUtils.getAllDeepModifyMultisigCosigners(txn);
+            currentInnerSigners = allDeepCosigners;
+            let flatCosigners = await CosignUtils.getAllFlatModifyMultisigCosigners(txn);
 
-          for(let a = 0; a < flatCosigners.length; ++a){
+            for(let a = 0; a < flatCosigners.length; ++a){
+              try {
+                let accountMultisigGraphInfo = await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(PublicAccount.createFromPublicKey(flatCosigners[a], AppState.networkType).address);
+
+                let allMultisigKey = accountMultisigGraphInfo.multisigAccounts.keys().sort((a, b)=>{return a-b}); // ascending keys
+
+                for(let y =0; y < allMultisigKey.length ;++y){
+                  const level = allMultisigKey[y];
+                  const multisigAccountsInfo = accountMultisigGraphInfo.multisigAccounts.get(level);
+
+                  for(let x =0; x < multisigAccountsInfo.length ;++x){
+                    if(CosignUtils.isFulllySigned(multisigAccountsInfo[x], signedSigners)){
+                      signedSigners.push(multisigAccountsInfo[x].account.publicKey);
+                    }
+                  }
+                }
+              } catch (error) {
+                //console.log(error);
+              }
+            }
+            signedSigners = Array.from(new Set(signedSigners));
+            let isSigned = flatCosigners.every((val) => signedSigners.includes(val));
+            console.log(isSigned)
+            innerSignedList.value.push(isSigned);
+          }else{
             try {
-              let accountMultisigGraphInfo = await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(PublicAccount.createFromPublicKey(flatCosigners[a], AppState.networkType).address);
+              let accountMultisigGraphInfo = await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(innerSigner.address);
 
-              let allMultisigKey = accountMultisigGraphInfo.multisigAccounts.keys().sort((a, b)=>{return a-b}); // ascending keys
+              let allMultisigKey = Array.from(accountMultisigGraphInfo.multisigAccounts.keys()).sort((a, b)=>{return a-b}); // ascending keys
 
               for(let y =0; y < allMultisigKey.length ;++y){
                 const level = allMultisigKey[y];
                 const multisigAccountsInfo = accountMultisigGraphInfo.multisigAccounts.get(level);
+
+                let cosigners = CosignUtils.findCosigners(multisigAccountsInfo);
+                currentInnerSigners = currentInnerSigners.concat(cosigners);
 
                 for(let x =0; x < multisigAccountsInfo.length ;++x){
                   if(CosignUtils.isFulllySigned(multisigAccountsInfo[x], signedSigners)){
@@ -125,44 +149,18 @@ export default {
                   }
                 }
               }
+
+              signedSigners = Array.from(new Set(signedSigners));
+              currentInnerSigners = Array.from(new Set(currentInnerSigners));
             } catch (error) {
+              currentInnerSigners = [innerSigner.publicKey];
               //console.log(error);
             }
+            innerSignedList.value.push(signedSigners.includes(innerSigner.publicKey));
           }
-          signedSigners = Array.from(new Set(signedSigners));
-          let isSigned = flatCosigners.every((val) => signedSigners.includes(val));
-          console.log(isSigned)
-          innerSignedList.value.push(isSigned);
-        }else{
-          try {
-            let accountMultisigGraphInfo = await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(innerSigner.address);
-
-            let allMultisigKey = Array.from(accountMultisigGraphInfo.multisigAccounts.keys()).sort((a, b)=>{return a-b}); // ascending keys
-
-            for(let y =0; y < allMultisigKey.length ;++y){
-              const level = allMultisigKey[y];
-              const multisigAccountsInfo = accountMultisigGraphInfo.multisigAccounts.get(level);
-
-              let cosigners = CosignUtils.findCosigners(multisigAccountsInfo);
-              currentInnerSigners = currentInnerSigners.concat(cosigners);
-
-              for(let x =0; x < multisigAccountsInfo.length ;++x){
-                if(CosignUtils.isFulllySigned(multisigAccountsInfo[x], signedSigners)){
-                  signedSigners.push(multisigAccountsInfo[x].account.publicKey);
-                }
-              }
-            }
-
-            signedSigners = Array.from(new Set(signedSigners));
-            currentInnerSigners = Array.from(new Set(currentInnerSigners));
-          } catch (error) {
-            currentInnerSigners = [innerSigner.publicKey];
-            //console.log(error);
-          }
-          innerSignedList.value.push(signedSigners.includes(innerSigner.publicKey));
-        }
-      });
-    }
+        });
+      }
+    });
 
     return {
       TransactionUtils,
