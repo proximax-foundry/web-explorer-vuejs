@@ -488,7 +488,8 @@ export class TransactionUtils {
   static async getTransaction(hash: string) : Promise<any|boolean> {
     try {
       let txn:any = {};
-      let txnStatus = await AppState.chainAPI.transactionAPI.getTransactionStatus(hash);
+      let txnStatus:any = {};
+      txnStatus = await AppState.chainAPI.transactionAPI.getTransactionStatus(hash);
       if(txnStatus.group == 'partial'){
         txn = await AppState.chainAPI.transactionAPI.getPartialTransaction(hash);
       }else{
@@ -572,7 +573,7 @@ export class TransactionUtils {
       }
       return {txn, txnStatus, isFound: true};
     }catch (e){
-      return { isFound: false };
+      return { isFound: 'error' };
       console.error(e)
     }
   }

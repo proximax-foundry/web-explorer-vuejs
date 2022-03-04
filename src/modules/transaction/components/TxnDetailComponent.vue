@@ -7,7 +7,7 @@
     <div>
       <div>Status</div>
       <div>
-        <div v-if="txnDetail.status" class="inline-block">
+        <div v-if="txnDetail.status=='Success'" class="inline-block">
           <div class="flex items-center px-2 py-1 rounded-sm border border-green-100 bg-green-100 text-green-700 text-xs"><span class="material-icons md-16">done</span>&nbsp;Success</div>
         </div>
         <div v-else class="inline-block">

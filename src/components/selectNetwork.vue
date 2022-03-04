@@ -27,7 +27,7 @@
 
 <script>
 import { networkState } from '@/state/networkState';
-import { computed, defineComponent, ref, watch } from 'vue';
+import { computed, defineComponent, ref, watch, getCurrentInstance } from 'vue';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { ChainProfile } from "@/models/stores/chainProfile";
 import { AppState } from '@/state/appState';
@@ -38,8 +38,9 @@ export default defineComponent({
     'update:modelValue', 'select-network'
   ],
   setup(){
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const toggleSelection = ref(false);
-
     const networks = computed(()=> {
       let options = [];
       networkState.availableNetworks.forEach((network, index) => {
@@ -50,23 +51,13 @@ export default defineComponent({
       return options;
     });
 
-    // const networks = ref([
-    //   {
-    //     name: 'Sirius Testnet 1',
-    //     node: 'bctestnet1.brimstone.xpxsirius.io'
-    //   },
-    //   {
-    //     name: 'Sirius Testnet 2',
-    //     node: 'api-1.testnet2.xpxsirius.io'
-    //   }
-    // ]);
-
     const selectNetwork = (networkName, networkNode, index) => {
       selectedNetwork.value.name = networkName;
       selectedNetwork.value.node = networkNode;
       node.value = networkNode;
       NetworkStateUtils.changeNetworkByIndex(parseInt(index));
       toggleSelection.value = false;
+      emitter.emit("CHANGE_NETWORK", true);
     }
 
     const node = ref('')
