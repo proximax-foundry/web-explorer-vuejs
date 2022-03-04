@@ -4,7 +4,7 @@
       Transaction Details
     </p>
     <div v-if="!isFetching">
-      <div class="filter shadow-xl border border-gray-50 p-5 mb-15" v-if="formattedTransaction.isFound">
+      <div class="filter shadow-xl border border-gray-50 p-5 mb-15" v-if="formattedTransaction.isFound===true">
         <div class="flex items-center mb-4 border-b border-gray-100 relative">
           <div class="w-32 font-bold text-xs text-center p-2 relative" :class="`${ (currentPage != 'detail')?'cursor-pointer':'' }`" @click="currentPage = 'detail'">Overview<div v-if="currentPage == 'detail'" class="absolute w-full border-b border-yellow-500 transition-all duration-200" style="bottom: -1px;"></div></div>
           <div class="w-32 font-bold text-xs text-center p-2 relative" :class="`${ (currentPage != 'inner')?'cursor-pointer':'' }`" @click="currentPage = 'inner'" v-if="innerTransaction">Inner Txns<div v-if="currentPage == 'inner'" class="absolute w-full border-b border-yellow-500 transition-all duration-200" style="bottom: -1px;"></div></div>
@@ -12,13 +12,14 @@
         <TxnDetailComponent v-if="currentPage == 'detail'" :txnDetail="formattedTransaction" />
         <InnerTxnComponent v-else :innerTxn="innerTransaction" :txn="txn" :txnGroup="formattedTransaction.group" />
       </div>
-      <div v-if="formattedTransaction.isFound==='error'" class="p-3 bg-yellow-100 text-yellow-700">Transaction not found</div>
+      <div v-if="formattedTransaction.isFound==='error'" class="p-3 bg-yellow-100 text-yellow-700">Transaction not found in {{ networkName }}</div>
     </div>
   </div>
 </template>
 
 <script>
 import { computed, defineComponent, getCurrentInstance, inject, ref, watch } from "vue";
+import { networkState } from '@/state/networkState';
 import TxnDetailComponent from '@/modules/transaction/components/TxnDetailComponent.vue';
 import InnerTxnComponent from '@/modules/transaction/components/InnerTxnComponent.vue';
 import { AppState } from '@/state/appState';
@@ -34,6 +35,8 @@ export default {
     hash: String
   },
   setup(props){
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const currentPage = ref('detail');
     const isFetching = ref(true);
     const txn = ref({});
@@ -67,10 +70,10 @@ export default {
 
       let transaction = await TransactionUtils.getTransaction(props.hash);
       txn.value = transaction.txn;
-      if(transaction.isFound){
+      if(transaction.isFound==true){
         formattedTransaction.value = {
           hash: props.hash,
-          status: transaction.txnStatus.status,
+          status: transaction.txnStatus.status?transaction.txnStatus.status:'',
           timestamp: Helper.convertDisplayDateTimeFormat(transaction.txn.timestamp),
           height: transaction.txn.transactionInfo.height.compact(),
           type: TransactionUtils.getTransactionTypeName(transaction.txn.type),
@@ -119,13 +122,24 @@ export default {
     };
     loadTxn();
 
+    const networkName = computed(() => {
+      return networkState.chainNetworkName;
+    });
+
+    emitter.on('CHANGE_NETWORK', payload => {
+      if(payload){
+        loadTxn();
+      }
+    });
+
     return {
       currentPage,
       AppState,
       formattedTransaction,
       innerTransaction,
       isFetching,
-      txn
+      txn,
+      networkName,
     }
   }
 }
