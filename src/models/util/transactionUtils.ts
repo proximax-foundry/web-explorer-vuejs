@@ -572,7 +572,7 @@ export class TransactionUtils {
       }
       return {txn, txnStatus, isFound: true};
     }catch (e){
-      return { isFound: false };
+      return { isFound: 'error' };
       console.error(e)
     }
   }
