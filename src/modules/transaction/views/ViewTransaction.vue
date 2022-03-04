@@ -59,9 +59,6 @@ export default {
       assetName: {},
     });
     const innerTransaction = ref({});
-    // (async() => {
-      
-    // })();
 
     const loadTxn = async () => {
       if(!AppState.isReady){
@@ -98,7 +95,6 @@ export default {
         if(transaction.txn.mosaic!=undefined){
           formattedTransaction.value.assetAmount = Helper.convertToExact(transaction.txn.mosaic.amount.compact(), AppState.nativeToken.divisibility);
           formattedTransaction.value.assetId = transaction.txn.mosaic.id.toHex();
-          // console.log(formattedTransaction.value.assetId)
           let isNamespace = TransactionUtils.isNamespace(transaction.txn.mosaic.id);
           if(isNamespace){
             let namespaceId = Helper.createNamespaceId(transaction.txn.mosaic.id.toDTO().id);

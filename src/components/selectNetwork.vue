@@ -51,17 +51,6 @@ export default defineComponent({
       return options;
     });
 
-    // const networks = ref([
-    //   {
-    //     name: 'Sirius Testnet 1',
-    //     node: 'bctestnet1.brimstone.xpxsirius.io'
-    //   },
-    //   {
-    //     name: 'Sirius Testnet 2',
-    //     node: 'api-1.testnet2.xpxsirius.io'
-    //   }
-    // ]);
-
     const selectNetwork = (networkName, networkNode, index) => {
       selectedNetwork.value.name = networkName;
       selectedNetwork.value.node = networkNode;
