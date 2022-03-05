@@ -6,7 +6,7 @@
      <DataTable
       :value="transactions"
       :paginator="true"
-      :rows="10"
+      :rows="40"
       scrollDirection="horizontal"
       :alwaysShowPaginator="false"
       responsiveLayout="scroll"
@@ -24,10 +24,6 @@
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Type</div>
             <div class="flex items-center">
               <div class="uppercase font-bold text-txs mr-2">{{data.type}}</div>
-              <div>
-                <img src="@/modules/transaction/img/icon-txn-in.svg" class="inline-block w-5" v-if="data.in_out === true">
-                <img src="@/modules/transaction/img/icon-txn-out.svg" class="inline-block w-5" v-else-if="data.in_out === false">
-              </div>
             </div>
           </div>
           <div>
@@ -57,14 +53,6 @@
           <div>
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Tx Amount</div>
             <div class="text-txs uppercase font-bold" >{{ data.amountTransfer ? data.amountTransfer:'-' }} <b v-if="data.amountTransfer">{{ nativeTokenName }}</b></div>
-          </div>
-        </template>
-      </Column>
-      <Column header="IN/OUT" headerStyle="width:40px" v-if="wideScreen">
-        <template #body="{data}">
-          <div class="ml-2">
-            <img src="@/modules/transaction/img/icon-txn-in.svg" class="inline-block" v-if="data.in_out === true">
-            <img src="@/modules/transaction/img/icon-txn-out.svg" class="inline-block" v-else-if="data.in_out === false">
           </div>
         </template>
       </Column>
@@ -151,6 +139,8 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { AppState } from '@/state/appState';
 import { Helper } from "@/util/typeHelper";
+// import { TransactionFilterTypes } from '@/models/transactions/transactionFilterType';
+import { TransactionUtils } from '@/models/util/transactionUtils';
 import Tooltip from 'primevue/tooltip';
 
 export default {
@@ -166,6 +156,8 @@ export default {
     hash: String
   },
   setup(){
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const wideScreen = ref(false);
     const screenResizeHandler = () => {
       if(window.innerWidth < 1024){
@@ -220,23 +212,41 @@ export default {
       return asset_div;
     }
 
-    const transactions = ref([
-      {
-        hash: '1234',
-        type: '',
-        in_out: true,
-        recipient: 'XDHJWHP4IY25PADFXQ2RUX5D5CULJGMQS4MIDVG3',
-        timestamp: '1234',
-        sender: 'XDHJWHP4IY25PADFXQ2RUX5D5CULJGMQS4MIDVG3',
-        amountTransfer: '1234',
-        block: 1234,
-        fee: 23,
-        amountTransfer: 123.34,
-        sda: {},
-        messageTypeTitle: '',
-        message: '234'
+    const transactions = ref([]);
+    let transactionGroupType = Helper.getTransactionGroupType();
+    let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
+
+    let loadRecentTransferTransactions = async() =>{
+      let txnQueryParams = Helper.createTransactionQueryParams();
+      txnQueryParams.pageSize = 40;
+      txnQueryParams.embedded = true;
+      txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
+
+      let transactionSearchResult = await TransactionUtils.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams);
+
+      if(transactionSearchResult.transactions.length){
+        let formattedTxns = await TransactionUtils.formatConfirmedMixedTxns(transactionSearchResult.transactions);
+        transactions.value = formattedTxns;
       }
-    ]);
+    };
+
+    if(AppState.isReady){
+      loadRecentTransferTransactions();
+    }
+    else{
+      let readyWatcher = watch(AppState, (value) => {
+        if(value.isReady){
+          init();
+          readyWatcher();
+        }
+      });
+    }
+
+    emitter.on('CHANGE_NETWORK', payload => {
+      if(payload){
+        loadRecentTransferTransactions();
+      }
+    });
 
     return {
       wideScreen,
