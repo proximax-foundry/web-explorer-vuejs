@@ -13,7 +13,7 @@
       <DataTable
         :value="transactions"
         :paginator="false"
-        :rows="pages"
+        :rows="Number(pages)"
         scrollDirection="horizontal"
         :alwaysShowPaginator="false"
         responsiveLayout="scroll"
@@ -139,9 +139,9 @@
           Fetching transactions
         </template>
       </DataTable>
-      <div class="flex justify-between my-5">
+      <div class="flex justify-between my-5 mb-15">
         <div class="text-xs text-gray-700">Show
-          <select v-model="pages" class="border border-gray-300 rounded-md p-1">
+          <select v-model="pages" class="border border-gray-300 rounded-md p-1" @change="changeRows">
             <option value=10>10</option>
             <option value=20>20</option>
             <option value=30>30</option>
@@ -287,6 +287,10 @@ export default {
       loadRecentTransferTransactions();
     }
 
+    const changeRows = () => {
+      loadRecentTransferTransactions();
+    }
+
     const transactions = ref([]);
     let transactionGroupType = Helper.getTransactionGroupType();
     let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
@@ -295,8 +299,8 @@ export default {
       isFetching.value = true;
       let txnQueryParams = Helper.createTransactionQueryParams();
       let blockHeight = await AppState.chainAPI.chainAPI.getBlockchainHeight();
-      txnQueryParams.pageSize = Number(pages.value);
-      txnQueryParams.pageNumber = Number(currentPage.value);
+      txnQueryParams.pageSize = pages.value;
+      txnQueryParams.pageNumber = currentPage.value;
       txnQueryParams.embedded = true;
       txnQueryParams.fromHeight = blockHeight - 20000;
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
@@ -352,6 +356,7 @@ export default {
       naviPrevious,
       naviNext,
       naviLast,
+      changeRows,
     }
   }
 }
