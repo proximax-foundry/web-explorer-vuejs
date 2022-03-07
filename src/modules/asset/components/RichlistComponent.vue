@@ -1,9 +1,6 @@
 <template>
   <div>
     <div>
-      
-    </div>
-    <div>
       <DataTable
         :value="richlistDatatable"
         :paginator="true"

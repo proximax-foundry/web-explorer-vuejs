@@ -1,4 +1,5 @@
 <template>
+  <loading v-model:active="isLoading" :can-cancel="false" :is-full-page="true" />
   <div class="flex flex-col justify-between min-h-screen bg-white">
     <Toast position="top-left" group="tl" />
     <Toast position="top-right" group="tr" />
@@ -24,16 +25,29 @@
     <footerComponent class=" flex-grow-0" />
   </div>
 </template>
-
 <script>
+import { computed } from "vue";
+import Toast from 'primevue/toast';
+import headerComponent from '@/components/headerComponent.vue';
+import footerComponent from '@/components/footerComponent.vue';
+import { AppState } from '@/state/appState';
+import Loading from 'vue-loading-overlay';
+import 'vue-loading-overlay/dist/vue-loading.css';
 
-import headerComponent from '@/components/headerComponent.vue'
-import footerComponent from '@/components/footerComponent.vue'
 export default {
   name: 'App',
   components: {
     headerComponent,
     footerComponent,
+    Loading,
+    Toast,
+  },
+
+  setup() {
+    const isLoading = computed(()=>{ return !AppState.isReady});
+    return{
+      isLoading
+    }
   }
 }
 </script>
