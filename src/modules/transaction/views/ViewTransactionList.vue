@@ -3,7 +3,14 @@
     <p class="text-gray-500 mb-5 text-sm font-bold">
       Transactions
     </p>
-     <DataTable
+    <div v-if="isFetching">
+      <div class="flex justify-center items-center border-gray-400 mt-15">
+        <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-navy-primary mr-2"></div>
+        <span class="text-tsm">Fetching transactions</span>
+      </div>
+    </div>
+    <DataTable
+      v-else
       :value="transactions"
       :paginator="true"
       :rows="40"
@@ -58,7 +65,7 @@
       </Column>
       <Column field="hash" header="TX HASH" headerStyle="width:100px" v-if="wideScreen">
         <template #body="{data}">
-          <span class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
+          <span class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 15) }}...</span>
         </template>
       </Column>
       <Column field="timestamp" v-if="wideScreen" header="TIMESTAMP" headerStyle="width:110px">
@@ -80,14 +87,14 @@
         <template #body="{data}">
           <span v-if="data.sender === '' || data.sender === null"></span>
           <span v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-txs">
-            {{ data.sender }}
+            {{ shortenedAddress(Helper.createAddress(data.sender).pretty()) }}
           </span>
         </template>
       </Column>
       <Column field="recipient" header="RECIPIENT" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{data}">
           <span v-if="data.recipient === '' || data.recipient === null"></span>
-          <span v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs">{{ data.recipient }}</span>
+          <span v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs">{{ shortenedAddress(Helper.createAddress(data.recipient).pretty()) }}</span>
         </template>
       </Column>
       <Column header="TX FEE" v-if="wideScreen" headerStyle="width:110px">
@@ -116,10 +123,12 @@
           </div>
         </template>
       </Column>
-      <Column header="" headerStyle="width:20px">
-        <template>
-          <div class="flex justify-center">
-            <img src="@/modules/transaction/img/icon-open_in_new_black.svg" class="cursor-pointer">
+      <Column header="" headerStyle="width:40px">
+        <template #body="{data}">
+          <div>
+            <router-link :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}">
+              <img src="@/modules/transaction/img/icon-open_in_new_black.svg" class="cursor-pointer w-4 h-4">
+            </router-link>
           </div>
         </template>
       </Column>
@@ -158,6 +167,7 @@ export default {
   setup(){
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    const isFetching = ref(true);
     const wideScreen = ref(false);
     const screenResizeHandler = () => {
       if(window.innerWidth < 1024){
@@ -212,13 +222,18 @@ export default {
       return asset_div;
     }
 
+    const shortenedAddress = (address) => {
+      return address.substring(0, 4) + '...' + address.substring(address.length-4, address.length);
+      // return address;
+    }
+
     const transactions = ref([]);
     let transactionGroupType = Helper.getTransactionGroupType();
     let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
 
     let loadRecentTransferTransactions = async() =>{
       let txnQueryParams = Helper.createTransactionQueryParams();
-      txnQueryParams.pageSize = 40;
+      txnQueryParams.pageSize = 20;
       txnQueryParams.embedded = true;
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
 
@@ -228,6 +243,7 @@ export default {
         let formattedTxns = await TransactionUtils.formatConfirmedMixedTxns(transactionSearchResult.transactions);
         transactions.value = formattedTxns;
       }
+      isFetching.value = false;
     };
 
     if(AppState.isReady){
@@ -243,18 +259,21 @@ export default {
     }
 
     emitter.on('CHANGE_NETWORK', payload => {
+      isFetching.value = true;
       if(payload){
         loadRecentTransferTransactions();
       }
     });
 
     return {
+      isFetching,
       wideScreen,
       transactions,
       nativeTokenName,
       checkOtherAsset,
       displaySDAs,
-      Helper
+      Helper,
+      shortenedAddress
     }
   }
 }
