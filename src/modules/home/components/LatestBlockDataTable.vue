@@ -1,6 +1,6 @@
 <template>
   <div class="border divide-y divide-gray-200" > 
-    <div class="font-bold text-xs ml-4 mt-4 mb-4 ">
+    <div class="font-bold text-xs ml-4 mt-4 mb-4">
       Latest Blocks
     </div>
     <DataTable
@@ -30,8 +30,8 @@
               <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Validator</div>
               <div>
                 <div class="uppercase text-txs text-blue-primary inline-flex truncate w-60 mt-4">{{data.signer}}</div>
+                <div class="text-xxs text-gray-500 mb-4">{{data.trx}}trx</div>
               </div>
-              <div class="text-xxs text-gray-500 mb-4">{{getTotalTrx(data.block)?trxn:""}}trx</div>
             </div>
           </template>
         </Column>
@@ -55,9 +55,9 @@
       <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem;" field="Validator" header="Validator" > 
         <template #body="{data}" v-if="wideScreen"> 
           <div>
-            <div class="uppercase text-txs text-blue-primary inline-flex truncate w-80 mt-4">{{data.signer}}</div>
+            <div class="uppercase text-txs text-blue-primary inline-flex truncate w-80 mt-4">{{data.signer}}</div>         
+            <div class="text-xxs text-gray-500 mb-4">{{data.trx>1?data.trx+" trxs":data.trx+" trx"}}</div>
           </div>
-          <div class="text-xxs text-gray-500 mb-4">{{getTotalTrx(data.block)?trxn:""}}trx</div>
         </template> 
       </Column>
       <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem;" field="Fee" header="Fee"> 
@@ -102,10 +102,8 @@ export default{
     const wideScreen = ref(false);
     const screenResizeHandler = () => {
       if(window.innerWidth < 1024){
-        console.log(false);
         wideScreen.value = false;
       }else{
-        console.log(true);
         wideScreen.value = true;
       }
     };
@@ -120,23 +118,6 @@ export default{
     const getcurrentTimestamp = ref();
     const transactions = ref([]);
     const trxn = ref(0);
-
-    
-    const getTotalTrx = async(blockheight)=>{
-      //let data = false;     
-      try {
-      let trx = await AppState.chainAPI.blockAPI.getBlockByHeight(blockheight);
-      
-        //test =  
-       trxn.value = trx.numTransactions;
-      }catch(error){
-        console.log(error);
-      }
-
-     
-      //console.log("trx value: " +trxn.value + "blockheight: " + blockheight + "data: " +data);
-      
-    };
     
     const generateDatatable = async() => {
       let txnQueryParams = new TransactionQueryParams();
@@ -152,9 +133,7 @@ export default{
   const countDuration = (timestamp) =>{
     let trxDuration = "";
     const current = new Date().getTime();
-
     const blockTimestamp = new Date(timestamp).getTime();
-
     const getMinutes = parseInt(Math.abs(current-blockTimestamp)/(1000 * 60)); 
     if(getMinutes > 59){
       let diff_hour = parseInt(Math.abs(current-blockTimestamp)/(1000 * 60 * 60) % 24);
@@ -184,12 +163,8 @@ export default{
       transactions,
       getcurrentTimestamp,
       countDuration,
-      getTotalTrx,
       trxn,
       wideScreen
-      //loadDataTable,
-      //generateDatatable
-
     }
   }
 }

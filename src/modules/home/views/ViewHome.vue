@@ -21,8 +21,6 @@
         </div>
       </div>
     </div>
-
-    <!-- <div class="flex mb-10 gap-4"> -->
       <div class="xl:grid xl:grid-cols-2 xl:gap-4 md:grid md:grid-rows-1 md:gap-2 sm:grid sm:grid-rows-1 sm:gap-5">
       <div class="box-border h-auto" style="width: 540px">  
         <LatestBlockDataTable class="!border-collapse"></LatestBlockDataTable>
@@ -32,6 +30,7 @@
         <LatestTransactionDataTable class="!border-collapse"></LatestTransactionDataTable>
         <button class="content-center w-full h-6 text-txs text-center text-blue-primary rounded-none bg-gray-200">View all transactions</button>       
       </div>
+      <br>
     </div>
   </div>
 </template>
@@ -40,11 +39,8 @@
 import { computed, defineComponent, ref, onMounted, onUnmounted } from 'vue';
 import LatestBlockDataTable from '@/modules/home/components/LatestBlockDataTable.vue';
 import LatestTransactionDataTable from '@/modules/home/components/LatestTransactionDataTable.vue';
-import ChainUtils from '@/util/chainUtils'
 import { AppState } from "@/state/appState";
-import { DashboardService } from '@/services/dashboardService';
-import { TransactionGroupType,TransactionQueryParams,Order_v2 } from 'tsjs-xpx-chain-sdk';
-import { Helper } from '@/util/typeHelper';
+import { networkState } from '@/state/networkState';
 
 export default {
   components: { LatestBlockDataTable,LatestTransactionDataTable },
@@ -56,45 +52,12 @@ export default {
     const getChainInfo = async() => {
       let currentBlockHeight = await AppState.chainAPI.chainAPI.getBlockchainHeight();
       lastestBlock.value = currentBlockHeight;
-      let trx = await AppState.chainAPI.transactionAPI.searchTransactions(TransactionGroupType.CONFIRMED);
-      totalTransaction.value = trx.pagination.totalEntries;
-      console.log("lastest transaction: " + totalTransaction.value);
-      console.log("latest block: "+lastestBlock.value)
+      let trx = await AppState.chainAPI.diagnosticAPI.getDiagnosticStorage();
+      totalTransaction.value = trx.numTransactions;
+      console.log(networkState.currentNetworkProfile.network.type);
     };
-
-
-  //   const getTransaction = async() =>{
-
-  //     let txnQueryParams = new TransactionQueryParams();
-  //     txnQueryParams.pageSize = 10;
-  //     let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
-  //     txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
-  //     let txns = await AppState.chainAPI.transactionAPI.searchTransactions(TransactionGroupType.CONFIRMED,txnQueryParams);
-  //     let dashboardService = new DashboardService();
-  //     let transactionSearchResult = await dashboardService.formatConfirmedMixedTxns(txns.transactions);
-  //     transactions.value = txns.transactions;
-  //     let block = await AppState.chainAPI.blockAPI.getBlockByHeight(await AppState.chainAPI.chainAPI.getBlockchainHeight());
-  //     let getTrxTimestamp = new Date(block.timestamp.compact() + Deadline.timestampNemesisBlock * 1000).getTime();
-  //     let getBlockTimestamp = new Date().getTime();
-  //     let diff =  parseInt(Math.abs(getBlockTimestamp-getTrxTimestamp)/(1000 * 60) % 60);
-  //     console.log("different: "+diff);
-  //  }
-//  const generateDatatable = async() => {
-//       //let formattedNamespaces = [];
-//       let txnQueryParams = new TransactionQueryParams();
-//       txnQueryParams.pageSize = 10;
-//       let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
-//       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
-//       let txns = await TransactionUtils.searchTransactions(TransactionGroupType.CONFIRMED,txnQueryParams);
-//    let dashboardService = new DashboardService();
-//      let transactionSearchResult = await dashboardService.formatConfirmedMixedTxns(txns.transactions);
-//      transactions.value = txns.transactions;
-//  }
-//    generateDatatable();
-  setInterval(getChainInfo, 60000);
-    
-
-
+    setInterval(getChainInfo, 60000);
+  
     return{
       lastestBlock,
       totalTransaction

@@ -448,7 +448,14 @@ export class DashboardService {
         for(let i=0; i < txns.length; ++i){
             let formattedTxn = await this.formatConfirmedTransaction(txns[i]);
             let txn = ConfirmedTransaction.convertToSubClass(ConfirmedTransferTransaction, formattedTxn) as ConfirmedTransferTransaction;
-
+            
+            try {
+                let trx = await AppState.chainAPI.blockAPI.getBlockByHeight(txn.block);
+                txn.trx = trx.numTransactions;
+            } catch (error) {
+                console.log(error);
+            }
+            
             let sdas: SDA[] = [];
 
             if(txns[i].type === TransactionType.TRANSFER){

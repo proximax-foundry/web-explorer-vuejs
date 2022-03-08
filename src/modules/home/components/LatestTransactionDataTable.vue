@@ -19,7 +19,7 @@
           <template #body="{data}">
             <div>
               <div class="uppercase text-xxs text-gray-300 font-bold mb-1">TX Hash</div>
-              <div class="uppercase text-txs text-blue-primary mt-4">{{data.hash}}</div>
+              <div class="uppercase text-txs text-blue-primary mt-3">{{data.hash}}</div>
               <div class="text-xxs text-gray-500 mb-4">{{ countDuration(data.timestamp)}} ago</div>
             </div>
           </template>
@@ -28,10 +28,10 @@
           <template #body="{data}">
             <div>
               <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Addresses</div>
-              <div class="text-xxs text-gray-500 inline-flex truncate w-80 mt-4">Sender:
+              <div class="text-xxs text-gray-500 inline-flex truncate w-80">Sender:
               <div class="uppercase text-txs text-blue-primary pl-1.5">{{data.signerAddress}}</div>
             </div>
-            <div class="text-xxs text-gray-500 inline-flex truncate w-84 px-px mb-4">Recipient:
+            <div class="text-xxs text-gray-500 inline-flex truncate w-84 px-px">Recipient:
               <div class="uppercase text-txs text-blue-primary pl-1.5">{{data.recipient?data.recipient:"-"}}</div>
             </div>
             </div>
@@ -61,7 +61,7 @@
             <div class="text-xxs text-gray-500 inline-flex truncate w-80 mt-4">Sender:
               <div class="uppercase text-txs text-blue-primary pl-1.5">{{data.signerAddress}}</div>
             </div>
-            <div class="text-xxs text-gray-500 inline-flex truncate w-84 px-px mb-4">Recipient:
+            <div class="text-xxs text-gray-500 inline-flex truncate w-80 px-px mb-4">Recipient:
               <div class="uppercase text-txs text-blue-primary pl-1.5">{{data.recipient?data.recipient:"-"}}</div>
             </div>
           </div>
@@ -70,7 +70,7 @@
       <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem;" field="Fee" header="Fee" v-if="wideScreen"> 
         <template #body="{data}"> 
           <div>
-            <div class="text-txs mt-4">{{data.fee + data.amountTransfer}}</div>
+            <div class="text-txs mt-3">{{data.fee + data.amountTransfer}}</div>
           </div>
           <div class="mb-7"></div>
         </template> 
@@ -106,10 +106,8 @@ export default{
     const wideScreen = ref(false);
     const screenResizeHandler = () => {
       if(window.innerWidth < 1024){
-        console.log(false);
         wideScreen.value = false;
       }else{
-        console.log(true);
         wideScreen.value = true;
       }
     };
@@ -126,15 +124,14 @@ export default{
     const countDuration = (timestamp) =>{
       let trxDuration = "";
       const current = new Date().getTime();
-      console.log("CurrentTimestamp: " + new Date().toISOString());
 
       const blockTimestamp = new Date(timestamp).getTime();
-      console.log("Block Timestamp: " + timestamp);
 
       const getMinutes = parseInt(Math.abs(current-blockTimestamp)/(1000 * 60)); 
 
       if(getMinutes > 59){
         let diff_hour = parseInt(Math.abs(current-blockTimestamp)/(1000 * 60 * 60) % 24);
+        
         let hour = "";
         if(diff_hour < 2){
           hour = " hr";
