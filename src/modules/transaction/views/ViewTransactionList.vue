@@ -3,145 +3,162 @@
     <p class="text-gray-500 mb-5 text-sm font-bold">
       Transactions
     </p>
-     <DataTable
-      :value="transactions"
-      :paginator="true"
-      :rows="10"
-      scrollDirection="horizontal"
-      :alwaysShowPaginator="false"
-      responsiveLayout="scroll"
-      paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-      currentPageReportTemplate=""
-      :globalFilterFields="['recipient','sender', 'signerAddress', 'type']"
-      >
-      <Column style="width: 200px" v-if="!wideScreen">
-        <template #body="{data}">
-          <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Tx Hash</div>
-            <div class="uppercase font-bold text-txs"><span class="text-txs" v-tooltip.right="data.hash">{{data.hash }}</span></div>
-          </div>
-          <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Type</div>
-            <div class="flex items-center">
-              <div class="uppercase font-bold text-txs mr-2">{{data.type}}</div>
-              <div>
-                <img src="@/modules/transaction/img/icon-txn-in.svg" class="inline-block w-5" v-if="data.in_out === true">
-                <img src="@/modules/transaction/img/icon-txn-out.svg" class="inline-block w-5" v-else-if="data.in_out === false">
+    <div v-if="isFetching">
+      <div class="flex justify-center items-center border-gray-400 mt-15">
+        <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-navy-primary mr-2"></div>
+        <span class="text-tsm">Fetching transactions</span>
+      </div>
+    </div>
+    <div v-else>
+      <DataTable
+        :value="transactions"
+        :paginator="false"
+        :rows="Number(pages)"
+        scrollDirection="horizontal"
+        :alwaysShowPaginator="false"
+        responsiveLayout="scroll"
+        paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+        currentPageReportTemplate=""
+        :globalFilterFields="['recipient','sender', 'signerAddress', 'type']"
+        >
+        <Column style="width: 200px" v-if="!wideScreen">
+          <template #body="{data}">
+            <div>
+              <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Tx Hash</div>
+              <div class="uppercase font-bold text-txs"><span class="text-txs" v-tooltip.right="data.hash">{{data.hash }}</span></div>
+            </div>
+            <div>
+              <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Type</div>
+              <div class="flex items-center">
+                <div class="uppercase font-bold text-txs mr-2">{{data.type}}</div>
               </div>
             </div>
-          </div>
-          <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5" v-if="data.recipient != '' && data.recipient != null">Receipient</div>
-            <div class="uppercase font-bold text-txs">
-              <span v-if="data.recipient === '' || data.recipient === null"></span>
-              <span v-tooltip.right="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs">{{ data.recipient }}</span>
+            <div>
+              <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5" v-if="data.recipient != '' && data.recipient != null">Receipient</div>
+              <div class="uppercase font-bold text-txs">
+                <span v-if="data.recipient === '' || data.recipient === null"></span>
+                <span v-tooltip.right="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs">{{ data.recipient }}</span>
+              </div>
             </div>
-          </div>
-        </template>
-      </Column>
-      <Column style="width: 200px" v-if="!wideScreen">
-        <template #body="{data}">
-          <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Timestamp</div>
-            <div class="uppercase font-bold text-txs">{{ Helper.convertDisplayDateTimeFormat24(data.timestamp) }}</div>
-          </div>
-          <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Sender</div>
-            <div class="uppercase font-bold text-txs">
-              <span v-if="data.sender === '' || data.sender === null"></span>
-              <span v-else v-tooltip.right="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-txs">
-                {{ data.sender.substring(0, 20) }}...
-              </span>
+          </template>
+        </Column>
+        <Column style="width: 200px" v-if="!wideScreen">
+          <template #body="{data}">
+            <div>
+              <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Timestamp</div>
+              <div class="uppercase font-bold text-txs">{{ Helper.convertDisplayDateTimeFormat24(data.timestamp) }}</div>
             </div>
-          </div>
-          <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Tx Amount</div>
-            <div class="text-txs uppercase font-bold" >{{ data.amountTransfer ? data.amountTransfer:'-' }} <b v-if="data.amountTransfer">{{ nativeTokenName }}</b></div>
-          </div>
+            <div>
+              <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Sender</div>
+              <div class="uppercase font-bold text-txs">
+                <span v-if="data.sender === '' || data.sender === null"></span>
+                <span v-else v-tooltip.right="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-txs">
+                  {{ data.sender.substring(0, 20) }}...
+                </span>
+              </div>
+            </div>
+            <div>
+              <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Tx Amount</div>
+              <div class="text-txs uppercase font-bold" >{{ data.amountTransfer ? data.amountTransfer:'-' }} <b v-if="data.amountTransfer">{{ nativeTokenName }}</b></div>
+            </div>
+          </template>
+        </Column>
+        <Column field="hash" header="TX HASH" headerStyle="width:100px" v-if="wideScreen">
+          <template #body="{data}">
+            <span class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 15) }}...</span>
+          </template>
+        </Column>
+        <Column field="timestamp" v-if="wideScreen" header="TIMESTAMP" headerStyle="width:110px">
+          <template #body="{data}">
+            <span class="text-txs">{{ Helper.convertDisplayDateTimeFormat24(data.timestamp) }}</span>
+          </template>
+        </Column>
+        <Column field="type" header="TYPE" headerStyle="width:110px" v-if="wideScreen">
+          <template #body="{data}">
+            <span class="text-txs">{{data.type}}</span>
+          </template>
+        </Column>
+        <Column field="block" v-if="wideScreen" header="BLOCK" headerStyle="width:110px">
+          <template #body="{data}">
+            <div class="text-txs">{{ data.block }}</div>
+          </template>
+        </Column>
+        <Column field="signer" header="SENDER" headerStyle="width:110px" v-if="wideScreen">
+          <template #body="{data}">
+            <span v-if="data.sender === '' || data.sender === null"></span>
+            <span v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-txs">
+              {{ shortenedAddress(Helper.createAddress(data.sender).pretty()) }}
+            </span>
+          </template>
+        </Column>
+        <Column field="recipient" header="RECIPIENT" headerStyle="width:110px" v-if="wideScreen">
+          <template #body="{data}">
+            <span v-if="data.recipient === '' || data.recipient === null"></span>
+            <span v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs">{{ shortenedAddress(Helper.createAddress(data.recipient).pretty()) }}</span>
+          </template>
+        </Column>
+        <Column header="TX FEE" v-if="wideScreen" headerStyle="width:110px">
+          <template #body="{data}">
+            <div class="text-txs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
+          </template>
+        </Column>
+        <Column header="AMOUNT" headerStyle="width:110px" v-if="wideScreen">
+          <template #body="{data}">
+            <div class="text-txs" >{{ data.amountTransfer ? data.amountTransfer:'-' }} <b v-if="data.amountTransfer">{{ nativeTokenName }}</b></div>
+          </template>
+        </Column>
+        <Column header="SDA" headerStyle="width:40px" v-if="wideScreen">
+          <template #body="{data}">
+            <div>
+              <img src="@/modules/transaction/img/icon-sda.svg" class="inline-block" v-if="checkOtherAsset(data.sda)" v-tooltip.left="'<tiptitle>Sirius Digital Asset</tiptitle><tiptext>' + displaySDAs(data.sda) + '</tiptext>'">
+              <span v-else>-</span>
+            </div>
+          </template>
+        </Column>
+        <Column header="MESSAGE" headerStyle="width:40px" v-if="wideScreen">
+          <template #body="{data}">
+            <div>
+              <img src="@/modules/transaction/img/icon-message.svg" v-tooltip.left="'<tiptitle>' + data.messageTypeTitle + '</tiptitle><tiptext>' + data.message + '</tiptext>'" class="inline-block" v-if="data.message && data.messageType !== 1">
+              <div v-else class="w-full text-center">-</div>
+            </div>
+          </template>
+        </Column>
+        <Column header="" headerStyle="width:40px">
+          <template #body="{data}">
+            <div>
+              <router-link :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}">
+                <img src="@/modules/transaction/img/icon-open_in_new_black.svg" class="cursor-pointer w-4 h-4">
+              </router-link>
+            </div>
+          </template>
+        </Column>
+        <template #empty>
+          No transaction found
         </template>
-      </Column>
-      <Column header="IN/OUT" headerStyle="width:40px" v-if="wideScreen">
-        <template #body="{data}">
-          <div class="ml-2">
-            <img src="@/modules/transaction/img/icon-txn-in.svg" class="inline-block" v-if="data.in_out === true">
-            <img src="@/modules/transaction/img/icon-txn-out.svg" class="inline-block" v-else-if="data.in_out === false">
-          </div>
+        <template #loading>
+          Fetching transactions
         </template>
-      </Column>
-      <Column field="hash" header="TX HASH" headerStyle="width:100px" v-if="wideScreen">
-        <template #body="{data}">
-          <span class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 20) }}...</span>
-        </template>
-      </Column>
-      <Column field="timestamp" v-if="wideScreen" header="TIMESTAMP" headerStyle="width:110px">
-        <template #body="{data}">
-          <span class="text-txs">{{ Helper.convertDisplayDateTimeFormat24(data.timestamp) }}</span>
-        </template>
-      </Column>
-      <Column field="type" header="TYPE" headerStyle="width:110px" v-if="wideScreen">
-        <template #body="{data}">
-          <span class="text-txs">{{data.type}}</span>
-        </template>
-      </Column>
-      <Column field="block" v-if="wideScreen" header="BLOCK" headerStyle="width:110px">
-        <template #body="{data}">
-          <div class="text-txs">{{ data.block }}</div>
-        </template>
-      </Column>
-      <Column field="signer" header="SENDER" headerStyle="width:110px" v-if="wideScreen">
-        <template #body="{data}">
-          <span v-if="data.sender === '' || data.sender === null"></span>
-          <span v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-txs">
-            {{ data.sender }}
-          </span>
-        </template>
-      </Column>
-      <Column field="recipient" header="RECIPIENT" headerStyle="width:110px" v-if="wideScreen">
-        <template #body="{data}">
-          <span v-if="data.recipient === '' || data.recipient === null"></span>
-          <span v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs">{{ data.recipient }}</span>
-        </template>
-      </Column>
-      <Column header="TX FEE" v-if="wideScreen" headerStyle="width:110px">
-        <template #body="{data}">
-          <div class="text-txs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
-        </template>
-      </Column>
-      <Column header="AMOUNT" headerStyle="width:110px" v-if="wideScreen">
-        <template #body="{data}">
-          <div class="text-txs" >{{ data.amountTransfer ? data.amountTransfer:'-' }} <b v-if="data.amountTransfer">{{ nativeTokenName }}</b></div>
-        </template>
-      </Column>
-      <Column header="SDA" headerStyle="width:40px" v-if="wideScreen">
-        <template #body="{data}">
-          <div>
-            <img src="@/modules/transaction/img/icon-sda.svg" class="inline-block" v-if="checkOtherAsset(data.sda)" v-tooltip.left="'<tiptitle>Sirius Digital Asset</tiptitle><tiptext>' + displaySDAs(data.sda) + '</tiptext>'">
-            <span v-else>-</span>
-          </div>
-        </template>
-      </Column>
-      <Column header="MESSAGE" headerStyle="width:40px" v-if="wideScreen">
-        <template #body="{data}">
-          <div>
-            <img src="@/modules/transaction/img/icon-message.svg" v-tooltip.left="'<tiptitle>' + data.messageTypeTitle + '</tiptitle><tiptext>' + data.message + '</tiptext>'" class="inline-block" v-if="data.message && data.messageType !== 1">
-            <div v-else class="w-full text-center">-</div>
-          </div>
-        </template>
-      </Column>
-      <Column header="" headerStyle="width:20px">
-        <template>
-          <div class="flex justify-center">
-            <img src="@/modules/transaction/img/icon-open_in_new_black.svg" class="cursor-pointer">
-          </div>
-        </template>
-      </Column>
-      <template #empty>
-        No transaction found
-      </template>
-      <template #loading>
-        Fetching transactions
-      </template>
-    </DataTable>
+      </DataTable>
+      <div class="flex justify-between my-5 mb-15">
+        <div class="text-xs text-gray-700">Show
+          <select v-model="pages" class="border border-gray-300 rounded-md p-1" @change="changeRows">
+            <option value=10>10</option>
+            <option value=20>20</option>
+            <option value=30>30</option>
+            <option value=40>40</option>
+            <option value=50>50</option>
+          </select>
+          Records
+        </div>
+        <div class="flex">
+          <div v-if="enableFirstPage" @click="naviFirst" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">First</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs">First</div>
+          <div v-if="enablePreviousPage" @click="naviPrevious" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">Previous</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs">Previous</div>
+          <div class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs">Page {{ currentPage }} of {{ totalPages }}</div>
+          <div v-if="enableNextPage" @click="naviNext" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">Next</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs">Next</div>
+          <div v-if="enableLastPage" @click="naviLast" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs ml-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">Last</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs">Last</div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -151,6 +168,8 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { AppState } from '@/state/appState';
 import { Helper } from "@/util/typeHelper";
+// import { TransactionFilterTypes } from '@/models/transactions/transactionFilterType';
+import { TransactionUtils } from '@/models/util/transactionUtils';
 import Tooltip from 'primevue/tooltip';
 
 export default {
@@ -166,6 +185,9 @@ export default {
     hash: String
   },
   setup(){
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    const isFetching = ref(true);
     const wideScreen = ref(false);
     const screenResizeHandler = () => {
       if(window.innerWidth < 1024){
@@ -220,31 +242,121 @@ export default {
       return asset_div;
     }
 
-    const transactions = ref([
-      {
-        hash: '1234',
-        type: '',
-        in_out: true,
-        recipient: 'XDHJWHP4IY25PADFXQ2RUX5D5CULJGMQS4MIDVG3',
-        timestamp: '1234',
-        sender: 'XDHJWHP4IY25PADFXQ2RUX5D5CULJGMQS4MIDVG3',
-        amountTransfer: '1234',
-        block: 1234,
-        fee: 23,
-        amountTransfer: 123.34,
-        sda: {},
-        messageTypeTitle: '',
-        message: '234'
+    const shortenedAddress = (address) => {
+      return address.substring(0, 4) + '...' + address.substring(address.length - 4, address.length);
+      // return address;
+    }
+
+    const pages = ref(20);
+    const currentPage = ref(1)
+    const totalPages = ref(0);
+
+    const enableFirstPage = computed(() => {
+      return currentPage.value > 1;
+    });
+
+    const enablePreviousPage = computed(() => {
+      return currentPage.value > 1;
+    });
+
+    const enableNextPage = computed(() => {
+      return (totalPages.value - currentPage.value) > 0;
+    });
+
+    const enableLastPage = computed(() => {
+      return currentPage.value < totalPages.value;
+    });
+
+    const naviFirst = () => {
+      currentPage.value = 1;
+      loadRecentTransferTransactions();
+    }
+
+    const naviPrevious = () => {
+      --currentPage.value;
+      loadRecentTransferTransactions();
+    }
+
+    const naviNext = () => {
+      ++currentPage.value;
+      loadRecentTransferTransactions();
+    }
+
+    const naviLast = () => {
+      currentPage.value = totalPages.value;
+      loadRecentTransferTransactions();
+    }
+
+    const changeRows = () => {
+      loadRecentTransferTransactions();
+    }
+
+    const transactions = ref([]);
+    let transactionGroupType = Helper.getTransactionGroupType();
+    let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
+
+    let loadRecentTransferTransactions = async() =>{
+      isFetching.value = true;
+      let txnQueryParams = Helper.createTransactionQueryParams();
+      let blockHeight = await AppState.chainAPI.chainAPI.getBlockchainHeight();
+      txnQueryParams.pageSize = pages.value;
+      txnQueryParams.pageNumber = currentPage.value;
+      txnQueryParams.embedded = true;
+      txnQueryParams.fromHeight = blockHeight - 20000;
+      txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
+
+      let transactionSearchResult = await TransactionUtils.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams);
+
+      if(transactionSearchResult.transactions.length > 0){
+        let formattedTxns = await TransactionUtils.formatConfirmedMixedTxns(transactionSearchResult.transactions);
+        transactions.value = formattedTxns;
+        totalPages.value = transactionSearchResult.pagination.totalPages;
+      }else{
+        transactions.value = []
       }
-    ]);
+      isFetching.value = false;
+    };
+
+    if(AppState.isReady){
+      loadRecentTransferTransactions();
+    }
+    else{
+      let readyWatcher = watch(AppState, (value) => {
+        if(value.isReady){
+          init();
+          readyWatcher();
+        }
+      });
+    }
+
+    emitter.on('CHANGE_NETWORK', payload => {
+      isFetching.value = true;
+      if(payload){
+        loadRecentTransferTransactions();
+      }
+    });
 
     return {
+      isFetching,
       wideScreen,
       transactions,
       nativeTokenName,
       checkOtherAsset,
       displaySDAs,
-      Helper
+      Helper,
+      shortenedAddress,
+      pages,
+      currentPage,
+      totalPages,
+      enableFirstPage,
+      enablePreviousPage,
+      enableNextPage,
+      enableLastPage,
+      naviFirst,
+      naviPrevious,
+      naviNext,
+      naviLast,
+      changeRows,
     }
   }
 }

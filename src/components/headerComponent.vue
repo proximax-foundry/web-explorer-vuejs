@@ -55,7 +55,7 @@ export default {
 .header-links{
   @apply my-2;
   a{
-    @apply mr-4 hover:opacity-20 duration-200 transition-all text-xs text-gray-200
+    @apply mr-4 hover:text-white duration-200 transition-all text-xs text-gray-200
   }
 }
 
