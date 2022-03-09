@@ -6,17 +6,16 @@
         <div class="xl:text-txs xl:text-justify md:text-justify	md:text-txs md:mt-4 sm:text-justify sm:text-txs sm:mt-4 sm:mb-4">Blockchain information for XPX including historical prices, the most recently mined blocks, the mempool size of unconfirmed transactions, and data for the latest transactions.</div>
       </div>
       <div>
-        <!-- <div class="xl:grid xl:grid-cols-2 xl:gap-4 md:grid md:grid-cols-2 md:gap-4 sm:grid-cols-1 sm:gap-4 sm:mt-4"> -->
         <div class="grid grid-cols-2"> 
 
           <div>
             <div class="text-xxs text-gray-400 xl:ml-20 md:ml-20 sm:ml-0 mt-5">Latest Block</div>
-            <div class="text-base font-bold xl:ml-20 md:ml-20  mb-5">{{lastestBlock==null?'Fetching...':lastestBlock}}</div>
+            <div class="text-base font-bold xl:ml-20 md:ml-20  mb-5">{{lastestBlock==null||isFetching?'Fetching...':lastestBlock}}</div>
           </div>
           
           <div>
             <div class="text-xxs text-gray-400 xl:ml-6 md:ml-6 mt-5 ">Transactions</div>
-            <div class="text-base font-bold xl:ml-6 md:ml-6 mb-5">{{totalTransaction==null?'Fetching...':totalTransaction}}</div>
+            <div class="text-base font-bold xl:ml-6 md:ml-6 mb-5">{{totalTransaction==null||isFetching?'Fetching...':totalTransaction}}</div>
           </div>    
         </div>
       </div>
@@ -36,31 +35,50 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref, onMounted, onUnmounted } from 'vue';
+import { computed, defineComponent, ref, onMounted, getCurrentInstance,watch } from 'vue';
 import LatestBlockDataTable from '@/modules/home/components/LatestBlockDataTable.vue';
 import LatestTransactionDataTable from '@/modules/home/components/LatestTransactionDataTable.vue';
-import { AppState } from "@/state/appState";
 import { networkState } from '@/state/networkState';
+import { AppState } from '@/state/appState';
 
 export default {
   components: { LatestBlockDataTable,LatestTransactionDataTable },
   name: 'Home',
   setup(){
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    const isFetching = ref(true);
     const lastestBlock = ref();
     const totalTransaction = ref();
 
     const getChainInfo = async() => {
-      let currentBlockHeight = await AppState.chainAPI.chainAPI.getBlockchainHeight();
-      lastestBlock.value = currentBlockHeight;
       let trx = await AppState.chainAPI.diagnosticAPI.getDiagnosticStorage();
       totalTransaction.value = trx.numTransactions;
-      console.log(networkState.currentNetworkProfile.network.type);
+      lastestBlock.value = trx.numBlocks;
     };
-    setInterval(getChainInfo, 60000);
-  
+      setInterval(getChainInfo, 60000);
+    
+    emitter.on('CHANGE_NETWORK', payload => {
+      isFetching.value = true;
+      if(payload){
+        getChainInfo();
+      }
+    });
+
+    if(AppState.isReady){
+      getChainInfo();
+    }else{
+      let readyWatcher = watch(AppState, (value) => {
+        if(value.isReady){
+          getChainInfo();
+          readyWatcher();
+        }
+      });
+    }
     return{
       lastestBlock,
-      totalTransaction
+      totalTransaction,
+      isFetching
     }
   },
 }

@@ -3,6 +3,13 @@
     <div class="font-bold text-xs ml-4 mt-4 mb-4">
       Latest Blocks
     </div>
+     <div v-if="isFetching">
+      <div class="flex justify-center items-center border-gray-400 mt-10 mb-10">
+        <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-navy-primary"></div>
+        <span class="text-tsm">Fetching transactions</span>
+      </div>
+    </div>
+    <div v-else>
     <DataTable
       :value="transactions"
       :paginator="true"
@@ -56,7 +63,7 @@
         <template #body="{data}" v-if="wideScreen"> 
           <div>
             <div class="uppercase text-txs text-blue-primary inline-flex truncate w-80 mt-4">{{data.signer}}</div>         
-            <div class="text-xxs text-gray-500 mb-4">{{data.trx>1?data.trx+" trxs":data.trx+" trx"}}</div>
+            <div class="text-xxs text-gray-500 mb-4">{{data.trxNumber>1?data.trxNumber+" trxs":data.trxNumber+" trx"}}</div>
           </div>
         </template> 
       </Column>
@@ -68,17 +75,8 @@
           </div>
         </template> 
       </Column> 
-    <template #empty>
-      <div class="ml-4">
-        No transaction found
-      </div>
-    </template>
-    <template #loading>
-      <div class="ml-4">
-        Fetching transactions
-      </div>
-    </template>
-  </DataTable>
+      </DataTable>
+    </div>
   </div>
 </template>
 
@@ -86,20 +84,20 @@
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { Helper } from '@/util/typeHelper';
-import { AppState } from "@/state/appState";
-import { ref, onMounted, onUnmounted, reactive } from 'vue';
-
-import { TransactionUtils } from "../../../util/transactionUtils";
+import { AppState } from '@/state/appState';
+import { ref, onMounted, onUnmounted, watch, getCurrentInstance } from 'vue';
+import { TransactionUtils } from '@/models/util/transactionUtils';
 import { TransactionGroupType,TransactionQueryParams,Deadline,Order_v2 } from 'tsjs-xpx-chain-sdk';
-import { DashboardService } from '@/services/dashboardService';
-import { ChainUtils } from "../../../util/chainUtils";
 
 export default{
   components: { DataTable, Column },
-  name: 'LatestTransactionDataTable',
+  name: 'LatestBlockDataTable',
   
   setup(){
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const wideScreen = ref(false);
+    const isFetching = ref(true);
     const screenResizeHandler = () => {
       if(window.innerWidth < 1024){
         wideScreen.value = false;
@@ -115,6 +113,7 @@ export default{
     onUnmounted(() => {
       window.removeEventListener("resize", screenResizeHandler);
     });
+
     const getcurrentTimestamp = ref();
     const transactions = ref([]);
     const trxn = ref(0);
@@ -124,10 +123,13 @@ export default{
       txnQueryParams.pageSize = 10;
       let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
-      let txns = await TransactionUtils.searchTransactions(TransactionGroupType.CONFIRMED,txnQueryParams);
-      let dashboardService = new DashboardService();
-      let transactionSearchResult = await dashboardService.formatConfirmedMixedTxns(txns.transactions);
-      transactions.value = transactionSearchResult;
+      let txns = await TransactionUtils.searchTxns(TransactionGroupType.CONFIRMED,txnQueryParams);
+      if(txns.transactions.length > 0){
+        let transactionSearchResult = await TransactionUtils.formatConfirmedMixedTxns(txns.transactions);
+        transactions.value = transactionSearchResult;
+        console.log(transactionSearchResult);
+      }
+      isFetching.value = false;
     };
 
   const countDuration = (timestamp) =>{
@@ -156,15 +158,37 @@ export default{
       return trxDuration;
     };
 
-    generateDatatable();
+    
     setInterval(generateDatatable, 60000);
 
+    const init = () =>{
+      generateDatatable();
+    }
+
+    if(AppState.isReady){
+      generateDatatable();
+    }else{
+      let readyWatcher = watch(AppState, (value) => {
+        if(value.isReady){
+          init();
+          readyWatcher();
+        }
+      });
+    }
+
+    emitter.on('CHANGE_NETWORK', payload => {
+      isFetching.value = true;
+      if(payload){
+        generateDatatable();
+      }
+    });
     return {
       transactions,
       getcurrentTimestamp,
       countDuration,
       trxn,
-      wideScreen
+      wideScreen,
+      isFetching
     }
   }
 }
