@@ -130,7 +130,13 @@ export default{
       const blockTimestamp = new Date(timestamp).getTime();
 
       const getMinutes = parseInt(Math.abs(current-blockTimestamp)/(1000 * 60)); 
+      const getSeconds = parseInt(Math.abs(current-blockTimestamp)/(1000 * 60)*60); 
 
+    if(getSeconds < 60){
+      let second = s;
+     
+      trxDuration = getSeconds + second ;
+    }else{
       if(getMinutes > 59){
         let diff_hour = parseInt(Math.abs(current-blockTimestamp)/(1000 * 60 * 60) % 24);
         
@@ -150,7 +156,8 @@ export default{
         }
         trxDuration = getMinutes + minutes;
       }   
-        return trxDuration;
+    }
+      return trxDuration;
       };
 
     const generateDatatable = async() => {
@@ -166,7 +173,7 @@ export default{
       isFetching.value = false;
     }
 
-    setInterval(generateDatatable, 60000);
+    setInterval(generateDatatable, 15000);
     const init = () =>{
       generateDatatable();
     }

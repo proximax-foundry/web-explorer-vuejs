@@ -10,12 +10,12 @@
 
           <div>
             <div class="text-xxs text-gray-400 xl:ml-20 md:ml-20 sm:ml-0 mt-5">Latest Block</div>
-            <div class="text-base font-bold xl:ml-20 md:ml-20  mb-5">{{lastestBlock==null||isFetching?'Fetching...':lastestBlock}}</div>
+            <div class="text-base font-bold xl:ml-20 md:ml-20  mb-5">{{lastestBlock==null?'Fetching...':lastestBlock}}</div>
           </div>
           
           <div>
             <div class="text-xxs text-gray-400 xl:ml-6 md:ml-6 mt-5 ">Transactions</div>
-            <div class="text-base font-bold xl:ml-6 md:ml-6 mb-5">{{totalTransaction==null||isFetching?'Fetching...':totalTransaction}}</div>
+            <div class="text-base font-bold xl:ml-6 md:ml-6 mb-5">{{totalTransaction==null?'Fetching...':totalTransaction}}</div>
           </div>    
         </div>
       </div>
@@ -47,19 +47,20 @@ export default {
   setup(){
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const isFetching = ref(true);
     const lastestBlock = ref();
     const totalTransaction = ref();
 
     const getChainInfo = async() => {
+      let block = await AppState.chainAPI.chainAPI.getBlockchainHeight();
       let trx = await AppState.chainAPI.diagnosticAPI.getDiagnosticStorage();
       totalTransaction.value = trx.numTransactions;
       lastestBlock.value = trx.numBlocks;
     };
-      setInterval(getChainInfo, 60000);
+      setInterval(getChainInfo, 15000);
+     getChainInfo();
+    
     
     emitter.on('CHANGE_NETWORK', payload => {
-      isFetching.value = true;
       if(payload){
         getChainInfo();
       }
@@ -77,8 +78,7 @@ export default {
     }
     return{
       lastestBlock,
-      totalTransaction,
-      isFetching
+      totalTransaction
     }
   },
 }

@@ -26,7 +26,7 @@
           <template #body="{data}">
             <div>
               <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Height</div>
-              <div class="uppercase text-txs text-blue-primary mt-4">{{data.block}}</div>
+              <div class="uppercase text-txs text-blue-primary mt-4">{{data.height.lower}}</div>
               <div class="text-xxs text-gray-500 mb-4">{{ countDuration(data.timestamp)}} ago</div>
             </div>
           </template>
@@ -36,8 +36,8 @@
             <div>
               <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Validator</div>
               <div>
-                <div class="uppercase text-txs text-blue-primary inline-flex truncate w-60 mt-4">{{data.signer}}</div>
-                <div class="text-xxs text-gray-500 mb-4">{{data.trx}}trx</div>
+                <div class="uppercase text-txs text-blue-primary inline-flex truncate w-60 mt-4">{{data.signer.publicKey}}</div>
+                <div class="text-xxs text-gray-500 mb-4">{{data.numTransactions>1?data.numTransactions+" trxs":data.numTransactions+" trx"}}</div>
               </div>
             </div>
           </template>
@@ -46,7 +46,7 @@
           <template #body="{data}">
             <div>
               <div class="uppercase text-xxs text-gray-300 font-bold mb-1">fee</div>
-              <div class="uppercase font-bold text-txs">{{data.fee + data.amountTransfer}}</div>
+              <div class="uppercase font-bold text-txs">{{data.totalFee.lower}}</div>
               <div class="mb-7"></div>
             </div>
           </template>
@@ -54,7 +54,7 @@
       <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem; padding-left: 1rem;" field="Height" header="Height" v-if="wideScreen"> 
         <template #body="{data}"> 
           <div> 
-            <div class="uppercase text-txs text-blue-primary mt-4">{{data.block}}</div>
+            <div class="uppercase text-txs text-blue-primary mt-4">{{data.height.lower}}</div>
             <div class="text-xxs text-gray-500 mb-4">{{ countDuration(data.timestamp)}} ago</div>
           </div>
         </template>           
@@ -62,15 +62,15 @@
       <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem;" field="Validator" header="Validator" > 
         <template #body="{data}" v-if="wideScreen"> 
           <div>
-            <div class="uppercase text-txs text-blue-primary inline-flex truncate w-80 mt-4">{{data.signer}}</div>         
-            <div class="text-xxs text-gray-500 mb-4">{{data.trxNumber>1?data.trxNumber+" trxs":data.trxNumber+" trx"}}</div>
+            <div class="uppercase text-txs text-blue-primary inline-flex truncate w-80 mt-4">{{data.signer.publicKey}}</div>         
+            <div class="text-xxs text-gray-500 mb-4">{{data.numTransactions>1?data.numTransactions+" trxs":data.numTransactions+" trx"}}</div>
           </div>
         </template> 
       </Column>
       <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem;" field="Fee" header="Fee"> 
         <template #body="{data}" v-if="wideScreen"> 
           <div>
-            <div class="text-txs mt-4">{{data.fee + data.amountTransfer}}</div>
+            <div class="text-txs mt-4">{{data.totalFee.lower}}</div>
             <div class="mb-7"></div>
           </div>
         </template> 
@@ -87,7 +87,8 @@ import { Helper } from '@/util/typeHelper';
 import { AppState } from '@/state/appState';
 import { ref, onMounted, onUnmounted, watch, getCurrentInstance } from 'vue';
 import { TransactionUtils } from '@/models/util/transactionUtils';
-import { TransactionGroupType,TransactionQueryParams,Deadline,Order_v2 } from 'tsjs-xpx-chain-sdk';
+import { TransactionGroupType,TransactionQueryParams,Deadline,Order_v2, LimitType } from 'tsjs-xpx-chain-sdk';
+import { electronMassDependencies } from 'mathjs';
 
 export default{
   components: { DataTable, Column },
@@ -121,13 +122,16 @@ export default{
     const generateDatatable = async() => {
       let txnQueryParams = new TransactionQueryParams();
       txnQueryParams.pageSize = 10;
-      let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
-      txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
-      let txns = await TransactionUtils.searchTxns(TransactionGroupType.CONFIRMED,txnQueryParams);
-      if(txns.transactions.length > 0){
-        let transactionSearchResult = await TransactionUtils.formatConfirmedMixedTxns(txns.transactions);
-        transactions.value = transactionSearchResult;
-        console.log(transactionSearchResult);
+      let trx = await AppState.chainAPI.diagnosticAPI.getDiagnosticStorage();
+      let txns = await AppState.chainAPI.blockAPI.getBlocksByHeightWithLimit(trx.numBlocks,LimitType.N_25);
+       
+      if(txns.length > 0){            
+        if(txns.length > 10){
+          let trx = txns.slice(0,10);
+          transactions.value = trx;
+        }else{
+          transactions.value = txns;
+        }
       }
       isFetching.value = false;
     };
@@ -135,31 +139,39 @@ export default{
   const countDuration = (timestamp) =>{
     let trxDuration = "";
     const current = new Date().getTime();
-    const blockTimestamp = new Date(timestamp).getTime();
+    const blockTimestamp = new Date(timestamp.compact() + Deadline.timestampNemesisBlock * 1000).getTime();
     const getMinutes = parseInt(Math.abs(current-blockTimestamp)/(1000 * 60)); 
-    if(getMinutes > 59){
-      let diff_hour = parseInt(Math.abs(current-blockTimestamp)/(1000 * 60 * 60) % 24);
-      let hour = "";
-      if(diff_hour < 2){
-        hour = " hr";
-      } else {
-        hour = " hrs";
-      }
-      trxDuration = diff_hour + hour;
-    } else {
-      let minutes = "";
-      if(getMinutes > 1){
-        minutes = " mins";
-      }else {
-        minutes = " min";
-      }
-      trxDuration = getMinutes + minutes;
-    }   
+    const getSeconds = parseInt(Math.abs(current-blockTimestamp)/(1000 * 60)*60); 
+
+    if(getSeconds < 60){
+      let second = "s";
+     
+      trxDuration = getSeconds + second ;
+    }else{
+      if(getMinutes > 59){
+        let diff_hour = parseInt(Math.abs(current-blockTimestamp)/(1000 * 60 * 60) % 24);
+        let hour = "";
+        if(diff_hour < 2){
+          hour = " hr";
+        } else {
+          hour = " hrs";
+        }
+        trxDuration = diff_hour + hour;
+      } else{
+        let minutes = "";
+        if(getMinutes > 1){
+          minutes = " mins";
+        }else {
+          minutes = " min";
+        }
+        trxDuration = getMinutes + minutes;
+      }   
+    }
       return trxDuration;
     };
 
     
-    setInterval(generateDatatable, 60000);
+    setInterval(generateDatatable, 15000);
 
     const init = () =>{
       generateDatatable();

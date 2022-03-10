@@ -3033,13 +3033,7 @@ static async extractPartialTransfer(transferTxn: TransferTransaction): Promise<I
     for(let i=0; i < txns.length; ++i){
       let formattedTxn = await TransactionUtils.formatConfirmedTransaction(txns[i]);
       let txn = ConfirmedTransaction.convertToSubClass(ConfirmedTransferTransaction, formattedTxn) as ConfirmedTransferTransaction;
-      try {
-        let trx = await AppState.chainAPI.blockAPI.getBlockByHeight(txn.block);
-        txn.trxNumber = trx.numTransactions;
-        console.log(txn.trxNumber);
-      } catch (error) {
-        console.log(error);
-      }
+     
       let sdas: SDA[] = [];
 
       if(txns[i].type === TransactionType.TRANSFER){
