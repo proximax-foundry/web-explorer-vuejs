@@ -17,7 +17,7 @@ import { NetworkStateUtils } from './state/utils/networkStateUtils';
 import { ChainUtils } from './util/chainUtils';
 import { ChainAPICall } from './models/REST/chainAPICall';
 import { AppStateUtils } from './state/utils/appStateUtils';
-import { ChainProfile, ChainProfileConfig, ChainProfileNames, ChainProfileName } from "./models/stores/"
+import { ChainProfile, ChainProfileConfig, ChainProfileNames, ChainProfileName, ThemeStyleConfig } from "./models/stores/"
 
 
 
@@ -44,6 +44,24 @@ app.mount('#app');
 app.component('ConfirmDialog', ConfirmDialog);
 app.component('Toast', Toast);
 
+const loadThemeConfig = async() => {
+  try {
+    let config = await fetch('./themeConfig.json', {
+      headers: {
+        'Cache-Control': 'no-store',
+        'Pragma' : 'no-cache'
+      }
+    }).then((res) => res.json()).then((configInfo) => { return configInfo });
+    let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
+    themeConfig.updateConfig(config);
+    themeConfig.saveToLocalStorage();
+    AppStateUtils.setStateReady('theme');
+  } catch (e) {
+    AppStateUtils.setStateReady('theme');
+    console.error(e);
+  }
+}
+loadThemeConfig();
 
 const chainProfileIntegration = async () => {
   try {

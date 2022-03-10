@@ -2697,7 +2697,7 @@ export class TransactionUtils {
         txnDetails.namespaceName = nsNames[0].name;
       }
 
-      if(txnDetails.namespaceName && txnDetails.namespaceName === "prx.xpx"){
+      if(txnDetails.namespaceName && txnDetails.namespaceName === AppState.nativeToken.fullNamespace){
         txnDetails.namespaceName = AppState.nativeToken.label;
       }
 
@@ -2751,7 +2751,7 @@ static async extractPartialSecretLock(secretLockTxn: SecretLockTransaction): Pro
             txnDetails.namespaceName = nsNames[0].name;
         }
 
-        if(txnDetails.namespaceName && txnDetails.namespaceName === "prx.xpx"){
+        if(txnDetails.namespaceName && txnDetails.namespaceName === AppState.nativeToken.fullNamespace){
             txnDetails.namespaceName = AppState.nativeToken.label;
         }
 

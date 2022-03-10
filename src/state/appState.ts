@@ -10,9 +10,15 @@ interface NativeToken{
     divisibility: number,
 }
 
+interface RegisteredToken{
+    label: string;
+    fullNamespace: string;
+}
+
 interface appStateInterface {
     buildTxn: BuildTransactions | null
     nativeToken: NativeToken;
+    registeredToken: RegisteredToken[];
     chainAPI: ChainAPICall | null;
     networkType: NetworkType;
     nodeFullURL: string;
@@ -31,6 +37,13 @@ export const AppState = reactive<appStateInterface>({
         fullNamespace: 'prx.xpx',
         label: 'XPX'
     },
+    registeredToken: [{
+        label: 'METX',
+        fullNamespace: 'prx.metx'
+    }, {
+        label: 'XAR',
+        fullNamespace: 'xarcade.zar'
+    }],
     chainAPI: null,
     networkType: NetworkType.TEST_NET, 
     nodeFullURL: '',

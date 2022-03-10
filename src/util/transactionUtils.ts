@@ -65,6 +65,7 @@ import { networkState } from "../state/networkState";
 import { ChainUtils } from "../util/chainUtils";
 import { ChainAPICall } from "../models/REST/chainAPICall";
 import { BuildTransactions } from "../util/buildTransactions";
+import { AppState } from '@/state/appState';
 import { Helper } from "./typeHelper";
 import { Duration } from "js-joda";
 import { faBreadSlice } from "@fortawesome/free-solid-svg-icons";
@@ -392,7 +393,7 @@ export class TransactionUtils {
     let txn = buildTransactions.transfer(tempAcc.address, PlainMessage.create('hello'));
     let abt = buildTransactions.aggregateBonded([txn.toAggregate(tempAcc.publicAccount)])
     let signedTxn = tempAcc.sign(abt, generationHash);
-    return buildTransactions.hashLock(new Mosaic(new NamespaceId('prx.xpx'), UInt64.fromUint(10)), UInt64.fromUint(10), signedTxn).maxFee.compact();
+    return buildTransactions.hashLock(new Mosaic(new NamespaceId(AppState.nativeToken.fullNamespace), UInt64.fromUint(10)), UInt64.fromUint(10), signedTxn).maxFee.compact();
   }
 
   static castToAggregate(tx :Transaction){
