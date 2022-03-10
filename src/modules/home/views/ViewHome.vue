@@ -35,10 +35,9 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref, onMounted, getCurrentInstance,watch } from 'vue';
+import { ref, getCurrentInstance,watch } from 'vue';
 import LatestBlockDataTable from '@/modules/home/components/LatestBlockDataTable.vue';
 import LatestTransactionDataTable from '@/modules/home/components/LatestTransactionDataTable.vue';
-import { networkState } from '@/state/networkState';
 import { AppState } from '@/state/appState';
 
 export default {
@@ -51,13 +50,12 @@ export default {
     const totalTransaction = ref();
 
     const getChainInfo = async() => {
-      let block = await AppState.chainAPI.chainAPI.getBlockchainHeight();
       let trx = await AppState.chainAPI.diagnosticAPI.getDiagnosticStorage();
       totalTransaction.value = trx.numTransactions;
       lastestBlock.value = trx.numBlocks;
     };
-      setInterval(getChainInfo, 15000);
-     getChainInfo();
+     // setInterval(getChainInfo, 15000);
+     //getChainInfo();
     
     
     emitter.on('CHANGE_NETWORK', payload => {

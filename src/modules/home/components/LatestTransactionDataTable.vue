@@ -20,31 +20,30 @@
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
       tableStyle=""
-      class="w-full !border-collapse"
     >
-      <Column style="width: 250px" v-if="!wideScreen">
+      <Column style="width: 10px" v-if="!wideScreen">
           <template #body="{data}">
-            <div>
-              <div class="uppercase text-xxs text-gray-300 font-bold mb-1">TX Hash</div>
-              <div class="uppercase text-txs text-blue-primary mt-3">{{data.hash}}</div>
+            <div class="ml-2">
+              <div class="uppercase text-xxs text-gray-300 font-bold">TX Hash</div>
+              <div class="uppercase text-txs text-blue-primary">{{data.hash.substring(0, 7)}}...</div>
               <div class="text-xxs text-gray-500 mb-4">{{ countDuration(data.timestamp)}} ago</div>
             </div>
           </template>
         </Column>
-        <Column style="width: 250px" v-if="!wideScreen">
+        <Column style="width: 229px" v-if="!wideScreen">
           <template #body="{data}">
             <div>
-              <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Addresses</div>
-              <div class="text-xxs text-gray-500 inline-flex truncate w-80">Sender:
-              <div class="uppercase text-txs text-blue-primary pl-1.5">{{data.signerAddress}}</div>
+              <div class="uppercase text-xxs text-gray-300 font-bold -mt-3">Addresses</div>
+              <div class="text-xxs text-gray-500 inline-flex">Sender:
+              <div class="uppercase text-txs text-blue-primary">{{shortenedString(Helper.createAddress(data.signerAddress).pretty())}}</div>
             </div>
-            <div class="text-xxs text-gray-500 inline-flex truncate w-84 px-px">Recipient:
-              <div class="uppercase text-txs text-blue-primary pl-1.5">{{data.recipient?data.recipient:"-"}}</div>
+            <div class="text-xxs text-gray-500 inline-flex">Recipient:
+              <div class="uppercase text-txs text-blue-primary">{{data.recipient?shortenedString(Helper.createAddress(data.recipient).pretty()):"-"}}</div>
             </div>
             </div>
           </template>
         </Column>
-        <Column style="width: 250px" v-if="!wideScreen">
+        <Column style="width:145px" v-if="!wideScreen">
           <template #body="{data}">
             <div>
               <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Fee</div>
@@ -53,28 +52,28 @@
             </div>
           </template>
         </Column>
-
       <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem;padding-left: 1rem;" field="TX Hash" header="TX Hash" class="ml-4" v-if="wideScreen"> 
         <template #body="{data}">                
           <div>
-            <div class="uppercase text-txs text-blue-primary inline-flex truncate w-24 mt-4">{{data.hash}}</div>
+            <div class="uppercase text-txs text-blue-primary inline-flex truncate w-24 mt-4"><span class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 12)}}...</span></div>
             <div class="text-xxs text-gray-500 mb-4">{{countDuration(data.timestamp)}} ago</div>
           </div>
         </template> 
       </Column>
-      <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem;" field="Addresses" header="Addresses" > 
-        <template #body="{data}" v-if="wideScreen"> 
+      <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem;" field="Addresses" header="Addresses" v-if="wideScreen"> 
+        <template #body="{data}"> 
           <div>
             <div class="text-xxs text-gray-500 inline-flex truncate w-80 mt-4">Sender:
-              <div class="uppercase text-txs text-blue-primary pl-1.5">{{data.signerAddress}}</div>
+              <div class="uppercase text-txs text-blue-primary pl-1.5"><span class="text-txs" v-tooltip.top="Helper.createAddress(data.signerAddress).pretty()">{{shortenedString(Helper.createAddress(data.signerAddress).pretty())}}</span></div>
             </div>
             <div class="text-xxs text-gray-500 inline-flex truncate w-80 px-px mb-4">Recipient:
-              <div class="uppercase text-txs text-blue-primary pl-1.5">{{data.recipient?data.recipient:"-"}}</div>
+              <div class="uppercase text-txs text-blue-primary pl-1.5" v-if="data.recipient!=null"><span class="text-txs" v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" >{{shortenedString(Helper.createAddress(data.recipient).pretty())}}</span></div>
+                <div class="uppercase text-txs text-blue-primary pl-1.5" v-else>-</div>
             </div>
           </div>
         </template> 
       </Column>
-      <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem;" field="Fee" header="Fee" v-if="wideScreen"> 
+      <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem; padding-right: 1rem; " field="Fee" header="Fee" v-if="wideScreen"> 
         <template #body="{data}"> 
           <div>
             <div class="text-txs mt-3">{{data.fee + data.amountTransfer}}</div>
@@ -96,15 +95,20 @@ import { AppState } from "@/state/appState";
 import { ref, onMounted, onUnmounted, watch, getCurrentInstance } from 'vue';
 import { TransactionUtils } from '@/models/util/transactionUtils';
 import { TransactionGroupType,TransactionQueryParams,Deadline,Order_v2 } from 'tsjs-xpx-chain-sdk';
+import Tooltip from 'primevue/tooltip';
 
 export default{
   components: { DataTable, Column },
   name: 'LatestTransactionDataTable',
+  directives: {
+    'tooltip': Tooltip
+  },
   setup(){
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const wideScreen = ref(false);
     const isFetching = ref(true);
+    const transactions = ref([]);
 
     const screenResizeHandler = () => {
       if(window.innerWidth < 1024){
@@ -113,6 +117,7 @@ export default{
         wideScreen.value = true;
       }
     };
+
     screenResizeHandler();
     onMounted(() => {
       window.addEventListener("resize", screenResizeHandler);
@@ -121,44 +126,48 @@ export default{
     onUnmounted(() => {
       window.removeEventListener("resize", screenResizeHandler);
     });
-    const transactions = ref([]);
+
+    const shortenedString = (value) => {
+      if(wideScreen.value == true){
+        return value.substring(0, 4) + '...' + value.substring(value.length - 32, value.length);
+      }else{
+        return value.substring(0, 4) + '...' + value.substring(value.length - 20, value.length);
+      }
+    }
 
     const countDuration = (timestamp) =>{
       let trxDuration = "";
       const current = new Date().getTime();
-
       const blockTimestamp = new Date(timestamp).getTime();
+      const getSeconds = parseInt(Math.abs(current-blockTimestamp)/(1000 * 60)*60);
+      const getHour = Math.floor(getSeconds / 3600);
+      const getMinutes = Math.floor(getSeconds / 60);
 
-      const getMinutes = parseInt(Math.abs(current-blockTimestamp)/(1000 * 60)); 
-      const getSeconds = parseInt(Math.abs(current-blockTimestamp)/(1000 * 60)*60); 
-
-    if(getSeconds < 60){
-      let second = s;
-     
-      trxDuration = getSeconds + second ;
-    }else{
-      if(getMinutes > 59){
-        let diff_hour = parseInt(Math.abs(current-blockTimestamp)/(1000 * 60 * 60) % 24);
-        
-        let hour = "";
-        if(diff_hour < 2){
-          hour = " hr";
-        }else{
-          hour = " hrs";
-        }
-        trxDuration = diff_hour + hour;
+      if(getSeconds < 60){
+        let second = "s";
+        trxDuration = getSeconds + second ;
       }else{
-        let minutes = "";
-        if(getMinutes > 1){
-          minutes = " mins";
-        }else {
-          minutes = " min";
+        let hour = "";
+        if(getHour > 0){
+          
+          if(getHour > 1){
+            hour = " hrs";
+          }else{
+            hour = " hr";
+          }
+          trxDuration = getHour + hour;
+        }else{
+          let minutes = "";
+          if(getMinutes > 1){
+            minutes = " mins";
+          }else{
+            minutes = " min";
+          }
+          trxDuration = getMinutes + minutes;
         }
-        trxDuration = getMinutes + minutes;
-      }   
-    }
+      }
       return trxDuration;
-      };
+    };
 
     const generateDatatable = async() => {
       let txnQueryParams = new TransactionQueryParams();
@@ -173,7 +182,7 @@ export default{
       isFetching.value = false;
     }
 
-    setInterval(generateDatatable, 15000);
+    //setInterval(generateDatatable, 15000);
     const init = () =>{
       generateDatatable();
     }
@@ -202,7 +211,9 @@ export default{
       AppState,
       Helper,
       wideScreen,
-      isFetching
+      isFetching,
+      shortenedString,
+      Tooltip
     }
   }
 }
