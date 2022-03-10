@@ -19,34 +19,32 @@
       :alwaysShowPaginator="false"
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
-      tableStyle=""
-      class="w-full !border-collapse"
     >
-        <Column style="width: 250px" v-if="!wideScreen">
+        <Column style="width: 30px" v-if="!wideScreen">
           <template #body="{data}">
-            <div>
-              <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Height</div>
-              <div class="uppercase text-txs text-blue-primary mt-4">{{data.block}}</div>
-              <div class="text-xxs text-gray-500 mb-4">{{ countDuration(data.timestamp)}} ago</div>
+            <div class="ml-2">
+              <div class="uppercase text-xxs text-gray-300 font-bold">Height</div>
+              <div class="uppercase text-txs text-blue-primary">{{data.height.compact() }}</div>
+              <div class="text-xxs text-gray-500 mb-4">{{ countDuration(data.timestamp.compact()+ Deadline.timestampNemesisBlock * 1000)}} ago</div>
             </div>
           </template>
         </Column>
-        <Column style="width: 250px" v-if="!wideScreen">
+        <Column style="width: 100px" v-if="!wideScreen">
           <template #body="{data}">
             <div>
-              <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Validator</div>
+              <div class="uppercase text-xxs text-gray-300 font-bold">Validator</div>
               <div>
-                <div class="uppercase text-txs text-blue-primary inline-flex truncate w-60 mt-4">{{data.signer}}</div>
-                <div class="text-xxs text-gray-500 mb-4">{{data.trx}}trx</div>
+                <div class="uppercase text-txs text-blue-primary inline-flex">{{shortenedPublicKey(data.signer.publicKey)}}</div>
+                <div class="text-xxs text-gray-500 mb-4">{{data.numTransactions>1?data.numTransactions+" trxs":data.numTransactions+" trx"}}</div>
               </div>
             </div>
           </template>
         </Column>
-        <Column style="width: 250px" v-if="!wideScreen">
+        <Column style="width: 120px" v-if="!wideScreen">
           <template #body="{data}">
             <div>
-              <div class="uppercase text-xxs text-gray-300 font-bold mb-1">fee</div>
-              <div class="uppercase font-bold text-txs">{{data.fee + data.amountTransfer}}</div>
+              <div class="uppercase text-xxs text-gray-300 font-bold">fee</div>
+              <div class="uppercase font-bold text-txs">{{data.totalFee.lower}}</div>
               <div class="mb-7"></div>
             </div>
           </template>
@@ -54,23 +52,23 @@
       <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem; padding-left: 1rem;" field="Height" header="Height" v-if="wideScreen"> 
         <template #body="{data}"> 
           <div> 
-            <div class="uppercase text-txs text-blue-primary mt-4">{{data.block}}</div>
-            <div class="text-xxs text-gray-500 mb-4">{{ countDuration(data.timestamp)}} ago</div>
+            <div class="uppercase text-txs text-blue-primary mt-4">{{data.height.compact() }}</div>
+            <div class="text-xxs text-gray-500 mb-4">{{ countDuration(data.timestamp.compact()+ Deadline.timestampNemesisBlock * 1000)}} ago</div>
           </div>
         </template>           
       </Column>
-      <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem;" field="Validator" header="Validator" > 
-        <template #body="{data}" v-if="wideScreen"> 
+      <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem;" field="Validator" header="Validator" v-if="wideScreen"> 
+        <template #body="{data}" > 
           <div>
-            <div class="uppercase text-txs text-blue-primary inline-flex truncate w-80 mt-4">{{data.signer}}</div>         
-            <div class="text-xxs text-gray-500 mb-4">{{data.trxNumber>1?data.trxNumber+" trxs":data.trxNumber+" trx"}}</div>
+            <div class="uppercase text-txs text-blue-primary inline-flex w-80 mt-4"><span class="text-txs" v-tooltip.bottom="data.signer.publicKey">{{shortenedPublicKey(data.signer.publicKey)}}</span></div>         
+            <div class="text-xxs text-gray-500 mb-4">{{data.numTransactions>1?data.numTransactions+" trxs":data.numTransactions+" trx"}}</div>
           </div>
         </template> 
       </Column>
-      <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem;" field="Fee" header="Fee"> 
-        <template #body="{data}" v-if="wideScreen"> 
+      <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem; padding-right: 1rem;" field="Fee" header="Fee" v-if="wideScreen"> 
+        <template #body="{data}" > 
           <div>
-            <div class="text-txs mt-4">{{data.fee + data.amountTransfer}}</div>
+            <div class="text-txs mt-4">{{data.totalFee.lower}}</div>
             <div class="mb-7"></div>
           </div>
         </template> 
@@ -83,21 +81,26 @@
 <script>
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import { Helper } from '@/util/typeHelper';
 import { AppState } from '@/state/appState';
 import { ref, onMounted, onUnmounted, watch, getCurrentInstance } from 'vue';
-import { TransactionUtils } from '@/models/util/transactionUtils';
-import { TransactionGroupType,TransactionQueryParams,Deadline,Order_v2 } from 'tsjs-xpx-chain-sdk';
+import { Deadline, LimitType } from 'tsjs-xpx-chain-sdk';
+import Tooltip from 'primevue/tooltip';
 
 export default{
   components: { DataTable, Column },
   name: 'LatestBlockDataTable',
-  
+  directives: {
+    'tooltip': Tooltip
+  },
   setup(){
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const wideScreen = ref(false);
     const isFetching = ref(true);
+    const getcurrentTimestamp = ref();
+    const transactions = ref([]);
+    const trxn = ref(0);
+    
     const screenResizeHandler = () => {
       if(window.innerWidth < 1024){
         wideScreen.value = false;
@@ -114,52 +117,63 @@ export default{
       window.removeEventListener("resize", screenResizeHandler);
     });
 
-    const getcurrentTimestamp = ref();
-    const transactions = ref([]);
-    const trxn = ref(0);
-    
+    const shortenedPublicKey = (publicKey) => {
+      if(wideScreen.value == true){
+         return publicKey.substring(0, 4) + '...' + publicKey.substring(publicKey.length - 48, publicKey.length);
+      }else{
+        return publicKey.substring(0, 4) + '...' + publicKey.substring(publicKey.length - 22, publicKey.length);
+      }
+    }
     const generateDatatable = async() => {
-      let txnQueryParams = new TransactionQueryParams();
-      txnQueryParams.pageSize = 10;
-      let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
-      txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
-      let txns = await TransactionUtils.searchTxns(TransactionGroupType.CONFIRMED,txnQueryParams);
-      if(txns.transactions.length > 0){
-        let transactionSearchResult = await TransactionUtils.formatConfirmedMixedTxns(txns.transactions);
-        transactions.value = transactionSearchResult;
-        console.log(transactionSearchResult);
+      let trx = await AppState.chainAPI.diagnosticAPI.getDiagnosticStorage();
+      let txns = await AppState.chainAPI.blockAPI.getBlocksByHeightWithLimit(trx.numBlocks,LimitType.N_25);
+       
+      if(txns.length > 0){            
+        if(txns.length > 10){
+          let trx = txns.slice(0,10);
+          transactions.value = trx;
+        }else{
+          transactions.value = txns;
+        }
       }
       isFetching.value = false;
     };
+   
 
-  const countDuration = (timestamp) =>{
-    let trxDuration = "";
-    const current = new Date().getTime();
-    const blockTimestamp = new Date(timestamp).getTime();
-    const getMinutes = parseInt(Math.abs(current-blockTimestamp)/(1000 * 60)); 
-    if(getMinutes > 59){
-      let diff_hour = parseInt(Math.abs(current-blockTimestamp)/(1000 * 60 * 60) % 24);
-      let hour = "";
-      if(diff_hour < 2){
-        hour = " hr";
-      } else {
-        hour = " hrs";
+    const countDuration = (timestamp) =>{
+      let trxDuration = "";
+      const current = new Date().getTime();
+      const blockTimestamp = new Date(timestamp).getTime();
+      const getSeconds = parseInt(Math.abs(current-blockTimestamp)/(1000 * 60)*60); 
+      const getHour = Math.floor(getSeconds / 3600);
+      const getMinutes = Math.floor(getSeconds / 60);
+
+      if(getSeconds < 60){
+        let second = "s";
+        trxDuration = getSeconds + second ;
+      }else{
+        let hour = "";
+        if(getHour > 0){
+          if(getHour > 1){
+            hour = " hrs";
+          }else{
+            hour = " hr";
+          }
+          trxDuration = getHour + hour;
+        }else{
+          let minutes = "";
+          if(getMinutes > 1){
+            minutes = " mins";
+          }else{
+            minutes = " min";
+          }
+          trxDuration = getMinutes + minutes;
+        }
       }
-      trxDuration = diff_hour + hour;
-    } else {
-      let minutes = "";
-      if(getMinutes > 1){
-        minutes = " mins";
-      }else {
-        minutes = " min";
-      }
-      trxDuration = getMinutes + minutes;
-    }   
       return trxDuration;
     };
 
-    
-    setInterval(generateDatatable, 60000);
+    //setInterval(generateDatatable, 15000);
 
     const init = () =>{
       generateDatatable();
@@ -182,13 +196,17 @@ export default{
         generateDatatable();
       }
     });
+
     return {
       transactions,
       getcurrentTimestamp,
       countDuration,
       trxn,
       wideScreen,
-      isFetching
+      isFetching,
+      shortenedPublicKey,
+      Deadline,
+      Tooltip
     }
   }
 }

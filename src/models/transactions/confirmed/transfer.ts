@@ -8,7 +8,6 @@ export class ConfirmedTransferTransaction extends ConfirmedTransaction{
     recipient: string | null = null;
     recipientNamespaceId: string | null = null; 
     recipientNamespaceName: string | null = null; 
-    trxNumber: number = 0;
     sda: SDA[] = [];
     amountTransfer: number = 0;
     message: string | null = null;
