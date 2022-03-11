@@ -559,7 +559,6 @@ export class TransactionUtils {
       }
       else{
         blockHeight = transactionInfo.height.compact();
-
         // wait SDK to fix
         try {
             txnBytes = txn.serialize().length / 2;
@@ -568,11 +567,17 @@ export class TransactionUtils {
         }
         deadline = txn.deadline.adjustedValue.compact();
       }
-
-      let blockInfo = await AppState.chainAPI.blockAPI.getBlockByHeight(blockHeight);
-      txn.fee = txnBytes * blockInfo.feeMultiplier;
-      txn.deadline = deadline;
-      txn.timestamp = new Date(blockInfo.timestamp.compact() + Deadline.timestampNemesisBlock * 1000).toISOString();
+      
+      if(txnStatus.group == 'partial'){
+        // txn.deadline = deadline;
+        txn.timestamp = Helper.formatDeadline(deadline);
+        txn.fee = '-';
+      }else{
+        let blockInfo = await AppState.chainAPI.blockAPI.getBlockByHeight(blockHeight);
+        txn.fee = txnBytes * blockInfo.feeMultiplier;
+        // txn.deadline = Helper.formatDeadline(deadline);
+        txn.timestamp = Helper.convertDisplayDateTimeFormat(new Date(blockInfo.timestamp.compact() + Deadline.timestampNemesisBlock * 1000).toISOString());
+      }
 
       if(txn.type == TransactionType.TRANSFER){
         let sdas: SDA[] = [];

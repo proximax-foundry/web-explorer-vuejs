@@ -7,7 +7,7 @@
     <div>
       <div>Status</div>
       <div>
-        <div v-if="txnDetail.status=='Success'" class="inline-block">
+        <div v-if="txnDetail.group=='confirmed'" class="inline-block">
           <div class="flex items-center px-2 py-1 rounded-sm border border-green-100 bg-green-100 text-green-700 text-xs"><span class="material-icons md-16">done</span>&nbsp;Success</div>
         </div>
         <div v-else class="inline-block">
@@ -15,15 +15,15 @@
         </div>
       </div>
     </div>
-    <div v-if="txnDetail.status">
-      <div>Timestamp</div>
-      <div>{{ txnDetail.timestamp }}</div>
-    </div>
     <div v-if="txnDetail.group=='partial'">
       <div>Deadline</div>
       <div>{{ txnDetail.timestamp }}</div>
     </div>
-    <div v-if="txnDetail.status">
+    <div v-else>
+      <div>Timestamp</div>
+      <div>{{ txnDetail.timestamp }}</div>
+    </div>
+    <div v-if="txnDetail.group=='confirmed'">
       <div>Height</div>
       <div class="text-blue-primary">{{ txnDetail.height }}</div>
     </div>
@@ -31,7 +31,7 @@
       <div>Tx Type</div>
       <div>{{ txnDetail.type }} <span class="text-xxs text-gray-500">(Version: {{ txnDetail.version }})</span></div>
     </div>
-    <div>
+    <div v-if="txnDetail.group=='confirmed'">>
       <div>Tx Fee</div>
       <div class="relative"><span class="font-bold">{{ maxFee[0] }}</span>{{ maxFee[1]>0?'.':'' }}<span class="text-xxs">{{ maxFee[1] }}</span> <span class="font-bold">{{ nativeTokenNamespace }}</span> <img src="@/assets/img/icon-xpx.svg" class="ml-2 inline-block absolute" style="top: -1px; width:14px;" /></div>
     </div>
