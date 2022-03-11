@@ -1,12 +1,19 @@
 <template>
   <div class="txn-div">
-    <div class="text-center text-tsm font-semibold py-1 rounded-full text-white bg-yellow-500 flex justify-center mb-5">Transaction failed</div>
     <div>
       <div>Tx Hash</div>
       <div class="break-all">{{ hash }}</div>
     </div>
     <div>
       <div>Status</div>
+      <div>
+        <div class="inline-block">
+          <div class="flex items-center px-2 py-1 rounded-sm border border-red-100 bg-red-100 text-red-700 text-xs"><span class="material-icons md-16">close</span>&nbsp;Failed</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div>Error</div>
       <div class="break-all">{{ status }}</div>
     </div>
   </div>
