@@ -3033,7 +3033,7 @@ static async extractPartialTransfer(transferTxn: TransferTransaction): Promise<I
     for(let i=0; i < txns.length; ++i){
       let formattedTxn = await TransactionUtils.formatConfirmedTransaction(txns[i]);
       let txn = ConfirmedTransaction.convertToSubClass(ConfirmedTransferTransaction, formattedTxn) as ConfirmedTransferTransaction;
-
+     
       let sdas: SDA[] = [];
 
       if(txns[i].type === TransactionType.TRANSFER){
@@ -3141,6 +3141,8 @@ static async extractPartialTransfer(transferTxn: TransferTransaction): Promise<I
       }
       txn.sda = sdas;
       formatedTxns.push(txn);
+
+     
     }
 
     return formatedTxns;

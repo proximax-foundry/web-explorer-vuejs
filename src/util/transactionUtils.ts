@@ -195,6 +195,7 @@ export const transactionTypeName = {
 export class TransactionUtils {
 
   static async getAccInfo(address: Address): Promise<AccountInfo> {
+    console.log(networkState.selectedAPIEndpoint);
 
     const chainAPICall = new ChainAPICall(networkAPIEndpoint.value);
 
