@@ -9,10 +9,10 @@
       <div class="w-18 text-center cursor-pointer" :class="`${ (currentComponent=='multisig')?'border-yellow-500 border-b-2':'' }`" v-if="multisigLength > 0 || cosignatoriesLength > 0" @click="setCurrentComponent('multisig')">Multisig</div>
       <div class="w-18 text-center cursor-pointer" :class="`${ (currentComponent=='scheme')?'border-yellow-500 border-b-2':'' }`" @click="setCurrentComponent('scheme')">Scheme</div>
     </div>
-    <div class="mb-10" v-if="!isFetching">
+    <div class="mb-20" v-if="!isFetching">
       <AssetComponent :accountAssets="accountAssets" v-if="currentComponent=='asset'" />
       <MultisigComponent :cosignatories="multisig.cosignatories" :multisig="multisig.multisigAccounts" :address="strAddress" v-else-if="currentComponent=='multisig'" />
-      <AssetComponent :accountAssets="accountAssets" v-else-if="currentComponent=='scheme'" />
+      <SchemeComponent v-else-if="currentComponent=='scheme'" />
     </div>
   </div>
 </template>
@@ -22,10 +22,11 @@ import { computed, defineComponent, getCurrentInstance, inject, ref, watch } fro
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import AssetComponent from "@/modules/account/components/AssetComponent.vue";
 import MultisigComponent from "@/modules/account/components/MultisigComponent.vue";
+import SchemeComponent from "@/modules/account/components/SchemeComponent.vue";
 import { networkState } from '@/state/networkState';
 import { AppState } from '@/state/appState';
-import { Helper } from "@/models/util/typeHelper";
-import { AccountUtils } from "@/models/util/accountUtil";
+import { Helper } from "@/util/typeHelper";
+import { AccountUtils } from "@/util/accountUtil";
 import { TransactionUtils } from '@/models/util/transactionUtils';
 import { Address } from "tsjs-xpx-chain-sdk";
 export default {
@@ -34,6 +35,7 @@ export default {
     AccountComponent,
     AssetComponent,
     MultisigComponent,
+    SchemeComponent,
   },
   props: {
     accountParam: String
@@ -54,7 +56,6 @@ export default {
 
     const setCurrentComponent = (page) => {
       currentComponent.value = page;
-      console.log(page)
     }
 
     const loadAccountInfo = async() => {

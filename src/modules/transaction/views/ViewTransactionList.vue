@@ -24,7 +24,7 @@
         <Column style="width: 200px" v-if="!wideScreen">
           <template #body="{data}">
             <div>
-              <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Tx Hash</div>
+              <div class="uppercase text-xxs text-gray-300 font-bold mb-1 break-all">Tx Hash</div>
               <div class="uppercase font-bold text-txs"><span class="text-txs" v-tooltip.right="data.hash">{{data.hash }}</span></div>
             </div>
             <div>
@@ -37,7 +37,7 @@
               <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5" v-if="data.recipient != '' && data.recipient != null">Receipient</div>
               <div class="uppercase font-bold text-txs">
                 <span v-if="data.recipient === '' || data.recipient === null"></span>
-                <span v-tooltip.right="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs">{{ data.recipient }}</span>
+                <span v-tooltip.right="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs break-all">{{ Helper.createAddress(data.recipient).pretty() }}</span>
               </div>
             </div>
           </template>

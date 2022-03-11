@@ -50,7 +50,7 @@ import { AccountUtils } from "@/util/accountUtil";
 import { AppState } from '@/state/appState';
 
 export default {
-  name:"MultisigComponent",
+  name:"SchemeComponent",
   props:{
     cosignatories: Array,
     multisig: Array,

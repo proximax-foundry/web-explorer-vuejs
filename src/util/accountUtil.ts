@@ -13,7 +13,7 @@ import {
 } from "tsjs-xpx-chain-sdk";
 import { ChainUtils } from "./chainUtils";
 import { TransactionUtils } from '@/models/util/transactionUtils';
-import { Helper } from "@/models/util/typeHelper";
+import { Helper } from "@/util/typeHelper";
 
 export interface AssetObj {
   id: string;

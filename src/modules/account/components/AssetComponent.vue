@@ -23,7 +23,7 @@
 
 import { watch, ref, computed, getCurrentInstance, toRefs } from "vue";
 import { Helper } from '@/util/typeHelper';
-import { AccountUtils } from "@/models/util/accountUtil";
+import { AccountUtils } from "@/util/accountUtil";
 import { AppState } from '@/state/appState';
 export default {
   name:"AssetComponent",

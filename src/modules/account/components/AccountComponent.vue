@@ -5,7 +5,7 @@
       <div class="flex flex-col justify-center ml-2">
         <div class="text-xxs font-semibold text-gray-400 mb-1">Address</div>
         <div class="flex items-center">
-          <div id="address" :copyValue="address" copySubject="Address" class="text-xs font-semibold mt-1">{{ address }}</div>
+          <div id="address" :copyValue="address" copySubject="Address" class="text-xs font-semibold mt-1 break-all">{{ address }}</div>
           <img src="@/assets/img/icon-copy.svg" @click="copy('address')" class="ml-2 w-4 h-4 cursor-pointer" />
         </div>
         <div class="text-xxs font-semibold text-gray-400 mt-4 mb-1">Public Key</div>
@@ -13,7 +13,7 @@
           <div id="publicKey" class="text-xs font-semibold mt-1 text-gray-300">{{ publicKey }}</div>
         </div>
         <div class="flex items-center" v-else>
-          <div id="publicKey" :copyValue="address" copySubject="Public Key" class="text-xs font-semibold mt-1">{{ publicKey }}</div>
+          <div id="publicKey" :copyValue="publicKey" copySubject="Public Key" class="text-xs font-semibold mt-1 break-all">{{ publicKey }}</div>
           <img src="@/assets/img/icon-copy.svg" @click="copy('publicKey')" class="ml-2 w-4 h-4 cursor-pointer" />
         </div>
         <div class="flex gap-2">

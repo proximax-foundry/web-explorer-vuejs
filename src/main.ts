@@ -19,8 +19,6 @@ import { ChainAPICall } from './models/REST/chainAPICall';
 import { AppStateUtils } from './state/utils/appStateUtils';
 import { ChainProfile, ChainProfileConfig, ChainProfileNames, ChainProfileName, ThemeStyleConfig } from "./models/stores/"
 
-
-
 import ConfirmDialog from 'primevue/confirmdialog';
 import Toast from 'primevue/toast';
 
@@ -29,7 +27,7 @@ import 'vue3-blocks-tree/dist/vue3-blocks-tree.css';
 
 const app = createApp(App);
 const emitter = mitt();
-let defaultoptions = {treeName:'blocks-tree'}
+
 app.config.globalProperties.emitter = emitter;
 app.use(router)
 app.use(PrimeVue);
@@ -37,7 +35,7 @@ app.use(ConfirmationService);
 app.use(ToastService);
 
 app.use(vueDebounce);
-app.use(VueBlocksTree,defaultoptions)
+app.use(VueBlocksTree, {treeName:'blocks-tree'});
 app.mount('#app');
 // Use Components
 
@@ -97,12 +95,10 @@ const chainProfileIntegration = async () => {
       });
 
       chainNameArray.concat(customChainProfile);
-    } catch (error) {
-      
-    }
+    } catch (error) {}
 
     chainProfileNamesStore.names = chainNameArray;
-    
+
     chainProfileNamesStore.saveToLocalStorage();
 
     for(const chainProfileName of chainProfileNames){
@@ -142,7 +138,6 @@ const chainProfileIntegration = async () => {
           else{
             console.error(config);
           }
-          
         } catch (error) {
           console.log(error);
         }
