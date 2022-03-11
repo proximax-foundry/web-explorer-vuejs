@@ -11,7 +11,11 @@
           <div class="flex items-center px-2 py-1 rounded-sm border border-green-100 bg-green-100 text-green-700 text-xs"><span class="material-icons md-16">done</span>&nbsp;Success</div>
         </div>
         <div v-else class="inline-block">
-          <div class="flex items-center px-2 py-1 rounded-sm border border-yellow-100 bg-yellow-100 text-yellow-700 text-xs"><span class="material-icons md-16">info</span>&nbsp;{{ txnDetail.group=='partial'?'Partial':'Unconfirmed' }}</div>
+          <div class="flex items-center px-2 py-1 rounded-sm border border-yellow-100 bg-yellow-100 text-yellow-700 text-xs"><span class="material-icons md-16">info</span>&nbsp;
+            <span v-if="txnDetail.group=='partial'">Partial</span>
+            <span v-else-if="txnDetail.group=='unconfirmed'">Unconfirmed</span>
+            <span v-else-if="txnDetail.group=='failed'">Failed</span>
+          </div>
         </div>
       </div>
     </div>
