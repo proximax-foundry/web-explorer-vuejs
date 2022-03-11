@@ -27,7 +27,7 @@
       </div>
       <div class="box-content h-auto border-collapse" style="width:540px">  
         <LatestTransactionDataTable class="!border-collapse"></LatestTransactionDataTable>
-        <button class="content-center w-full h-6 text-txs text-center text-blue-primary rounded-none bg-gray-200">View all transactions</button>       
+        <button class="content-center w-full h-6 text-txs text-center text-blue-primary rounded-none bg-gray-200" @click="showTransactionList">View all transactions</button>       
       </div>
       <br>
     </div>
@@ -39,11 +39,13 @@ import { ref, getCurrentInstance,watch } from 'vue';
 import LatestBlockDataTable from '@/modules/home/components/LatestBlockDataTable.vue';
 import LatestTransactionDataTable from '@/modules/home/components/LatestTransactionDataTable.vue';
 import { AppState } from '@/state/appState';
+import { useRouter } from "vue-router";
 
 export default {
   components: { LatestBlockDataTable,LatestTransactionDataTable },
   name: 'Home',
   setup(){
+    const router = useRouter();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const lastestBlock = ref();
@@ -56,7 +58,9 @@ export default {
     };
      // setInterval(getChainInfo, 15000);
      //getChainInfo();
-    
+    const showTransactionList = () =>{
+      router.push({ name: "ViewTransactionList"});
+    }
     
     emitter.on('CHANGE_NETWORK', payload => {
       if(payload){
@@ -76,7 +80,8 @@ export default {
     }
     return{
       lastestBlock,
-      totalTransaction
+      totalTransaction,
+      showTransactionList
     }
   },
 }
