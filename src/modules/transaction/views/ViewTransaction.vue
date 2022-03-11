@@ -67,7 +67,6 @@ export default {
 
       let transaction = await TransactionUtils.getTransaction(props.hash);
       txn.value = transaction.txn;
-      console.log(transaction)
       if(transaction.isFound==true){
         formattedTransaction.value = {
           hash: props.hash,

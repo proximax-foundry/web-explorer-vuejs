@@ -492,7 +492,6 @@ export class TransactionUtils {
       txnStatus = await AppState.chainAPI.transactionAPI.getTransactionStatus(hash);
       if(txnStatus.group == 'partial'){
         txn = await AppState.chainAPI.transactionAPI.getPartialTransaction(hash);
-        console.log(txn)
       }else{
         txn = await AppState.chainAPI.transactionAPI.getTransaction(hash);
       }
