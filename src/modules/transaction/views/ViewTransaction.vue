@@ -12,7 +12,10 @@
         <TxnDetailComponent v-if="currentPage == 'detail'" :txnDetail="formattedTransaction" />
         <InnerTxnComponent v-else :innerTxn="innerTransaction" :txn="txn" :txnGroup="formattedTransaction.group" />
       </div>
-      <div v-if="formattedTransaction.isFound==='error'" class="p-3 bg-yellow-100 text-yellow-700">Transaction not found in {{ networkName }}</div>
+      <div v-else-if="formattedTransaction.isFound==='error'" class="p-3 bg-yellow-100 text-yellow-700">Transaction not found in {{ networkName }}</div>
+      <div v-else class="filter shadow-xl border border-gray-50 p-5 mb-15">
+        <TxnFailedComponent :hash="hash" :status="failedStatus" />
+      </div>
     </div>
   </div>
 </template>
@@ -22,6 +25,7 @@ import { computed, defineComponent, getCurrentInstance, inject, ref, watch } fro
 import { networkState } from '@/state/networkState';
 import TxnDetailComponent from '@/modules/transaction/components/TxnDetailComponent.vue';
 import InnerTxnComponent from '@/modules/transaction/components/InnerTxnComponent.vue';
+import TxnFailedComponent from '@/modules/transaction/components/TxnFailedComponent.vue';
 import { AppState } from '@/state/appState';
 import { Helper } from "@/util/typeHelper";
 import { TransactionUtils } from '@/models/util/transactionUtils';
@@ -29,7 +33,8 @@ export default {
   name: 'ViewTransaction',
   components: {
     TxnDetailComponent,
-    InnerTxnComponent
+    InnerTxnComponent,
+    TxnFailedComponent
   },
   props: {
     hash: String
@@ -39,6 +44,8 @@ export default {
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const currentPage = ref('detail');
     const isFetching = ref(true);
+    const isTxnFailed = ref(false);
+    const failedStatus = ref('');''
     const txn = ref({});
     const formattedTransaction = ref({
       hash: '',
@@ -66,52 +73,57 @@ export default {
       }
 
       let transaction = await TransactionUtils.getTransaction(props.hash);
-      txn.value = transaction.txn;
-      if(transaction.isFound==true){
-        formattedTransaction.value = {
-          hash: props.hash,
-          status: transaction.txnStatus.status?transaction.txnStatus.status:'',
-          timestamp: transaction.txn.timestamp,
-          height: transaction.txn.transactionInfo.height.compact(),
-          type: TransactionUtils.getTransactionTypeName(transaction.txn.type),
-          fee: Helper.convertToExact(transaction.txn.fee, AppState.nativeToken.divisibility),
-          signature: transaction.txn.signature,
-          signer: transaction.txn.signer.address.address,
-          version: transaction.txn.version,
-          isMissingSignature: transaction.txn.hasMissingSignatures(),
-          group: transaction.txnStatus.group,
-          isFound: transaction.isFound,
-        }
-        if(transaction.txn.cosignatures!=undefined){
-          formattedTransaction.value.cosigners = transaction.txn.cosignatures;
-        }else{
-          formattedTransaction.value.cosigners = {}
-        }
-
-        if(transaction.txn.amountTransfer!=undefined){
-          formattedTransaction.value.amountTransfer = transaction.txn.amountTransfer;
-        }
-
-        if(transaction.txn.mosaic!=undefined){
-          formattedTransaction.value.assetAmount = Helper.convertToExact(transaction.txn.mosaic.amount.compact(), AppState.nativeToken.divisibility);
-          formattedTransaction.value.assetId = transaction.txn.mosaic.id.toHex();
-          let isNamespace = TransactionUtils.isNamespace(transaction.txn.mosaic.id);
-          if(isNamespace){
-            let namespaceId = Helper.createNamespaceId(transaction.txn.mosaic.id.toDTO().id);
-            let nsNames = await TransactionUtils.getNamespacesName([namespaceId]);
-            formattedTransaction.value.assetName = nsNames[0].name;
-          }
-          // formattedTransaction.value.assetName = await TransactionUtils.getAssetsName([transaction.txn.mosaic.id]);
-          // console.log(formattedTransaction.value.assetName)
-        }
-
-        if(transaction.txn.amount!=undefined){
-          formattedTransaction.value.amount = transaction.txn.amount;
-        }
-
-        innerTransaction.value = transaction.txn.innerTransactions;
+      if(transaction.txnStatus.group=='failed'){
+        isTxnFailed.value = true;
+        failedStatus.value = transaction.txnStatus.status;
       }else{
-        formattedTransaction.value = transaction;
+        txn.value = transaction.txn;
+        if(transaction.isFound==true){
+          formattedTransaction.value = {
+            hash: props.hash,
+            status: transaction.txnStatus.status?transaction.txnStatus.status:'',
+            timestamp: transaction.txn.timestamp,
+            height: transaction.txn.transactionInfo.height.compact(),
+            type: TransactionUtils.getTransactionTypeName(transaction.txn.type),
+            fee: Helper.convertToExact(transaction.txn.fee, AppState.nativeToken.divisibility),
+            signature: transaction.txn.signature,
+            signer: transaction.txn.signer.address.address,
+            version: transaction.txn.version,
+            isMissingSignature: transaction.txn.hasMissingSignatures(),
+            group: transaction.txnStatus.group,
+            isFound: transaction.isFound,
+          }
+          if(transaction.txn.cosignatures!=undefined){
+            formattedTransaction.value.cosigners = transaction.txn.cosignatures;
+          }else{
+            formattedTransaction.value.cosigners = {}
+          }
+
+          if(transaction.txn.amountTransfer!=undefined){
+            formattedTransaction.value.amountTransfer = transaction.txn.amountTransfer;
+          }
+
+          if(transaction.txn.mosaic!=undefined){
+            formattedTransaction.value.assetAmount = Helper.convertToExact(transaction.txn.mosaic.amount.compact(), AppState.nativeToken.divisibility);
+            formattedTransaction.value.assetId = transaction.txn.mosaic.id.toHex();
+            let isNamespace = TransactionUtils.isNamespace(transaction.txn.mosaic.id);
+            if(isNamespace){
+              let namespaceId = Helper.createNamespaceId(transaction.txn.mosaic.id.toDTO().id);
+              let nsNames = await TransactionUtils.getNamespacesName([namespaceId]);
+              formattedTransaction.value.assetName = nsNames[0].name;
+            }
+            // formattedTransaction.value.assetName = await TransactionUtils.getAssetsName([transaction.txn.mosaic.id]);
+            // console.log(formattedTransaction.value.assetName)
+          }
+
+          if(transaction.txn.amount!=undefined){
+            formattedTransaction.value.amount = transaction.txn.amount;
+          }
+
+          innerTransaction.value = transaction.txn.innerTransactions;
+        }else{
+          formattedTransaction.value = transaction;
+        }
       }
 
       isFetching.value = false;
@@ -130,6 +142,8 @@ export default {
 
     return {
       currentPage,
+      isTxnFailed,
+      failedStatus,
       AppState,
       formattedTransaction,
       innerTransaction,
