@@ -55,7 +55,7 @@
       <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem;padding-left: 1rem;" field="TX Hash" header="TX Hash" class="ml-4" v-if="wideScreen"> 
         <template #body="{data}">                
           <div>
-            <div class="uppercase text-txs text-blue-primary inline-flex truncate w-24 mt-4"><span class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 12)}}...</span></div>
+            <router-link :to="{ name: 'ViewTransaction', params: {hash: data.hash}}" class="uppercase text-txs text-blue-primary inline-flex truncate w-24 mt-4"><span class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 12)}}...</span></router-link>
             <div class="text-xxs text-gray-500 mb-4">{{countDuration(data.timestamp)}} ago</div>
           </div>
         </template> 
