@@ -67,11 +67,12 @@ export default {
 
       let transaction = await TransactionUtils.getTransaction(props.hash);
       txn.value = transaction.txn;
+      console.log(transaction)
       if(transaction.isFound==true){
         formattedTransaction.value = {
           hash: props.hash,
           status: transaction.txnStatus.status?transaction.txnStatus.status:'',
-          timestamp: Helper.convertDisplayDateTimeFormat(transaction.txn.timestamp),
+          timestamp: transaction.txn.timestamp,
           height: transaction.txn.transactionInfo.height.compact(),
           type: TransactionUtils.getTransactionTypeName(transaction.txn.type),
           fee: Helper.convertToExact(transaction.txn.fee, AppState.nativeToken.divisibility),
