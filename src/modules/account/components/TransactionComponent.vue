@@ -1,16 +1,12 @@
 <template>
-  <div>
-    <p class="text-gray-500 mb-5 text-sm font-bold">
-      Transactions
-    </p>
-    <div v-if="isFetching">
-      <div class="flex justify-center items-center border-gray-400 mt-15">
-        <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-navy-primary mr-2"></div>
-        <span class="text-tsm">Fetching transactions</span>
-      </div>
+  <div v-if="isFetching">
+    <div class="flex justify-center items-center border-gray-400 mt-15">
+      <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-navy-primary mr-2"></div>
+      <span class="text-tsm">Fetching transactions</span>
     </div>
-    <div v-else>
-      <DataTable
+  </div>
+  <div v-else>
+    <DataTable
         :value="transactions"
         :paginator="false"
         :rows="Number(pages)"
@@ -131,42 +127,47 @@
         <template #loading>
           Fetching transactions
         </template>
-      </DataTable>
-      <div class="flex justify-between my-5 mb-15">
-        <div class="text-xs text-gray-700">Show
-          <select v-model="pages" class="border border-gray-300 rounded-md p-1" @change="changeRows">
-            <option value=10>10</option>
-            <option value=20>20</option>
-            <option value=30>30</option>
-            <option value=40>40</option>
-            <option value=50>50</option>
-          </select>
-          Records
-        </div>
-        <div class="flex items-center">
-          <div v-if="enableFirstPage" @click="naviFirst" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">First</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs">First</div>
-          <div v-if="enablePreviousPage" @click="naviPrevious" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">Previous</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs">Previous</div>
-          <div class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs">Page {{ currentPage }} of {{ totalPages }}</div>
-          <div v-if="enableNextPage" @click="naviNext" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">Next</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs">Next</div>
-          <div v-if="enableLastPage" @click="naviLast" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs ml-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">Last</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs">Last</div>
-        </div>
+    </DataTable>
+    <div class="flex justify-between my-5 mb-15">
+      <div class="text-xs text-gray-700">Show
+        <select v-model="pages" class="border border-gray-300 rounded-md p-1" @change="changeRows">
+          <option value=10>10</option>
+          <option value=20>20</option>
+          <option value=30>30</option>
+          <option value=40>40</option>
+          <option value=50>50</option>
+        </select>
+        Records
+      </div>
+      <div class="flex items-center">
+        <div v-if="enableFirstPage" @click="naviFirst" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">First</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs">First</div>
+        <div v-if="enablePreviousPage" @click="naviPrevious" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">Previous</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs">Previous</div>
+        <div class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs">Page {{ currentPage }} of {{ totalPages }}</div>
+        <div v-if="enableNextPage" @click="naviNext" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">Next</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs">Next</div>
+        <div v-if="enableLastPage" @click="naviLast" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs ml-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">Last</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs">Last</div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { computed, defineComponent, getCurrentInstance, inject, ref, watch, onMounted, onUnmounted } from "vue";
+import { watch, ref, computed, getCurrentInstance, onMounted ,onUnmounted  } from "vue";
+import { useToast } from "primevue/usetoast";
+import { copyToClipboard } from '@/util/functions';
+import { Helper } from '@/util/typeHelper';
+import { AccountUtils } from "@/util/accountUtil";
+import { AppState } from '@/state/appState';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import { AppState } from '@/state/appState';
-import { Helper } from "@/util/typeHelper";
-// import { TransactionFilterTypes } from '@/models/transactions/transactionFilterType';
 import { TransactionUtils } from '@/models/util/transactionUtils';
 import Tooltip from 'primevue/tooltip';
 
 export default {
-  name: 'ViewTransactionList',
+  name:"TransactionComponent",
+  props:{
+    accountAddress: String,
+    accountPublicKey: String,
+  },
   components: {
     DataTable,
     Column
@@ -174,12 +175,10 @@ export default {
   directives: {
     'tooltip': Tooltip
   },
-  props: {
-    hash: String
-  },
-  setup(){
+  setup(props){
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    const toast = useToast();
     const isFetching = ref(true);
     const wideScreen = ref(false);
     const screenResizeHandler = () => {
@@ -293,9 +292,10 @@ export default {
       let txnQueryParams = Helper.createTransactionQueryParams();
       let blockHeight = await AppState.chainAPI.chainAPI.getBlockchainHeight();
       txnQueryParams.pageSize = pages.value;
+      txnQueryParams.publicKey = props.accountPublicKey;
       txnQueryParams.pageNumber = currentPage.value;
-      txnQueryParams.embedded = false;
-      txnQueryParams.fromHeight = blockHeight - 20000;
+      txnQueryParams.embedded = true;
+      txnQueryParams.fromHeight = blockHeight - 200000;
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
 
       let transactionSearchResult = await TransactionUtils.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams);
@@ -329,7 +329,7 @@ export default {
       }
     });
 
-    return {
+    return{
       isFetching,
       wideScreen,
       transactions,

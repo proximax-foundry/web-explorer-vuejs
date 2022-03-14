@@ -1,6 +1,6 @@
 <template>
   <div class="border-2 border-t-0">
-    <div v-if="accountAssets.length==0" class='text-blue-primary text-xs text-center font-semibold'>No asset available</div>
+    <div v-if="accountAssets.length==0" class='text-blue-primary text-xs text-center font-semibold py-5'>No asset available</div>
     <div>
       <div v-for="(asset, index) in accountAssets" :key="index" class="py-6 px-5 flex items-center" :class="`${(index != (accountAssets.length - 1))?'gray-line':''}`">
         <img v-if="displayTokenName(asset.name).name=='XPX'" src="@/modules/account/img/proximax-logo.svg" class="inline-block h-7 w-7 mr-2 border-2 rounded-3xl">

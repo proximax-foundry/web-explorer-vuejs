@@ -2973,10 +2973,18 @@ static async extractPartialTransfer(transferTxn: TransferTransaction): Promise<I
     return transactionSearchResult;
   }
 
+  static async accountTxns(publicKey: string, transactionQueryParams: TransactionQueryParams): Promise<Transaction[]>{
+    console.log(publicKey)
+    let publicAccount = PublicAccount.createFromPublicKey(publicKey, AppState.networkType)
+    let transactionSearchResult: Transaction[] = await AppState.chainAPI.accountAPI.transactions(publicAccount, transactionQueryParams);
+    console.log(transactionSearchResult)
+    return transactionSearchResult;
+  }
+
   static async formatConfirmedTransaction(txn: Transaction): Promise<ConfirmedTransaction>{
 
     let transactionInfo: TransactionInfo | AggregateTransactionInfo = txn.transactionInfo;
-    let txnHash = transactionInfo instanceof AggregateTransactionInfo ? 
+    let txnHash = transactionInfo instanceof AggregateTransactionInfo ?
         transactionInfo.aggregateHash : transactionInfo.hash;
 
     let blockHeight: number = 0;

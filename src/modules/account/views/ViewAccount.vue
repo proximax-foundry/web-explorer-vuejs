@@ -1,18 +1,23 @@
 <template>
   <div>
-    <p class="text-gray-500 mb-5 text-sm font-bold">Transaction Details</p>
-    <div>
-      <AccountComponent :address="strAddress" :publicKey="strPublicKey" :multisig="multisigLength" class="mb-10" />
-    </div>
-    <div class="flex text-xs font-semibold border-b-2 menu_title_div">
-      <div class="w-18 text-center cursor-pointer pb-3" :class="`${ (currentComponent=='asset')?'border-yellow-500 border-b-2':'' }`" @click="setCurrentComponent('asset')">Assets</div>
-      <div class="w-18 text-center cursor-pointer" :class="`${ (currentComponent=='multisig')?'border-yellow-500 border-b-2':'' }`" v-if="multisigLength > 0 || cosignatoriesLength > 0" @click="setCurrentComponent('multisig')">Multisig</div>
-      <div class="w-18 text-center cursor-pointer" :class="`${ (currentComponent=='scheme')?'border-yellow-500 border-b-2':'' }`" @click="setCurrentComponent('scheme')">Scheme</div>
-    </div>
-    <div class="mb-20" v-if="!isFetching">
-      <AssetComponent :accountAssets="accountAssets" v-if="currentComponent=='asset'" />
-      <MultisigComponent :cosignatories="multisig.cosignatories" :multisig="multisig.multisigAccounts" :address="strAddress" v-else-if="currentComponent=='multisig'" />
-      <SchemeComponent v-else-if="currentComponent=='scheme'" />
+    <p class="text-gray-500 mb-5 text-sm font-bold">Account Details</p>
+    <div v-if="isShowInvalid" class="p-3 bg-yellow-100 text-yellow-700">Account is not available in {{ networkName }}</div>
+    <div v-else>
+      <div>
+        <AccountComponent :address="strAddress" :publicKey="strPublicKey" :multisig="multisigLength" class="mb-10" />
+      </div>
+      <div class="flex text-xs font-semibold border-b-2 menu_title_div">
+        <div class="w-18 text-center cursor-pointer pb-3" :class="`${ (currentComponent=='asset')?'border-yellow-500 border-b-2':'' }`" @click="setCurrentComponent('asset')">Assets</div>
+        <div class="w-18 text-center cursor-pointer" :class="`${ (currentComponent=='multisig')?'border-yellow-500 border-b-2':'' }`" @click="setCurrentComponent('multisig')" v-if="multisigLength > 0 || cosignatoriesLength > 0">Multisig</div>
+        <div class="w-18 text-center cursor-pointer" :class="`${ (currentComponent=='scheme')?'border-yellow-500 border-b-2':'' }`" @click="setCurrentComponent('scheme')" v-if="cosignatoriesLength > 0">Scheme</div>
+        <div class="w-18 text-center cursor-pointer" :class="`${ (currentComponent=='txn')?'border-yellow-500 border-b-2':'' }`" @click="setCurrentComponent('txn')">Transactions</div>
+      </div>
+      <div class="mb-20" v-if="!isFetching">
+        <AssetComponent :accountAssets="accountAssets" v-if="currentComponent=='asset'" />
+        <MultisigComponent :cosignatories="multisig.cosignatories" :multisig="multisig.multisigAccounts" :address="strAddress" v-else-if="currentComponent=='multisig'" />
+        <SchemeComponent v-else-if="currentComponent=='scheme'" :accountAddress="strAddress" :accountPublicKey="strPublicKey" />
+        <TransactionComponent v-else-if="currentComponent=='txn'" :accountAddress="strAddress" :accountPublicKey="strPublicKey" />
+      </div>
     </div>
   </div>
 </template>
@@ -23,6 +28,7 @@ import AccountComponent from "@/modules/account/components/AccountComponent.vue"
 import AssetComponent from "@/modules/account/components/AssetComponent.vue";
 import MultisigComponent from "@/modules/account/components/MultisigComponent.vue";
 import SchemeComponent from "@/modules/account/components/SchemeComponent.vue";
+import TransactionComponent from "@/modules/account/components/TransactionComponent.vue";
 import { networkState } from '@/state/networkState';
 import { AppState } from '@/state/appState';
 import { Helper } from "@/util/typeHelper";
@@ -36,12 +42,16 @@ export default {
     AssetComponent,
     MultisigComponent,
     SchemeComponent,
+    TransactionComponent,
   },
   props: {
     accountParam: String
   },
   setup(props){
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const currentComponent = ref('asset'); //option: multisig, metadata, scheme, transaction
+    const isShowInvalid = ref(false);
     const strAddress = ref('');
     const strPublicKey  = ref('');
     const multisigLength = ref(0);
@@ -67,12 +77,22 @@ export default {
         let address = AccountUtils.getAddressFromPublicKey(props.accountParam);
         strAddress.value = Helper.createAddress(address).pretty();
         account = await AccountUtils.getAccountFromAddress(address);
-        strPublicKey.value = props.accountParam;
+        if(account!=false){
+          strPublicKey.value = props.accountParam;
+        }else{
+          isShowInvalid.value = true;
+          return;
+        }
       }else if(props.accountParam.length == 40 || props.accountParam.length == 46){
         let address = Address.createFromRawAddress(props.accountParam)
-        account = await AccountUtils.getAccountFromAddress(props.accountParam);
         strAddress.value = Helper.createAddress(address.address).pretty();
-        strPublicKey.value = account.publicKey;
+        account = await AccountUtils.getAccountFromAddress(props.accountParam);
+        if(account!=false){
+          strPublicKey.value = account.publicKey;
+        }else{
+          isShowInvalid.value = true;
+          return;
+        }
       }
 
       multisig.value = await AccountUtils.getMultisig(strAddress.value);
@@ -82,8 +102,19 @@ export default {
       let fetchedAccountAssets = await AccountUtils.formatAccountAsset(account.mosaics);
       accountAssets.value = fetchedAccountAssets;
       isFetching.value = false;
+      isShowInvalid.value = false;
     };
     loadAccountInfo();
+
+    const networkName = computed(() => {
+      return networkState.chainNetworkName;
+    });
+
+    emitter.on('CHANGE_NETWORK', payload => {
+      if(payload){
+        loadAccountInfo();
+      }
+    });
 
 
     return {
@@ -96,6 +127,8 @@ export default {
       multisig,
       accountAssets,
       isFetching,
+      isShowInvalid,
+      networkName,
     }
   }
 }

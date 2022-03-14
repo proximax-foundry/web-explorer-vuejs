@@ -63,23 +63,15 @@ export default defineComponent({
     const node = ref('')
     const selectedNetwork = computed(()=>{ return {name: networkState.chainNetworkName, node: node.value }});
 
-    const init = ()=>{
+    const init = () =>{
       let currentChainProfile = new ChainProfile(networkState.chainNetworkName);
       currentChainProfile.init();
       node.value = currentChainProfile.apiNodes[0];
+      if(!AppState.isReady){
+        setTimeout(init, 1000);
+      }
     }
-
-    if(AppState.isReady){
-      init();
-    }
-    else{
-      let readyWatcher = watch(AppState, (value) => {
-        if(value.isReady){
-          init();
-          readyWatcher();
-        }
-      });
-    }
+    init();
 
     return {
       networks,

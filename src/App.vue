@@ -21,7 +21,7 @@
       </template>
     </Toast>
     <headerComponent class=" flex-grow-0" />
-    <router-view class="flex-grow container mx-auto pt-48 sm:pt-40"></router-view>
+    <router-view class="flex-grow container mx-auto pt-48 sm:pt-40" :key="$route.path"></router-view>
     <footerComponent class=" flex-grow-0" />
   </div>
 </template>

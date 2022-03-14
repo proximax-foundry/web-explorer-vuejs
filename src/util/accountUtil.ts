@@ -28,7 +28,7 @@ export class AccountUtils{
       let account = await ChainUtils.getAccountInfo(addressobj);
       return account;
     } catch(error){
-      console.log(error)
+      // console.log(error)
       return false;
     }
   }
@@ -38,7 +38,7 @@ export class AccountUtils{
       let address = PublicAccount.createFromPublicKey(publicKey, AppState.networkType)
       return address.address.plain();
     } catch(error){
-      console.warn(error);
+      // console.warn(error);
       return false;
     }
   }
@@ -49,7 +49,7 @@ export class AccountUtils{
       let multisig = await AppState.chainAPI.accountAPI.getMultisigAccountInfo(address);
       return multisig;
     } catch(error){
-      console.warn(error);
+      // console.warn(error);
       return false;
     }
   }
