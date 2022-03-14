@@ -39,6 +39,16 @@ const routes = [
       title: "View Transactions",
     }
   },
+
+  {
+    path: '/account/:accountParam',
+    name: 'ViewAccount',
+    props: true,
+    component: () => import('@/modules/account/views/ViewAccount.vue'),
+    meta: {
+      title: "View Address",
+    }
+  },
 ];
 
 const router = createRouter({
