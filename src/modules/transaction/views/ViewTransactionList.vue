@@ -132,7 +132,7 @@
           Fetching transactions
         </template>
       </DataTable>
-      <div class="flex justify-between my-5 mb-15">
+      <div class="flex justify-between my-5 mb-15" v-if="transactions.length > 20">
         <div class="text-xs text-gray-700">Show
           <select v-model="pages" class="border border-gray-300 rounded-md p-1" @change="changeRows">
             <option value=10>10</option>
