@@ -73,58 +73,65 @@ export default {
       }
 
       let transaction = await TransactionUtils.getTransaction(props.hash);
-      if(transaction.txnStatus.group=='failed'){
-        isTxnFailed.value = true;
-        failedStatus.value = transaction.txnStatus.status;
+      if(transaction.isFound == 'error'){
+        formattedTransaction.value = transaction;
+        isFetching.value = false;
+        return;
       }else{
-        txn.value = transaction.txn;
-        if(transaction.isFound==true){
-          formattedTransaction.value = {
-            hash: props.hash,
-            status: transaction.txnStatus.status?transaction.txnStatus.status:'',
-            timestamp: transaction.txn.timestamp,
-            height: transaction.txn.transactionInfo.height.compact(),
-            type: TransactionUtils.getTransactionTypeName(transaction.txn.type),
-            fee: Helper.convertToExact(transaction.txn.fee, AppState.nativeToken.divisibility),
-            signature: transaction.txn.signature,
-            signer: transaction.txn.signer.address.address,
-            version: transaction.txn.version,
-            isMissingSignature: transaction.txn.hasMissingSignatures(),
-            group: transaction.txnStatus.group,
-            isFound: transaction.isFound,
-          }
-          if(transaction.txn.cosignatures!=undefined){
-            formattedTransaction.value.cosigners = transaction.txn.cosignatures;
-          }else{
-            formattedTransaction.value.cosigners = {}
-          }
-
-          if(transaction.txn.amountTransfer!=undefined){
-            formattedTransaction.value.amountTransfer = transaction.txn.amountTransfer;
-          }
-
-          if(transaction.txn.mosaic!=undefined){
-            formattedTransaction.value.assetAmount = Helper.convertToExact(transaction.txn.mosaic.amount.compact(), AppState.nativeToken.divisibility);
-            formattedTransaction.value.assetId = transaction.txn.mosaic.id.toHex();
-            let isNamespace = TransactionUtils.isNamespace(transaction.txn.mosaic.id);
-            if(isNamespace){
-              let namespaceId = Helper.createNamespaceId(transaction.txn.mosaic.id.toDTO().id);
-              let nsNames = await TransactionUtils.getNamespacesName([namespaceId]);
-              formattedTransaction.value.assetName = nsNames[0].name;
-            }
-            // formattedTransaction.value.assetName = await TransactionUtils.getAssetsName([transaction.txn.mosaic.id]);
-            // console.log(formattedTransaction.value.assetName)
-          }
-
-          if(transaction.txn.amount!=undefined){
-            formattedTransaction.value.amount = transaction.txn.amount;
-          }
-
-          innerTransaction.value = transaction.txn.innerTransactions;
+        if(transaction.txnStatus.group=='failed'){
+          isTxnFailed.value = true;
+          failedStatus.value = transaction.txnStatus.status;
         }else{
-          formattedTransaction.value = transaction;
+          txn.value = transaction.txn;
+          if(transaction.isFound==true){
+            formattedTransaction.value = {
+              hash: props.hash,
+              status: transaction.txnStatus.status?transaction.txnStatus.status:'',
+              timestamp: transaction.txn.timestamp,
+              height: transaction.txn.transactionInfo.height.compact(),
+              type: TransactionUtils.getTransactionTypeName(transaction.txn.type),
+              fee: Helper.convertToExact(transaction.txn.fee, AppState.nativeToken.divisibility),
+              signature: transaction.txn.signature,
+              signer: transaction.txn.signer.address.address,
+              version: transaction.txn.version,
+              isMissingSignature: transaction.txn.hasMissingSignatures(),
+              group: transaction.txnStatus.group,
+              isFound: transaction.isFound,
+            }
+            if(transaction.txn.cosignatures!=undefined){
+              formattedTransaction.value.cosigners = transaction.txn.cosignatures;
+            }else{
+              formattedTransaction.value.cosigners = {}
+            }
+
+            if(transaction.txn.amountTransfer!=undefined){
+              formattedTransaction.value.amountTransfer = transaction.txn.amountTransfer;
+            }
+
+            if(transaction.txn.mosaic!=undefined){
+              formattedTransaction.value.assetAmount = Helper.convertToExact(transaction.txn.mosaic.amount.compact(), AppState.nativeToken.divisibility);
+              formattedTransaction.value.assetId = transaction.txn.mosaic.id.toHex();
+              let isNamespace = TransactionUtils.isNamespace(transaction.txn.mosaic.id);
+              if(isNamespace){
+                let namespaceId = Helper.createNamespaceId(transaction.txn.mosaic.id.toDTO().id);
+                let nsNames = await TransactionUtils.getNamespacesName([namespaceId]);
+                formattedTransaction.value.assetName = nsNames[0].name;
+              }
+              // formattedTransaction.value.assetName = await TransactionUtils.getAssetsName([transaction.txn.mosaic.id]);
+              // console.log(formattedTransaction.value.assetName)
+            }
+
+            if(transaction.txn.amount!=undefined){
+              formattedTransaction.value.amount = transaction.txn.amount;
+            }
+
+            innerTransaction.value = transaction.txn.innerTransactions;
+          }else{
+            formattedTransaction.value = transaction;
+          }
         }
       }
+
 
       isFetching.value = false;
     };
