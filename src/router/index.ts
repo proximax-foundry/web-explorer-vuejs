@@ -49,6 +49,26 @@ const routes = [
       title: "View Address",
     }
   },
+
+  {
+    path: '/block/:number',
+    name: 'ViewBlock',
+    props: true,
+    component: () => import('@/modules/block/views/ViewBlock.vue'),
+    meta: {
+      title: "View Block",
+    }
+  },
+
+  {
+    path: '/namespace/:namespace',
+    name: 'ViewNamespace',
+    props: true,
+    component: () => import('@/modules/namespace/views/ViewNamespace.vue'),
+    meta: {
+      title: "View Namespace",
+    }
+  },
 ];
 
 const router = createRouter({

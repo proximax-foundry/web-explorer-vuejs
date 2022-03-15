@@ -62,14 +62,15 @@
     <div>
       <div>Signer</div>
       <div class="flex justify-start" v-if="txnDetail.signer">
-        <div class="text-blue-primary mr-2" id="signerAddress" :copyValue="Helper.createAddress(txnDetail.signer).pretty()" copySubject="Signer address">{{ Helper.createAddress(txnDetail.signer).pretty() }}</div>
+        <router-link :to="{ name: 'ViewAccount', params:{ accountParam: Helper.createAddress(txnDetail.signer).pretty() }}" class="hover:text-blue-primary hover:underline mr-2" id="signerAddress" :copyValue="Helper.createAddress(txnDetail.signer).pretty()" copySubject="Signer address">{{ Helper.createAddress(txnDetail.signer).pretty() }}</router-link>
         <img src="@/assets/img/icon-copy.svg" @click="copy('signerAddress')" class="cursor-pointer" />
       </div>
     </div>
     <div v-if="txnDetail.cosigners.length > 0">
       <div>Cosigner{{ (txnDetail.cosigners.length>1)?'s':'' }}</div>
       <div class="flex justify-start">
-        <div class="text-blue-primary mr-2" v-for="cosigner, item in txnDetail.cosigners" :key="item">{{ Helper.createAddress(cosigner.signer.address.address).pretty() }}</div>
+        <router-link :to="{ name: 'ViewAccount', params:{ accountParam: Helper.createAddress(cosigner.signer.address.address).pretty() }}" class="hover:text-blue-primary hover:underline mr-2" v-for="cosigner, item in txnDetail.cosigners" :key="item" :id="'cosigner'+item" :copyValue="Helper.createAddress(cosigner.signer.address.address).pretty()" copySubject="Cosigner address">{{ Helper.createAddress(cosigner.signer.address.address).pretty() }}</router-link>
+        <img src="@/assets/img/icon-copy.svg" @click="copy('cosigner' + item)" class="cursor-pointer" />
       </div>
     </div>
   </div>
