@@ -16,7 +16,7 @@ import { TransactionUtils } from '@/models/util/transactionUtils';
 export default {
   name: 'ViewNamespace',
   props: {
-    namespace: String
+    namespaceParam: String
   },
   setup(props){
     const internalInstance = getCurrentInstance();

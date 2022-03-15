@@ -10,15 +10,31 @@ import {
   MultisigAccountInfo,
   Mosaic,
   NamespaceId,
+  NamespaceInfo,
 } from "tsjs-xpx-chain-sdk";
 import { ChainUtils } from "./chainUtils";
 import { TransactionUtils } from '@/models/util/transactionUtils';
 import { Helper } from "@/util/typeHelper";
+import { pushScopeId } from "vue";
 
 export interface AssetObj {
   id: string;
   name: string;
   balance: string;
+}
+
+export interface NamespaceObj{
+  id: string;
+  name: string;
+  active: boolean;
+  type: number;
+  linkedId: string;
+  depth: number;
+}
+
+export interface MatchedNamespace{
+  id: string;
+  name: string;
 }
 
 export class AccountUtils{
@@ -31,6 +47,61 @@ export class AccountUtils{
       // console.log(error)
       return false;
     }
+  }
+
+  static async getAccountNamespaces(address:string): Promise<NamespaceObj[]|boolean>{
+    let namespaceObj:NamespaceObj[] = [];
+    try {
+      let addressobj = Address.createFromRawAddress(address);
+      let namespaceInfo = await AppState.chainAPI.namespaceAPI.getNamespacesFromAccount(addressobj);
+      for(let i = 0; i < namespaceInfo.length; ++i){
+        let ns:any = {};  
+        let nsName = await AppState.chainAPI.namespaceAPI.getNamespacesName([namespaceInfo[i].id]);
+        ns.name = nsName[0].name;
+        ns.active = namespaceInfo[i].active;
+        ns.id = namespaceInfo[i].id.toHex();
+        ns.type = Number(namespaceInfo[i].alias.type);
+        ns.depth = namespaceInfo[i].depth;
+        if(ns.type == 1){
+          ns.linkedId = namespaceInfo[i].id.toHex();
+        }else if(ns.type == 2){
+          ns.linkedId = namespaceInfo[i].alias.address.pretty();
+        }else{
+          ns.linkedId = '';
+        }
+        namespaceObj.push(ns);
+      }
+      namespaceObj.sort((a, b) => {
+        if (a.name > b.name) return 1;
+        if (a.name < b.name) return -1;
+          return 0;
+      });
+      // namespaceObj .sort((a, b) => {
+      //   if (a.depth > b.depth) return 1;
+      //   if (a.depth < b.depth) return -1;
+      //     return 0;
+      // });
+      return namespaceObj;
+    } catch(error){
+      return false;
+    }
+  }
+
+  static fetchLinkedAccountNamespace(namespace:NamespaceObj[], address:string):MatchedNamespace[]{
+    let matchedNs: MatchedNamespace[] = [];
+    if(namespace.length > 0){
+      namespace.forEach(ns => {
+        if(ns.type == 2){ // match linked address type
+          if(ns.linkedId == address){
+            matchedNs.push({
+              name: ns.name,
+              id: ns.id
+            });
+          }
+        }
+      });
+    }
+    return matchedNs;
   }
 
   static getAddressFromPublicKey (publicKey: string): string|boolean{

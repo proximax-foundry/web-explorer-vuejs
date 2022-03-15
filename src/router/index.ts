@@ -61,7 +61,7 @@ const routes = [
   },
 
   {
-    path: '/namespace/:namespace',
+    path: '/namespace/:namespaceParam',
     name: 'ViewNamespace',
     props: true,
     component: () => import('@/modules/namespace/views/ViewNamespace.vue'),
