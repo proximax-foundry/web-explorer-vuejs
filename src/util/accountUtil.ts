@@ -1,3 +1,4 @@
+import { computed } from "vue";
 import { AppState } from "@/state/appState";
 import {
   Account,
@@ -13,9 +14,11 @@ import {
   NamespaceInfo,
 } from "tsjs-xpx-chain-sdk";
 import { ChainUtils } from "./chainUtils";
+import { networkState } from '@/state/networkState';
+import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
 import { TransactionUtils } from '@/models/util/transactionUtils';
 import { Helper } from "@/util/typeHelper";
-import { pushScopeId } from "vue";
+import { NamespaceUtils } from "@/util/namespaceUtil";
 
 export interface AssetObj {
   id: string;
@@ -30,6 +33,8 @@ export interface NamespaceObj{
   type: number;
   linkedId: string;
   depth: number;
+  endHeight: number;
+  expiringRelativeTime: string;
 }
 
 export interface MatchedNamespace{
@@ -52,16 +57,28 @@ export class AccountUtils{
   static async getAccountNamespaces(address:string): Promise<NamespaceObj[]|boolean>{
     let namespaceObj:NamespaceObj[] = [];
     try {
+      let chainConfig = new ChainProfileConfig(networkState.chainNetworkName);
+      chainConfig.init();
+      let blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
+
       let addressobj = Address.createFromRawAddress(address);
       let namespaceInfo = await AppState.chainAPI.namespaceAPI.getNamespacesFromAccount(addressobj);
+      let currentBlock = await AppState.chainAPI.chainAPI.getBlockchainHeight();
+
       for(let i = 0; i < namespaceInfo.length; ++i){
-        let ns:any = {};  
+        let ns:any = {};
         let nsName = await AppState.chainAPI.namespaceAPI.getNamespacesName([namespaceInfo[i].id]);
         ns.name = nsName[0].name;
         ns.active = namespaceInfo[i].active;
         ns.id = namespaceInfo[i].id.toHex();
         ns.type = Number(namespaceInfo[i].alias.type);
         ns.depth = namespaceInfo[i].depth;
+        ns.endHeight = namespaceInfo[i].endHeight.compact();
+
+        // caluclate expiration
+        let remainingBlockHeight = ns.endHeight - currentBlock;
+        ns.expiringRelativeTime = NamespaceUtils.relativeTime(Math.floor(Date.now()) + (remainingBlockHeight*blockTargetTime*1000));
+
         if(ns.type == 1){
           ns.linkedId = namespaceInfo[i].id.toHex();
         }else if(ns.type == 2){
@@ -76,11 +93,6 @@ export class AccountUtils{
         if (a.name < b.name) return -1;
           return 0;
       });
-      // namespaceObj .sort((a, b) => {
-      //   if (a.depth > b.depth) return 1;
-      //   if (a.depth < b.depth) return -1;
-      //     return 0;
-      // });
       return namespaceObj;
     } catch(error){
       return false;

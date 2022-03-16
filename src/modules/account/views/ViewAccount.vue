@@ -38,6 +38,7 @@ import { Helper } from "@/util/typeHelper";
 import { AccountUtils } from "@/util/accountUtil";
 import { TransactionUtils } from '@/models/util/transactionUtils';
 import { Address } from "tsjs-xpx-chain-sdk";
+
 export default {
   name: 'ViewAccount',
   components: {
@@ -131,7 +132,6 @@ export default {
         loadAccountInfo();
       }
     });
-
 
     return {
       currentComponent,
