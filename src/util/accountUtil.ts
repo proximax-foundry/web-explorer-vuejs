@@ -56,6 +56,8 @@ export class AccountUtils{
 
   static async getAccountNamespaces(address:string): Promise<NamespaceObj[]|boolean>{
     let namespaceObj:NamespaceObj[] = [];
+    let month = ['Jan', 'Feb', 'Mac', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    let day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     try {
       let chainConfig = new ChainProfileConfig(networkState.chainNetworkName);
       chainConfig.init();
@@ -77,7 +79,9 @@ export class AccountUtils{
 
         // caluclate expiration
         let remainingBlockHeight = ns.endHeight - currentBlock;
-        ns.expiringRelativeTime = NamespaceUtils.relativeTime(Math.floor(Date.now()) + (remainingBlockHeight*blockTargetTime*1000));
+        let timestamp = (Math.floor(Date.now()) + (remainingBlockHeight*blockTargetTime*1000));
+        let date = new Date(timestamp);
+        ns.expiringRelativeTime = day[date.getDay()] + ' ' + date.getDate() + ' ' + month[date.getMonth()] + ' ' + date.getFullYear();
 
         if(ns.type == 1){
           ns.linkedId = namespaceInfo[i].id.toHex();
