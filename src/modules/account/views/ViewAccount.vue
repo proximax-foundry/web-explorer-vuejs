@@ -4,16 +4,18 @@
     <div v-if="isShowInvalid" class="p-3 bg-yellow-100 text-yellow-700">Account is not available in {{ networkName }}</div>
     <div v-else>
       <div>
-        <AccountComponent :address="strAddress" :publicKey="strPublicKey" :multisig="multisigLength" class="mb-10" />
+        <AccountComponent :address="strAddress" :publicKey="strPublicKey" :linkAccount="delegatePublicKey" :namespace="matchedNamespace" :multisig="multisigLength" class="mb-10" />
       </div>
       <div class="flex text-xs font-semibold border-b-2 menu_title_div">
         <div class="w-18 text-center cursor-pointer pb-3" :class="`${ (currentComponent=='asset')?'border-yellow-500 border-b-2':'' }`" @click="setCurrentComponent('asset')">Assets</div>
+        <div class="w-18 text-center cursor-pointer" :class="`${ (currentComponent=='namespace')?'border-yellow-500 border-b-2':'' }`" @click="setCurrentComponent('namespace')" v-if="accountNamespaces.length > 0">Namespaces</div>
         <div class="w-18 text-center cursor-pointer" :class="`${ (currentComponent=='multisig')?'border-yellow-500 border-b-2':'' }`" @click="setCurrentComponent('multisig')" v-if="multisigLength > 0 || cosignatoriesLength > 0">Multisig</div>
         <div class="w-18 text-center cursor-pointer" :class="`${ (currentComponent=='scheme')?'border-yellow-500 border-b-2':'' }`" @click="setCurrentComponent('scheme')" v-if="cosignatoriesLength > 0">Scheme</div>
         <div class="w-18 text-center cursor-pointer" :class="`${ (currentComponent=='txn')?'border-yellow-500 border-b-2':'' }`" @click="setCurrentComponent('txn')">Transactions</div>
       </div>
       <div class="mb-20" v-if="!isFetching">
         <AssetComponent :accountAssets="accountAssets" v-if="currentComponent=='asset'" />
+        <NamespaceComponent :accountNamespaces="accountNamespaces" v-if="currentComponent=='namespace'" />
         <MultisigComponent :cosignatories="multisig.cosignatories" :multisig="multisig.multisigAccounts" :address="strAddress" v-else-if="currentComponent=='multisig'" />
         <SchemeComponent v-else-if="currentComponent=='scheme'" :accountAddress="strAddress" :accountPublicKey="strPublicKey" />
         <TransactionComponent v-else-if="currentComponent=='txn'" :accountAddress="strAddress" :accountPublicKey="strPublicKey" />
@@ -26,6 +28,7 @@
 import { computed, defineComponent, getCurrentInstance, inject, ref, watch } from "vue";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import AssetComponent from "@/modules/account/components/AssetComponent.vue";
+import NamespaceComponent from "@/modules/account/components/NamespaceComponent.vue";
 import MultisigComponent from "@/modules/account/components/MultisigComponent.vue";
 import SchemeComponent from "@/modules/account/components/SchemeComponent.vue";
 import TransactionComponent from "@/modules/account/components/TransactionComponent.vue";
@@ -35,11 +38,13 @@ import { Helper } from "@/util/typeHelper";
 import { AccountUtils } from "@/util/accountUtil";
 import { TransactionUtils } from '@/models/util/transactionUtils';
 import { Address } from "tsjs-xpx-chain-sdk";
+
 export default {
   name: 'ViewAccount',
   components: {
     AccountComponent,
     AssetComponent,
+    NamespaceComponent,
     MultisigComponent,
     SchemeComponent,
     TransactionComponent,
@@ -58,10 +63,13 @@ export default {
     const cosignatoriesLength = ref(0);
     const isFetching = ref(true);
     const accountAssets = ref([]);
+    const delegatePublicKey = ref();
     const multisig = ref({
       cosignatories: [],
       multisigAccounts: []
     });
+    const accountNamespaces = ref([]);
+    const matchedNamespace = ref([]);
     let account;
 
     const setCurrentComponent = (page) => {
@@ -95,6 +103,15 @@ export default {
         }
       }
 
+      delegatePublicKey.value = account.linkedAccountKey;
+
+      let fetchedAccountNamespaces = await AccountUtils.getAccountNamespaces(strAddress.value);
+      if(fetchedAccountNamespaces !== false){
+        accountNamespaces.value = fetchedAccountNamespaces;
+      }
+      let linkedNamespaceToAccount = AccountUtils.fetchLinkedAccountNamespace(fetchedAccountNamespaces, strAddress.value);
+      matchedNamespace.value = linkedNamespaceToAccount;
+
       multisig.value = await AccountUtils.getMultisig(strAddress.value);
       cosignatoriesLength.value = multisig.value.cosignatories?multisig.value.cosignatories.length:0;
       multisigLength.value = multisig.value.multisigAccounts?multisig.value.multisigAccounts.length:0;
@@ -116,7 +133,6 @@ export default {
       }
     });
 
-
     return {
       currentComponent,
       setCurrentComponent,
@@ -126,9 +142,12 @@ export default {
       cosignatoriesLength,
       multisig,
       accountAssets,
+      accountNamespaces,
       isFetching,
       isShowInvalid,
       networkName,
+      delegatePublicKey,
+      matchedNamespace,
     }
   }
 }

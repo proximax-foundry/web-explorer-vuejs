@@ -132,7 +132,6 @@ export default {
         }
       }
 
-
       isFetching.value = false;
     };
     loadTxn();

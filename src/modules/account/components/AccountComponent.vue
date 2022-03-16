@@ -16,6 +16,17 @@
           <div id="publicKey" :copyValue="publicKey" copySubject="Public Key" class="text-xs font-semibold mt-1 break-all">{{ publicKey }}</div>
           <img src="@/assets/img/icon-copy.svg" @click="copy('publicKey')" class="ml-2 w-4 h-4 cursor-pointer" />
         </div>
+        <div class="text-xxs font-semibold text-gray-400 mt-4 mb-1" v-if="linkAccount">Linked account</div>
+        <div class="flex items-center" v-if="linkAccount">
+          <router-link :to="{ name: 'ViewAccount', params:{ accountParam: linkAccount }}" id="linked" :copyValue="linkAccount" copySubject="Linked Account Public Key" class="text-xs font-semibold mt-1 break-all hover:text-blue-primary hover:underline">{{ linkAccount }}</router-link>
+          <img src="@/assets/img/icon-copy.svg" @click="copy('linked')" class="ml-2 w-4 h-4 cursor-pointer" />
+        </div>
+        <div class="text-xxs font-semibold text-gray-400 mt-4 mb-1" v-if="namespace.length > 0">Linked namespace{{ (namespace.length>1)?'s':'' }}</div>
+        <div class="flex items-center" v-if="namespace.length > 0">
+          <div v-for="(item, index) in namespace" :key="index" :class="`${index > 0 }?'mt-2':''`">
+            <router-link :to="{ name: 'ViewNamespace', params:{ namespaceParam: item.id }}" class="text-xs font-semibold mt-1 break-all hover:text-blue-primary hover:underline">{{ item.name }}</router-link>
+          </div>
+        </div>
         <div class="flex gap-2">
           <div v-if="multisig>0" class="px-2 py-1 flex mt-4 bg-orange-primary rounded-sm items-center">
             <img src="@/modules/account/img/icon-key.svg" class="h-3 w-3 mr-1" title="This is your default account everytime you login">
@@ -33,12 +44,16 @@ import { ref } from "vue";
 import { toSvg } from "jdenticon";
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
+import { AppState } from '@/state/appState';
+import { AccountUtils } from '@/util/accountUtil';
 export default {
   name:"AccountComponent",
   props:{
     address: String,
     publicKey: String,
+    linkAccount: String,
     multisig: Number,
+    namespace: Array,
   },
 
   setup(props){
@@ -47,6 +62,12 @@ export default {
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.init();
     const svgString = ref(toSvg(props.address, 70, themeConfig.jdenticonConfig));
+
+    // const linkedNamespace = ref([]);
+
+    // (async() => {
+      
+    // })();
 
     const copy = (id) =>{
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");

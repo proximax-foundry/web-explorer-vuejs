@@ -2,7 +2,7 @@
   <div class="txn-div">
     <div>
       <div>Tx Hash</div>
-      <div>{{ txnDetail.hash }}</div>
+      <div class="flex items-center"><div class="mr-2" id="hash" :copyValue="txnDetail.hash" copySubject="Transaction hash">{{ txnDetail.hash }}</div><img src="@/assets/img/icon-copy.svg" @click="copy('hash')" class="cursor-pointer" /></div>
     </div>
     <div>
       <div>Status</div>
@@ -68,9 +68,11 @@
     </div>
     <div v-if="txnDetail.cosigners.length > 0">
       <div>Cosigner{{ (txnDetail.cosigners.length>1)?'s':'' }}</div>
-      <div class="flex justify-start">
-        <router-link :to="{ name: 'ViewAccount', params:{ accountParam: Helper.createAddress(cosigner.signer.address.address).pretty() }}" class="hover:text-blue-primary hover:underline mr-2" v-for="cosigner, item in txnDetail.cosigners" :key="item" :id="'cosigner'+item" :copyValue="Helper.createAddress(cosigner.signer.address.address).pretty()" copySubject="Cosigner address">{{ Helper.createAddress(cosigner.signer.address.address).pretty() }}</router-link>
-        <img src="@/assets/img/icon-copy.svg" @click="copy('cosigner' + item)" class="cursor-pointer" />
+      <div>
+        <div v-for="cosigner, item in txnDetail.cosigners" :key="item" class="flex items-center mb-3">
+          <router-link :to="{ name: 'ViewAccount', params:{ accountParam: Helper.createAddress(cosigner.signer.address.address).pretty() }}" class="hover:text-blue-primary hover:underline mr-2" :id="'cosigner'+item" :copyValue="Helper.createAddress(cosigner.signer.address.address).pretty()" copySubject="Cosigner address">{{ Helper.createAddress(cosigner.signer.address.address).pretty() }}</router-link>
+          <img src="@/assets/img/icon-copy.svg" @click="copy('cosigner' + item)" class="cursor-pointer" />
+        </div>
       </div>
     </div>
   </div>

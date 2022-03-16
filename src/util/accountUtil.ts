@@ -1,3 +1,4 @@
+import { computed } from "vue";
 import { AppState } from "@/state/appState";
 import {
   Account,
@@ -10,15 +11,35 @@ import {
   MultisigAccountInfo,
   Mosaic,
   NamespaceId,
+  NamespaceInfo,
 } from "tsjs-xpx-chain-sdk";
 import { ChainUtils } from "./chainUtils";
+import { networkState } from '@/state/networkState';
+import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
 import { TransactionUtils } from '@/models/util/transactionUtils';
 import { Helper } from "@/util/typeHelper";
+import { NamespaceUtils } from "@/util/namespaceUtil";
 
 export interface AssetObj {
   id: string;
   name: string;
   balance: string;
+}
+
+export interface NamespaceObj{
+  id: string;
+  name: string;
+  active: boolean;
+  type: number;
+  linkedId: string;
+  depth: number;
+  endHeight: number;
+  expiringRelativeTime: string;
+}
+
+export interface MatchedNamespace{
+  id: string;
+  name: string;
 }
 
 export class AccountUtils{
@@ -31,6 +52,72 @@ export class AccountUtils{
       // console.log(error)
       return false;
     }
+  }
+
+  static async getAccountNamespaces(address:string): Promise<NamespaceObj[]|boolean>{
+    let namespaceObj:NamespaceObj[] = [];
+    let month = ['Jan', 'Feb', 'Mac', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    let day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    try {
+      let chainConfig = new ChainProfileConfig(networkState.chainNetworkName);
+      chainConfig.init();
+      let blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
+
+      let addressobj = Address.createFromRawAddress(address);
+      let namespaceInfo = await AppState.chainAPI.namespaceAPI.getNamespacesFromAccount(addressobj);
+      let currentBlock = await AppState.chainAPI.chainAPI.getBlockchainHeight();
+
+      for(let i = 0; i < namespaceInfo.length; ++i){
+        let ns:any = {};
+        let nsName = await AppState.chainAPI.namespaceAPI.getNamespacesName([namespaceInfo[i].id]);
+        ns.name = nsName[0].name;
+        ns.active = namespaceInfo[i].active;
+        ns.id = namespaceInfo[i].id.toHex();
+        ns.type = Number(namespaceInfo[i].alias.type);
+        ns.depth = namespaceInfo[i].depth;
+        ns.endHeight = namespaceInfo[i].endHeight.compact();
+
+        // caluclate expiration
+        let remainingBlockHeight = ns.endHeight - currentBlock;
+        let timestamp = (Math.floor(Date.now()) + (remainingBlockHeight*blockTargetTime*1000));
+        let date = new Date(timestamp);
+        ns.expiringRelativeTime = day[date.getDay()] + ' ' + date.getDate() + ' ' + month[date.getMonth()] + ' ' + date.getFullYear();
+
+        if(ns.type == 1){
+          ns.linkedId = namespaceInfo[i].id.toHex();
+        }else if(ns.type == 2){
+          ns.linkedId = namespaceInfo[i].alias.address.pretty();
+        }else{
+          ns.linkedId = '';
+        }
+        namespaceObj.push(ns);
+      }
+      namespaceObj.sort((a, b) => {
+        if (a.name > b.name) return 1;
+        if (a.name < b.name) return -1;
+          return 0;
+      });
+      return namespaceObj;
+    } catch(error){
+      return false;
+    }
+  }
+
+  static fetchLinkedAccountNamespace(namespace:NamespaceObj[], address:string):MatchedNamespace[]{
+    let matchedNs: MatchedNamespace[] = [];
+    if(namespace.length > 0){
+      namespace.forEach(ns => {
+        if(ns.type == 2){ // match linked address type
+          if(ns.linkedId == address){
+            matchedNs.push({
+              name: ns.name,
+              id: ns.id
+            });
+          }
+        }
+      });
+    }
+    return matchedNs;
   }
 
   static getAddressFromPublicKey (publicKey: string): string|boolean{
