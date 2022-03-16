@@ -5,20 +5,18 @@
       <div class="grid grid-cols-5 md:hidden bg-gray-100 text-xs font-semibold text-gray-600 px-3">
         <div class="text-left px-2 py-3 col-span-2">ID</div>
         <div class="text-left px-2 py-3 col-span-2">Namespace</div>
-        <div class="text-left px-2 py-3">Amount</div>
+        <div class="text-left px-2 py-3">Balance</div>
       </div>
-      <div class="hidden md:grid md:grid-cols-9 bg-gray-100 text-xs font-semibold text-gray-600 px-3">
+      <div class="hidden md:grid md:grid-cols-8 bg-gray-100 text-xs font-semibold text-gray-600 px-3">
         <div class="text-left px-2 py-3 col-span-2">ID</div>
         <div class="text-left px-2 py-3 col-span-3">Namespace</div>
-        <div class="text-left px-2 py-3 col-span-2">Amount</div>
+        <div class="text-left px-2 py-3 col-span-2">Balance</div>
         <div class="text-center px-2 py-3">Creator</div>
-        <div class="text-center px-2 py-3">Active</div>
       </div>
       <div v-for="(asset, index) in accountAssets" :key="index" class="grid grid-cols-5 text-xs md:hidden py-6 px-3 items-center" :class="`${(index != (accountAssets.length - 1))?'gray-line':''}`">
         <div class="px-2 py-3 col-span-2">
           <div>{{ asset.id }}</div>
           <div class="flex items-center mt-5"><div class="w-14 text-txs">Creator:</div><div class="material-icons md-16 text-green-600 font-bold" v-if="asset.isOwner">done</div><div class="material-icons md-16 text-red-700 font-bold" v-else>close</div></div>
-          <div class="flex items-center mt-3"><div class="w-14 text-txs">Active:</div><div class="material-icons md-16 text-green-600 font-bold" v-if="asset.isActive">done</div><div class="material-icons md-16 text-red-700 font-bold" v-else>close</div></div>
         </div>
         <div class="px-2 py-3 col-span-2">
           <div class="flex items-center">
@@ -39,7 +37,7 @@
           <div class="inline-block text-txs font-bold">{{splitBalance(asset.balance).right}}</div>
         </div>
       </div>
-      <div v-for="(asset, index) in accountAssets" :key="index" class="hidden md:grid md:grid-cols-9 py-6 px-3 items-center text-xs" :class="`${(index != (accountAssets.length - 1))?'gray-line':''}`">
+      <div v-for="(asset, index) in accountAssets" :key="index" class="hidden md:grid md:grid-cols-8 py-6 px-3 items-center text-xs" :class="`${(index != (accountAssets.length - 1))?'gray-line':''}`">
         <div class="px-2 py-3 col-span-2">{{ asset.id }}</div>
         <div class="px-2 py-3 col-span-3 flex items-center">
           <div class="inline-block mr-2" v-if="displayTokenName(asset.name).name">
@@ -58,7 +56,6 @@
           <div class="inline-block text-txs font-bold">{{splitBalance(asset.balance).right}}</div>
         </div>
         <div class="px-2 py-3 text-center"><span class="material-icons md-16 text-green-600 font-bold" v-if="asset.isOwner">done</span><span class="material-icons md-16 text-red-700 font-bold" v-else>close</span></div>
-        <div class="px-2 py-3 text-center"><span class="material-icons md-16 text-green-600 font-bold" v-if="asset.isActive">done</span><span class="material-icons md-16 text-red-700 font-bold" v-else>close</span></div>
       </div>
     </div>
   </div>
