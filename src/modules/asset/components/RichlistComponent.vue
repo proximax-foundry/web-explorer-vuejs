@@ -2,7 +2,7 @@
   <div>
     <div>
       <DataTable
-        :value="richlistDatatable"
+        :value="transactions"
         :paginator="true"
         :rows="20"
         responsiveLayout="scroll"
@@ -17,19 +17,19 @@
           <template #body="{data}">
             <div>
               <div class="uppercase text-xxs text-gray-300 font-bold mb-1">ADDRESS</div>
-              <div class="uppercase font-bold text-txs">{{data.address}}</div>
+              <div class="uppercase font-bold text-txs">{{data.address.pretty()}}</div>
               <div class="uppercase text-xxs text-gray-300 font-bold mb-1">BALANCE</div>
-              <div class="uppercase font-bold text-txs">{{data.balance}}</div>
+              <div class="uppercase font-bold text-txs">{{data.amount}}</div>
             </div>
           </template>
         </Column>
         <Column style="width: 250px" v-if="!wideScreen">
           <template #body="{data}">
             <div>
-              <div class="uppercase text-xxs text-gray-300 font-bold mb-1">IMPORTNACE</div>
-              <div class="uppercase font-bold text-txs">{{data.importance}}</div>
+              <div class="uppercase text-xxs text-gray-300 font-bold mb-1">IMPORTANCE</div>
+              <div class="uppercase font-bold text-txs">{{data.amount}}</div>
               <div class="uppercase text-xxs text-gray-300 font-bold mt-2 mb-1">NAMESPACE</div>
-              <div class="uppercase font-bold text-txs">{{data.namespace}}</div>
+              <div class="uppercase font-bold text-txs">{{data.amount}}</div>
             </div>
           </template>
         </Column>
@@ -37,22 +37,22 @@
         </Column>
         <Column field="ADDRESS" header="ADDRESS" style="`wideScreen?'min-width: 200px'?'width: 200px'`" v-if="wideScreen">
           <template #body="{data}">
-            <span class="uppercase font-bold text-txs">{{data.address}}</span>
+            <span class="uppercase font-bold text-txs">{{data.address.pretty()}}</span>
           </template>
         </Column>
         <Column field="BALANCE" header="BALANCE" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
           <template #body="{data}">
-            <span class="uppercase text-txs">{{data.balance}}</span>
+            <span class="uppercase text-txs">{{data.amount.compact()}}</span>
           </template>
         </Column>
         <Column field="IMPORTANCE" header="IMPORTANCE" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
           <template #body="{data}">
-            <span class="uppercase font-bold text-txs">{{data.importance}}</span>
+            <span class="uppercase font-bold text-txs">{{data.amount}}</span>
           </template>
         </Column>
         <Column field="NAMESPACE" header="NAMESPACE" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
           <template #body="{data}">
-            <span class="text-txs">{{data.namespace}}</span>
+            <span class="text-txs">{{data.amount}}</span>
           </template>
         </Column>
         <template #empty>
@@ -73,7 +73,10 @@ import { ref, onMounted, onUnmounted } from "vue";
 export default {
   name: 'RichlistComponent',
   components: { DataTable, Column },
-  setup(){
+  props:{
+    transactions: Array
+  },
+  setup(p,context){
     const richlistDatatable = ref([
       {address: 'address1', balance: '0.000005', importance: '0.000000%', namespace: 'N/A'},
       {address: 'address2', balance: '0.000005', importance: '0.000000%', namespace: 'N/A'},
@@ -81,6 +84,8 @@ export default {
       {address: 'address4', balance: '0.000005', importance: '0.000000%', namespace: 'N/A'},
       {address: 'address5', balance: '0.000005', importance: '0.000000%', namespace: 'N/A'},
     ]);
+
+    
     const wideScreen = ref(false);
     const screenResizeHandler = () => {
       if(window.innerWidth < '1024'){

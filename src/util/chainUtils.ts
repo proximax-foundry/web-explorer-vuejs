@@ -3,7 +3,7 @@ import { ChainConfigHttp, ChainHttp, AccountHttp, NamespaceHttp, MosaicHttp, Con
   NamespaceId,
   MosaicId, Address, PublicAccount, CosignatureSignedTransaction, Statement,
   AccountInfo, Transaction, TransactionQueryParams, SignedTransaction, TransactionType, NamespaceName, Mosaic, MosaicInfo,
-  NamespaceInfo, TransactionGroupType, TransactionSearch
+  NamespaceInfo, TransactionGroupType, TransactionSearch, RichlistEntry
 } from "tsjs-xpx-chain-sdk";
 import { NetworkConfig } from "../models/stores/chainProfileConfig";
 import { ChainAPICall } from "../models/REST/chainAPICall";
@@ -13,7 +13,6 @@ import { computed } from "vue";
 const currentEndPoint = computed(() => networkState.selectedAPIEndpoint);
 const connectionPort = computed(() => networkState.currentNetworkProfile.httpPort);
 const currentNetworkType = computed(() => networkState.currentNetworkProfile.network.type);
-console.log(networkState.currentNetworkProfile);
 export class ChainUtils{
 
     static buildWSEndpoint(endpoint :string, port: number | undefined){
@@ -305,7 +304,9 @@ export class ChainUtils{
       let assetInfo = await chainRESTCall.assetAPI.getMosaic(assetId);
 
       return assetInfo;
-    }
+  }
+  
+  
 
     static async getAssetsProperties(assetIds: MosaicId[]): Promise<MosaicInfo[]>{
 
@@ -314,8 +315,19 @@ export class ChainUtils{
       let assetInfos = await chainRESTCall.assetAPI.getMosaics(assetIds);
 
       return assetInfos;
-    }
+  }
+  
+    static async getRichList(assetIdHex: string, queryParams?: TransactionQueryParams): Promise<RichlistEntry[]> {
 
+      let assetId = new MosaicId(assetIdHex);
+
+      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
+
+      let richList = await chainRESTCall.assetAPI.getMosaicRichlist(assetId, queryParams);
+
+      return richList;
+  }
+  
     static async getBlockReceipt(blockHeight: number): Promise<Statement>{
 
       let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));

@@ -171,7 +171,9 @@ export default{
 
     const generateDatatable = async() => {
       let txnQueryParams = new TransactionQueryParams();
+      let trx = await AppState.chainAPI.diagnosticAPI.getDiagnosticStorage();
       txnQueryParams.pageSize = 10;
+      txnQueryParams.fromHeight = trx.numBlocks - 10000;
       let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
       let txns = await TransactionUtils.searchTxns(TransactionGroupType.CONFIRMED,txnQueryParams);

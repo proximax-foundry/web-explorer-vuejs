@@ -1,7 +1,7 @@
 <template>
   <div>
     <p class="text-gray-500 mb-5 text-sm font-bold">
-      Asset <span class="text-blue-primary font-bold">[[ namespacename ]]</span>
+      Asset <span class="text-blue-primary font-bold">{{assets.name}}</span>
     </p>
     <div class="md:grid md:grid-cols-2">
       <div class="filter shadow-xl border border-gray-50 p-5 mb-15 md:mr-2">
@@ -9,15 +9,11 @@
         <div class="txn-div">
           <div>
             <div>Total Supply </div>
-            <div>9,000,000,000</div>
+            <div>{{assets.supply}}</div>
           </div>
           <div>
             <div>Decimals</div>
-            <div>6</div>
-          </div>
-          <div>
-            <div>Holders</div>
-            <div>1,000</div>
+            <div>{{assets.divisibility}}</div>
           </div>
         </div>
       </div>
@@ -26,21 +22,21 @@
         <div class="txn-div">
           <div>
             <div>Creator</div>
-            <div>[[ ADDRESS ]] at height [[ block ]]</div>
+            <div class="ml-8"> {{assets.owner}} at height {{assets.height}}</div>
           </div>
           <div>
             <div>Asset ID</div>
-            <div class="font-bold">[[ ASSETID ]]</div>
+            <div class="font-bold">{{assets.assetId}}</div>
           </div>
           <div>
             <div>Expiry</div>
-            <div class="font-bold">NIL</div>
+            <div class="font-bold">{{assets.expiry==0?"NIL":assets.expiry}}</div>
           </div>
           <div>
             <div>Supply Mutable</div>
-            <div class="font-bold text-green-600">True</div>
+            <div class="font-bold text-green-600">{{assets.supplyMutable}}</div>
             <div>Transferable</div>
-            <div class="font-bold text-green-600">True</div>
+            <div class="font-bold text-green-600">{{assets.transferable}}</div>
           </div>
         </div>
       </div>
@@ -52,7 +48,7 @@
         <div class="w-32 font-bold text-xs text-center p-2 relative" :class="`${ (currentPage != 'metadata')?'cursor-pointer':'' }`" @click="currentPage = 'metadata'">Metadata<div v-if="currentPage == 'metadata'" class="absolute w-full border-b border-yellow-500 transition-all duration-200" style="bottom: -1px;"></div></div>
       </div>
       <transition name="slide">
-        <RichlistComponent v-if="currentPage == 'rich'" />
+        <RichlistComponent v-if="currentPage == 'rich'" :transactions="richList" />
         <InnerTxnComponent v-else />
       </transition>
     </div>
@@ -63,6 +59,9 @@
 import { computed, defineComponent, getCurrentInstance, inject, ref, watch } from "vue";
 import RichlistComponent from '@/modules/asset/components/RichlistComponent.vue';
 import InnerTxnComponent from '@/modules/transaction/components/InnerTxnComponent.vue';
+import {TransactionHttp, Mosaic, MosaicId, UInt64} from "tsjs-xpx-chain-sdk";
+import { AppState } from '@/state/appState';
+import { ChainUtils } from '@/util/chainUtils';
 
 export default {
   name: 'ViewAsset',
@@ -71,12 +70,59 @@ export default {
     InnerTxnComponent
   },
   props: {
-    hash: String
+    id: String
   },
-  setup(){
+  setup(props){
+    const assets = ref({
+      owner: '',
+      height:0,
+      assetId: 0,
+      expiry: '',
+      supply: 0,
+      divisibility: 0,
+      supplyMutable: false,
+      transferable: false,
+      revision: 0,
+      name: ''
+    });
+    const richList = ref([]);
+
+    const loadAsset = async() => {
+      //const asset = await AppState.chainAPI.assetAPI.getMosaic(new MosaicId(props.id));
+      //const test = await AppState.chainAPI.assetAPI.getMosaicsNames(new MosaicId(props.id));
+      //console.log(test.length);
+      const asset = await ChainUtils.getAssetProperties(props.id);
+      const richlist = await ChainUtils.getRichList(props.id);
+      richList.value = richlist;
+if(richlist.length>0){
+  currentPage.value = 'rich';
+}
+      console.log(richList.value);
+      richlist[1].address.pretty;
+
+       if(asset){
+         assets.value = {
+          owner: asset.owner.address.pretty(),
+          height: asset.height.compact(),
+          assetId: asset.mosaicId.toHex(),
+          expiry: 0,
+          supply: asset.supply.compact(),
+          divisibility: asset.divisibility,
+          supplyMutable: asset.isSupplyMutable(),
+          transferable: asset.isTransferable(),
+          revision: asset.revision,
+          name: "HALLO"
+          }
+          
+       }
+     }
+     loadAsset();
     const currentPage = ref('rich');
     return {
-      currentPage
+      currentPage,
+      loadAsset,
+      assets,
+      richList
     }
   }
 }
