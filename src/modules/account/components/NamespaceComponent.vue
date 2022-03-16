@@ -57,12 +57,6 @@ export default {
   directives: {
     'tooltip': Tooltip
   },
-  setup(props){
-    console.log(props.accountNamespaces)
-    return{
-
-    }
-  }
 }
 </script>
 
