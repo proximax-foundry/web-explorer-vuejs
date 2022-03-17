@@ -290,6 +290,9 @@ export default {
 
     let loadRecentTransferTransactions = async() =>{
       isFetching.value = true;
+      if(!AppState.isReady){
+        setTimeout(loadRecentTransferTransactions, 1000);
+      }
       let txnQueryParams = Helper.createTransactionQueryParams();
       let blockHeight = await AppState.chainAPI.chainAPI.getBlockchainHeight();
       txnQueryParams.pageSize = pages.value;
@@ -309,18 +312,7 @@ export default {
       }
       isFetching.value = false;
     };
-
-    if(AppState.isReady){
-      loadRecentTransferTransactions();
-    }
-    else{
-      let readyWatcher = watch(AppState, (value) => {
-        if(value.isReady){
-          init();
-          readyWatcher();
-        }
-      });
-    }
+    loadRecentTransferTransactions();
 
     emitter.on('CHANGE_NETWORK', payload => {
       isFetching.value = true;

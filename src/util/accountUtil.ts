@@ -24,6 +24,9 @@ export interface AssetObj {
   id: string;
   name: string;
   balance: string;
+  namespaceId: string;
+  isActive: boolean;
+  isOwner: boolean;
 }
 
 export interface NamespaceObj{
@@ -141,32 +144,54 @@ export class AccountUtils{
     }
   }
 
-  static async formatAccountAsset(assets: Mosaic[]): Promise<AssetObj[]>{
+  static async formatAccountAsset(assets: Mosaic[], publicKey:string): Promise<AssetObj[]>{
     let formattedAsset:any = [];
     if(assets.length > 0){
+      let currentBlock = await AppState.chainAPI.chainAPI.getBlockchainHeight();
+
       for(let key in assets){
         let objAsset:AssetObj;
         let assetName:string;
+        let namespaceId:string;
+        let isOwner:boolean = false;
         let assetDetails = await AppState.chainAPI.assetAPI.getMosaic(assets[key].id);
-        if(!TransactionUtils.isNamespace(assets[key].id)){
+
+        let isActive:boolean = false;
+        if((assetDetails.height.compact() + assetDetails.duration.compact() ) > currentBlock ){
+          isActive = true;
+        }else if(assetDetails.height.compact() == 1){
+          isActive = true;
+        }
+
+        if(assetDetails.owner.publicKey == publicKey){
+          isOwner = true;
+        }
+
+        // if(!TransactionUtils.isNamespace(assets[key].id)){
           let assetsNames = await TransactionUtils.getAssetsName([assets[key].id]);
           if(assetsNames[0].names.length){
             assetName = assetsNames[0].names[0].name;
+            namespaceId = assetsNames[0].names[0].namespaceId.id.toHex();
           }else{
             assetName = '';
+            namespaceId = '';
           }
-        }else{
-          let namespaceId = new NamespaceId(assets[key].id.toDTO().id);
-          let nsNames = await TransactionUtils.getNamespacesName([namespaceId]);
-          assetName = nsNames[0].name;
-          if(!assetName){
-            assetName = '';
-          }
-        }
+        // }else{
+        //   let namespaceId = new NamespaceId(assets[key].id.toDTO().id);
+        //   let nsNames = await TransactionUtils.getNamespacesName([namespaceId]);
+        //   assetName = nsNames[0].name;
+        //   console.log(nsNames)
+        //   if(!assetName){
+        //     assetName = '';
+        //   }
+        // }
         objAsset = {
           id: assets[key].id.id.toHex(),
           balance: Helper.convertToCurrency(assets[key].amount.compact(), assetDetails.divisibility),
           name: assetName,
+          namespaceId,
+          isOwner,
+          isActive,
         }
         formattedAsset.push(objAsset);
       }

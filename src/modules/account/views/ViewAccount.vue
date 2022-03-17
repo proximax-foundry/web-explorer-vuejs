@@ -63,7 +63,7 @@ export default {
     const cosignatoriesLength = ref(0);
     const isFetching = ref(true);
     const accountAssets = ref([]);
-    const delegatePublicKey = ref();
+    const delegatePublicKey = ref('0');
     const multisig = ref({
       cosignatories: [],
       multisigAccounts: []
@@ -116,7 +116,7 @@ export default {
       cosignatoriesLength.value = multisig.value.cosignatories?multisig.value.cosignatories.length:0;
       multisigLength.value = multisig.value.multisigAccounts?multisig.value.multisigAccounts.length:0;
 
-      let fetchedAccountAssets = await AccountUtils.formatAccountAsset(account.mosaics);
+      let fetchedAccountAssets = await AccountUtils.formatAccountAsset(account.mosaics, strPublicKey.value);
       accountAssets.value = fetchedAccountAssets;
       isFetching.value = false;
       isShowInvalid.value = false;
