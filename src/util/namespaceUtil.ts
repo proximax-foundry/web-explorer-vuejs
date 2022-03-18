@@ -1,14 +1,6 @@
 import { AppState } from "@/state/appState";
 import {
-  Account,
-  Address,
-  AggregateTransaction,
-  PublicAccount,
-  MultisigCosignatoryModification,
-  MultisigCosignatoryModificationType,
-  AccountInfo,
-  MultisigAccountInfo,
-  Mosaic,
+  UInt64,
   NamespaceId,
   NamespaceInfo,
 } from "tsjs-xpx-chain-sdk";
@@ -17,9 +9,93 @@ import { TransactionUtils } from '@/models/util/transactionUtils';
 import { Helper } from "@/util/typeHelper";
 import { pushScopeId } from "vue";
 
+const namespaceIdFirstCharacterString = "89ABCDEF";
 
+export interface aliasObj{
+  id: string;
+  type: number;
+}
+
+export interface levelObj{
+  id: string;
+  type: string;
+}
+
+export interface namespaceInfoFormatted{
+  ownerAddress: string;
+  ownerPublicKey: string;
+  start: number;
+  end: number;
+  levels: levelObj[];
+  alias: aliasObj;
+  parentId?: string;
+  depth: number;
+  name: string;
+  active: boolean;
+  type: boolean;
+}
 
 export class NamespaceUtils{
+  static async fetchNamespaceInfo(namespaceHex: string):Promise<namespaceInfoFormatted|boolean>{
+    try{
+      let ns_uint64 = UInt64.fromHex(namespaceHex);
+      let ns:namespaceInfoFormatted;
+      let namespaceId = new NamespaceId([ns_uint64.lower, ns_uint64.higher]);
+      let namespaceInfo = await AppState.chainAPI.namespaceAPI.getNamespace(namespaceId);
+
+      let namespaceName = await AppState.chainAPI.namespaceAPI.getNamespacesName([namespaceId]);
+      ns = {
+        ownerAddress: namespaceInfo.owner.address.pretty().toString(),
+        ownerPublicKey: namespaceInfo.owner.publicKey,
+        start: namespaceInfo.startHeight.compact(),
+        end: namespaceInfo.endHeight.compact()[0],
+        depth: namespaceInfo.depth,
+        active: namespaceInfo.active,
+        type: namespaceInfo.isRoot(),
+        levels:[],
+        name: namespaceName[0].name,
+        alias: {
+          id: '',
+          type: 0
+        }
+      };
+
+      if(namespaceInfo.levels.length > 0){
+        let levels:any = [];
+        for(let i = 0; i < namespaceInfo.levels.length; ++i){
+          let levelNamespaceId = new NamespaceId([namespaceInfo.levels[i].id.lower, namespaceInfo.levels[i].id.higher]);
+          let levelNamespace_name = await AppState.chainAPI.namespaceAPI.getNamespacesName([levelNamespaceId]);
+          levels.push({
+            id: namespaceInfo.levels[i].id.toHex(),
+            name: levelNamespace_name[0].name
+          })
+        }
+        ns.levels = levels;
+      }
+
+      if(namespaceInfo.alias){
+        if(namespaceInfo.alias.type == 1){
+          ns.alias.id = namespaceInfo.alias.mosaicId.toHex();
+        }else if(namespaceInfo.alias.type == 2){
+          ns.alias.id = namespaceInfo.alias.address.pretty();
+        }
+        ns.alias.type = namespaceInfo.alias.type;
+      }
+
+      if(!namespaceInfo.isRoot()){
+        ns.parentId = namespaceInfo.parentNamespaceId().toHex();
+      }
+      return ns;
+    }catch(error){
+      return false;
+    }
+  }
+
+  static isNamespace(namespaceHex: string): boolean{
+    return Array.from(namespaceIdFirstCharacterString).includes(namespaceHex.toUpperCase().substring(0, 1));
+  }
+
+
   static relativeTime = (timestamp:number) => {
     let current = new Date();
     let expired = new Date(timestamp);
