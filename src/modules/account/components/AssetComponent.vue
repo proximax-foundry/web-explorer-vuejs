@@ -27,7 +27,7 @@
               <img v-else src="@/modules/transaction/img/icon-sda.svg" class='inline-block h-6 w-6 mr-2 '>
             </div>
             <div v-if="asset.namespaceId">
-              <router-link :to="{ name: 'ViewNamespace', params:{ namespaceParam: asset.namespaceId }}" class="hover:text-blue-primary hover:underline">{{ displayTokenName(asset.name).name }}</router-link>
+              <router-link :to="{ name: 'ViewNamespace', params:{ namespaceParam: asset.namespaceId }}" class="text-blue-600 hover:text-blue-primary hover:underline">{{ displayTokenName(asset.name).name }}</router-link>
             </div>
           </div>
         </div>
@@ -47,7 +47,7 @@
             <img v-else src="@/modules/transaction/img/icon-sda.svg" class='inline-block h-6 w-6 mr-2 '>
           </div>
           <div v-if="asset.namespaceId">
-            <router-link :to="{ name: 'ViewNamespace', params:{ namespaceParam: asset.namespaceId }}" class="hover:text-blue-primary hover:underline">{{ displayTokenName(asset.name).name }}</router-link>
+            <router-link :to="{ name: 'ViewNamespace', params:{ namespaceParam: asset.namespaceId }}" class="text-blue-600 hover:text-blue-primary hover:underline">{{ displayTokenName(asset.name).name }}</router-link>
           </div>
         </div>
         <div class="px-2 py-3 col-span-2 flex items-center">

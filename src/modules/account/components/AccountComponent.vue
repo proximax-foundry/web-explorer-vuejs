@@ -19,14 +19,14 @@
         <div v-if="linkAccount!=invalidPublicKey">
           <div class="text-xxs font-semibold text-gray-400 mt-4 mb-1">Linked account</div>
           <div class="flex items-center">
-            <router-link :to="{ name: 'ViewAccount', params:{ accountParam: linkAccount }}" id="linked" :copyValue="linkAccount" copySubject="Linked Account Public Key" class="text-xs font-semibold mt-1 break-all hover:text-blue-primary hover:underline">{{ linkAccount }}</router-link>
+            <router-link :to="{ name: 'ViewAccount', params:{ accountParam: linkAccount }}" id="linked" :copyValue="linkAccount" copySubject="Linked Account Public Key" class="text-xs font-semibold mt-1 break-all text-blue-600 hover:text-blue-primary hover:underline">{{ linkAccount }}</router-link>
             <img src="@/assets/img/icon-copy.svg" @click="copy('linked')" class="ml-2 w-4 h-4 cursor-pointer" />
           </div>
         </div>
         <div class="text-xxs font-semibold text-gray-400 mt-4 mb-1" v-if="namespace.length > 0">Linked namespace{{ (namespace.length>1)?'s':'' }}</div>
         <div class="flex items-center" v-if="namespace.length > 0">
           <div v-for="(item, index) in namespace" :key="index" :class="`${index > 0 }?'mt-2':''`">
-            <router-link :to="{ name: 'ViewNamespace', params:{ namespaceParam: item.id }}" class="text-xs font-semibold mt-1 break-all hover:text-blue-primary hover:underline">{{ item.name }}</router-link>
+            <router-link :to="{ name: 'ViewNamespace', params:{ namespaceParam: item.id }}" class="text-xs font-semibold mt-1 break-all text-blue-600 hover:text-blue-primary hover:underline">{{ item.name }}</router-link>
           </div>
         </div>
         <div class="flex gap-2">

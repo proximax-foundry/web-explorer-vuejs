@@ -25,7 +25,7 @@ export interface namespaceInfoFormatted{
   ownerAddress: string;
   ownerPublicKey: string;
   start: number;
-  end: number;
+  end: string;
   levels: levelObj[];
   alias: aliasObj;
   parentId?: string;
@@ -44,11 +44,17 @@ export class NamespaceUtils{
       let namespaceInfo = await AppState.chainAPI.namespaceAPI.getNamespace(namespaceId);
 
       let namespaceName = await AppState.chainAPI.namespaceAPI.getNamespacesName([namespaceId]);
+      let endHeight:string;
+      if(typeof namespaceInfo.endHeight.compact() === 'number'){
+        endHeight = namespaceInfo.endHeight.compact().toString();
+      }else{
+        endHeight = NamespaceUtils.preciseBigInt(namespaceInfo.endHeight.toHex());
+      }
       ns = {
         ownerAddress: namespaceInfo.owner.address.pretty().toString(),
         ownerPublicKey: namespaceInfo.owner.publicKey,
         start: namespaceInfo.startHeight.compact(),
-        end: namespaceInfo.endHeight.compact()[0],
+        end: endHeight,
         depth: namespaceInfo.depth,
         active: namespaceInfo.active,
         type: namespaceInfo.isRoot(),
@@ -87,6 +93,7 @@ export class NamespaceUtils{
       }
       return ns;
     }catch(error){
+      console.log(error)
       return false;
     }
   }
@@ -94,7 +101,6 @@ export class NamespaceUtils{
   static isNamespace(namespaceHex: string): boolean{
     return Array.from(namespaceIdFirstCharacterString).includes(namespaceHex.toUpperCase().substring(0, 1));
   }
-
 
   static relativeTime = (timestamp:number) => {
     let current = new Date();
@@ -138,6 +144,84 @@ export class NamespaceUtils{
     }else{
       return timeDiff.mins + ' ' + 'minute' + ((timeDiff.mins>1)?'s':'');
     }
+  }
+
+  static preciseBigInt (hexNum:string) {
+    /**
+     * http://www.danvk.org/hex2dec.html
+     */
+    function add(x:number[], y:number[], base:number) {
+        let z = [];
+        let n = Math.max(x.length, y.length);
+        let carry = 0;
+        let i = 0;
+        while (i < n || carry) {
+            let xi = i < x.length ? x[i] : 0;
+            let yi = i < y.length ? y[i] : 0;
+            let zi = carry + xi + yi;
+            z.push(zi % base);
+            carry = Math.floor(zi / base);
+            i++;
+        }
+        return z;
+    }
+    function multiplyByNumber(num:number, x:number[], base:number) {
+        if (num < 0) return null;
+        if (num == 0) return [];
+
+        let result = [];
+        let power = x;
+        while (true) {
+            if (num & 1) {
+                result = add(result, power, base);
+            }
+            num = num >> 1;
+            if (num === 0) break;
+            power = add(power, power, base);
+        }
+        return result;
+    }
+
+    function parseToDigitsArray(str:string, base:number) {
+        let digits = str.split('');
+        let ary = [];
+        for (let i = digits.length - 1; i >= 0; i--) {
+            let n = parseInt(digits[i], base);
+            if (isNaN(n)) return null;
+            ary.push(n);
+        }
+        return ary;
+    }
+    function convertBase(str:string, fromBase:number, toBase:number) {
+        let digits = parseToDigitsArray(str, fromBase);
+        if (digits === null) return null;
+
+        let outArray = [];
+        let power = [1];
+        for (let i = 0; i < digits.length; i++) {
+            if (digits[i]) {
+                outArray = add(outArray, multiplyByNumber(digits[i], power, toBase), toBase);
+            }
+            power = multiplyByNumber(fromBase, power, toBase);
+        }
+
+        let out = '';
+        for (let i = outArray.length - 1; i >= 0; i--) {
+            out += outArray[i].toString(toBase);
+        }
+        return out;
+    }
+    function decToHex(decStr) {
+        let hex = convertBase(decStr, 10, 16);
+        return hex ? '0x' + hex : null;
+    }
+    function hexToDec(hexStr:string) {
+        if (hexStr.substring(0, 2) === '0x') hexStr = hexStr.substring(2);
+        hexStr = hexStr.toLowerCase();
+        return convertBase(hexStr, 16, 10);
+    }
+    let result = hexToDec(hexNum)
+    return result
   }
 }
 
