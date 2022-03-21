@@ -113,7 +113,6 @@ export default {
       matchedNamespace.value = linkedNamespaceToAccount;
 
       multisig.value = await AccountUtils.getMultisig(strAddress.value);
-      console.log(multisig.value.multisigAccounts)
       cosignatoriesLength.value = multisig.value.cosignatories?multisig.value.cosignatories.length:0;
       multisigLength.value = multisig.value.multisigAccounts?multisig.value.multisigAccounts.length:0;
 

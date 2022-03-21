@@ -138,9 +138,6 @@ export class AccountUtils{
     try{
       let address = Address.createFromRawAddress(strAddress);
       let multisig = await AppState.chainAPI.accountAPI.getMultisigAccountInfo(address);
-      console.log(multisig)
-      // let num = multisig.multisigAccounts.get(0);
-      // console.log(num.length)
       return multisig;
     } catch(error){
       // console.warn(error);
