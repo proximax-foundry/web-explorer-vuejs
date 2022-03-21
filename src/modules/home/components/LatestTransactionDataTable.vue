@@ -33,12 +33,12 @@
         <Column style="width: 229px" v-if="!wideScreen">
           <template #body="{data}">
             <div>
-              <div class="uppercase text-xxs text-gray-300 font-bold -mt-3">Signer/TX Type</div>
-              <div class="text-xxs text-gray-500 inline-flex">Signer:
-              <div class="uppercase text-txs text-blue-primary">{{shortenedString(Helper.createAddress(data.signerAddress).pretty())}}}}</div>
+              <div class="uppercase text-xxs text-gray-300 font-bold -mt-3">Addresses</div>
+              <div class="text-xxs text-gray-500 inline-flex">Sender:
+              <div class="uppercase text-txs text-blue-primary">{{shortenedString(Helper.createAddress(data.signerAddress).pretty())}}</div>
             </div>
-            <div class="text-xxs text-gray-500 inline-flex">Transaction Type:
-              <div class="uppercase text-txs text-blue-primary">{{data.type}}</div>
+            <div class="text-xxs text-gray-500 inline-flex">Recipient:
+              <div class="uppercase text-txs text-blue-primary">{{data.recipient?shortenedString(Helper.createAddress(data.recipient).pretty()):"-"}}</div>
             </div>
             </div>
           </template>
@@ -60,14 +60,15 @@
           </div>
         </template> 
       </Column>
-      <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem;" field="Transaction Details" header="Signer / TX Type" v-if="wideScreen"> 
+      <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem;" field="Addresses" header="Addresses" v-if="wideScreen"> 
         <template #body="{data}"> 
           <div>
-            <div class="text-xxs text-gray-500 inline-flex truncate w-80 mt-4">Signer:
-             <router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signerAddress}}" class="uppercase text-txs text-blue-primary pl-1.5"><span class="text-txs" v-tooltip.top="Helper.createAddress(data.signerAddress).pretty()">{{shortenedString(Helper.createAddress(data.signerAddress).pretty())}}</span></router-link>
+            <div class="text-xxs text-gray-500 inline-flex truncate w-80 mt-4">Sender:
+              <div class="uppercase text-txs text-blue-primary pl-1.5"><span class="text-txs" v-tooltip.top="Helper.createAddress(data.signerAddress).pretty()">{{shortenedString(Helper.createAddress(data.signerAddress).pretty())}}</span></div>
             </div>
-            <div class="text-xxs text-gray-500 inline-flex truncate w-80 px-px mb-4">Transaction Type:
-              <div class="uppercase text-txs text-blue-primary pl-1.5">{{data.type}}</div>
+            <div class="text-xxs text-gray-500 inline-flex truncate w-80 px-px mb-4">Recipient:
+              <div class="uppercase text-txs text-blue-primary pl-1.5" v-if="data.recipient!=null"><span class="text-txs" v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" >{{shortenedString(Helper.createAddress(data.recipient).pretty())}}</span></div>
+                <div class="uppercase text-txs text-blue-primary pl-1.5" v-else>-</div>
             </div>
           </div>
         </template> 
@@ -95,7 +96,6 @@ import { ref, onMounted, onUnmounted, watch, getCurrentInstance } from 'vue';
 import { TransactionUtils } from '@/models/util/transactionUtils';
 import { TransactionGroupType,TransactionQueryParams,Deadline,Order_v2 } from 'tsjs-xpx-chain-sdk';
 import Tooltip from 'primevue/tooltip';
-import { number } from 'mathjs';
 
 export default{
   components: { DataTable, Column },
@@ -103,7 +103,6 @@ export default{
   directives: {
     'tooltip': Tooltip
   },
-  
   setup(){
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -172,8 +171,8 @@ export default{
 
     const generateDatatable = async() => {
       let txnQueryParams = new TransactionQueryParams();
-      txnQueryParams.pageSize = 10;
       let trx = await AppState.chainAPI.diagnosticAPI.getDiagnosticStorage();
+      txnQueryParams.pageSize = 10;
       txnQueryParams.fromHeight = trx.numBlocks - 10000;
       let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
@@ -184,7 +183,6 @@ export default{
       }
       isFetching.value = false;
     }
-    
 
     //setInterval(generateDatatable, 15000);
     const init = () =>{

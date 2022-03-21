@@ -1,8 +1,11 @@
 <template>
   <div>
-    <div>
+    <div v-if="transactions==false" class="ml-5">
+      No record found
+    </div>
+    <div v-else>
       <DataTable
-        :value="richlistDatatable"
+        :value="transactions"
         :paginator="true"
         :rows="20"
         responsiveLayout="scroll"
@@ -15,52 +18,52 @@
         >
         <Column style="width: 250px" v-if="!wideScreen">
           <template #body="{data}">
-            <div>
+            <div class="mb-2">
               <div class="uppercase text-xxs text-gray-300 font-bold mb-1">ADDRESS</div>
-              <div class="uppercase font-bold text-txs">{{data.address}}</div>
+              <div class="uppercase font-bold text-txs">{{data.address.pretty()}}</div>
               <div class="uppercase text-xxs text-gray-300 font-bold mb-1">BALANCE</div>
-              <div class="uppercase font-bold text-txs">{{data.balance}}</div>
+              <div class="uppercase font-bold text-txs">{{getCurrency(data.amount.compact())}}</div>
             </div>
           </template>
         </Column>
         <Column style="width: 250px" v-if="!wideScreen">
           <template #body="{data}">
             <div>
-              <div class="uppercase text-xxs text-gray-300 font-bold mb-1">IMPORTNACE</div>
-              <div class="uppercase font-bold text-txs">{{data.importance}}</div>
+              <div class="uppercase text-xxs text-gray-300 font-bold mb-1">PERCENTAGE</div>
+              <div class="uppercase font-bold text-txs">{{getPercentage(data.amount.compact())}}%</div>
               <div class="uppercase text-xxs text-gray-300 font-bold mt-2 mb-1">NAMESPACE</div>
-              <div class="uppercase font-bold text-txs">{{data.namespace}}</div>
+              <div class="uppercase font-bold text-txs">{{getLinkedNamespace(data.address)&&linkednamespaceID==null?"No Linked Namespace":linkednamespaceID}}</div>
             </div>
           </template>
         </Column>
-        <Column style="width: 50px" v-if="wideScreen">
+        <Column style="width: 30px" v-if="wideScreen">
         </Column>
-        <Column field="ADDRESS" header="ADDRESS" style="`wideScreen?'min-width: 200px'?'width: 200px'`" v-if="wideScreen">
+        <Column field="ADDRESS" header="ADDRESS" style="width:380px" v-if="wideScreen">
           <template #body="{data}">
-            <span class="uppercase font-bold text-txs">{{data.address}}</span>
+             <span><router-link :to="{ name: 'ViewAccount', params: { accountParam: data.address.pretty()}}" class="uppercase font-bold text-txs text-blue-600 hover:text-blue-primary hover:underline">{{data.address.pretty()}}</router-link></span>
           </template>
         </Column>
-        <Column field="BALANCE" header="BALANCE" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
+        <Column field="BALANCE" header="BALANCE" style="width: 200px" v-if="wideScreen">
           <template #body="{data}">
-            <span class="uppercase text-txs">{{data.balance}}</span>
+            <span class="uppercase text-txs">{{getCurrency(data.amount.compact())}}</span>
           </template>
         </Column>
-        <Column field="IMPORTANCE" header="IMPORTANCE" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
+        <Column field="PERCENTAGE" header="PERCENTAGE" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
           <template #body="{data}">
-            <span class="uppercase font-bold text-txs">{{data.importance}}</span>
+            <span class="uppercase font-bold text-txs">{{getPercentage(data.amount.compact())}}%</span>
           </template>
         </Column>
         <Column field="NAMESPACE" header="NAMESPACE" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
           <template #body="{data}">
-            <span class="text-txs">{{data.namespace}}</span>
+            <span class="text-txs">{{getLinkedNamespace(data.address)&&linkednamespaceID==null?"No Linked Namespace":linkednamespaceID }}</span>
           </template>
         </Column>
-        <template #empty>
+        <!-- <template #empty>
           No record found
         </template>
         <template #loading>
           Fetching richlist
-        </template>
+        </template> -->
       </DataTable>
     </div>
   </div>
@@ -70,17 +73,21 @@
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { ref, onMounted, onUnmounted } from "vue";
+import { Helper } from '@/util/typeHelper';
+import { AppState } from '@/state/appState';
+import { text } from '@fortawesome/fontawesome-svg-core';
+import { ChainUtils } from '@/util/chainUtils';
+
 export default {
   name: 'RichlistComponent',
   components: { DataTable, Column },
-  setup(){
-    const richlistDatatable = ref([
-      {address: 'address1', balance: '0.000005', importance: '0.000000%', namespace: 'N/A'},
-      {address: 'address2', balance: '0.000005', importance: '0.000000%', namespace: 'N/A'},
-      {address: 'address3', balance: '0.000005', importance: '0.000000%', namespace: 'N/A'},
-      {address: 'address4', balance: '0.000005', importance: '0.000000%', namespace: 'N/A'},
-      {address: 'address5', balance: '0.000005', importance: '0.000000%', namespace: 'N/A'},
-    ]);
+  props:{
+    transactions: Array,
+    supply : Number,
+    divisibility :Number
+    },
+  setup(p){
+    const linkednamespaceID = ref(null);
     const wideScreen = ref(false);
     const screenResizeHandler = () => {
       if(window.innerWidth < '1024'){
@@ -99,9 +106,30 @@ export default {
       window.removeEventListener("resize", screenResizeHandler);
     });
 
+    const getCurrency = (amount) =>{
+      return Helper.toCurrencyFormat(amount,p.divisibility);
+    }
+    const getPercentage =(amount)=>{
+      return ((amount / p.supply) * 100).toFixed(p.divisibility); 
+    }
+    const getLinkedNamespace = async(address) =>{
+    let namespaceID = null;
+    const getNamespacesFromAccount = await ChainUtils.getNamespacesFromAccount(address);
+      for(let i = 0; i < getNamespacesFromAccount.length; ++i){
+        if(getNamespacesFromAccount[i].alias.type == 2){
+          namespaceID = getNamespacesFromAccount[i].levels[0].id.toHex();
+          linkednamespaceID.value = namespaceID;
+        }
+      } 
+      return namespaceID;
+    }
+
     return{
-      richlistDatatable,
+      getPercentage,
       wideScreen,
+      getCurrency,
+      getLinkedNamespace,
+      linkednamespaceID
     }
   }
 }

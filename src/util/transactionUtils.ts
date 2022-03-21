@@ -58,7 +58,8 @@ import {
   SignedTransaction,
   CosignatureSignedTransaction,
   TransactionGroupType,
-  TransactionSearch
+  TransactionSearch,
+  MosaicNames
 } from "tsjs-xpx-chain-sdk";
 // import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
 import { networkState } from "../state/networkState";
@@ -203,7 +204,7 @@ export class TransactionUtils {
     // console.log(publicKey);
     return accountInfo;
   }
-
+  
   static getTransactionTypeNameByEnum(transactionType: TransactionType): string{
 
     let name = "";
