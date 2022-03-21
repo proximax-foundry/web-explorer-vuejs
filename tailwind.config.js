@@ -1,4 +1,5 @@
 module.exports = {
+  important: true,
   purge: [
     './src/**/*.html',
     './src/**/*.vue',
@@ -34,6 +35,9 @@ module.exports = {
       txl: ['23px', '26px'],
     },
     extend: {
+      scale: {
+        '-1': '-1'
+      },
       margin: {
         '18': '4.5rem',
         '15':'3.75rem'

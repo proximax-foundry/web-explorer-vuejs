@@ -17,9 +17,7 @@ import { NetworkStateUtils } from './state/utils/networkStateUtils';
 import { ChainUtils } from './util/chainUtils';
 import { ChainAPICall } from './models/REST/chainAPICall';
 import { AppStateUtils } from './state/utils/appStateUtils';
-import { ChainProfile, ChainProfileConfig, ChainProfileNames, ChainProfileName } from "./models/stores/"
-
-
+import { ChainProfile, ChainProfileConfig, ChainProfileNames, ChainProfileName, ThemeStyleConfig } from "./models/stores/"
 
 import ConfirmDialog from 'primevue/confirmdialog';
 import Toast from 'primevue/toast';
@@ -29,7 +27,7 @@ import 'vue3-blocks-tree/dist/vue3-blocks-tree.css';
 
 const app = createApp(App);
 const emitter = mitt();
-let defaultoptions = {treeName:'blocks-tree'}
+
 app.config.globalProperties.emitter = emitter;
 app.use(router)
 app.use(PrimeVue);
@@ -37,13 +35,31 @@ app.use(ConfirmationService);
 app.use(ToastService);
 
 app.use(vueDebounce);
-app.use(VueBlocksTree,defaultoptions)
+app.use(VueBlocksTree, {treeName:'blocks-tree'});
 app.mount('#app');
 // Use Components
 
 app.component('ConfirmDialog', ConfirmDialog);
 app.component('Toast', Toast);
 
+const loadThemeConfig = async() => {
+  try {
+    let config = await fetch('./themeConfig.json', {
+      headers: {
+        'Cache-Control': 'no-store',
+        'Pragma' : 'no-cache'
+      }
+    }).then((res) => res.json()).then((configInfo) => { return configInfo });
+    let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
+    themeConfig.updateConfig(config);
+    themeConfig.saveToLocalStorage();
+    AppStateUtils.setStateReady('theme');
+  } catch (e) {
+    AppStateUtils.setStateReady('theme');
+    console.error(e);
+  }
+}
+loadThemeConfig();
 
 const chainProfileIntegration = async () => {
   try {
@@ -79,12 +95,10 @@ const chainProfileIntegration = async () => {
       });
 
       chainNameArray.concat(customChainProfile);
-    } catch (error) {
-      
-    }
+    } catch (error) {}
 
     chainProfileNamesStore.names = chainNameArray;
-    
+
     chainProfileNamesStore.saveToLocalStorage();
 
     for(const chainProfileName of chainProfileNames){
@@ -124,7 +138,6 @@ const chainProfileIntegration = async () => {
           else{
             console.error(config);
           }
-          
         } catch (error) {
           console.log(error);
         }

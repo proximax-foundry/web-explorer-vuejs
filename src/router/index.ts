@@ -39,6 +39,36 @@ const routes = [
       title: "View Transactions",
     }
   },
+
+  {
+    path: '/account/:accountParam',
+    name: 'ViewAccount',
+    props: true,
+    component: () => import('@/modules/account/views/ViewAccount.vue'),
+    meta: {
+      title: "View Address",
+    }
+  },
+
+  {
+    path: '/block/:number',
+    name: 'ViewBlock',
+    props: true,
+    component: () => import('@/modules/block/views/ViewBlock.vue'),
+    meta: {
+      title: "View Block",
+    }
+  },
+
+  {
+    path: '/namespace/:namespaceParam',
+    name: 'ViewNamespace',
+    props: true,
+    component: () => import('@/modules/namespace/views/ViewNamespace.vue'),
+    meta: {
+      title: "View Namespace",
+    }
+  },
 ];
 
 const router = createRouter({

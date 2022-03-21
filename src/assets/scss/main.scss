@@ -175,7 +175,7 @@ body{
 }
 
 .gray-line{
-  @apply border-t border-solid border-gray-300;
+  @apply border-b border-solid border-gray-300;
 }
 
 .delete-position{
@@ -214,10 +214,6 @@ body{
   display:block;
   margin-left: auto;
   margin-right: auto;
-}
-
-.page-title-gray-line{
-  @apply mx-auto w-11/12 md:w-8/12 lg:w-9/12 mt-2 py-3 gray-line;
 }
 
 .text-icon{

@@ -2,6 +2,7 @@ import { readonly, computed } from "vue";
 import {
   Account,
   Address,
+  AddressAlias,
   AliasActionType,
   Deadline,
   EncryptedMessage,
@@ -88,7 +89,7 @@ import { Duration } from "js-joda";
 import { AppState } from '@/state/appState';
 import { SDA } from '@/models/transactions/sda';
 import {
-  InnerAliasTransaction, InnerTransaction as MyInnerTxn, InnerExchangeTransaction, TxnExchangeOffer, InnerChainTransaction, InnerLinkTransaction, InnerLockTransaction,
+  ConfirmedTransferTransaction, ConfirmedTransaction, InnerAliasTransaction, InnerTransaction as MyInnerTxn, InnerExchangeTransaction, TxnExchangeOffer, InnerChainTransaction, InnerLinkTransaction, InnerLockTransaction,
   InnerRestrictionTransaction, RestrictionModification, InnerAccountTransaction, InnerAssetTransaction, InnerNamespaceTransaction, InnerSecretTransaction, InnerTransferTransaction, InnerMetadataTransaction
 } from "@/models/transactions/transaction";
 import { HashType as myHashType } from "@/models/const/hashType";
@@ -384,6 +385,44 @@ export class TransactionUtils {
   //   ChainUtils.announceCosignTransaction(signedTx);
   // }
 
+  static async getRecipient(transferTxn: TransferTransaction, blockHeight: number): Promise<Address>{
+
+    let recipient: Address = null;
+
+    if(transferTxn.recipient instanceof NamespaceId){
+
+      let receipts = await AppState.chainAPI.blockAPI.getBlockReceipts(blockHeight);
+
+      for(let i=0; i < receipts.addressResolutionStatements.length; ++i){
+        let unresolved = receipts.addressResolutionStatements[i].unresolved;
+        let resolved = receipts.addressResolutionStatements[i].resolutionEntries[0].resolved;
+        if(unresolved instanceof MosaicId){ // actually is namespaceId
+          let namespaceIdHex: string = unresolved.toHex();
+
+          if(transferTxn.recipient.toHex() !== namespaceIdHex){
+            continue;
+          }
+
+          if(resolved instanceof AddressAlias){
+            recipient = resolved.address;
+            break;
+          }
+          else{
+            continue;
+          }
+        }
+        else{
+          continue;
+        }
+      }
+    }
+    else{
+      recipient = transferTxn.recipient;
+    }
+
+    return recipient;
+}
+
   static getTransactionTypeName(type: number): string | null {
 
     let typeName = "";
@@ -492,6 +531,8 @@ export class TransactionUtils {
       txnStatus = await AppState.chainAPI.transactionAPI.getTransactionStatus(hash);
       if(txnStatus.group == 'partial'){
         txn = await AppState.chainAPI.transactionAPI.getPartialTransaction(hash);
+      }else if(txnStatus.group == 'failed'){
+        return {txn: {}, txnStatus, isFound: true};
       }else{
         txn = await AppState.chainAPI.transactionAPI.getTransaction(hash);
       }
@@ -520,7 +561,6 @@ export class TransactionUtils {
       }
       else{
         blockHeight = transactionInfo.height.compact();
-
         // wait SDK to fix
         try {
             txnBytes = txn.serialize().length / 2;
@@ -529,11 +569,17 @@ export class TransactionUtils {
         }
         deadline = txn.deadline.adjustedValue.compact();
       }
-
-      let blockInfo = await AppState.chainAPI.blockAPI.getBlockByHeight(blockHeight);
-      txn.fee = txnBytes * blockInfo.feeMultiplier;
-      txn.deadline = deadline;
-      txn.timestamp = new Date(blockInfo.timestamp.compact() + Deadline.timestampNemesisBlock * 1000).toISOString();
+      
+      if(txnStatus.group == 'partial'){
+        // txn.deadline = deadline;
+        txn.timestamp = Helper.formatDeadline(deadline);
+        txn.fee = '-';
+      }else{
+        let blockInfo = await AppState.chainAPI.blockAPI.getBlockByHeight(blockHeight);
+        txn.fee = txnBytes * blockInfo.feeMultiplier;
+        // txn.deadline = Helper.formatDeadline(deadline);
+        txn.timestamp = Helper.convertDisplayDateTimeFormat(new Date(blockInfo.timestamp.compact() + Deadline.timestampNemesisBlock * 1000).toISOString());
+      }
 
       if(txn.type == TransactionType.TRANSFER){
         let sdas: SDA[] = [];
@@ -2658,7 +2704,7 @@ export class TransactionUtils {
         txnDetails.namespaceName = nsNames[0].name;
       }
 
-      if(txnDetails.namespaceName && txnDetails.namespaceName === "prx.xpx"){
+      if(txnDetails.namespaceName && txnDetails.namespaceName === AppState.nativeToken.fullNamespace){
         txnDetails.namespaceName = AppState.nativeToken.label;
       }
 
@@ -2712,7 +2758,7 @@ static async extractPartialSecretLock(secretLockTxn: SecretLockTransaction): Pro
             txnDetails.namespaceName = nsNames[0].name;
         }
 
-        if(txnDetails.namespaceName && txnDetails.namespaceName === "prx.xpx"){
+        if(txnDetails.namespaceName && txnDetails.namespaceName === AppState.nativeToken.fullNamespace){
             txnDetails.namespaceName = AppState.nativeToken.label;
         }
 
@@ -2918,6 +2964,203 @@ static async extractPartialTransfer(transferTxn: TransferTransaction): Promise<I
       let aggregateTxn = txn as AggregateTransaction
       return aggregateTxn;
     }
+  }
+
+  static async searchTxns(transactionGroupType: TransactionGroupType, transactionQueryParams: TransactionQueryParams): Promise<TransactionSearch>{
+
+    let transactionSearchResult: TransactionSearch = await AppState.chainAPI.transactionAPI.searchTransactions(transactionGroupType, transactionQueryParams);
+
+    return transactionSearchResult;
+  }
+
+  static async accountTxns(publicKey: string, transactionQueryParams: TransactionQueryParams): Promise<Transaction[]>{
+    console.log(publicKey)
+    let publicAccount = PublicAccount.createFromPublicKey(publicKey, AppState.networkType)
+    let transactionSearchResult: Transaction[] = await AppState.chainAPI.accountAPI.transactions(publicAccount, transactionQueryParams);
+    console.log(transactionSearchResult)
+    return transactionSearchResult;
+  }
+
+  static async formatConfirmedTransaction(txn: Transaction): Promise<ConfirmedTransaction>{
+
+    let transactionInfo: TransactionInfo | AggregateTransactionInfo = txn.transactionInfo;
+    let txnHash = transactionInfo instanceof AggregateTransactionInfo ?
+        transactionInfo.aggregateHash : transactionInfo.hash;
+
+    let blockHeight: number = 0;
+    let txnBytes: number = 0;
+    let deadline = null;
+
+    if(transactionInfo instanceof AggregateTransactionInfo){
+        //let aggregateTxn = await this.autoFindAggregateTransaction(txnHash);
+        blockHeight = transactionInfo.height.compact();
+        //txnBytes = aggregateTxn.serialize().length / 2;
+        //deadline = aggregateTxn.deadline.adjustedValue.compact();
+    }
+    else if(txn.type === TransactionType.AGGREGATE_BONDED || txn.type === TransactionType.AGGREGATE_COMPLETE){
+        let aggregateTxn = await this.autoFindAggregateTransaction(txnHash);
+        blockHeight = aggregateTxn.transactionInfo.height.compact();
+        txnBytes = aggregateTxn.serialize().length / 2;
+        deadline = aggregateTxn.deadline.adjustedValue.compact();
+    }
+    else{
+        blockHeight = transactionInfo.height.compact();
+
+        // wait SDK to fix
+        try {
+            txnBytes = txn.serialize().length / 2;
+        } catch (error) {
+            console.log(error);
+        }
+        deadline = txn.deadline.adjustedValue.compact();
+    }
+
+    let blockInfo = await AppState.chainAPI.blockAPI.getBlockByHeight(blockHeight);
+
+    let fee = txnBytes * blockInfo.feeMultiplier;
+
+    let formattedTxn: ConfirmedTransaction = new ConfirmedTransaction(txnHash);
+    formattedTxn.block = blockHeight;
+    formattedTxn.deadline = deadline;
+    formattedTxn.type = TransactionUtils.getTransactionTypeName(txn.type);
+    formattedTxn.maxFee = transactionInfo instanceof AggregateTransactionInfo ? 
+        null : TransactionUtils.convertToExactNativeAmount(txn.maxFee.compact());
+
+    formattedTxn.signer = txn.signer.publicKey;
+    formattedTxn.signerAddress = txn.signer.address.plain();
+
+    formattedTxn.fee = TransactionUtils.convertToExactNativeAmount(fee);
+
+    if(transactionInfo instanceof AggregateTransactionInfo){
+        formattedTxn.fee = null;
+    }
+
+    formattedTxn.timestamp = new Date(blockInfo.timestamp.compact() + Deadline.timestampNemesisBlock * 1000).toISOString()
+
+    return formattedTxn;
+  }
+
+
+  static async formatConfirmedMixedTxns(txns: Transaction[]): Promise<ConfirmedTransferTransaction[]>{
+
+    let formatedTxns : ConfirmedTransferTransaction[] = [];
+
+    for(let i=0; i < txns.length; ++i){
+      let formattedTxn = await TransactionUtils.formatConfirmedTransaction(txns[i]);
+      let txn = ConfirmedTransaction.convertToSubClass(ConfirmedTransferTransaction, formattedTxn) as ConfirmedTransferTransaction;
+     
+      let sdas: SDA[] = [];
+
+      if(txns[i].type === TransactionType.TRANSFER){
+        let transferTxn = txns[i] as TransferTransaction;
+        txn.message = transferTxn.message.payload;
+        txn.messageType = transferTxn.message.type;
+
+        if(txn.messageType === MessageType.PlainMessage){
+          let newType = TransactionUtils.convertToSwapType(txn.message);
+          if(newType){
+            txn.type = newType;
+          }
+        }
+        switch(txn.messageType){
+          case MessageType.PlainMessage:
+            txn.messageTypeTitle = "Plain Message";
+            break;
+          case MessageType.EncryptedMessage:
+            txn.messageTypeTitle = "Encrypted Message";
+            break;
+          case MessageType.HexadecimalMessage:
+            txn.messageTypeTitle = "Hexadecimal Message";
+            break;
+        }
+        let recipientIsNamespace = transferTxn.recipient instanceof NamespaceId ? true : false;
+
+        if(transferTxn.recipient instanceof NamespaceId){
+          txn.recipientNamespaceId = transferTxn.recipient.toHex();
+          let namespacesName = await TransactionUtils.getNamespacesName([transferTxn.recipient]);
+          txn.recipientNamespaceName = namespacesName[0].name;
+        }
+
+        let recipient = await TransactionUtils.getRecipient(transferTxn, txn.block);
+
+        txn.recipient = recipient.plain();
+        txn.sender = transferTxn.signer.address.plain();
+        txn.in_out = false;
+
+        for(let y = 0; y < transferTxn.mosaics.length; ++y){
+
+          let rawAmount = transferTxn.mosaics[y].amount.compact();
+          let actualAmount = rawAmount;
+          let isSendWithNamespace = TransactionUtils.isNamespace(transferTxn.mosaics[y].id);
+          let assetId = await TransactionUtils.getResolvedAsset(transferTxn.mosaics[y].id, txn.block);
+          let assetIdHex = assetId.toHex();
+
+          if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
+            txn.amountTransfer += TransactionUtils.convertToExactNativeAmount(actualAmount);
+            continue;
+          }
+
+          let newSDA: SDA = {
+            amount: rawAmount,
+            divisibility: 0,
+            id: assetIdHex,
+            amountIsRaw: true,
+            sendWithNamespace: isSendWithNamespace
+          };
+
+          if(isSendWithNamespace){
+            let namespaceId = transferTxn.mosaics[y].id;
+
+            newSDA.sendWithAlias = {
+              idHex: namespaceId.toHex(),
+              id: namespaceId.toDTO().id
+            }
+          }
+
+          sdas.push(newSDA);
+        }
+
+        let namespaceIds = sdas.filter(sda => sda.sendWithNamespace).map(sda => Helper.createNamespaceId(sda.sendWithAlias.id));
+
+        let allAssetId = sdas.filter(sda =>{ 
+            return sda.amountIsRaw
+        }).map(sda => Helper.createAssetId(sda.id));
+
+        if(namespaceIds.length || allAssetId.length){
+          let namespacesNames: NamespaceName[] = [];
+          namespacesNames = await AppState.chainAPI.namespaceAPI.getNamespacesName(namespaceIds);
+          let assetsProperties = await AppState.chainAPI.assetAPI.getMosaics(allAssetId);
+          let aliasNames: MosaicNames[] = await AppState.chainAPI.assetAPI.getMosaicsNames(allAssetId);
+
+          for(let x= 0; x < sdas.length; ++x){
+
+            let assetProperties = assetsProperties.filter(aliasName=> aliasName.mosaicId.toHex() === sdas[x].id)[0];
+
+            sdas[x].divisibility = assetProperties.divisibility;
+            sdas[x].amount = TransactionUtils.convertToExactAmount(sdas[x].amount, assetProperties.divisibility);
+            sdas[x].amountIsRaw = false;
+
+            let mosaicNames: MosaicNames = aliasNames.filter(aliaName => aliaName.mosaicId.toHex() === sdas[x].id)[0];
+            let currentAliasNames: NamespaceName[] = mosaicNames.names;
+            sdas[x].currentAlias = currentAliasNames.map(currentAlias =>{ 
+                return { name: currentAlias.name, id: currentAlias.namespaceId.toDTO().id, idHex: currentAlias.namespaceId.toHex() }
+            });
+
+            if(sdas[x].sendWithAlias){
+              sdas[x].sendWithAlias.name = namespacesNames
+                .filter(nsName => nsName.namespaceId.toHex() === sdas[x].sendWithAlias.idHex)
+                .map(nsName => nsName.name)[0]
+            }
+          }
+        }
+      }
+      txn.sda = sdas;
+      formatedTxns.push(txn);
+
+     
+    }
+
+    return formatedTxns;
   }
 }
 

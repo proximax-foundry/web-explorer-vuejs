@@ -5,9 +5,9 @@ import { ChainConfigHttp, ChainHttp, AccountHttp, NamespaceHttp, MosaicHttp, Con
   AccountInfo, Transaction, TransactionQueryParams, SignedTransaction, TransactionType, NamespaceName, Mosaic, MosaicInfo,
   NamespaceInfo, TransactionGroupType, TransactionSearch
 } from "tsjs-xpx-chain-sdk";
-import { NetworkConfig } from "../models/stores/chainProfileConfig";
-import { ChainAPICall } from "../models/REST/chainAPICall";
-import { networkState } from "../state/networkState";
+import { NetworkConfig } from "@/models/stores/chainProfileConfig";
+import { ChainAPICall } from "@/models/REST/chainAPICall";
+import { networkState } from "@/state/networkState";
 import { computed } from "vue";
 
 const currentEndPoint = computed(() => networkState.selectedAPIEndpoint);

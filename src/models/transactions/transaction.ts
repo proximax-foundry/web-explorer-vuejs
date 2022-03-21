@@ -3,3 +3,4 @@ export * from "./sda";
 export * from "./inner/inner";
 export * from "./restrictionModification";
 export * from "./exchangeOffer";
+export * from "./confirmed/confirmed";
