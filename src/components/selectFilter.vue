@@ -37,7 +37,8 @@ export default defineComponent({
       { label:'Block', val: 'block' },
       { label:'Asset ID', val: 'assetID' },
       { label:'Namespace', val: 'namespaceID' },
-      { label:'Address', val: 'address' }
+      { label:'Address', val: 'address' },
+      { label:'Public Key', val: 'publicKey' }
     ]);
 
     const selectedFilter = ref(props.modelValue);
