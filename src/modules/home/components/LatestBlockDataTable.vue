@@ -60,7 +60,7 @@
       <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem;" field="Validator" header="Validator" v-if="wideScreen"> 
         <template #body="{data}" > 
           <div>
-            <router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signer.publicKey}}" class="uppercase text-txs text-blue-primary inline-flex w-80 mt-4"><span class="text-txs" v-tooltip.bottom="data.signer.publicKey">{{shortenedPublicKey(data.signer.publicKey)}}</span></router-link>        
+            <router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signer.publicKey}}" class="uppercase text-txs inline-flex w-80 mt-4 text-blue-600 hover:text-blue-primary hover:underline"><span class="text-txs" v-tooltip.bottom="data.signer.publicKey">{{shortenedPublicKey(data.signer.publicKey)}}</span></router-link>        
             <div class="text-xxs text-gray-500 mb-4">{{data.numTransactions>1?data.numTransactions+" trxs":data.numTransactions+" trx"}}</div>
           </div>
         </template> 
