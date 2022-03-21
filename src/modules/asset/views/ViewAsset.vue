@@ -1,22 +1,27 @@
 <template>
-  <div>
+<div>
     <p class="text-gray-500 mb-5 text-sm font-bold">
-      Asset <span class="text-blue-primary font-bold">{{assets.name}}</span>
+        Asset <span class="text-blue-primary font-bold">{{assetname}}</span>
     </p>
+    <div v-if="isShowInvalid">
+     
+      <div class="p-3 bg-yellow-100 text-yellow-700">Asset is not available in {{ networkName }}</div>
+    </div>
+    <div v-else>
     <div class="md:grid md:grid-cols-2">
       <div class="filter shadow-xl border border-gray-50 p-5 mb-15 md:mr-2">
         <div class="text-xs font-bold mb-5">Overview</div>
-        <div class="txn-div">
-          <div>
-            <div>Total Supply </div>
-            <div>{{assets.supply}}</div>
-          </div>
-          <div>
-            <div>Decimals</div>
-            <div>{{assets.divisibility}}</div>
+          <div class="txn-div">
+            <div>
+              <div>Total Supply </div>
+              <div>{{Helper.toCurrencyFormat(assets.supply,assets.divisibility)}}</div>
+            </div>
+            <div>
+              <div>Decimals</div>
+              <div>{{assets.divisibility}}</div>
+            </div>
           </div>
         </div>
-      </div>
       <div class="filter shadow-xl border border-gray-50 p-5 mb-15 sm:ml-2">
         <div class="text-xs font-bold mb-5">More Info</div>
         <div class="txn-div">
@@ -30,7 +35,7 @@
           </div>
           <div>
             <div>Expiry</div>
-            <div class="font-bold">{{assets.expiry==0?"NIL":assets.expiry}}</div>
+            <div class="font-bold">{{assets.expiry==0?'NIL':assets.expiry}}</div>
           </div>
           <div>
             <div>Supply Mutable</div>
@@ -41,18 +46,18 @@
         </div>
       </div>
     </div>
-    
     <div class="filter shadow-xl border border-gray-50 p-5 mb-15">
       <div class="flex items-center mb-4 border-b border-gray-100 relative">
-        <div class="w-32 font-bold text-xs text-center p-2 relative" :class="`${ (currentPage != 'rich')?'cursor-pointer':'' }`" @click="currentPage = 'rich'">Richlist<div v-if="currentPage == 'rich'" class="absolute w-full border-b border-yellow-500 transition-all duration-200" style="bottom: -1px;"></div></div>
-        <div class="w-32 font-bold text-xs text-center p-2 relative" :class="`${ (currentPage != 'metadata')?'cursor-pointer':'' }`" @click="currentPage = 'metadata'">Metadata<div v-if="currentPage == 'metadata'" class="absolute w-full border-b border-yellow-500 transition-all duration-200" style="bottom: -1px;"></div></div>
+        <div class="w-32 font-bold text-xs text-center p-2 relative" :class="`${ (currentComponent == 'rich')?'cursor-pointer':'' }`" @click="setCurrentComponent('rich')">Richlist<div v-if="currentComponent == 'rich'" class="absolute w-full border-b border-yellow-500 transition-all duration-200" style="bottom: -1px;"></div></div>
+        <div class="w-32 font-bold text-xs text-center p-2 relative" :class="`${ (currentComponent == 'metadata')?'cursor-pointer':'' }`" @click="setCurrentComponent('metadata')">Metadata<div v-if="currentComponent == 'metadata'" class="absolute w-full border-b border-yellow-500 transition-all duration-200" style="bottom: -1px;"></div></div>
       </div>
       <transition name="slide">
-        <RichlistComponent v-if="currentPage == 'rich'" :transactions="richList" />
-        <InnerTxnComponent v-else />
+        <RichlistComponent v-if="currentComponent == 'rich'" :transactions="richList" :supply="assets.supply"  :divisibility="assets.divisibility" />
+        <!-- <InnerTxnComponent v-else-if="currentComponent == 'metadata'" /> -->
       </transition>
     </div>
   </div>
+</div>
 </template>
 
 <script>
@@ -61,18 +66,27 @@ import RichlistComponent from '@/modules/asset/components/RichlistComponent.vue'
 import InnerTxnComponent from '@/modules/transaction/components/InnerTxnComponent.vue';
 import {TransactionHttp, Mosaic, MosaicId, UInt64} from "tsjs-xpx-chain-sdk";
 import { AppState } from '@/state/appState';
-import { ChainUtils } from '@/util/chainUtils';
+import { AssetUtils } from '@/util/assetUtil';
+import { NamespaceUtils } from '@/util/namespaceUtil';
+import { Helper } from '@/util/typeHelper';
+import { networkState } from '@/state/networkState';
 
 export default {
   name: 'ViewAsset',
   components: {
     RichlistComponent,
-    InnerTxnComponent
+   // InnerTxnComponent
   },
   props: {
     id: String
   },
   setup(props){
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    const currentComponent = ref('rich');
+    const isShowInvalid = ref(false);
+    const richList = ref([]);
+    const assetname = ref(null);
     const assets = ref({
       owner: '',
       height:0,
@@ -81,48 +95,70 @@ export default {
       supply: 0,
       divisibility: 0,
       supplyMutable: false,
-      transferable: false,
-      revision: 0,
-      name: ''
+      transferable: false
     });
-    const richList = ref([]);
 
+    const setCurrentComponent = (page) => {
+      currentComponent.value = page;
+    }
+    const networkName = computed(() => {
+      return networkState.chainNetworkName;
+    });
     const loadAsset = async() => {
-      //const asset = await AppState.chainAPI.assetAPI.getMosaic(new MosaicId(props.id));
-      //const test = await AppState.chainAPI.assetAPI.getMosaicsNames(new MosaicId(props.id));
-      //console.log(test.length);
-      const asset = await ChainUtils.getAssetProperties(props.id);
-      const richlist = await ChainUtils.getRichList(props.id);
-      richList.value = richlist;
-if(richlist.length>0){
-  currentPage.value = 'rich';
-}
-      console.log(richList.value);
-      richlist[1].address.pretty;
-
-       if(asset){
-         assets.value = {
+      const asset = await AssetUtils.getAssetProperties(props.id);     
+      const richlist = await AssetUtils.getRichList(props.id);
+      const assetName = await AssetUtils.getAssetName(props.id);
+       
+      console.log(asset);
+      if(asset!=false){
+        assets.value = {
           owner: asset.owner.address.pretty(),
           height: asset.height.compact(),
           assetId: asset.mosaicId.toHex(),
-          expiry: 0,
+          expiry: asset.duration.compact(),
           supply: asset.supply.compact(),
           divisibility: asset.divisibility,
           supplyMutable: asset.isSupplyMutable(),
-          transferable: asset.isTransferable(),
-          revision: asset.revision,
-          name: "HALLO"
-          }
-          
-       }
-     }
-     loadAsset();
-    const currentPage = ref('rich');
+          transferable: asset.isTransferable()
+        }
+        if(assetName!=false){
+          assetname.value = assetName.names[0].name;
+        }else{
+          assetname.value = null;
+        }
+        richList.value = richlist;
+      }else{
+        isShowInvalid.value = true;
+      }
+    }
+
+    if(AppState.isReady){
+      loadAsset();
+    }else{
+      let readyWatcher = watch(AppState, (value) => {
+        if(value.isReady){
+          loadAsset();
+          readyWatcher();
+        }
+      });
+    }
+
+    emitter.on('CHANGE_NETWORK', payload => {
+      if(payload){
+        loadAsset();
+      }
+    });
+    
     return {
-      currentPage,
+      currentComponent,
       loadAsset,
       assets,
-      richList
+      richList,
+      Helper,
+      setCurrentComponent,
+      assetname,
+      isShowInvalid,
+      networkName
     }
   }
 }

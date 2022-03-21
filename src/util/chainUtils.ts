@@ -3,7 +3,7 @@ import { ChainConfigHttp, ChainHttp, AccountHttp, NamespaceHttp, MosaicHttp, Con
   NamespaceId,
   MosaicId, Address, PublicAccount, CosignatureSignedTransaction, Statement,
   AccountInfo, Transaction, TransactionQueryParams, SignedTransaction, TransactionType, NamespaceName, Mosaic, MosaicInfo,
-  NamespaceInfo, TransactionGroupType, TransactionSearch, RichlistEntry
+  NamespaceInfo, TransactionGroupType, TransactionSearch, RichlistEntry, QueryParams, PageQueryParams, BlockchainStorageInfo, MosaicNames, LimitType, BlockInfo
 } from "tsjs-xpx-chain-sdk";
 import { NetworkConfig } from "../models/stores/chainProfileConfig";
 import { ChainAPICall } from "../models/REST/chainAPICall";
@@ -12,7 +12,8 @@ import { computed } from "vue";
 
 const currentEndPoint = computed(() => networkState.selectedAPIEndpoint);
 const connectionPort = computed(() => networkState.currentNetworkProfile.httpPort);
-const currentNetworkType = computed(() => networkState.currentNetworkProfile.network.type);
+const currentNetworkType = computed(() => networkState.currentNetworkProfile?.network.type);
+
 export class ChainUtils{
 
     static buildWSEndpoint(endpoint :string, port: number | undefined){
@@ -294,7 +295,23 @@ export class ChainUtils{
 
       return namespaceNames;
     }
+    
+    static async getNamespaceInfo(namespaceId: NamespaceId): Promise<NamespaceInfo> {
+      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
 
+      let namespaceInfo = await chainRESTCall.namespaceAPI.getNamespace(namespaceId);
+
+      return namespaceInfo;
+    }
+
+    static async getNamespacesFromAccount(address: Address): Promise<NamespaceInfo[]> {
+      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
+
+      let namespaceList = await chainRESTCall.namespaceAPI.getNamespacesFromAccount(address);
+
+      return namespaceList;
+    }
+  
     static async getAssetProperties(assetIdHex: string): Promise<MosaicInfo>{
 
       let assetId = new MosaicId(assetIdHex);
@@ -304,10 +321,19 @@ export class ChainUtils{
       let assetInfo = await chainRESTCall.assetAPI.getMosaic(assetId);
 
       return assetInfo;
-  }
+    }
   
-  
+    static async getRichList(assetIdHex: string, queryParams?: PageQueryParams): Promise<RichlistEntry[]> {
 
+      let assetId = new MosaicId(assetIdHex);
+
+      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
+
+      let richListInfo = await chainRESTCall.assetAPI.getMosaicRichlist(assetId, queryParams);
+
+      return richListInfo;
+    }
+  
     static async getAssetsProperties(assetIds: MosaicId[]): Promise<MosaicInfo[]>{
 
       let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
@@ -315,18 +341,16 @@ export class ChainUtils{
       let assetInfos = await chainRESTCall.assetAPI.getMosaics(assetIds);
 
       return assetInfos;
-  }
+    }
   
-    static async getRichList(assetIdHex: string, queryParams?: TransactionQueryParams): Promise<RichlistEntry[]> {
-
-      let assetId = new MosaicId(assetIdHex);
-
+    static async getAssetName(assetId: string): Promise<MosaicNames> {
       let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
 
-      let richList = await chainRESTCall.assetAPI.getMosaicRichlist(assetId, queryParams);
+      let mosaicId = new MosaicId(assetId);
+      let assetNames = await chainRESTCall.assetAPI.getMosaicsNames([mosaicId]);
 
-      return richList;
-  }
+      return assetNames[0];
+    } 
   
     static async getBlockReceipt(blockHeight: number): Promise<Statement>{
 
@@ -336,12 +360,21 @@ export class ChainUtils{
 
       return statement;
     }
+  
+    static async getBlocksByHeightWithLimit(height: number, limitType?: LimitType): Promise<BlockInfo[]> {
+      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
+      let blockInfo = await chainRESTCall.blockAPI.getBlocksByHeightWithLimit(height, limitType);
+      return blockInfo;
+    }
+    
+    static async getDiagnosticStorage(): Promise<BlockchainStorageInfo> {
 
-    static async getNamespaceInfo(namespaceId: NamespaceId): Promise<NamespaceInfo>{
       let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
 
-      let namespaceInfo = await chainRESTCall.namespaceAPI.getNamespace(namespaceId);
+      let blockChainStorageInfo = await chainRESTCall.diagnosticAPI.getDiagnosticStorage();
 
-      return namespaceInfo;
+      return blockChainStorageInfo;
     }
+
+  
 }
