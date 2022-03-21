@@ -1,11 +1,11 @@
 <template>
   <footer class="z-10 w-full">
     <div class="bg-blue-theme">
-      <div class="container mx-auto sm:grid-cols-2 lg:grid-cols-4 grid">
-        <div class="flex py-10 col-span-2">
-          <div class="mr-7"><img src="@/assets/img/proximax-logo-footer.svg" class="w-7"></div>
+      <div class="md:container mx-auto sm:grid-cols-2 lg:grid-cols-4 grid">
+        <div class="flex py-10 sm:col-span-2">
+          <div class="mx-3 sm:mx-7"><img src="@/assets/img/proximax-logo-footer.svg" class="w-7"></div>
           <div>
-            <div class="text-xs text-white mb-5">Copyright 2022 ProximaX. All rights reserved.</div>
+            <div class="text-xxs sm:text-xs text-white mb-5">Copyright 2022 ProximaX. All rights reserved.</div>
             <div>
               <p class="media-link">
                 <a href="http://t.me/ProximaXio" target=_new><font-awesome-icon :icon="faTelegramPlane" class="w-4 h-4" /></a>
@@ -25,8 +25,8 @@
             </div>
           </div>
         </div>
-        <div class="col-span-1 p-10">
-          <div class="text-white text-tsm mb-4">For Developers</div>
+        <div class="sm:col-span-1 p-3 sm:p-5 md:px-2 md:my-5 mx-1 md:mx-5">
+          <div class="text-white text-xs md:text-tsm mb-4">For Developers</div>
           <div class="links">
             <a href="https://bcdocs.xpxsirius.io/" target="=_new">Getting Started</a>
             <a href="https://www.proximax.io/en/wallet" target="=_new">Create Sirius Wallet Account</a>
@@ -34,8 +34,8 @@
             <a href="https://www.proximax.io/en#Participate" target="=_new">Become a Node Participant</a>
           </div>
         </div>
-        <div class="col-span-1 p-10">
-          <div class="text-white text-tsm mb-4">Company</div>
+        <div class="sm:col-span-1 p-3 sm:p-5 md:px-2 md:my-5 mx-1 md:mx-5">
+          <div class="text-white text-xs md:text-tsm mb-4">Company</div>
           <div class="links">
             <a href="https://www.proximax.io/technology/#Architecture" target=_new>Platform</a>
             <a href="https://www.proximax.ltd/en" target=_new>About</a>
@@ -85,12 +85,12 @@ export default {
 .policy-link{
   @apply text-gray-300;
   a{
-    @apply text-xs underline hover:text-white hover:no-underline transition-all duration-200;
+    @apply text-xxs sm:text-xs underline hover:text-white hover:no-underline transition-all duration-200;
   }
 }
 
 .links{
-  @apply text-gray-400 text-tsm;
+  @apply text-gray-400 text-xs sm:text-tsm;
   a{
     @apply block mb-1 transition-all duration-200 hover:text-white;
   }
