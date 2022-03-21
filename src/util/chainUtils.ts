@@ -310,29 +310,7 @@ export class ChainUtils{
       let namespaceList = await chainRESTCall.namespaceAPI.getNamespacesFromAccount(address);
 
       return namespaceList;
-    }
-  
-    static async getAssetProperties(assetIdHex: string): Promise<MosaicInfo>{
-
-      let assetId = new MosaicId(assetIdHex);
-
-      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
-
-      let assetInfo = await chainRESTCall.assetAPI.getMosaic(assetId);
-
-      return assetInfo;
-    }
-  
-    static async getRichList(assetIdHex: string, queryParams?: PageQueryParams): Promise<RichlistEntry[]> {
-
-      let assetId = new MosaicId(assetIdHex);
-
-      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
-
-      let richListInfo = await chainRESTCall.assetAPI.getMosaicRichlist(assetId, queryParams);
-
-      return richListInfo;
-    }
+    }  
   
     static async getAssetsProperties(assetIds: MosaicId[]): Promise<MosaicInfo[]>{
 
@@ -342,15 +320,6 @@ export class ChainUtils{
 
       return assetInfos;
     }
-  
-    static async getAssetName(assetId: string): Promise<MosaicNames> {
-      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
-
-      let mosaicId = new MosaicId(assetId);
-      let assetNames = await chainRESTCall.assetAPI.getMosaicsNames([mosaicId]);
-
-      return assetNames[0];
-    } 
   
     static async getBlockReceipt(blockHeight: number): Promise<Statement>{
 
