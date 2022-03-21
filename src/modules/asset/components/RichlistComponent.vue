@@ -30,7 +30,7 @@
           <template #body="{data}">
             <div>
               <div class="uppercase text-xxs text-gray-300 font-bold mb-1">PERCENTAGE</div>
-              <div class="uppercase font-bold text-txs">{{getPercentage(data.amount.compact())}}</div>
+              <div class="uppercase font-bold text-txs">{{getPercentage(data.amount.compact())}}%</div>
               <div class="uppercase text-xxs text-gray-300 font-bold mt-2 mb-1">NAMESPACE</div>
               <div class="uppercase font-bold text-txs">{{getLinkedNamespace(data.address)&&linkednamespaceID==null?"No Linked Namespace":linkednamespaceID}}</div>
             </div>
