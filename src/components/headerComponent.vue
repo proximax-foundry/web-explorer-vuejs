@@ -17,7 +17,7 @@
               <div class="header-links">
                 <a href="#">Blocks</a>
                 <router-link :to="{name: 'ViewTransactionList'}">Transactions</router-link>
-                <a href="#">Accounts</a>
+                <!-- <a href="#">Accounts</a> -->
               </div>
               <selectNetwork class="ml-5" />
             </div>
