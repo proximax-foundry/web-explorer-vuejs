@@ -8,6 +8,7 @@ import {
   MultisigCosignatoryModification,
   MultisigCosignatoryModificationType,
   AccountInfo,
+  MultisigAccountGraphInfo,
   MultisigAccountInfo,
   Mosaic,
   NamespaceId,

@@ -4,7 +4,7 @@
     <div v-if="isShowInvalid" class="p-3 bg-yellow-100 text-yellow-700">Account is not available in {{ networkName }}</div>
     <div v-else>
       <div>
-        <AccountComponent :address="strAddress" :publicKey="strPublicKey" :linkAccount="delegatePublicKey" :namespace="matchedNamespace" :multisig="multisigLength" class="mb-10" />
+        <AccountComponent :address="strAddress" :publicKey="strPublicKey" :linkAccount="delegatePublicKey" :namespace="matchedNamespace" :multisig="cosignatoriesLength" class="mb-10" />
       </div>
       <div class="flex text-xs font-semibold border-b-2 menu_title_div">
         <div class="w-18 text-center cursor-pointer pb-3" :class="`${ (currentComponent=='asset')?'border-yellow-500 border-b-2':'' }`" @click="setCurrentComponent('asset')">Assets</div>
