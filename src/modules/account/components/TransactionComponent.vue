@@ -22,7 +22,7 @@
             <div>
               <div class="uppercase text-xxs text-gray-300 font-bold mb-1 break-all">Tx Hash</div>
               <router-link class="uppercase font-bold text-txs block" :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}">
-                <span class="text-txs break-all hover:underline hover:text-blue-primary" v-tooltip.right="data.hash">{{data.hash }}</span>
+                <span class="text-txs break-all text-blue-600 hover:text-blue-primary hover:underline" v-tooltip.right="data.hash">{{data.hash }}</span>
               </router-link>
             </div>
             <div>
@@ -35,7 +35,7 @@
               <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5" v-if="data.recipient != '' && data.recipient != null">Receipient</div>
               <div class="uppercase font-bold text-txs">
                 <span v-if="data.recipient === '' || data.recipient === null"></span>
-                <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.recipient }}" v-tooltip.right="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs break-all hover:underline hover:text-blue-primary">{{ Helper.createAddress(data.recipient).pretty() }}</router-link>
+                <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.recipient }}" v-tooltip.right="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs break-all text-blue-600 hover:text-blue-primary hover:underline">{{ Helper.createAddress(data.recipient).pretty() }}</router-link>
               </div>
             </div>
           </template>
@@ -50,7 +50,7 @@
               <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Sender</div>
               <div class="uppercase font-bold text-txs">
                 <span v-if="data.sender === '' || data.sender === null"></span>
-                <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.sender }}" v-else v-tooltip.right="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-txs break-all hover:underline hover:text-blue-primary">
+                <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.sender }}" v-else v-tooltip.right="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-txs break-all text-blue-600 hover:text-blue-primary hover:underline">
                   {{ data.sender.substring(0, 20) }}...
                 </router-link>
               </div>
@@ -63,7 +63,7 @@
         </Column>
         <Column field="hash" header="TX HASH" headerStyle="width:100px" v-if="wideScreen">
           <template #body="{data}">
-            <router-link :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}" class="text-txs hover:text-blue-primary hover:underline" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 15) }}...</router-link>
+            <router-link :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}" class="text-txs text-blue-600 hover:text-blue-primary hover:underline" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 15) }}...</router-link>
           </template>
         </Column>
         <Column field="timestamp" v-if="wideScreen" header="TIMESTAMP" headerStyle="width:110px">
@@ -84,7 +84,7 @@
         <Column field="signer" header="SENDER" headerStyle="width:110px" v-if="wideScreen">
           <template #body="{data}">
             <span v-if="data.sender === '' || data.sender === null"></span>
-            <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.sender }}" v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-txs hover:text-blue-primary hover:underline">
+            <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.sender }}" v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-txs text-blue-600 hover:text-blue-primary hover:underline">
               {{ shortenedAddress(Helper.createAddress(data.sender).pretty()) }}
             </router-link>
           </template>
@@ -92,7 +92,7 @@
         <Column field="recipient" header="RECIPIENT" headerStyle="width:110px" v-if="wideScreen">
           <template #body="{data}">
             <span v-if="data.recipient === '' || data.recipient === null"></span>
-            <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.recipient }}" v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs hover:text-blue-primary hover:underline">{{ shortenedAddress(Helper.createAddress(data.recipient).pretty()) }}</router-link>
+            <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.recipient }}" v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs text-blue-600 hover:text-blue-primary hover:underline">{{ shortenedAddress(Helper.createAddress(data.recipient).pretty()) }}</router-link>
           </template>
         </Column>
         <Column header="TX FEE" v-if="wideScreen" headerStyle="width:110px">
