@@ -40,6 +40,7 @@ export class ChainAPICall {
         this.namespaceAPI = new NamespaceAPI(endpoint, this.networkAPI.networkHttp); 
         
         this.chainAPI = new ChainAPI(endpoint);
+        console.log(this.chainAPI);
         this.chainConfigAPI = new ChainConfigAPI(endpoint);
         this.diagnosticAPI = new DiagnosticAPI(endpoint);
         this.nodeAPI = new NodeAPI(endpoint);

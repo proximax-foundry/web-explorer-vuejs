@@ -102,7 +102,8 @@ export class AccountUtils{
           return 0;
       });
       return namespaceObj;
-    } catch(error){
+    } catch (error) {
+      console.log(error);
       return false;
     }
   }
