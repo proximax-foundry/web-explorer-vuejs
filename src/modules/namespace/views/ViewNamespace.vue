@@ -114,7 +114,7 @@ export default {
       }
 
       let fetchInfo = await NamespaceUtils.fetchNamespaceInfo(props.namespaceParam);
-      if(fetchInfo!= false){
+      if(fetchInfo != false){
         namespaceInfo.value = fetchInfo;
         isShowInvalid.value = false;
       }else{

@@ -9,7 +9,7 @@
           <div class="mx-3 md:mx-0">
             <div class="border border-gray-300 my-1 searchbar flex bg-white">
               <selectFilter :selected="searchFilter" class="inline-block border-r border-gray-300" @selected-filter="updateFilter" />
-              <input type="text" placeholder="Search by Address / Txn Hash / Namespace / Asset ID" class="text-tsm sm:w-48 lg:w-96 outline-none px-2 py-1 flex-grow" @keyup.enter="search">
+              <input type="text" :placeholder="searchPlaceHolder" class="text-tsm sm:w-48 lg:w-96 outline-none px-2 py-1 flex-grow" @keyup.enter="search">
               <div class="hover:bg-blue-100 cursor-pointer flex justify-center items-center w-10">
                 <img src="@/assets/img/icon-search.svg" class="w-4 inline-block">
               </div>
@@ -33,7 +33,9 @@
 <script>
 import selectNetwork from '@/components/selectNetwork.vue';
 import selectFilter from '@/components/selectFilter.vue';
-import { defineComponent, getCurrentInstance, inject, ref, watch } from "vue";
+import { SearchUtils } from '@/util/searchUtil';
+import { useRouter } from "vue-router";
+import { defineComponent, getCurrentInstance, inject, ref, computed } from "vue";
 export default {
   components: {
     selectNetwork,
@@ -43,19 +45,59 @@ export default {
   name: 'headerComponent',
 
   setup(){
+    const router = useRouter();
     const searchFilter = ref('all');
-    const search = () => {
-      console.log('hello');
+    const search = async (e) => {
+      let searchResult = await SearchUtils.search(e.target.value, searchFilter.value);
+      if(searchResult.valid){
+        switch(searchResult.searchType){
+          case 'Asset':
+            router.push({ name: 'ViewAsset', params: { id: searchResult.param } });
+            break;
+          case 'Address':
+            router.push({ name: 'ViewAccount', params: { accountParam: searchResult.param } });
+            break;
+          case 'Block':
+            router.push({ name: 'ViewBlock', params: { number: searchResult.param } });
+            break;
+          case 'Hash':
+            router.push({ name: 'ViewTransaction', params: { hash: searchResult.param } });
+            break;
+          case 'Namespace':
+            router.push({ name: 'ViewNamespace', params: { namespaceParam: searchResult.param } });
+            break;
+          case 'PublicKey':
+            router.push({ name: 'ViewAccount', params: { accountParam: searchResult.param } });
+            break;
+        }
+      }else{
+        console.log('Invalid')
+      }
     }
 
     const updateFilter = (e) => {
       searchFilter.value = e;
     }
 
+    let placeHolderString = [
+      { label: 'all', placeHolder: 'Search by Address / Txn Hash / Namespace / Asset ID' },
+      { label: 'tx', placeHolder: 'Search by Transaction Hash' },
+      { label: 'block', placeHolder: 'Search by Block Number' },
+      { label: 'assetID', placeHolder: 'Search by Asset ID or Asset Name' },
+      { label: 'namespaceID', placeHolder: 'Search by Namespace ID or Namespace Name' },
+      { label: 'address', placeHolder: 'Search by Address' },
+      { label: 'publicKey', placeHolder: 'Search by Public Key' }
+    ]
+
+    const searchPlaceHolder = computed(() => {
+      return placeHolderString.find(type => type.label == searchFilter.value).placeHolder;
+    });
+
     return {
       searchFilter,
       search,
-      updateFilter
+      updateFilter,
+      searchPlaceHolder,
     }
   }
 
