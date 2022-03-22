@@ -8,9 +8,11 @@
           </div>
           <div class="mx-3 md:mx-0">
             <div class="border border-gray-300 my-1 searchbar flex bg-white">
-              <selectFilter v-model="searchFilter" class="inline-block border-r border-gray-300" />
-              <input type="text" placeholder="Search by Address / Txn Hash / Namespace / Asset ID" class="text-tsm sm:w-48 lg:w-96 outline-none px-2 py-1 flex-grow">
-              <img src="@/assets/img/icon-search.svg" class="ml-2 w-4 inline-block mr-3">
+              <selectFilter :selected="searchFilter" class="inline-block border-r border-gray-300" @selected-filter="updateFilter" />
+              <input type="text" placeholder="Search by Address / Txn Hash / Namespace / Asset ID" class="text-tsm sm:w-48 lg:w-96 outline-none px-2 py-1 flex-grow" @keyup.enter="search">
+              <div class="hover:bg-blue-100 cursor-pointer flex justify-center items-center w-10">
+                <img src="@/assets/img/icon-search.svg" class="w-4 inline-block">
+              </div>
             </div>
             <div class="flex items-center justify-end">
               <router-link :to="{name : 'Home'}"><img src="@/assets/img/icon-home.svg" class="h-5 w-5 mr-4"></router-link>
@@ -42,9 +44,18 @@ export default {
 
   setup(){
     const searchFilter = ref('all');
+    const search = () => {
+      console.log('hello');
+    }
+
+    const updateFilter = (e) => {
+      searchFilter.value = e;
+    }
 
     return {
-      searchFilter
+      searchFilter,
+      search,
+      updateFilter
     }
   }
 

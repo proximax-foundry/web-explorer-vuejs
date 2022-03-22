@@ -11,7 +11,7 @@
 
     <div class="relative" v-if='toggleSelection'>
       <div class="absolute w-full z-50 bg-white max-h-60 overflow-auto px-1 filter drop-shodow-xl pb-2 border border-gray-300">
-        <div v-for='(item, index) in filterOptions' :key="index" class="py-3 flex cursor-pointer items-center hover:bg-gray-50 transition-all duration-300" @click="selectFilter(item.val);$emit('update:modelValue');">
+        <div v-for='(item, index) in filterOptions' :key="index" class="py-3 flex cursor-pointer items-center hover:bg-gray-50 transition-all duration-300" @click="selectFilter(item.val);">
           <div class='text-xs ml-2 font-semibold'>{{item.label}}</div>
         </div>
       </div>
@@ -25,9 +25,12 @@ import { computed, defineComponent, ref } from 'vue';
 
 export default defineComponent({
   name: 'selectFilter',
-  props:{
-    modelValue: string
-  },
+  props:[
+    'selected'
+  ],
+  emits:[
+    'selected-filter',
+  ],
   setup(props, {emit}){
     const toggleSelection = ref(false);
 
@@ -41,10 +44,10 @@ export default defineComponent({
       { label:'Public Key', val: 'publicKey' }
     ]);
 
-    const selectedFilter = ref(props.modelValue);
+    const selectedFilter = ref(props.selected);
 
     const selectedFilterTerm = computed(() => {
-      return filterOptions.value.find(filter => filter.val == selectedFilter.value).label;
+      return filterOptions.value.find(filter => filter.val == props.selected).label;
     });
 
     const selectFilter = (filterValue) => {
