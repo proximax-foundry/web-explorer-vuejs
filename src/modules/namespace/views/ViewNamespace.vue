@@ -91,7 +91,6 @@
 
 <script>
 import { computed, defineComponent, getCurrentInstance, inject, ref, watch } from "vue";
-// import { Id } from "tsjs-xpx-chain-sdk";
 import { networkState } from '@/state/networkState';
 import { AppState } from '@/state/appState';
 import { Helper } from "@/util/typeHelper";

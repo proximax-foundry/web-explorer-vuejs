@@ -69,6 +69,16 @@ const routes = [
       title: "View Namespace",
     }
   },
+
+  {
+    path: '/search/:type/:param',
+    name: 'ViewInvalidSearch',
+    props: true,
+    component: () => import('@/modules/search/views/ViewInvalidSearch.vue'),
+    meta: {
+      title: "View Invalid Search",
+    }
+  },
 ];
 
 const router = createRouter({

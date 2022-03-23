@@ -10,7 +10,12 @@
             <div class="border border-gray-300 my-1 searchbar flex bg-white">
               <selectFilter :selected="searchFilter" class="inline-block border-r border-gray-300" @selected-filter="updateFilter" />
               <input type="text" :placeholder="searchPlaceHolder" class="text-tsm sm:w-48 lg:w-96 outline-none px-2 py-1 flex-grow" @keyup.enter="search">
-              <div class="hover:bg-blue-100 cursor-pointer flex justify-center items-center w-10">
+              <div v-if="isSearching" class="flex justify-center items-center w-10">
+                <div class="flex justify-center items-center border-gray-400">
+                  <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-navy-primary mr-2"></div>
+                </div>
+              </div>
+              <div v-else class="hover:bg-blue-100 cursor-pointer flex justify-center items-center w-10">
                 <img src="@/assets/img/icon-search.svg" class="w-4 inline-block">
               </div>
             </div>
@@ -47,9 +52,12 @@ export default {
   setup(){
     const router = useRouter();
     const searchFilter = ref('all');
+    const isSearching = ref(false);
     const search = async (e) => {
+      isSearching.value = true;
       let searchResult = await SearchUtils.search(e.target.value, searchFilter.value);
       if(searchResult.valid){
+        isSearching.value = false;
         switch(searchResult.searchType){
           case 'Asset':
             router.push({ name: 'ViewAsset', params: { id: searchResult.param } });
@@ -71,7 +79,8 @@ export default {
             break;
         }
       }else{
-        console.log('Invalid')
+        isSearching.value = false;
+        router.push({ name: 'ViewInvalidSearch', params: { type:searchResult.searchType, param: searchResult.param } });
       }
     }
 
@@ -98,6 +107,7 @@ export default {
       search,
       updateFilter,
       searchPlaceHolder,
+      isSearching,
     }
   }
 

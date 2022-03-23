@@ -25,6 +25,8 @@ export interface searchResult{
   param: string;  // 'PublicKeyOrHash', 'AssetOrNamespace', 'Address', 'Block'
 }
 
+const regexNumeric = /^[0-9]+$/;
+
 export class SearchUtils{
   static async search (searchString:string, filter:string) :Promise<searchResult> {
     try {
@@ -114,7 +116,7 @@ export class SearchUtils{
                 };
               }
             }
-          }else if(!isNaN(parseInt(searchString))){ // block
+          }else if(regexNumeric.test(searchString)){ // block
             return {
               valid: true,
               searchType: 'Block',
@@ -176,7 +178,7 @@ export class SearchUtils{
             };
           }
         case 'block':
-          if(!isNaN(parseInt(searchString))){ // block
+          if(regexNumeric.test(searchString)){ // block
             return {
               valid: true,
               searchType: 'Block',
