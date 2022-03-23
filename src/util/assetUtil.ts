@@ -1,6 +1,5 @@
 import {
     MosaicId,
-    MosaicInfo,
     PageQueryParams,
     RichlistEntry,
     MosaicNames,
@@ -9,15 +8,37 @@ import { ChainUtils } from "./chainUtils";
 import { networkState } from '@/state/networkState';
 import { ChainAPICall } from "@/models/REST/chainAPICall";
 
+export interface AssetObj {
+    owner: string,
+    height: number,
+    assetId: string,
+    expiry: number,
+    supply: number,
+    divisibility: number,
+    supplyMutable: boolean,
+    transferable: boolean
+}
+
 export class AssetUtils {
    
-    static async getAssetProperties(assetIdHex: string): Promise<MosaicInfo | boolean> {
+    static async getAssetProperties(assetIdHex: string): Promise<AssetObj | boolean> {
         try {
             let assetId = new MosaicId(assetIdHex);
 
             let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile?.httpPort));
-
-            let assetInfo = await chainRESTCall.assetAPI.getMosaic(assetId);
+            let assetInfo: AssetObj;
+            let asset = await chainRESTCall.assetAPI.getMosaic(assetId);
+            
+            assetInfo = {
+                owner: asset.owner.address.pretty(),
+                height: asset.height.compact(),
+                assetId: asset.mosaicId.toHex(),
+                expiry: asset.duration.compact(),
+                supply: asset.supply.compact(),
+                divisibility: asset.divisibility,
+                supplyMutable: asset.isSupplyMutable(),
+                transferable: asset.isTransferable()
+            }
             return assetInfo;
         } catch (error) {
             return false;
@@ -45,6 +66,7 @@ export class AssetUtils {
 
             let mosaicId = new MosaicId(assetId);
             let assetNames = await chainRESTCall.assetAPI.getMosaicsNames([mosaicId]);
+            console.log(assetNames);
             return assetNames[0];
         } catch(error) {
             return false;

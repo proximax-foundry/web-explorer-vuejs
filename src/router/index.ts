@@ -51,7 +51,7 @@ const routes = [
   },
 
   {
-    path: '/block/:number',
+    path: '/block/:blockHeight',
     name: 'ViewBlock',
     props: true,
     component: () => import('@/modules/block/views/ViewBlock.vue'),
