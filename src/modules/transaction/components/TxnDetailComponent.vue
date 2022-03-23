@@ -62,7 +62,7 @@
     <div>
       <div>Signer</div>
       <div class="flex justify-start" v-if="txnDetail.signer">
-        <router-link :to="{ name: 'ViewAccount', params:{ accountParam: Helper.createAddress(txnDetail.signer).pretty() }}" class="hover:text-blue-primary hover:underline mr-2" id="signerAddress" :copyValue="Helper.createAddress(txnDetail.signer).pretty()" copySubject="Signer address">{{ Helper.createAddress(txnDetail.signer).pretty() }}</router-link>
+        <router-link :to="{ name: 'ViewAccount', params:{ accountParam: Helper.createAddress(txnDetail.signer).pretty() }}" class="text-blue-600 hover:text-blue-primary hover:underline mr-2" id="signerAddress" :copyValue="Helper.createAddress(txnDetail.signer).pretty()" copySubject="Signer address">{{ Helper.createAddress(txnDetail.signer).pretty() }}</router-link>
         <img src="@/assets/img/icon-copy.svg" @click="copy('signerAddress')" class="cursor-pointer" />
       </div>
     </div>
@@ -70,7 +70,7 @@
       <div>Cosigner{{ (txnDetail.cosigners.length>1)?'s':'' }}</div>
       <div>
         <div v-for="cosigner, item in txnDetail.cosigners" :key="item" class="flex items-center mb-3">
-          <router-link :to="{ name: 'ViewAccount', params:{ accountParam: Helper.createAddress(cosigner.signer.address.address).pretty() }}" class="hover:text-blue-primary hover:underline mr-2" :id="'cosigner'+item" :copyValue="Helper.createAddress(cosigner.signer.address.address).pretty()" copySubject="Cosigner address">{{ Helper.createAddress(cosigner.signer.address.address).pretty() }}</router-link>
+          <router-link :to="{ name: 'ViewAccount', params:{ accountParam: Helper.createAddress(cosigner.signer.address.address).pretty() }}" class="text-blue-600 hover:text-blue-primary hover:underline mr-2" :id="'cosigner'+item" :copyValue="Helper.createAddress(cosigner.signer.address.address).pretty()" copySubject="Cosigner address">{{ Helper.createAddress(cosigner.signer.address.address).pretty() }}</router-link>
           <img src="@/assets/img/icon-copy.svg" @click="copy('cosigner' + item)" class="cursor-pointer" />
         </div>
       </div>

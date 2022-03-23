@@ -2,11 +2,11 @@
   <header class="z-10 fixed w-full">
     <div class="bg-blue-theme">
       <div class="container mx-auto py-2">
-        <div class="flex justify-between">
-          <div class="flex items-center">
+        <div class="md:flex md:justify-between">
+          <div class="flex items-center justify-center mb-3 md:mb-0">
             <router-link :to="{name: 'Home'}"><img src="@/assets/img/proximax-logo.svg" class="w-40 mr-7"></router-link>
           </div>
-          <div>
+          <div class="mx-3 md:mx-0">
             <div class="border border-gray-300 my-1 searchbar flex bg-white">
               <selectFilter v-model="searchFilter" class="inline-block border-r border-gray-300" />
               <input type="text" placeholder="Search by Address / Txn Hash / Namespace / Asset ID" class="text-tsm sm:w-48 lg:w-96 outline-none px-2 py-1 flex-grow">
@@ -17,7 +17,7 @@
               <div class="header-links">
                 <a href="#">Blocks</a>
                 <router-link :to="{name: 'ViewTransactionList'}">Transactions</router-link>
-                <a href="#">Accounts</a>
+                <!-- <a href="#">Accounts</a> -->
               </div>
               <selectNetwork class="ml-5" />
             </div>

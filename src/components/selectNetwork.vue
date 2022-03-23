@@ -66,6 +66,7 @@ export default defineComponent({
     const init = () =>{
       let currentChainProfile = new ChainProfile(networkState.chainNetworkName);
       currentChainProfile.init();
+      networkState.currentNetworkProfile = currentChainProfile;
       node.value = currentChainProfile.apiNodes[0];
       if(!AppState.isReady){
         setTimeout(init, 1000);

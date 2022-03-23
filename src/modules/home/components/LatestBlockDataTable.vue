@@ -11,7 +11,7 @@
     </div>
     <div v-else>
     <DataTable
-      :value="transactions"
+      :value="blockDataTable"
       :paginator="true"
       :rows="20"
       responsiveLayout="scroll"
@@ -20,16 +20,16 @@
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       currentPageReportTemplate=""
     >
-        <Column style="width: 30px" v-if="!wideScreen">
-          <template #body="{data}">
-            <div class="ml-2">
-              <div class="uppercase text-xxs text-gray-300 font-bold">Height</div>
-              <div class="uppercase text-txs text-blue-primary">{{data.height.compact() }}</div>
-              <div class="text-xxs text-gray-500 mb-4">{{ countDuration(data.timestamp.compact()+ Deadline.timestampNemesisBlock * 1000)}} ago</div>
-            </div>
-          </template>
-        </Column>
-        <Column style="width: 100px" v-if="!wideScreen">
+      <Column style="width: 80px" v-if="!wideScreen">
+        <template #body="{data}">
+          <div class="ml-2">
+             <span class="uppercase text-xxs text-gray-300 font-bold">Height</span>
+            <div class="uppercase text-txs text-blue-primary">{{data.height.compact() }}</div>
+            <div class="text-xxs text-gray-500 mb-4">{{ countDuration(data.timestamp.compact()+ Deadline.timestampNemesisBlock * 1000)}} ago</div>
+          </div>
+        </template>
+      </Column>
+        <Column style="width: 220px" v-if="!wideScreen">
           <template #body="{data}">
             <div>
               <div class="uppercase text-xxs text-gray-300 font-bold">Validator</div>
@@ -40,7 +40,7 @@
             </div>
           </template>
         </Column>
-        <Column style="width: 120px" v-if="!wideScreen">
+        <Column style="width: 80px" v-if="!wideScreen">
           <template #body="{data}">
             <div>
               <div class="uppercase text-xxs text-gray-300 font-bold">fee</div>
@@ -52,7 +52,8 @@
       <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem; padding-left: 1rem;" field="Height" header="Height" v-if="wideScreen"> 
         <template #body="{data}"> 
           <div> 
-            <div class="uppercase text-txs text-blue-primary mt-4">{{data.height.compact() }}</div>
+            <div class="uppercase text-txs mt-4">
+            <router-link :to="{ name: 'ViewBlock', params: { blockHeight: data.height.compact()}}" class="truncate inline-block text-txs break-all text-blue-600 hover:text-blue-primary hover:underline"><span class="text-txs" v-tooltip.bottom="data.hash">{{data.height.compact()}}</span></router-link></div>
             <div class="text-xxs text-gray-500 mb-4">{{ countDuration(data.timestamp.compact()+ Deadline.timestampNemesisBlock * 1000)}} ago</div>
           </div>
         </template>           
@@ -60,7 +61,7 @@
       <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem;" field="Validator" header="Validator" v-if="wideScreen"> 
         <template #body="{data}" > 
           <div>
-            <router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signer.publicKey}}" class="uppercase text-txs text-blue-primary inline-flex w-80 mt-4"><span class="text-txs" v-tooltip.bottom="data.signer.publicKey">{{shortenedPublicKey(data.signer.publicKey)}}</span></router-link>        
+            <div class="uppercase text-txs text-blue-primary inline-flex w-80 mt-4"><router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signer.publicKey}}" class="uppercase text-txs text-blue-600 hover:text-blue-primary hover:underline inline-flex"><span class="text-txs" v-tooltip.bottom="data.signer.publicKey">{{shortenedPublicKey(data.signer.publicKey)}}</span></router-link></div>         
             <div class="text-xxs text-gray-500 mb-4">{{data.numTransactions>1?data.numTransactions+" trxs":data.numTransactions+" trx"}}</div>
           </div>
         </template> 
@@ -85,6 +86,7 @@ import { AppState } from '@/state/appState';
 import { ref, onMounted, onUnmounted, watch, getCurrentInstance } from 'vue';
 import { Deadline, LimitType } from 'tsjs-xpx-chain-sdk';
 import Tooltip from 'primevue/tooltip';
+import { HomeUtils } from "@/util/homeUtil"
 
 export default{
   components: { DataTable, Column },
@@ -97,10 +99,7 @@ export default{
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const wideScreen = ref(false);
     const isFetching = ref(true);
-    const getcurrentTimestamp = ref();
-    const transactions = ref([]);
-    const trxn = ref(0);
-    
+    const blockDataTable =  ref([]);
     const screenResizeHandler = () => {
       if(window.innerWidth < 1024){
         wideScreen.value = false;
@@ -123,98 +122,43 @@ export default{
       }else{
         return publicKey.substring(0, 4) + '...' + publicKey.substring(publicKey.length - 22, publicKey.length);
       }
-    }
-    const generateDatatable = async() => {
-      let trx = await AppState.chainAPI.diagnosticAPI.getDiagnosticStorage();
-      let txns = await AppState.chainAPI.blockAPI.getBlocksByHeightWithLimit(trx.numBlocks,LimitType.N_25);
-       
-      if(txns.length > 0){            
-        if(txns.length > 10){
-          let trx = txns.slice(0,10);
-          transactions.value = trx;
-        }else{
-          transactions.value = txns;
-        }
+    };
+
+    const getBlockDataTable = async() =>{
+      if(!AppState.isReady){
+        setTimeout(getBlockDataTable, 1000);
+        isFetching.value = true;
+        return;
       }
+      let trx = await HomeUtils.getDiagnosticStorage();
+      let blockData = await HomeUtils.getBlocksByHeightWithLimit(trx.numBlocks);
+      blockDataTable.value = blockData;
       isFetching.value = false;
     };
-   
-
+    
     const countDuration = (timestamp) =>{
-      let trxDuration = "";
-      const current = new Date().getTime();
-      const blockTimestamp = new Date(timestamp).getTime();
-      const getSeconds = parseInt(Math.abs(current-blockTimestamp)/(1000 * 60)*60); 
-      const getHour = Math.floor(getSeconds / 3600);
-      const getMinutes = Math.floor(getSeconds / 60);
-
-      if(getSeconds < 60){
-        let second = "s";
-        trxDuration = getSeconds + second ;
-      }else{
-        let hour = "";
-        if(getHour > 0){
-          if(getHour > 1){
-            hour = " hrs";
-          }else{
-            hour = " hr";
-          }
-          trxDuration = getHour + hour;
-        }else{
-          let minutes = "";
-          if(getMinutes > 1){
-            minutes = " mins";
-          }else{
-            minutes = " min";
-          }
-          trxDuration = getMinutes + minutes;
-        }
-      }
+      let trxDuration = HomeUtils.countDuration(timestamp);
       return trxDuration;
     };
-
+    getBlockDataTable();
     //setInterval(generateDatatable, 15000);
-
-    const init = () =>{
-      generateDatatable();
-    }
-
-    if(AppState.isReady){
-      generateDatatable();
-    }else{
-      let readyWatcher = watch(AppState, (value) => {
-        if(value.isReady){
-          init();
-          readyWatcher();
-        }
-      });
-    }
 
     emitter.on('CHANGE_NETWORK', payload => {
       isFetching.value = true;
       if(payload){
-        generateDatatable();
+        getBlockDataTable();
       }
     });
 
     return {
-      transactions,
-      getcurrentTimestamp,
       countDuration,
-      trxn,
       wideScreen,
       isFetching,
       shortenedPublicKey,
       Deadline,
-      Tooltip
+      Tooltip,
+      blockDataTable
     }
   }
 }
 </script>
-
-<style lang="scss" scoped>
-.p-datatable-table{
-  border-collapse: collapse !important;
-}
-
-</style>
