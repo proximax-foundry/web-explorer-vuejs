@@ -9,14 +9,14 @@
           <div class="mx-3 md:mx-0">
             <div class="border border-gray-300 my-1 searchbar flex bg-white">
               <selectFilter :selected="searchFilter" class="inline-block border-r border-gray-300" @selected-filter="updateFilter" />
-              <input type="text" :placeholder="searchPlaceHolder" class="text-tsm sm:w-48 lg:w-96 outline-none px-2 py-1 flex-grow" @keyup.enter="search">
+              <input type="text" :placeholder="searchPlaceHolder" v-model="searchText" class="text-tsm sm:w-48 lg:w-96 outline-none px-2 py-1 flex-grow" @keyup.enter="search">
               <div v-if="isSearching" class="flex justify-center items-center w-10">
                 <div class="flex justify-center items-center border-gray-400">
                   <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-navy-primary mr-2"></div>
                 </div>
               </div>
               <div v-else class="hover:bg-blue-100 cursor-pointer flex justify-center items-center w-10">
-                <img src="@/assets/img/icon-search.svg" class="w-4 inline-block">
+                <img src="@/assets/img/icon-search.svg" class="w-4 inline-block" @click="search">
               </div>
             </div>
             <div class="flex items-center justify-end">
@@ -53,10 +53,11 @@ export default {
     const router = useRouter();
     const searchFilter = ref('all');
     const isSearching = ref(false);
-    const search = async (e) => {
+    const searchText = ref('');
+    const search = async () => {
       isSearching.value = true;
       let searchService = new SearchService();
-      let searchResult = await searchService.search(e.target.value, searchFilter.value);
+      let searchResult = await searchService.search(searchText.value, searchFilter.value);
       // let searchResult = await SearchUtils.search(e.target.value, searchFilter.value);
       if(searchResult.valid){
         isSearching.value = false;
@@ -110,6 +111,7 @@ export default {
       updateFilter,
       searchPlaceHolder,
       isSearching,
+      searchText,
     }
   }
 
