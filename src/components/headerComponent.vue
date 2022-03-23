@@ -58,7 +58,6 @@ export default {
       isSearching.value = true;
       let searchService = new SearchService();
       let searchResult = await searchService.search(searchText.value, searchFilter.value);
-      // let searchResult = await SearchUtils.search(e.target.value, searchFilter.value);
       if(searchResult.valid){
         isSearching.value = false;
         switch(searchResult.searchType){
