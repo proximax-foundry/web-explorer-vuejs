@@ -91,7 +91,6 @@
 
 <script>
 import { computed, defineComponent, getCurrentInstance, inject, ref, watch } from "vue";
-// import { Id } from "tsjs-xpx-chain-sdk";
 import { networkState } from '@/state/networkState';
 import { AppState } from '@/state/appState';
 import { Helper } from "@/util/typeHelper";
@@ -114,7 +113,7 @@ export default {
       }
 
       let fetchInfo = await NamespaceUtils.fetchNamespaceInfo(props.namespaceParam);
-      if(fetchInfo!= false){
+      if(fetchInfo != false){
         namespaceInfo.value = fetchInfo;
         isShowInvalid.value = false;
       }else{
