@@ -53,7 +53,7 @@ import { networkState } from '@/state/networkState';
 export default {
   name: 'ViewBlock',
   props: {
-    blockHeight: Number
+    blockHeight: [Number, String]
   },
   setup(p){
     const internalInstance = getCurrentInstance();

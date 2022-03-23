@@ -16,7 +16,7 @@ import { Helper } from "@/util/typeHelper";
 import { NamespaceUtils, namespaceInfoFormatted } from "@/util/namespaceUtil";
 import { AccountUtils } from "@/util/accountUtil";
 import { AssetUtils } from '@/util/assetUtil';
-import { typeOf } from "mathjs";
+import { BlockUtils } from "@/util/blockUtil"
 
 export interface searchResult{
   valid: boolean;
@@ -31,7 +31,7 @@ export class SearchService{
   filter:string;
 
   async search (_searchString:string, _filter:string) :Promise<searchResult> {
-    this.searchString = _searchString;
+    this.searchString = _searchString.trim();
     this.filter = _filter;
     try {
       switch(this.filter) {
@@ -54,11 +54,7 @@ export class SearchService{
               return this.searchAsset();
             }
           }else if(regexNumeric.test(this.searchString)){ // block
-            return {
-              valid: true,
-              searchType: 'Block',
-              param: this.searchString,
-            };
+            return this.searchBlock();
           }else{
             // search alias
             return this.searchAlias();
@@ -75,11 +71,12 @@ export class SearchService{
           }
         case 'block':
           if(regexNumeric.test(this.searchString)){ // block
-            return {
-              valid: true,
-              searchType: 'Block',
-              param: this.searchString,
-            };
+            return this.searchBlock();
+            // return {
+            //   valid: true,
+            //   searchType: 'Block',
+            //   param: this.searchString,
+            // };
           }else{
             return {
               valid: false,
@@ -273,6 +270,23 @@ export class SearchService{
           param: formattedNs.alias.id,
         };
       }
+    }
+  }
+
+  async searchBlock(){
+    const block = await BlockUtils.getBlockByHeight(parseInt(this.searchString));
+    if(block != false){
+      return {
+        valid: true,
+        searchType: 'Block',
+        param: this.searchString,
+      };
+    }else{
+      return {
+        valid: false,
+        searchType: 'Block',
+        param: this.searchString,
+      };
     }
   }
 }

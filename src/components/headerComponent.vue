@@ -68,7 +68,8 @@ export default {
             router.push({ name: 'ViewAccount', params: { accountParam: searchResult.param } });
             break;
           case 'Block':
-            router.push({ name: 'ViewBlock', params: { number: searchResult.param } });
+            let intParam = Number.parseInt(searchResult.param);
+            router.push({ name: 'ViewBlock', params: { blockHeight: +intParam } });
             break;
           case 'Hash':
             router.push({ name: 'ViewTransaction', params: { hash: searchResult.param } });
