@@ -129,7 +129,7 @@ export class SearchUtils{
             if(typeof formattedNs === 'boolean'){
               return {
                 valid: false,
-                searchType: 'Namespace',
+                searchType: 'All',
                 param: searchString,
               };
             }else{

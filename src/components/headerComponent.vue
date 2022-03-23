@@ -38,7 +38,7 @@
 <script>
 import selectNetwork from '@/components/selectNetwork.vue';
 import selectFilter from '@/components/selectFilter.vue';
-import { SearchUtils } from '@/util/searchUtil';
+import { SearchService } from '@/services/searchService';
 import { useRouter } from "vue-router";
 import { defineComponent, getCurrentInstance, inject, ref, computed } from "vue";
 export default {
@@ -55,7 +55,9 @@ export default {
     const isSearching = ref(false);
     const search = async (e) => {
       isSearching.value = true;
-      let searchResult = await SearchUtils.search(e.target.value, searchFilter.value);
+      let searchService = new SearchService();
+      let searchResult = await searchService.search(e.target.value, searchFilter.value);
+      // let searchResult = await SearchUtils.search(e.target.value, searchFilter.value);
       if(searchResult.valid){
         isSearching.value = false;
         switch(searchResult.searchType){
