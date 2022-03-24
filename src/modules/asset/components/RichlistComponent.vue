@@ -58,12 +58,6 @@
             <span class="text-txs">{{getLinkedNamespace(data.address)&&linkednamespaceID==null?"No Linked Namespace":linkednamespaceID }}</span>
           </template>
         </Column>
-        <!-- <template #empty>
-          No record found
-        </template>
-        <template #loading>
-          Fetching richlist
-        </template> -->
       </DataTable>
     </div>
   </div>
@@ -74,8 +68,6 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { ref, onMounted, onUnmounted } from "vue";
 import { Helper } from '@/util/typeHelper';
-import { AppState } from '@/state/appState';
-import { text } from '@fortawesome/fontawesome-svg-core';
 import { ChainUtils } from '@/util/chainUtils';
 
 export default {
@@ -109,18 +101,20 @@ export default {
     const getCurrency = (amount) =>{
       return Helper.toCurrencyFormat(amount,p.divisibility);
     }
+
     const getPercentage =(amount)=>{
       return ((amount / p.supply) * 100).toFixed(p.divisibility); 
     }
+
     const getLinkedNamespace = async(address) =>{
-    let namespaceID = null;
-    const getNamespacesFromAccount = await ChainUtils.getNamespacesFromAccount(address);
-      for(let i = 0; i < getNamespacesFromAccount.length; ++i){
-        if(getNamespacesFromAccount[i].alias.type == 2){
-          namespaceID = getNamespacesFromAccount[i].levels[0].id.toHex();
-          linkednamespaceID.value = namespaceID;
-        }
-      } 
+      let namespaceID = null;
+      const getNamespacesFromAccount = await ChainUtils.getNamespacesFromAccount(address);
+        for(let i = 0; i < getNamespacesFromAccount.length; ++i){
+          if(getNamespacesFromAccount[i].alias.type == 2){
+            namespaceID = getNamespacesFromAccount[i].levels[0].id.toHex();
+            linkednamespaceID.value = namespaceID;
+          }
+        } 
       return namespaceID;
     }
 
@@ -135,7 +129,3 @@ export default {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="scss">
-
-</style>
