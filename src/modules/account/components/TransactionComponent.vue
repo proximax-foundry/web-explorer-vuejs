@@ -22,7 +22,7 @@
             <div>
               <div class="uppercase text-xxs text-gray-300 font-bold mb-1 break-all">Tx Hash</div>
               <router-link class="uppercase font-bold text-txs block" :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}">
-                <span class="text-txs break-all text-blue-600 hover:text-blue-primary hover:underline" v-tooltip.right="data.hash">{{data.hash }}</span>
+                <span class="text-txs break-all text-blue-600 hover:text-blue-primary hover:underline" v-tooltip.right="data.hash">{{ data.hash.substring(0, 15) }}..</span>
               </router-link>
             </div>
             <div>
@@ -35,7 +35,7 @@
               <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5" v-if="data.recipient != '' && data.recipient != null">Receipient</div>
               <div class="uppercase font-bold text-txs">
                 <span v-if="data.recipient === '' || data.recipient === null"></span>
-                <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.recipient }}" v-tooltip.right="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs break-all text-blue-600 hover:text-blue-primary hover:underline">{{ Helper.createAddress(data.recipient).pretty() }}</router-link>
+                <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.recipient }}" v-tooltip.right="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-txs break-all text-blue-600 hover:text-blue-primary hover:underline">{{ shortenedAddress(Helper.createAddress(data.recipient).pretty()) }}</router-link>
               </div>
             </div>
           </template>
@@ -50,8 +50,8 @@
               <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Sender</div>
               <div class="uppercase font-bold text-txs">
                 <span v-if="data.sender === '' || data.sender === null"></span>
-                <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.sender }}" v-else v-tooltip.right="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-txs break-all text-blue-600 hover:text-blue-primary hover:underline">
-                  {{ data.sender.substring(0, 20) }}...
+                <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.sender }}" v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-txs break-all text-blue-600 hover:text-blue-primary hover:underline">
+                  {{ shortenedAddress(Helper.createAddress(data.sender).pretty()) }}
                 </router-link>
               </div>
             </div>
@@ -85,7 +85,7 @@
           <template #body="{data}">
             <span v-if="data.sender === '' || data.sender === null"></span>
             <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.sender }}" v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-txs text-blue-600 hover:text-blue-primary hover:underline">
-              {{ shortenedAddress(Helper.createAddress(data.sender).pretty()) }}
+              {{ shortenedAddress(shortenedAddress(Helper.createAddress(data.sender).pretty())) }}
             </router-link>
           </template>
         </Column>
@@ -128,8 +128,8 @@
           Fetching transactions
         </template>
     </DataTable>
-    <div class="flex justify-between my-5 mb-15" v-if="transactions.length > 20">
-      <div class="text-xs text-gray-700">Show
+    <div class="sm:flex sm:justify-between my-5 mb-15" v-if="totalPages > 1">
+      <div class="text-xs text-gray-700 mb-3 sm:mb-0 text-center sm:text-left">Show
         <select v-model="pages" class="border border-gray-300 rounded-md p-1" @change="changeRows">
           <option value=10>10</option>
           <option value=20>20</option>
@@ -139,7 +139,7 @@
         </select>
         Records
       </div>
-      <div class="flex items-center">
+      <div class="sm:flex sm:items-center text-center sm:text-right">
         <div v-if="enableFirstPage" @click="naviFirst" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">First</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs">First</div>
         <div v-if="enablePreviousPage" @click="naviPrevious" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">Previous</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs">Previous</div>
         <div class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs">Page {{ currentPage }} of {{ totalPages }}</div>
