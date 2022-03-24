@@ -4,7 +4,7 @@
         Asset <span class="text-blue-primary font-bold">{{assetname}}</span>
     </p>
     <div v-if="isShowInvalid">
-     
+  
       <div class="p-3 bg-yellow-100 text-yellow-700">Asset is not available in {{ networkName }}</div>
     </div>
     <div v-else>
@@ -61,21 +61,17 @@
 </template>
 
 <script>
-import { computed, defineComponent, getCurrentInstance, inject, ref, watch } from "vue";
+import { computed, getCurrentInstance, ref, watch } from "vue";
 import RichlistComponent from '@/modules/asset/components/RichlistComponent.vue';
-import InnerTxnComponent from '@/modules/transaction/components/InnerTxnComponent.vue';
-import {TransactionHttp, Mosaic, MosaicId, UInt64} from "tsjs-xpx-chain-sdk";
 import { AppState } from '@/state/appState';
 import { AssetUtils } from '@/util/assetUtil';
-import { NamespaceUtils } from '@/util/namespaceUtil';
 import { Helper } from '@/util/typeHelper';
 import { networkState } from '@/state/networkState';
 
 export default {
   name: 'ViewAsset',
   components: {
-    RichlistComponent,
-   // InnerTxnComponent
+    RichlistComponent
   },
   props: {
     id: String
@@ -87,42 +83,27 @@ export default {
     const isShowInvalid = ref(false);
     const richList = ref([]);
     const assetname = ref(null);
-    const assets = ref({
-      owner: '',
-      height:0,
-      assetId: 0,
-      expiry: '',
-      supply: 0,
-      divisibility: 0,
-      supplyMutable: false,
-      transferable: false
-    });
+    const assets = ref([]);
 
     const setCurrentComponent = (page) => {
       currentComponent.value = page;
-    }
+    };
+
     const networkName = computed(() => {
       return networkState.chainNetworkName;
     });
+
     const loadAsset = async() => {
       const asset = await AssetUtils.getAssetProperties(props.id);     
       const richlist = await AssetUtils.getRichList(props.id);
       const assetName = await AssetUtils.getAssetName(props.id);
        
-      console.log(asset);
       if(asset!=false){
-        assets.value = {
-          owner: asset.owner.address.pretty(),
-          height: asset.height.compact(),
-          assetId: asset.mosaicId.toHex(),
-          expiry: asset.duration.compact(),
-          supply: asset.supply.compact(),
-          divisibility: asset.divisibility,
-          supplyMutable: asset.isSupplyMutable(),
-          transferable: asset.isTransferable()
-        }
+        assets.value = asset;
         if(assetName!=false){
-          assetname.value = assetName.names[0].name;
+          if(assetName.names[0]!=undefined){
+            assetname.value = assetName.names[0].name;
+          }
         }else{
           assetname.value = null;
         }
@@ -130,7 +111,7 @@ export default {
       }else{
         isShowInvalid.value = true;
       }
-    }
+    };
 
     if(AppState.isReady){
       loadAsset();

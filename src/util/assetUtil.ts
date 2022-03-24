@@ -66,7 +66,6 @@ export class AssetUtils {
 
             let mosaicId = new MosaicId(assetId);
             let assetNames = await chainRESTCall.assetAPI.getMosaicsNames([mosaicId]);
-            console.log(assetNames);
             return assetNames[0];
         } catch(error) {
             return false;
