@@ -78,7 +78,7 @@
         </Column>
         <Column field="block" v-if="wideScreen" header="BLOCK" headerStyle="width:110px">
           <template #body="{data}">
-            <div class="text-txs">{{ data.block }}</div>
+            <div class="text-txs"><router-link :to="{ name: 'ViewBlock', params: { blockHeight: data.block}}" class="text-blue-600 hover:text-blue-primary hover:underline">{{ data.block }}</router-link></div>
           </template>
         </Column>
         <Column field="signer" header="SENDER" headerStyle="width:110px" v-if="wideScreen">

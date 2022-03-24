@@ -29,7 +29,7 @@
     </div>
     <div v-if="txnDetail.group=='confirmed'">
       <div>Height</div>
-      <div class="text-blue-primary">{{ txnDetail.height }}</div>
+      <div><router-link :to="{ name: 'ViewBlock', params: { blockHeight: txnDetail.height}}" class="text-blue-600 hover:text-blue-primary hover:underline">{{ txnDetail.height }}</router-link></div>
     </div>
     <div>
       <div>Tx Type</div>
@@ -53,6 +53,7 @@
         <div v-for="sda, item in txnDetail.amount" :key="item">
           <span class="font-bold">{{ sdaAmount[item][0] }}</span>{{ sdaAmount[item][1]>0?'.':'' }}<span class="text-xxs">{{ sdaAmount[item][1] }}</span> <span class="text-gray-400 text-txs hover:text-gray-700 duration-300 transition-all">{{ sda.name?(sda.name + ' / '):'' }} {{ sda.id }} </span>
         </div>
+        <div v-if="txnDetail.amount.length == 0">-</div>
       </div>
     </div>
     <div>
