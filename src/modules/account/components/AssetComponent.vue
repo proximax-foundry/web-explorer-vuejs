@@ -1,7 +1,7 @@
 <template>
   <div class="border-2 border-t-0">
     <div v-if="accountAssets.length==0" class='text-blue-primary text-xs text-center font-semibold py-5'>No asset available</div>
-    <div>
+    <div v-else>
       <div class="grid grid-cols-5 md:hidden bg-gray-100 text-xs font-semibold text-gray-600 px-3">
         <div class="text-left px-2 py-3 col-span-2">ID</div>
         <div class="text-left px-2 py-3 col-span-2">Namespace</div>
