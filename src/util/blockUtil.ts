@@ -41,47 +41,28 @@ export class BlockUtils {
         }
     }
 
-    static async getBlocksList(): Promise<BlockInfo[]> {
+    static async getBlocksList(blockHeight?:number): Promise<BlockInfo[]> {
         let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile?.httpPort));
         let blockInfo: BlockInfo[] = [];
-        //let sortNumber: LimitType;
-        // if (limitType == 25 || limitType == 0) {
-        //     sortNumber = LimitType.N_25;
-        // } else{
-        //     sortNumber = LimitType.N_50;
-        // } 
-        // else if(limitType == 100) {
-        //     sortNumber = LimitType.N_75;
-        // } else {
-        //     sortNumber = LimitType.N_100;
-        // } 
-        let height = await chainRESTCall.diagnosticAPI.getDiagnosticStorage();
-        let blockInfoByHeight = await chainRESTCall.blockAPI.getBlocksByHeightWithLimit(height.numBlocks, LimitType.N_100);
-        if (blockInfoByHeight.length < 100) {
-                let getPreviousBlockByHeight = await chainRESTCall.blockAPI.getBlocksByHeightWithLimit(height.numBlocks - blockInfoByHeight.length);
-                let totalHeight: number = 100 - blockInfoByHeight.length;
-                let getSlicedBlock: BlockInfo[] = getPreviousBlockByHeight.slice(0, totalHeight);
-                blockInfo = blockInfoByHeight.concat(getSlicedBlock);
-            
-            // getPreviousBlockByHeight[1].height;
-            // getPreviousBlockByHeight[1].hash;
-            // getPreviousBlockByHeight[1].timestamp;
-             getPreviousBlockByHeight[1].type;
-            getPreviousBlockByHeight[1].signer.address.plain();
-
-            // getPreviousBlockByHeight[1].numTransactions;
-            // getPreviousBlockByHeight[1].totalFee;
-
-
-            } else {
-                blockInfo = blockInfoByHeight;
+        if (blockHeight == null) {
+            let height = await chainRESTCall.diagnosticAPI.getDiagnosticStorage();
+            blockHeight = height.numBlocks;
         }
-        console.log("blockUtils");
-        console.log(blockInfo);
+        
+        let blockInfoByHeight = await chainRESTCall.blockAPI.getBlocksByHeightWithLimit(blockHeight, LimitType.N_100);
+        if (blockInfoByHeight.length < 100) {
+            let getPreviousBlockByHeight = await chainRESTCall.blockAPI.getBlocksByHeightWithLimit(blockHeight - blockInfoByHeight.length);
+            let totalHeight: number = 100 - blockInfoByHeight.length;
+            let getSlicedBlock: BlockInfo[] = getPreviousBlockByHeight.slice(0, totalHeight);
+            blockInfo = blockInfoByHeight.concat(getSlicedBlock);            
+        }
+        else {
+            blockInfo = blockInfoByHeight;
+        }
         
         return blockInfo;
     }
-
+    
     private static fmtTime(timestamp:number): string {
         let dateFormat = new Date(timestamp+ Deadline.timestampNemesisBlock * 1000)
         let date = new Date(dateFormat);
