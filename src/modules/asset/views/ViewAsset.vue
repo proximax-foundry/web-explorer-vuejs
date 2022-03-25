@@ -1,20 +1,39 @@
 <template>
 <div>
     <p class="text-gray-500 mb-5 text-sm font-bold">
-        Asset <span class="text-blue-primary font-bold">{{assetname}}</span>
+        Asset Details 
+        <!-- <span class="text-blue-primary font-bold">{{assetname}}</span> -->
     </p>
     <div v-if="isShowInvalid">
-  
       <div class="p-3 bg-yellow-100 text-yellow-700">Asset is not available in {{ networkName }}</div>
+    </div>
+    <div v-else-if="assets.length == 0 && !isShowInvalid">
+      <div class="flex justify-center items-center border-gray-400 mt-15">
+        <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-navy-primary mr-2"></div>
+        <span class="text-tsm">Fetching Asset Details</span>
+      </div>
     </div>
     <div v-else>
     <div class="md:grid md:grid-cols-2">
       <div class="filter shadow-xl border border-gray-50 p-5 mb-15 md:mr-2">
-        <div class="text-xs font-bold mb-5">Overview</div>
+        <div class="text-xs font-bold mb-5 ml-4">Overview</div>
           <div class="txn-div">
             <div>
+              <div>Asset Name</div>
+              <div class="font-bold" v-if="assetname">
+                {{assetname}}
+              </div>
+              <div v-else>
+                -
+              </div>
+            </div>
+            <div>
+              <div>Asset ID</div>
+              <div class="font-bold">{{assets.assetId}}</div>
+            </div>
+            <div>
               <div>Total Supply </div>
-              <div>{{Helper.toCurrencyFormat(assets.supply,assets.divisibility)}}</div>
+              <div>{{Helper.toCurrencyFormat(assets.supply,assets.divisibility)=="NaN"?"":Helper.toCurrencyFormat(assets.supply,assets.divisibility)}}</div>
             </div>
             <div>
               <div>Decimals</div>
@@ -23,25 +42,25 @@
           </div>
         </div>
       <div class="filter shadow-xl border border-gray-50 p-5 mb-15 sm:ml-2">
-        <div class="text-xs font-bold mb-5">More Info</div>
-        <div class="txn-div">
+        <div class="text-xs font-bold mb-5 ml-4">More Info</div>
+        <div class="txn-div w-auto">
           <div>
-            <div>Creator</div>
-            <div class="ml-8"> {{assets.owner}} at height {{assets.height}}</div>
+            <div>Creator Address</div>
+            <span class="break-all flex items-center"><router-link :to="{ name: 'ViewAccount', params: {accountParam: assets.owner}}" class="uppercase text-blue-600 hover:text-blue-primary hover:underline inline-flex"> {{assets.owner}}</router-link></span>
           </div>
           <div>
-            <div>Asset ID</div>
-            <div class="font-bold">{{assets.assetId}}</div>
+            <div>Height</div>
+            <router-link :to="{ name: 'ViewBlock', params: { blockHeight: assets.height}}" class="truncate inline-block break-all text-blue-600 hover:text-blue-primary hover:underline">{{assets.height}}</router-link>
           </div>
           <div>
             <div>Expiry</div>
-            <div class="font-bold">{{assets.expiry==0?'NIL':assets.expiry}}</div>
+            <div >{{assets.expiry==0?'NIL':assets.expiry}}</div>
           </div>
           <div>
             <div>Supply Mutable</div>
-            <div class="font-bold text-green-600">{{assets.supplyMutable}}</div>
+            <div class="font-bold text-green-600 w-10">{{assets.supplyMutable}}</div>
             <div>Transferable</div>
-            <div class="font-bold text-green-600">{{assets.transferable}}</div>
+            <div class="font-bold text-green-600 w-10">{{assets.transferable}}</div>
           </div>
         </div>
       </div>
@@ -80,9 +99,9 @@ export default {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const currentComponent = ref('rich');
-    const isShowInvalid = ref(false);
+    const isShowInvalid = ref(null);
     const richList = ref([]);
-    const assetname = ref(null);
+    const assetname = ref(false);
     const assets = ref([]);
 
     const setCurrentComponent = (page) => {
@@ -92,45 +111,41 @@ export default {
     const networkName = computed(() => {
       return networkState.chainNetworkName;
     });
-
+    
     const loadAsset = async() => {
-      const asset = await AssetUtils.getAssetProperties(props.id);     
+      if(!AppState.isReady){
+        setTimeout(loadAsset, 1000);
+      }
+      const asset = await AssetUtils.getAssetProperties(props.id);
       const richlist = await AssetUtils.getRichList(props.id);
       const assetName = await AssetUtils.getAssetName(props.id);
-       
-      if(asset!=false){
-        assets.value = asset;
-        if(assetName!=false){
+      setTimeout(() => {
+        if(asset!=false){
+          isShowInvalid.value = false;
+          assets.value = asset;
           if(assetName.names[0]!=undefined){
             assetname.value = assetName.names[0].name;
+          }else{
+            assetname.value = null;
           }
+          richList.value = richlist;
+          return;
         }else{
-          assetname.value = null;
+          isShowInvalid.value = true;
         }
-        richList.value = richlist;
-      }else{
-        isShowInvalid.value = true;
-      }
+      }, 1000);  
     };
-
-    if(AppState.isReady){
-      loadAsset();
-    }else{
-      let readyWatcher = watch(AppState, (value) => {
-        if(value.isReady){
-          loadAsset();
-          readyWatcher();
-        }
-      });
-    }
+    loadAsset();
 
     emitter.on('CHANGE_NETWORK', payload => {
       if(payload){
-        loadAsset();
+        assets.value = [];
+        isShowInvalid.value = false;
+        loadAsset();  
       }
     });
-    
-    return {
+
+return {
       currentComponent,
       loadAsset,
       assets,

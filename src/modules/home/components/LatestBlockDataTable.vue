@@ -12,8 +12,7 @@
     <div v-else>
     <DataTable
       :value="blockDataTable"
-      :paginator="true"
-      :rows="20"
+      :paginator="false"
       responsiveLayout="scroll"
       scrollDirection="horizontal"
       :alwaysShowPaginator="false"
@@ -24,7 +23,7 @@
         <template #body="{data}">
           <div class="ml-2">
              <span class="uppercase text-xxs text-gray-300 font-bold">Height</span>
-            <div class="uppercase text-txs text-blue-primary">{{data.height.compact() }}</div>
+            <div class="uppercase text-txs text-blue-primary"><router-link :to="{ name: 'ViewBlock', params: { blockHeight: data.height.compact()}}" class="truncate inline-block text-txs break-all text-blue-600 hover:text-blue-primary hover:underline">{{data.height.compact() }}</router-link></div>
             <div class="text-xxs text-gray-500 mb-4">{{ countDuration(data.timestamp.compact()+ Deadline.timestampNemesisBlock * 1000)}} ago</div>
           </div>
         </template>
@@ -34,7 +33,7 @@
             <div>
               <div class="uppercase text-xxs text-gray-300 font-bold">Validator</div>
               <div>
-                <div class="uppercase text-txs text-blue-primary inline-flex">{{shortenedPublicKey(data.signer.publicKey)}}</div>
+                <div class="uppercase text-txs text-blue-primary inline-flex"><router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signer.publicKey}}" class="uppercase text-txs text-blue-600 hover:text-blue-primary hover:underline inline-flex">{{shortenedPublicKey(data.signer.publicKey)}}</router-link></div>
                 <div class="text-xxs text-gray-500 mb-4">{{data.numTransactions>1?data.numTransactions+" trxs":data.numTransactions+" trx"}}</div>
               </div>
             </div>
