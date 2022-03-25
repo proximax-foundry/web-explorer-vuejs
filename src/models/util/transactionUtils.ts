@@ -612,6 +612,7 @@ export class TransactionUtils {
           let assetName = await TransactionUtils.getAssetName(assetIdHex);
           if(assetName.names[0]){
             newSDA.name = assetName.names[0].name;
+            newSDA.namespaceID = assetName.names[0].namespaceId.id.toHex();
           }
           sdas.push(newSDA);
         }
