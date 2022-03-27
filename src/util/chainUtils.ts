@@ -1,9 +1,9 @@
-import { ChainConfigHttp, ChainHttp, AccountHttp, NamespaceHttp, MosaicHttp, Convert,
+import { ChainConfigHttp, Convert,
   NetworkType, 
   NamespaceId,
   MosaicId, Address, PublicAccount, CosignatureSignedTransaction, Statement,
-  AccountInfo, Transaction, TransactionQueryParams, SignedTransaction, TransactionType, NamespaceName, Mosaic, MosaicInfo,
-  NamespaceInfo, TransactionGroupType, TransactionSearch, RichlistEntry, QueryParams, PageQueryParams, BlockchainStorageInfo, MosaicNames, LimitType, BlockInfo
+  AccountInfo, Transaction, TransactionQueryParams, SignedTransaction, TransactionType, NamespaceName, MosaicInfo,
+  NamespaceInfo, TransactionGroupType, TransactionSearch
 } from "tsjs-xpx-chain-sdk";
 import { NetworkConfig } from "../models/stores/chainProfileConfig";
 import { ChainAPICall } from "../models/REST/chainAPICall";
@@ -329,21 +329,5 @@ export class ChainUtils{
 
       return statement;
     }
-  
-    static async getBlocksByHeightWithLimit(height: number, limitType?: LimitType): Promise<BlockInfo[]> {
-      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
-      let blockInfo = await chainRESTCall.blockAPI.getBlocksByHeightWithLimit(height, limitType);
-      return blockInfo;
-    }
-    
-    static async getDiagnosticStorage(): Promise<BlockchainStorageInfo> {
-
-      let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
-
-      let blockChainStorageInfo = await chainRESTCall.diagnosticAPI.getDiagnosticStorage();
-
-      return blockChainStorageInfo;
-    }
-
-  
+     
 }

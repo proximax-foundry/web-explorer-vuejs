@@ -25,7 +25,7 @@
           <template #body="{data}">
             <div class="ml-2">
               <div class="uppercase text-xxs text-gray-300 font-bold">TX Hash</div>
-              <div class="uppercase text-txs text-blue-primary">{{data.hash.substring(0, 7)}}...</div>
+              <div class="uppercase text-txs text-blue-primary"><router-link :to="{ name: 'ViewTransaction', params: {hash: data.hash}}" class="uppercase text-txs text-blue-600 hover:text-blue-primary hover:underline inline-flex truncate w-24 mt-4">{{data.hash.substring(0, 7)}}...</router-link></div>
               <div class="text-xxs text-gray-500 mb-4">{{ countDuration(data.timestamp)}} ago</div>
             </div>
           </template>
@@ -35,10 +35,10 @@
             <div>
               <div class="uppercase text-xxs text-gray-300 font-bold -mt-3">Signer / TX Type</div>
               <div class="text-xxs text-gray-500 inline-flex">Signer:
-              <div class="uppercase text-txs text-blue-primary">{{shortenedString(Helper.createAddress(data.signerAddress).pretty())}}</div>
+              <div class="uppercase text-txs text-blue-primary"><router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signerAddress}}" class="uppercase text-txs text-blue-600 hover:text-blue-primary hover:underline inline-flex">{{shortenedString(Helper.createAddress(data.signerAddress).pretty())}}</router-link></div>
             </div>
             <div class="text-xxs text-gray-500 inline-flex">TX Type:
-              <div class="uppercase text-txs text-blue-primary">{{data.type}}</div>
+              <div class="uppercase text-txs">{{data.type}}</div>
             </div>
             </div>
           </template>
@@ -150,7 +150,7 @@ export default{
       let txnQueryParams = new TransactionQueryParams();
       let trx = await HomeUtils.getDiagnosticStorage();
       txnQueryParams.pageSize = 10;
-      txnQueryParams.fromHeight = trx.numBlocks - 10000;
+      txnQueryParams.fromHeight = trx.numBlocks - 20000;
       let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
       let txns = await TransactionUtils.searchTxns(TransactionGroupType.CONFIRMED,txnQueryParams);
@@ -159,7 +159,6 @@ export default{
         transactions.value = transactionSearchResult;
       }
       isFetching.value = false;
-      return;
     }
 
     //setInterval(generateDatatable, 15000);

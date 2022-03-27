@@ -51,6 +51,16 @@ const routes = [
   },
 
   {
+    path: '/block',
+    name: 'ViewBlockList',
+    props: true,
+    component: () => import('@/modules/block/views/ViewBlockList.vue'),
+    meta: {
+      title: "View Blocks",
+    }
+  },
+  
+  {
     path: '/block/:blockHeight',
     name: 'ViewBlock',
     props: true,

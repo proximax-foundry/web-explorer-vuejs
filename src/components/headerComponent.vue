@@ -22,7 +22,7 @@
             <div class="flex items-center justify-end">
               <router-link :to="{name : 'Home'}"><img src="@/assets/img/icon-home.svg" class="h-5 w-5 mr-4"></router-link>
               <div class="header-links">
-                <a href="#">Blocks</a>
+                <router-link :to="{name: 'ViewBlockList'}">Blocks</router-link>
                 <router-link :to="{name: 'ViewTransactionList'}">Transactions</router-link>
                 <!-- <a href="#">Accounts</a> -->
               </div>

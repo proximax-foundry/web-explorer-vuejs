@@ -15,8 +15,14 @@
             <div>{{blockInfo.height}}</div>
           </div>
           <div>
+            <div>Timestamp</div>
+            <div>{{blockInfo.timestamp}}</div>
+          </div>
+          <div>
             <div>Validator</div>
-            <div class="break-all flex items-center">{{blockInfo.validator}}</div>
+            <div class="break-all flex items-center">  
+              {{blockInfo.validator}}
+            </div>
           </div>
           <div>
             <div>Hash</div>
@@ -27,16 +33,12 @@
             <div>{{blockInfo.difficulty}}</div>
           </div>
           <div>
-            <div>No. of Transactions</div>
+            <div>No. of Transaction</div>
             <div>{{blockInfo.numTransactions}}</div>
           </div>
           <div>
             <div>Total Fees</div>
-            <div>{{blockInfo.totalFee}}</div>
-          </div>
-          <div>
-            <div>Timestamp</div>
-            <div>{{blockInfo.timestamp}}</div>
+            <div class="font-bold">{{blockInfo.totalFee }}<span class="ml-1">{{ nativeTokenNamespace }}</span> <img src="@/assets/img/icon-xpx.svg" class="inline-block" style="top:-3 width:14px;" /></div>
           </div>
         </div>
       </div>
@@ -53,28 +55,30 @@ import { networkState } from '@/state/networkState';
 export default {
   name: 'ViewBlock',
   props: {
-    blockHeight: [Number, String]
+    blockHeight: Number
   },
   setup(p){
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const blockInfo = ref([]);
     const isShowInvalid = ref(false);
-
+    const nativeTokenNamespace = AppState.nativeToken.label;
+console.log(AppState.nativeToken.label);
     const loadBlock = async() =>{
       if(!AppState.isReady){
         setTimeout(loadBlock, 1000);
       }
-      const block = await BlockUtils.getBlockByHeight(p.blockHeight);
+    const block = await BlockUtils.getBlockByHeight(p.blockHeight);
       if(block!=false){
-        blockInfo.value = block;  
+        blockInfo.value = block; 
         isShowInvalid.value = false;
+        return;
       }else{
         isShowInvalid.value = true;
       }
-      return;
-    };
+    };  
     loadBlock();
+
     const networkName = computed(() => {
       return networkState.chainNetworkName;
     });
@@ -88,7 +92,8 @@ export default {
     return {
       blockInfo,
       networkName,
-      isShowInvalid
+      isShowInvalid,
+      nativeTokenNamespace
     }
   }
 }
@@ -102,7 +107,7 @@ export default {
     @apply flex items-center border-b border-gray-100 py-4;
 
     > div:first-child{
-      @apply w-48 text-xs pl-4 font-bold ;
+      @apply w-56 text-xs pl-4 font-bold;
     }
 
     > div:nth-child(2){
