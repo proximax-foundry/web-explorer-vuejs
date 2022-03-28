@@ -16,46 +16,46 @@
         tableStyle=""
         class="w-full"
         >
-        <Column style="width: 250px" v-if="!wideScreen">
+        <Column style="width: 300px" v-if="!wideScreen">
           <template #body="{data}">
             <div class="mb-2">
-              <div class="uppercase text-xxs text-gray-300 font-bold mb-1">ADDRESS</div>
-              <div class="uppercase font-bold text-txs">{{data.address.pretty()}}</div>
-              <div class="uppercase text-xxs text-gray-300 font-bold mb-1">BALANCE</div>
-              <div class="uppercase font-bold text-txs">{{getCurrency(data.amount.compact())}}</div>
+              <div class="uppercase text-xs text-gray-300 font-bold mb-1">ADDRESS</div>
+              <div class="uppercase font-bold text-xs mb-2"><router-link :to="{ name: 'ViewAccount', params: { accountParam: data.address.pretty()}}" class="uppercase text-blue-600 hover:text-blue-primary hover:underline inline-flex">{{data.address.pretty()}}</router-link></div>
+              <div class="uppercase text-xs text-gray-300 font-bold mb-1">BALANCE</div>
+              <div class="uppercase font-bold text-xs">{{getCurrency(data.amount.compact())}}</div>
             </div>
           </template>
         </Column>
         <Column style="width: 250px" v-if="!wideScreen">
           <template #body="{data}">
             <div>
-              <div class="uppercase text-xxs text-gray-300 font-bold mb-1">PERCENTAGE</div>
-              <div class="uppercase font-bold text-txs">{{getPercentage(data.amount.compact())}}%</div>
-              <div class="uppercase text-xxs text-gray-300 font-bold mt-2 mb-1">NAMESPACE</div>
-              <div class="uppercase font-bold text-txs">{{getLinkedNamespace(data.address)&&linkednamespaceID==null?"No Linked Namespace":linkednamespaceID}}</div>
+              <div class="uppercase text-xs text-gray-300 font-bold -mt-1 mb-2">PERCENTAGE</div>
+              <div class="uppercase font-bold text-xs mb-4">{{getPercentage(data.amount.compact())}}%</div>
+              <div class="uppercase text-xs text-gray-300 font-bold mt-2 mb-1">NAMESPACE</div>
+              <div class="uppercase font-bold text-xs">{{getLinkedNamespace(data.address)&&linkednamespaceID==null?"No Linked Namespace":linkednamespaceID}}</div>
             </div>
           </template>
         </Column>
         <Column style="width: 30px" v-if="wideScreen">
         </Column>
-        <Column field="ADDRESS" header="ADDRESS" style="width:380px" v-if="wideScreen">
+        <Column field="ADDRESS" header="ADDRESS" style="width:480px" v-if="wideScreen">
           <template #body="{data}">
-             <span><router-link :to="{ name: 'ViewAccount', params: { accountParam: data.address.pretty()}}" class="uppercase font-bold text-txs text-blue-600 hover:text-blue-primary hover:underline">{{data.address.pretty()}}</router-link></span>
+             <span><router-link :to="{ name: 'ViewAccount', params: { accountParam: data.address.pretty()}}" class="uppercase text-blue-600 hover:text-blue-primary hover:underline inline-flex">{{data.address.pretty()}}</router-link></span>
           </template>
         </Column>
         <Column field="BALANCE" header="BALANCE" style="width: 200px" v-if="wideScreen">
           <template #body="{data}">
-            <span class="uppercase text-txs">{{getCurrency(data.amount.compact())}}</span>
+            <span class="uppercase text-xs">{{getCurrency(data.amount.compact())}}</span>
           </template>
         </Column>
         <Column field="PERCENTAGE" header="PERCENTAGE" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
           <template #body="{data}">
-            <span class="uppercase font-bold text-txs">{{getPercentage(data.amount.compact())}}%</span>
+            <span class="uppercase font-bold text-xs">{{getPercentage(data.amount.compact())}}%</span>
           </template>
         </Column>
         <Column field="NAMESPACE" header="NAMESPACE" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
           <template #body="{data}">
-            <span class="text-txs">{{getLinkedNamespace(data.address)&&linkednamespaceID==null?"No Linked Namespace":linkednamespaceID }}</span>
+            <span class="text-xs">{{getLinkedNamespace(data.address)&&linkednamespaceID==null?"No Linked Namespace":linkednamespaceID }}</span>
           </template>
         </Column>
       </DataTable>

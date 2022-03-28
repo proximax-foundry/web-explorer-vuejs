@@ -1,6 +1,6 @@
 <template>
   <div class="border divide-y divide-gray-200"> 
-    <div class="font-bold text-xs ml-4 mt-4 mb-4">
+    <div class="font-bold text-base ml-4 mt-4 mb-4">
         Latest Transactions
     </div>
     <div v-if="isFetching">
@@ -24,21 +24,21 @@
       <Column style="width: 80px" v-if="!wideScreen">
           <template #body="{data}">
             <div class="ml-2">
-              <div class="uppercase text-xxs text-gray-300 font-bold">TX Hash</div>
-              <div class="uppercase text-txs text-blue-primary"><router-link :to="{ name: 'ViewTransaction', params: {hash: data.hash}}" class="uppercase text-txs text-blue-600 hover:text-blue-primary hover:underline inline-flex truncate w-24 mt-4">{{data.hash.substring(0, 7)}}...</router-link></div>
-              <div class="text-xxs text-gray-500 mb-4">{{ countDuration(data.timestamp)}} ago</div>
+              <div class="uppercase text-xs text-gray-300 font-bold">TX Hash</div>
+              <div class="uppercase text-xs text-blue-primary"><router-link :to="{ name: 'ViewTransaction', params: {hash: data.hash}}" class="uppercase text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex truncate w-24 mt-4">{{data.hash.substring(0, 7)}}...</router-link></div>
+              <div class="text-xs text-gray-500 mb-4">{{ countDuration(data.timestamp)}} ago</div>
             </div>
           </template>
         </Column>
         <Column style="width: 220px" v-if="!wideScreen">
           <template #body="{data}">
             <div>
-              <div class="uppercase text-xxs text-gray-300 font-bold -mt-3">Signer / TX Type</div>
-              <div class="text-xxs text-gray-500 inline-flex">Signer:
-              <div class="uppercase text-txs text-blue-primary"><router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signerAddress}}" class="uppercase text-txs text-blue-600 hover:text-blue-primary hover:underline inline-flex">{{shortenedString(Helper.createAddress(data.signerAddress).pretty())}}</router-link></div>
+              <div class="uppercase text-xs text-gray-300 font-bold -mt-3">Signer / TX Type</div>
+              <div class="text-xs text-gray-500 inline-flex">Signer:
+              <div class="uppercase text-xs text-blue-primary"><router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signerAddress}}" class="uppercase text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex">{{shortenedString(Helper.createAddress(data.signerAddress).pretty())}}</router-link></div>
             </div>
-            <div class="text-xxs text-gray-500 inline-flex">TX Type:
-              <div class="uppercase text-txs">{{data.type}}</div>
+            <div class="text-xs text-gray-500 inline-flex">TX Type:
+              <div class="uppercase text-xs">{{data.type}}</div>
             </div>
             </div>
           </template>
@@ -46,37 +46,37 @@
         <Column style="width:80px" v-if="!wideScreen">
           <template #body="{data}">
             <div>
-              <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Fee</div>
-              <div class="uppercase font-bold text-txs">{{data.fee + data.amountTransfer}}</div>
+              <div class="uppercase text-xs text-gray-300 font-bold mb-1">Fee</div>
+              <div class="uppercase font-bold text-xs">{{data.fee + data.amountTransfer}}</div>
               <div class="mb-7"></div>
             </div>
           </template>
         </Column>
-      <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem;padding-left: 1rem;" field="TX Hash" header="TX Hash" class="ml-4" v-if="wideScreen"> 
+      <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem;padding-left: 1rem;" field="TX Hash" header="TX HASH" class="ml-4" v-if="wideScreen"> 
         <template #body="{data}">                
           <div>
-            <router-link :to="{ name: 'ViewTransaction', params: {hash: data.hash}}" class="uppercase text-txs text-blue-600 hover:text-blue-primary hover:underline inline-flex truncate w-24 mt-4"><span class="text-txs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 12)}}...</span></router-link>
-            <div class="text-xxs text-gray-500 mb-4">{{countDuration(data.timestamp)}} ago</div>
+            <router-link :to="{ name: 'ViewTransaction', params: {hash: data.hash}}" class="uppercase text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex truncate w-24 mt-4"><span class="text-xs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 12)}}...</span></router-link>
+            <div class="text-xs text-gray-500 mb-4">{{countDuration(data.timestamp)}} ago</div>
           </div>
         </template> 
       </Column>
-      <Column style="width: 150px; padding-bottom: 0rem; padding-top: 0rem;" field="Signer / TX Type" header="Signer / TX Type" v-if="wideScreen"> 
+      <Column style="width: 150px; padding-bottom: 0rem; padding-top: 0rem;" field="Signer / Tx Type" header="SIGNER / TX TYPE" v-if="wideScreen"> 
         <template #body="{data}"> 
           <div>
-            <div class="text-xxs text-gray-500 inline-flex truncate w-80 mt-4">Signer:
-              <div class="uppercase text-txs pl-1.5"><router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signerAddress}}" class="uppercase text-txs text-blue-600 hover:text-blue-primary hover:underline inline-flex"><span class="text-txs" v-tooltip.top="Helper.createAddress(data.signerAddress).pretty()">{{shortenedString(Helper.createAddress(data.signerAddress).pretty())}}</span></router-link></div>
+            <div class="text-xs text-gray-500 inline-flex truncate w-80 mt-4">SIGNER:
+              <div class="uppercase text-xs pl-1.5"><router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signerAddress}}" class="uppercase text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex"><span class="text-xs" v-tooltip.top="Helper.createAddress(data.signerAddress).pretty()">{{shortenedString(Helper.createAddress(data.signerAddress).pretty())}}</span></router-link></div>
             </div>
-            <div class="text-xxs text-gray-500 inline-flex truncate w-80 px-px mb-4">TX Type:
-              <div class="uppercase text-txs pl-1.5">{{data.type}}</div>
-                <!-- <div class="uppercase text-txs text-blue-primary pl-1.5" v-else>-</div> -->
+            <div class="text-xs text-gray-500 inline-flex truncate w-80 px-px mb-4">TX TYPE:
+              <div class="uppercase text-xs pl-1.5">{{data.type}}</div>
+                <!-- <div class="uppercase text-xs text-blue-primary pl-1.5" v-else>-</div> -->
             </div>
           </div>
         </template> 
       </Column>
-      <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem; padding-right: 1rem; " field="Fee" header="Fee" v-if="wideScreen"> 
+      <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem; padding-right: 1rem; " field="Fee" header="FEE" v-if="wideScreen"> 
         <template #body="{data}"> 
           <div>
-            <div class="text-txs mt-3">{{data.fee + data.amountTransfer}}</div>
+            <div class="text-xs mt-3">{{data.fee + data.amountTransfer}}</div>
           </div>
           <div class="mb-7"></div>
         </template> 
