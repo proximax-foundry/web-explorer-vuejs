@@ -23,19 +23,19 @@
         <Column style="width: 200px" v-if="!wideScreen">
           <template #body="{data}">
             <div>
-              <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-1 break-all">Height</div>
-                <router-link :to="{ name: 'ViewBlock', params: { blockHeight: data.height.compact()}}" class="text-txs text-blue-600 hover:text-blue-primary  font-bold hover:underline">{{data.height.compact()}}</router-link>
+              <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-1 break-all">Height</div>
+                <router-link :to="{ name: 'ViewBlock', params: { blockHeight: data.height.compact()}}" class="text-xs text-blue-600 hover:text-blue-primary  font-bold hover:underline">{{data.height.compact()}}</router-link>
             </div>
              <div>
-              <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Validator</div>
-              <div class="uppercase font-bold text-txs">
-                <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.signer.address.plain() }}" class="truncate text-txs text-blue-600 hover:text-blue-primary hover:underline">{{shortenedString(data.signer.address.pretty())}}</router-link>
+              <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Validator</div>
+              <div class="uppercase font-bold text-xs">
+                <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.signer.address.plain() }}" class="truncate text-xs text-blue-600 hover:text-blue-primary hover:underline">{{shortenedString(data.signer.address.pretty())}}</router-link>
               </div>
             </div>
             <div>
-              <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">No. of Transactions</div>
+              <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">No. of Transactions</div>
               <div class="flex items-center">
-                <div class="uppercase font-bold text-txs mr-2">{{data.numTransactions}}</div>
+                <div class="uppercase font-bold text-xs mr-2">{{data.numTransactions}}</div>
               </div>
             </div>
           </template>
@@ -43,46 +43,44 @@
         <Column style="width: 200px" v-if="!wideScreen">
           <template #body="{data}">
             <div>
-              <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Timestamp</div>
-              <div class="uppercase font-bold text-txs">{{ BlockUtils.fmtTime(data.timestamp.compact()) }}</div>
+              <div class="uppercase text-xs text-gray-300 font-bold mb-1">Timestamp</div>
+              <div class="uppercase font-bold text-xs">{{ BlockUtils.fmtTime(data.timestamp.compact()) }}</div>
             </div>
             <div>
-              <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-2">Fee</div>
-              <div class="text-txs uppercase font-bold" >{{ data.totalFee.compact()}}</div>
+              <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-2">Fee</div>
+              <div class="text-xs uppercase font-bold" >{{ data.totalFee.compact()}}</div>
             </div>
             <div>
-              <div class="uppercase text-xxs text-gray-300 font-bold mt-5"></div>
-              <div class="text-txs uppercase font-bold"></div>
+              <div class="uppercase text-xs text-gray-300 font-bold mt-5"></div>
+              <div class="text-xs uppercase font-bold"></div>
             </div>
           </template>
         </Column>
         <Column field="timestamp" v-if="wideScreen" header="HEIGHT" headerStyle="width:100px">
           <template #body="{data}">
-            <router-link :to="{ name: 'ViewBlock', params: { blockHeight: data.height.compact()}}" class="text-txs text-blue-600 hover:text-blue-primary hover:underline">{{data.height.compact()}}</router-link>
+            <router-link :to="{ name: 'ViewBlock', params: { blockHeight: data.height.compact()}}" class="text-xs text-blue-600 hover:text-blue-primary hover:underline">{{data.height.compact()}}</router-link>
           </template>
         </Column>
         <Column field="timestamp" v-if="wideScreen" header="TIMESTAMP" headerStyle="width:150px">
           <template #body="{data}">
-            <span class="text-txs">{{ BlockUtils.fmtTime(data.timestamp.compact()) }}</span>
+            <span class="text-xs">{{ BlockUtils.fmtTime(data.timestamp.compact()) }}</span>
           </template>
         </Column>
          <Column field="signer" header="SIGNER" headerStyle="width:150px" v-if="wideScreen">
           <template #body="{data}">
-            <!-- <span v-if="data.signer === '' || data.signer === null"></span> -->
-            <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.signer.address.plain() }}" class="truncate text-txs text-blue-600 hover:text-blue-primary hover:underline">{{ data.signer.address.pretty()}}</router-link>
+            <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.signer.address.plain() }}" class="truncate text-xs text-blue-600 hover:text-blue-primary hover:underline">{{ data.signer.address.pretty()}}</router-link>
           </template>
         </Column>
         <Column field="type" header="NO. OF TRANSACTIONS" headerStyle="width:150px" v-if="wideScreen">
           <template #body="{data}">
-            <span class="text-txs">{{ data.numTransactions }}</span>
+            <span class="text-xs">{{ data.numTransactions }}</span>
           </template>
         </Column>
         <Column field="block" v-if="wideScreen" header="FEE" headerStyle="width:120px">
           <template #body="{data}">
-            <span class="text-txs">{{ data.totalFee.compact()}}</span>
+            <span class="text-xs">{{ data.totalFee.compact()}}</span>
           </template>
         </Column>
-       
         <template #empty>
           No transaction found
         </template>
