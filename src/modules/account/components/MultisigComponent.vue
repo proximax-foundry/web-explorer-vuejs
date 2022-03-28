@@ -25,9 +25,15 @@
         <div v-for="(multisig,index) in multisigAccountsList" :key="index">
           <div class="border w-full rounded-md p-3">
             <div class="flex items-center">
-              <div :id="`multisigAddress${index}`" :copyValue="multisig.address" copySubject="Address" class="text-txs font-bold mt-1">{{multisig.address}}</div>
+              <div :id="`multisigAddress${index}`" :copyValue="multisig.address" copySubject="Address" class="text-txs font-bold mt-1">
+                <router-link :to="{ name: 'ViewAccount', params: { accountParam: multisig.address} }" class="hover:text-blue-primary hover:underline">
+                  {{ multisig.address }}
+                </router-link>
+              </div>
               <img src="@/assets/img/icon-copy.svg" @click="copy(`multisigAddress${index}`)" class="ml-2 w-4 h-4 cursor-pointer" />
-              <img src="@/assets/img/chevron_right.svg" class="w-5 h-5 ml-auto">
+              <router-link :to="{ name: 'ViewAccount', params: { accountParam: multisig.address} }" class="hover:bg-gray-200 w-7 h-7 ml-auto flex justify-center items-center rounded-full duration-300 transition-all cursor-pointer">
+                <img src="@/assets/img/chevron_right.svg" class="w-5 h-5">
+              </router-link>
             </div>
           </div>
         </div>
