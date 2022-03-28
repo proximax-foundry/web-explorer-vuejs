@@ -16,7 +16,7 @@
     <div v-else>
     <div class="md:grid md:grid-cols-2">
       <div class="filter shadow-xl border border-gray-50 p-5 mb-15 md:mr-2">
-        <div class="text-xs font-bold mb-5 ml-4">Overview</div>
+        <div class="text-xs font-bold mb-5 ml-2">Overview</div>
           <div class="txn-div">
             <div>
               <div>Asset Name</div>
@@ -42,7 +42,7 @@
           </div>
         </div>
       <div class="filter shadow-xl border border-gray-50 p-5 mb-15 sm:ml-2">
-        <div class="text-xs font-bold mb-5 ml-4">More Info</div>
+        <div class="text-xs font-bold mb-5 ml-2">More Info</div>
         <div class="txn-div w-auto">
           <div>
             <div>Creator Address</div>
@@ -170,7 +170,7 @@ return {
     @apply flex justify-start items-center border-b border-gray-100 py-4;
 
     > div:first-child{
-      @apply w-40 text-xs pl-4 font-bold;
+      @apply w-36 text-xs pl-2 pr-6 font-bold;
     }
 
     > div:nth-child(2){
@@ -178,7 +178,7 @@ return {
     }
 
     > div:nth-child(3){
-      @apply ml-7 w-36 text-xs pl-4 font-bold;
+      @apply ml-7 w-32 text-xs pl-4 font-bold;
     }
 
     > div:last-child{
