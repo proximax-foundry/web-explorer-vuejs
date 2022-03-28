@@ -74,7 +74,8 @@
     "eslint": "^7.28.0",
     "eslint-plugin-vue": "^7.11.1",
     "geckodriver": "^2.0.4",
-    "nightwatch": "^1.7.11",
+    "nightwatch": "^1.7.13",
+    "selenium-server": "^3.141.59",
     "typescript": "~4.1.5",
     "vue-cli-plugin-i18n": "~2.1.1"
   },
