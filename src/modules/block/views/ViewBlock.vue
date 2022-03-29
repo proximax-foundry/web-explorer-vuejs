@@ -63,19 +63,19 @@ export default {
     const blockInfo = ref([]);
     const isShowInvalid = ref(false);
     const nativeTokenNamespace = AppState.nativeToken.label;
-console.log(AppState.nativeToken.label);
     const loadBlock = async() =>{
-      if(!AppState.isReady){
-        setTimeout(loadBlock, 1000);
-      }
-    const block = await BlockUtils.getBlockByHeight(p.blockHeight);
-      if(block!=false){
-        blockInfo.value = block; 
-        isShowInvalid.value = false;
-        return;
-      }else{
-        isShowInvalid.value = true;
-      }
+      const block = await BlockUtils.getBlockByHeight(p.blockHeight);
+        if(!AppState.isReady){
+            setTimeout(loadBlock, 1000);
+        }
+    
+        if(block!=false){
+          blockInfo.value = block; 
+          isShowInvalid.value = false;
+          return;
+        }else{
+          isShowInvalid.value = true;
+        }
     };  
     loadBlock();
 
