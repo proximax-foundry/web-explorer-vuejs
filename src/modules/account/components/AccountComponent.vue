@@ -10,7 +10,7 @@
         </div>
         <div class="text-xxs font-semibold text-gray-400 mt-4 mb-1">Public Key</div>
         <div class="flex items-center" v-if="publicKey===invalidPublicKey">
-          <div id="publicKey" class="text-xs font-semibold mt-1 text-gray-300">{{ publicKey }}</div>
+          <div id="publicKey" class="text-xs font-semibold mt-1 text-gray-300">Public Key is not available</div>
         </div>
         <div class="flex items-center" v-else>
           <div id="publicKey" :copyValue="publicKey" copySubject="Public Key" class="text-xs font-semibold mt-1 break-all">{{ publicKey }}</div>
