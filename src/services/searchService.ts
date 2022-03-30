@@ -208,11 +208,20 @@ export class SearchService{
     let ns = new NamespaceId(this.searchString.toLowerCase());
     let formattedNs:namespaceInfoFormatted|boolean = await NamespaceUtils.fetchNamespaceInfo(ns.toHex());
     if(typeof formattedNs === 'boolean'){
-      return {
-        valid: false,
-        searchType: 'All',
-        param: this.searchString,
-      };
+      let namespace = await NamespaceUtils.fetchNamespaceInfo(ns.toHex());
+      if(namespace != false){
+        return {
+          valid: true,
+          searchType: 'Namespace',
+          param: ns.toHex(),
+        };
+      }else{
+        return {
+          valid: false,
+          searchType: 'Namespace',
+          param: this.searchString,
+        };
+      }
     }else{
       if(formattedNs.alias.type == 2){
         return {
@@ -230,7 +239,7 @@ export class SearchService{
         return {
           valid: true,
           searchType: 'Namespace',
-          param: this.searchString,
+          param: ns.toHex(),
         };
       }
     }
