@@ -93,7 +93,7 @@ export class NamespaceUtils{
       }
       return ns;
     }catch(error){
-      console.log(error)
+      // console.log(error)
       return false;
     }
   }
