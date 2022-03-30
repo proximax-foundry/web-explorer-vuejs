@@ -4,7 +4,7 @@
       Blocks
     </p>
     <div v-if="isFetching">
-      <div class="flex justify-center items-center border-gray-400 mt-15">
+      <div class="flex justify-center items-center border-gray-400 mt-15 mb-20">
         <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-navy-primary mr-2"></div>
         <span class="text-tsm">Fetching Blocks</span>
       </div>
@@ -43,16 +43,16 @@
         <Column style="width: 200px" v-if="!wideScreen">
           <template #body="{data}">
             <div>
-              <div class="uppercase text-xs text-gray-300 font-bold mb-1">Timestamp</div>
+              <div class="uppercase text-xs text-gray-300 font-bold mb-1 -mt-6">Timestamp</div>
               <div class="uppercase font-bold text-xs">{{ BlockUtils.fmtTime(data.timestamp.compact()) }}</div>
             </div>
             <div>
-              <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-2">Fee</div>
+              <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Fee</div>
               <div class="text-xs uppercase font-bold" >{{ data.totalFee.compact()}}</div>
             </div>
             <div>
-              <div class="uppercase text-xs text-gray-300 font-bold mt-5"></div>
-              <div class="text-xs uppercase font-bold"></div>
+              <div class="mb-1 mt-5"></div>
+              <div class="mr-2"></div>
             </div>
           </template>
         </Column>
