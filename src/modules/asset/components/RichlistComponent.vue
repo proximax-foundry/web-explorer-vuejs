@@ -22,7 +22,7 @@
               <div class="uppercase text-xs text-gray-300 font-bold mb-1">ADDRESS</div>
               <div class="uppercase font-bold text-xs mb-2"><router-link :to="{ name: 'ViewAccount', params: { accountParam: data.address.pretty()}}" class="uppercase text-blue-600 hover:text-blue-primary hover:underline inline-flex">{{data.address.pretty()}}</router-link></div>
               <div class="uppercase text-xs text-gray-300 font-bold mb-1">BALANCE</div>
-              <div class="uppercase font-bold text-xs">{{getCurrency(data.amount.compact())}}</div>
+              <div class="uppercase font-bold text-xs">{{getCurrency(data.amount.compact())+ " " + nativeTokenNamespace}}</div>
             </div>
           </template>
         </Column>
@@ -38,14 +38,14 @@
         </Column>
         <Column style="width: 30px" v-if="wideScreen">
         </Column>
-        <Column field="ADDRESS" header="ADDRESS" style="width:480px" v-if="wideScreen">
+        <Column field="ADDRESS" header="ADDRESS" style="width:450px" v-if="wideScreen">
           <template #body="{data}">
              <span><router-link :to="{ name: 'ViewAccount', params: { accountParam: data.address.pretty()}}" class="uppercase text-blue-600 hover:text-blue-primary hover:underline inline-flex">{{data.address.pretty()}}</router-link></span>
           </template>
         </Column>
-        <Column field="BALANCE" header="BALANCE" style="width: 200px" v-if="wideScreen">
+        <Column field="BALANCE" header="BALANCE" style="width: 250px" v-if="wideScreen">
           <template #body="{data}">
-            <span class="uppercase text-xs">{{getCurrency(data.amount.compact())}}</span>
+            <span class="uppercase text-xs">{{getCurrency(data.amount.compact())+ " " + nativeTokenNamespace}}</span>
           </template>
         </Column>
         <Column field="PERCENTAGE" header="PERCENTAGE" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen">
@@ -69,6 +69,7 @@ import Column from 'primevue/column';
 import { ref, onMounted, onUnmounted } from "vue";
 import { Helper } from '@/util/typeHelper';
 import { ChainUtils } from '@/util/chainUtils';
+import { AppState } from '@/state/appState';
 
 export default {
   name: 'RichlistComponent',
@@ -80,6 +81,7 @@ export default {
     },
   setup(p){
     const linkednamespaceID = ref(null);
+    const nativeTokenNamespace = AppState.nativeToken.label;
     const wideScreen = ref(false);
     const screenResizeHandler = () => {
       if(window.innerWidth < '1024'){
@@ -123,7 +125,8 @@ export default {
       wideScreen,
       getCurrency,
       getLinkedNamespace,
-      linkednamespaceID
+      linkednamespaceID,
+      nativeTokenNamespace
     }
   }
 }
