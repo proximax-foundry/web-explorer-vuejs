@@ -23,7 +23,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import Toast from 'primevue/toast';
 
 import VueBlocksTree from 'vue3-blocks-tree';
-import 'vue3-blocks-tree/dist/vue3-blocks-tree.css';
+// import 'vue3-blocks-tree/dist/vue3-blocks-tree.css';
 
 const app = createApp(App);
 const emitter = mitt();

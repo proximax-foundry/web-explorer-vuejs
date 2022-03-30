@@ -16,7 +16,7 @@
                 </div>
               </div>
               <div v-else class="hover:bg-blue-100 cursor-pointer flex justify-center items-center w-10">
-                <img src="@/assets/img/icon-search.svg" class="w-4 inline-block" @click="search">
+                <img src="@/assets/img/icon-search.svg" class="w-4 inline-block search" @click="search">
               </div>
             </div>
             <div class="flex items-center justify-end">

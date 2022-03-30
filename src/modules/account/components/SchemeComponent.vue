@@ -1,5 +1,5 @@
 <template>
-  <div class="border-2 border-t-0 shadow-lg">
+  <div class="border-2 border-t-0 shadow-lg schema">
     <div class="p-6 filter overflow-auto transform" :class="`${ !viewDirectionDetailSetting?'-scale-x-1':(!viewDirectionSetting?'-scale-y-1':'') }`" v-if="!isFetch">
       <div class="transform">
         <blocks-tree :data="graph" :horizontal="viewDirectionSetting" :collapsable="collapsable" :props="{ label:'label', numApproveTx:'numApproveTx', numRemoval:'numRemoval', children: 'children' }">
@@ -66,6 +66,7 @@ import { copyToClipboard } from '@/util/functions';
 import { Helper } from '@/util/typeHelper';
 import { AccountUtils } from "@/util/accountUtil";
 import { AppState } from '@/state/appState';
+import 'vue3-blocks-tree/dist/vue3-blocks-tree.css';
 
 export default {
   name:"SchemeComponent",
@@ -201,3 +202,16 @@ export default {
   }
 }
 </script>
+<style lang="scss" scoped>
+// @import "@/assets/scss/vue3-blocks-tree.scss";
+
+.schema::v-deep{
+  .org-tree-node-label{
+    .org-tree-node-label-inner{
+      @apply bg-gray-50;
+      box-shadow: none !important;
+      @apply border border-gray-300;
+    }
+  }
+}
+</style>
