@@ -535,6 +535,7 @@ export class TransactionUtils {
         return {txn: {}, txnStatus, isFound: true};
       }else{
         txn = await AppState.chainAPI.transactionAPI.getTransaction(hash);
+        console.log(txn)
       }
 
       // get fee

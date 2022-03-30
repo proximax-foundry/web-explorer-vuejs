@@ -178,6 +178,7 @@ export default {
   setup(props){
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    const invalidPublicKey = '0000000000000000000000000000000000000000000000000000000000000000';
     const toast = useToast();
     const isFetching = ref(true);
     const wideScreen = ref(false);
@@ -292,10 +293,14 @@ export default {
       let txnQueryParams = Helper.createTransactionQueryParams();
       let blockHeight = await AppState.chainAPI.chainAPI.getBlockchainHeight();
       txnQueryParams.pageSize = pages.value;
-      txnQueryParams.publicKey = props.accountPublicKey;
+      if(props.accountPublicKey == invalidPublicKey){
+        txnQueryParams.address = Helper.createAddress(props.accountAddress).plain();
+      }else{
+        txnQueryParams.publicKey = props.accountPublicKey;
+      }
       txnQueryParams.pageNumber = currentPage.value;
       txnQueryParams.embedded = true;
-      txnQueryParams.fromHeight = blockHeight - 200000;
+      // txnQueryParams.fromHeight = blockHeight - 200000;
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
 
       let transactionSearchResult = await TransactionUtils.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams);

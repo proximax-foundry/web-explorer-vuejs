@@ -55,6 +55,9 @@ export default {
     const isSearching = ref(false);
     const searchText = ref('');
     const search = async () => {
+      if(searchText.value.trim().length == 0){
+        return false;
+      }
       isSearching.value = true;
       let searchService = new SearchService();
       let searchResult = await searchService.search(searchText.value, searchFilter.value);
