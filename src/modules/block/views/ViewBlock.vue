@@ -6,7 +6,7 @@
     <div v-else> 
     <div>
       <p class="text-gray-500 mb-5 text-sm font-bold">
-        Block Details <span class="text-blue-primary font-bold"></span>
+        Block Details
       </p>   
       <div class="filter shadow-xl border border-gray-50 p-5 mb-15">
         <div class="txn-div">
