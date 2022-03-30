@@ -59,6 +59,16 @@ const commands = {
       .assert.containsText('div.text-txs.text-gray-400.font-normal.mt-1', 'Namespace');
   },
 
+  searchNamespace(){
+    return this
+      .waitForElementVisible('@searchTextBar')
+      .setValue('@searchTextBar', 'commonnamespace')
+      .pause(1000)
+      .click('@submit')
+      .pause(1000)
+      .assert.containsText('div.text-txs.text-gray-400.font-normal.mt-1', 'Namespace');
+  },
+
   searchNamespaceAsset(){
     return this
       .waitForElementVisible('@searchTextBar')
@@ -139,6 +149,18 @@ const commands = {
     return this
       .waitForElementVisible('@searchTextBar')
       .setValue('@searchTextBar', 'BFFB42A19116BDF6')
+      .click('@currentFilter')
+      .click('@NamespaceOption')
+      .pause(1000)
+      .click('@submit')
+      .pause(1000)
+      .assert.containsText('div.text-txs.text-gray-400.font-normal.mt-1', 'Namespace');
+  },
+
+  searchNamespaceWithNamespaceFilter(){
+    return this
+      .waitForElementVisible('@searchTextBar')
+      .setValue('@searchTextBar', 'commonnamespace')
       .click('@currentFilter')
       .click('@NamespaceOption')
       .pause(1000)

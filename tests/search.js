@@ -39,6 +39,14 @@ module.exports = {
       .searchNamespaceID()
   },
 
+  "Search Namespace without filter and linked to none": (browser) => {
+    let search = browser.page.search();
+    browser
+      .url('http://localhost:8080/')
+    search
+      .searchNamespace()
+  },
+
   "Search Namespace without filter with linked to asset": (browser) => {
     let search = browser.page.search();
     browser
@@ -101,6 +109,14 @@ module.exports = {
       .url('http://localhost:8080/')
     search
       .searchNamespaceIdWithNamespaceFilter()
+  },
+
+  "Search Namespace with Namespace filter without being linked": (browser) => {
+    let search = browser.page.search();
+    browser
+      .url('http://localhost:8080/')
+    search
+      .searchNamespaceWithNamespaceFilter()
   },
 
   "Search Namespace with Namespace filter with linked to asset": (browser) => {
