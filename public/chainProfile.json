@@ -1,5 +1,22 @@
 {
-    "Sirius Testnet 1": {
+  "Sirius Mainnet": {
+    "version": "0.7.1",
+    "apiNodes":[
+      "betelgeuse.xpxsirius.io"
+    ],
+    "httpPort": 3000,
+    "network":{
+      "type": 184,
+      "currency":{
+          "name": "XPX",
+          "namespace": "prx.xpx",
+          "assetId": "402b2f579faebc59",
+          "namespaceId": "bffb42a19116bdf6",
+          "divisibility": 6
+      }
+    }
+  },  
+  "Sirius Testnet 1": {
       "version": "0.0.6",
       "apiNodes":[
           "bctestnet3.brimstone.xpxsirius.io"

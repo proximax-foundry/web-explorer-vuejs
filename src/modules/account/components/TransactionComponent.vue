@@ -300,7 +300,7 @@ export default {
       }
       txnQueryParams.pageNumber = currentPage.value;
       txnQueryParams.embedded = true;
-      // txnQueryParams.fromHeight = blockHeight - 200000;
+      txnQueryParams.fromHeight = blockHeight - 200000;
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
 
       let transactionSearchResult = await TransactionUtils.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams);
