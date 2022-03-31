@@ -64,6 +64,36 @@
 </template>
 
 <script>
+/*
+Register Namespace
+SDA Definition
+SDA Supply Change
+Modify Multisig Account
+Aggregate Complete
+Aggregate Bonded
+SDA Alias
+Address Alias
+LockFund
+Account Link
+Exchange Offer
+Add Exchange Offer
+Remove Exchange Offer
+Modify Account Metadata
+Modify SDA Metadata
+Modify Namespace Metadata
+Modify Account Address Restriction
+Modify Account SDA Restriction
+Modify Account Operation Restriction
+Chain Configure
+Chain Upgrade
+Secret Lock
+Secret Proof
+Account Metadata
+SDA Metadata
+Namespace Metadata
+Modify SDA Levy
+Remove SDA Levy
+*/
 import { computed, defineComponent, getCurrentInstance, inject, ref, watch } from "vue";
 import { useToast } from "primevue/usetoast";
 import { AppState } from '@/state/appState';

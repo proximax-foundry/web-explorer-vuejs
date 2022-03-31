@@ -43,6 +43,10 @@
         <div v-if="txnDetail.detail.amount.length == 0">-</div>
       </div>
     </div>
+    <div v-if="txnDetail.detail.message">
+      <div>{{ txnDetail.detail.messageTypeTitle }}</div>
+      <div>{{ txnDetail.detail.message }}</div>
+    </div>
   </div>
 </template>
 

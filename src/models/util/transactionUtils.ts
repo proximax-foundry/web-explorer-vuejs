@@ -602,49 +602,68 @@ export class TransactionUtils {
       // extra transaction details for various transaction type
       txn.detail = {};
       switch(txn.type){
-        case TransactionType.TRANSFER:
-          // let sdas: SDA[] = [];
-          // for(let y = 0; y < txn.mosaics.length; ++y){
-          //   let rawAmount = txn.mosaics[y].amount.compact();
-          //   let actualAmount = rawAmount;
-          //   let assetId:MosaicId;
-          //   let isSendWithNamespace = TransactionUtils.isNamespace(txn.mosaics[y].id);
-          //   if(isSendWithNamespace){
-          //     let namespaceId = new NamespaceId(txn.mosaics[y].id.toDTO().id);
-          //     assetId = await TransactionUtils.getAssetAlias(namespaceId);
-          //   }
-          //   else{
-          //     assetId = txn.mosaics[y].id;
-          //   }
-
-          //   let assetIdHex = assetId.toHex();
-          //   txn.detail.amountTransfer = 0;
-          //   if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
-          //     txn.detail.amountTransfer += TransactionUtils.convertToExactNativeAmount(actualAmount);
-          //     continue;
-          //   }
-
-          //   let assetInfo = await TransactionUtils.getAssetInfo(assetId.toHex());
-
-          //   let newSDA: any = {
-          //     amount: Helper.convertToCurrency(rawAmount, assetInfo.divisibility),
-          //     id: assetIdHex,
-          //   };
-          //   let assetName = await TransactionUtils.getAssetName(assetIdHex);
-          //   if(assetName.names[0]){
-          //     newSDA.name = assetName.names[0].name;
-          //     newSDA.namespaceID = assetName.names[0].namespaceId.id.toHex();
-          //   }
-          //   sdas.push(newSDA);
-          // }
-          // txn.detail.amount = sdas;
-
-          // let recipient = await TransactionUtils.getRecipient(txn, blockHeight);
-          // txn.detail.recipient = recipient.plain();
+        case TransactionType.ADDRESS_ALIAS:
+          txn.detail = await TransactionUtils.formatTransfer(txn, txnStatus.group);
           break;
-
-        // case
+        case TransactionType.ADD_EXCHANGE_OFFER:
+          break;
+        case TransactionType.AGGREGATE_BONDED:
+          break;
+        case TransactionType.AGGREGATE_COMPLETE:
+          break;
+        case TransactionType.CHAIN_CONFIGURE:
+          break;
+        case TransactionType.CHAIN_UPGRADE:
+          break;
+        case TransactionType.EXCHANGE_OFFER:
+          break;
+        case TransactionType.REMOVE_EXCHANGE_OFFER:
+          break;
+        case TransactionType.LINK_ACCOUNT:
+          break;
+        case TransactionType.LOCK:
+          break;
+        case TransactionType.MODIFY_ACCOUNT_METADATA:
+          break;
+        case TransactionType.MODIFY_MOSAIC_METADATA:
+          break;
+        case TransactionType.MODIFY_NAMESPACE_METADATA:
+          break;
+        case TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS:
+          break;
+        case TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC:
+          break;
+        case TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION:
+          break;
+        case TransactionType.MODIFY_MULTISIG_ACCOUNT:
+          break;
+        case TransactionType.MOSAIC_ALIAS:
+          break;
+        case TransactionType.MOSAIC_DEFINITION:
+          break;
+        case TransactionType.MOSAIC_SUPPLY_CHANGE:
+          break;
+        case TransactionType.REGISTER_NAMESPACE:
+          break;
+        case TransactionType.SECRET_LOCK:
+          break;
+        case TransactionType.SECRET_PROOF:
+          break;
+        case TransactionType.TRANSFER:
+          txn.detail = await TransactionUtils.formatTransfer(txn, txnStatus.group);
+          break;
+        case TransactionType.ACCOUNT_METADATA_V2:
+          break;
+        case TransactionType.MOSAIC_METADATA_V2:
+          break;
+        case TransactionType.NAMESPACE_METADATA_V2:
+          break;
+        case TransactionType.MODIFY_MOSAIC_LEVY:
+          break;
+        case TransactionType.REMOVE_MOSAIC_LEVY:
+          break;  
       }
+      console.log(txn)
       return {txn, txnStatus, isFound: true};
     }catch (e){
       console.error(e)
@@ -3014,10 +3033,8 @@ static async extractUnconfirmedTransfer(transferTxn: TransferTransaction): Promi
   }
 
   static async accountTxns(publicKey: string, transactionQueryParams: TransactionQueryParams): Promise<Transaction[]>{
-    console.log(publicKey)
     let publicAccount = PublicAccount.createFromPublicKey(publicKey, AppState.networkType)
     let transactionSearchResult: Transaction[] = await AppState.chainAPI.accountAPI.transactions(publicAccount, transactionQueryParams);
-    console.log(transactionSearchResult)
     return transactionSearchResult;
   }
 
@@ -3470,125 +3487,126 @@ static async extractUnconfirmedTransfer(transferTxn: TransferTransaction): Promi
     return formatedTxns;
 }
 
-  /*static async formatConfirmedMixedTxns(txns: Transaction[]): Promise<ConfirmedTransferTransaction[]>{
-
-    let formatedTxns : ConfirmedTransferTransaction[] = [];
-
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatConfirmedTransaction(txns[i]);
-        let txn = ConfirmedTransaction.convertToSubClass(ConfirmedTransferTransaction, formattedTxn) as ConfirmedTransferTransaction;
-
-        let sdas: SDA[] = [];
-
-        if(txns[i].type === TransactionType.TRANSFER){
-            let transferTxn = txns[i] as TransferTransaction;
-            txn.message = transferTxn.message.payload;
-            txn.messageType = transferTxn.message.type;
-
-            if(txn.messageType === MessageType.PlainMessage){
-                let newType = TransactionUtils.convertToSwapType(txn.message);
-
-                if(newType){
-                    txn.type = newType;
-                }
-            }
-            switch(txn.messageType){
-                case MessageType.PlainMessage:
-                    txn.messageTypeTitle = "Plain Message";
-                    break;
-                case MessageType.EncryptedMessage:
-                    txn.messageTypeTitle = "Encrypted Message";
-                    break;
-                case MessageType.HexadecimalMessage:
-                    txn.messageTypeTitle = "Hexadecimal Message";
-                    break;
-            }
-            let recipientIsNamespace = transferTxn.recipient instanceof NamespaceId ? true : false;
-
-            if(transferTxn.recipient instanceof NamespaceId){
-                txn.recipientNamespaceId = transferTxn.recipient.toHex();
-                let namespacesName = await TransactionUtils.getNamespacesName([transferTxn.recipient]);
-                txn.recipientNamespaceName = namespacesName[0].name;
-            }
-
-            let recipient = await TransactionUtils.getRecipient(transferTxn, txn.block);
-
-            txn.recipient = recipient.plain();
-            txn.sender = transferTxn.signer.address.plain();
-
-            for(let y = 0; y < transferTxn.mosaics.length; ++y){
-
-                let rawAmount = transferTxn.mosaics[y].amount.compact();
-                let actualAmount = rawAmount;
-                let isSendWithNamespace = TransactionUtils.isNamespace(transferTxn.mosaics[y].id);
-                let assetId = await TransactionUtils.getResolvedAsset(transferTxn.mosaics[y].id, txn.block);
-                let assetIdHex = assetId.toHex();
-
-                if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
-                    txn.amountTransfer += TransactionUtils.convertToExactNativeAmount(actualAmount);
-                    continue;
-                }
-
-                let newSDA: SDA = {
-                    amount: rawAmount,
-                    divisibility: 0,
-                    id: assetIdHex,
-                    amountIsRaw: true,
-                    sendWithNamespace: isSendWithNamespace
-                };
-
-                if(isSendWithNamespace){
-                    let namespaceId = transferTxn.mosaics[y].id;
-
-                    newSDA.sendWithAlias = {
-                        idHex: namespaceId.toHex(),
-                        id: namespaceId.toDTO().id
-                    }
-                }
-
-                sdas.push(newSDA);
-            }
-
-            let namespaceIds = sdas.filter(sda => sda.sendWithNamespace).map(sda => Helper.createNamespaceId(sda.sendWithAlias.id));
-
-            let allAssetId = sdas.filter(sda =>{ 
-                return sda.amountIsRaw
-            }).map(sda => Helper.createAssetId(sda.id));
-
-            if(namespaceIds.length || allAssetId.length){
-                let namespacesNames: NamespaceName[] = [];
-                namespacesNames = await AppState.chainAPI.namespaceAPI.getNamespacesName(namespaceIds);
-                let assetsProperties = await AppState.chainAPI.assetAPI.getMosaics(allAssetId);
-                let aliasNames: MosaicNames[] = await AppState.chainAPI.assetAPI.getMosaicsNames(allAssetId);
-
-                for(let x= 0; x < sdas.length; ++x){
-
-                    let assetProperties = assetsProperties.filter(aliasName=> aliasName.mosaicId.toHex() === sdas[x].id)[0];
-
-                    sdas[x].divisibility = assetProperties.divisibility;
-                    sdas[x].amount = TransactionUtils.convertToExactAmount(sdas[x].amount, assetProperties.divisibility);
-                    sdas[x].amountIsRaw = false;
-
-                    let mosaicNames: MosaicNames = aliasNames.filter(aliaName => aliaName.mosaicId.toHex() === sdas[x].id)[0];
-                    let currentAliasNames: NamespaceName[] = mosaicNames.names;
-                    sdas[x].currentAlias = currentAliasNames.map(currentAlias =>{ 
-                        return { name: currentAlias.name, id: currentAlias.namespaceId.toDTO().id, idHex: currentAlias.namespaceId.toHex() }
-                    });
-
-                    if(sdas[x].sendWithAlias){
-                        sdas[x].sendWithAlias.name = namespacesNames
-                            .filter(nsName => nsName.namespaceId.toHex() === sdas[x].sendWithAlias.idHex)
-                            .map(nsName => nsName.name)[0]
-                    }
-                }
-            }
-        }
-        txn.sda = sdas;
-        formatedTxns.push(txn);
+  static async formatTransfer(transaction: Transaction, groupType: string): Promise<ConfirmedTransferTransaction|UnconfirmedTransferTransaction|PartialTransferTransaction>{
+    let formattedTxn:any, txn:any
+    if(groupType == 'partial'){
+      formattedTxn = await TransactionUtils.formatPartialTransaction(transaction);
+      txn = PartialTransaction.convertToSubClass(PartialTransferTransaction, formattedTxn) as PartialTransferTransaction;
+    }else if(groupType == 'unconfirmed'){
+      formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(transaction);
+      txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedTransferTransaction, formattedTxn) as UnconfirmedTransferTransaction;
+    }else{
+      formattedTxn = await TransactionUtils.formatConfirmedTransaction(transaction);
+      txn = ConfirmedTransaction.convertToSubClass(ConfirmedTransferTransaction, formattedTxn) as ConfirmedTransferTransaction;
     }
 
-    return formatedTxns;
-  }*/
+    let sdas: SDA[] = [];
+
+    if(transaction.type === TransactionType.TRANSFER){
+        let transferTxn = transaction as TransferTransaction;
+        txn.message = transferTxn.message.payload;
+        txn.messageType = transferTxn.message.type;
+        if(txn.messageType === MessageType.PlainMessage){
+            let newType = TransactionUtils.convertToSwapType(txn.message);
+
+            if(newType){
+              txn.type = newType;
+            }
+        }
+        switch(txn.messageType){
+            case MessageType.PlainMessage:
+              txn.messageTypeTitle = "Plain Message";
+              break;
+            case MessageType.EncryptedMessage:
+              txn.messageTypeTitle = "Encrypted Message";
+              break;
+            case MessageType.HexadecimalMessage:
+              txn.messageTypeTitle = "Hexadecimal Message";
+              break;
+        }
+        let recipientIsNamespace = transferTxn.recipient instanceof NamespaceId ? true : false;
+
+        if(transferTxn.recipient instanceof NamespaceId){
+          txn.recipientNamespaceId = transferTxn.recipient.toHex();
+          let namespacesName = await TransactionUtils.getNamespacesName([transferTxn.recipient]);
+          txn.recipientNamespaceName = namespacesName[0].name;
+        }
+
+        let recipient = await TransactionUtils.getRecipient(transferTxn, txn.block);
+
+        txn.recipient = recipient.plain();
+        txn.sender = transferTxn.signer.address.plain();
+
+        for(let y = 0; y < transferTxn.mosaics.length; ++y){
+
+          let rawAmount = transferTxn.mosaics[y].amount.compact();
+          let actualAmount = rawAmount;
+          let isSendWithNamespace = TransactionUtils.isNamespace(transferTxn.mosaics[y].id);
+          let assetId = await TransactionUtils.getResolvedAsset(transferTxn.mosaics[y].id, txn.block);
+          let assetIdHex = assetId.toHex();
+
+          if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
+            txn.amountTransfer += TransactionUtils.convertToExactNativeAmount(actualAmount);
+            continue;
+          }
+
+          let newSDA: SDA = {
+            amount: rawAmount,
+            divisibility: 0,
+            id: assetIdHex,
+            amountIsRaw: true,
+            sendWithNamespace: isSendWithNamespace
+          };
+
+          if(isSendWithNamespace){
+            let namespaceId = transferTxn.mosaics[y].id;
+
+            newSDA.sendWithAlias = {
+              idHex: namespaceId.toHex(),
+              id: namespaceId.toDTO().id
+            }
+          }
+
+          sdas.push(newSDA);
+        }
+
+        let namespaceIds = sdas.filter(sda => sda.sendWithNamespace).map(sda => Helper.createNamespaceId(sda.sendWithAlias.id));
+
+        let allAssetId = sdas.filter(sda =>{ 
+            return sda.amountIsRaw
+        }).map(sda => Helper.createAssetId(sda.id));
+
+        if(namespaceIds.length || allAssetId.length){
+          let namespacesNames: NamespaceName[] = [];
+          namespacesNames = await AppState.chainAPI.namespaceAPI.getNamespacesName(namespaceIds);
+          let assetsProperties = await AppState.chainAPI.assetAPI.getMosaics(allAssetId);
+          let aliasNames: MosaicNames[] = await AppState.chainAPI.assetAPI.getMosaicsNames(allAssetId);
+
+          for(let x= 0; x < sdas.length; ++x){
+
+            let assetProperties = assetsProperties.filter(aliasName=> aliasName.mosaicId.toHex() === sdas[x].id)[0];
+
+            sdas[x].divisibility = assetProperties.divisibility;
+            sdas[x].amount = TransactionUtils.convertToExactAmount(sdas[x].amount, assetProperties.divisibility);
+            sdas[x].amountIsRaw = false;
+
+            let mosaicNames: MosaicNames = aliasNames.filter(aliaName => aliaName.mosaicId.toHex() === sdas[x].id)[0];
+            let currentAliasNames: NamespaceName[] = mosaicNames.names;
+            sdas[x].currentAlias = currentAliasNames.map(currentAlias =>{ 
+              return { name: currentAlias.name, id: currentAlias.namespaceId.toDTO().id, idHex: currentAlias.namespaceId.toHex() }
+            });
+
+            if(sdas[x].sendWithAlias){
+              sdas[x].sendWithAlias.name = namespacesNames
+                .filter(nsName => nsName.namespaceId.toHex() === sdas[x].sendWithAlias.idHex)
+                .map(nsName => nsName.name)[0]
+            }
+          }
+        }
+    }
+    txn.sda = sdas;
+    return txn;
+  }
 
   //----------Account Transaction----------------------------------------------------------
   static async formatUnconfirmedAccountTransaction(txns: Transaction[]): Promise<UnconfirmedAccountTransaction[]>{
