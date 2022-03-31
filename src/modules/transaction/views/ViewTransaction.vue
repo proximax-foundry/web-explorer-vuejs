@@ -47,24 +47,7 @@ export default {
     const isTxnFailed = ref(false);
     const failedStatus = ref('');''
     const txn = ref({});
-    const formattedTransaction = ref({
-      hash: '',
-      status: '',
-      timestamp: '',
-      height: 0,
-      type: '',
-      fee: 0,
-      signature: '',
-      signer: '',
-      version: '',
-      isMissingSignature: false,
-      cosigners: [],
-      amount: '',
-      amountTransfer: [],
-      assetAmount: '',
-      assetId: '',
-      assetName: {},
-    });
+    const formattedTransaction = ref({});
     const innerTransaction = ref({});
 
     const loadTxn = async () => {
@@ -96,6 +79,7 @@ export default {
               signer: transaction.txn.signer.address.address,
               version: transaction.txn.version,
               isMissingSignature: transaction.txn.hasMissingSignatures(),
+              detail: transaction.txn.detail,
               group: transaction.txnStatus.group,
               isFound: transaction.isFound,
             }
@@ -105,9 +89,9 @@ export default {
               formattedTransaction.value.cosigners = {}
             }
 
-            if(transaction.txn.amountTransfer!=undefined){
-              formattedTransaction.value.amountTransfer = transaction.txn.amountTransfer;
-            }
+            // if(transaction.txn.amountTransfer!=undefined){
+            //   formattedTransaction.value.amountTransfer = transaction.txn.amountTransfer;
+            // }
 
             if(transaction.txn.mosaic!=undefined){
               formattedTransaction.value.assetAmount = Helper.convertToExact(transaction.txn.mosaic.amount.compact(), AppState.nativeToken.divisibility);
@@ -118,13 +102,11 @@ export default {
                 let nsNames = await TransactionUtils.getNamespacesName([namespaceId]);
                 formattedTransaction.value.assetName = nsNames[0].name;
               }
-              // formattedTransaction.value.assetName = await TransactionUtils.getAssetsName([transaction.txn.mosaic.id]);
-              // console.log(formattedTransaction.value.assetName)
             }
 
-            if(transaction.txn.amount!=undefined){
-              formattedTransaction.value.amount = transaction.txn.amount;
-            }
+            // if(transaction.txn.amount!=undefined){
+            //   formattedTransaction.value.amount = transaction.txn.amount;
+            // }
 
             innerTransaction.value = transaction.txn.innerTransactions;
           }else{

@@ -3,7 +3,6 @@ import { InnerTransaction } from "@/models/transactions/inner/innerTxn";
 
 export class InnerTransferTransaction extends InnerTransaction{
 
-    in_out: boolean | null = null;
     sender: string | null = null;
     recipient: string | null = null;
     recipientNamespaceId: string | null = null;

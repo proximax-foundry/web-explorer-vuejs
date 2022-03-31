@@ -93,7 +93,7 @@ export default {
           oriSignedSigners = cosignedSigner.concat([txn.signer.publicKey]);
           signedSigners = [...oriSignedSigners];
 
-          let extractedData = await TransactionUtils.extractInnerTransaction(txn);
+          let extractedData = await TransactionUtils.extractInnerTransaction(txn, props.txnGroup);
             extractedData.infoInfoList = extractedData.infos.filter(info => !info.label && info.type === MsgType.INFO);
             extractedData.infoGreenList = extractedData.infos.filter(info => !info.label && info.type === MsgType.GREEN);
             extractedData.infoRedList = extractedData.infos.filter(info => !info.label && info.type === MsgType.RED);

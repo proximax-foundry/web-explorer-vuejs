@@ -4,3 +4,6 @@ export * from "./inner/inner";
 export * from "./restrictionModification";
 export * from "./exchangeOffer";
 export * from "./confirmed/confirmed";
+export * from "./unconfirmed/unconfirmed";
+export * from "./partial/partial";
+export * from "./txnList";

@@ -39,45 +39,6 @@
       <div>Tx Fee</div>
       <div class="relative"><span class="font-bold">{{ maxFee[0] }}</span>{{ maxFee[1]>0?'.':'' }}<span class="text-xxs">{{ maxFee[1] }}</span> <span class="font-bold">{{ nativeTokenNamespace }}</span> <img src="@/assets/img/icon-xpx.svg" class="ml-2 inline-block absolute" style="top: -1px; width:14px;" /></div>
     </div>
-    <div v-if="txnDetail.amountTransfer">
-      <div>Amount</div>
-      <div class="relative">
-        <span class="font-bold">{{ transferAmount[0] }}</span>
-        {{ transferAmount[1]>0?'.':'' }}
-        <span class="text-xxs">{{ transferAmount[1] }}</span>
-        <span class="font-bold">{{ nativeTokenNamespace }}</span>
-        <img src="@/assets/img/icon-xpx.svg" class="ml-2 inline-block absolute" style="top: -1px; width:14px;" />
-      </div>
-    </div>{{txnDetail.mosaicAmount}}
-    <div v-if="txnDetail.assetAmount">
-      <div>Amount</div>
-      <div class="relative">
-        <span class="font-bold">{{ assetAmount[0] }}</span>
-        {{ assetAmount[1]>0?'.':'' }}
-        <span class="text-xxs">{{ assetAmount[1] }}</span>
-        <div class="inline-block text-gray-400 text-txs hover:text-gray-700 duration-300 transition-all">
-          <router-link v-if="txnDetail.assetName" :to="{ name: 'ViewNamespace', params: { namespaceParam: txnDetail.assetName }}" class="hover:text-blue-primary hover:underline">{{ txnDetail.assetName }}</router-link>
-          {{ txnDetail.assetName?' / ':'' }}
-          <router-link :to="{ name: 'ViewAsset', params: { id: txnDetail.assetId }}" class="hover:text-blue-primary hover:underline">{{ txnDetail.assetId }}</router-link>
-        </div>
-      </div>
-    </div>
-    <div v-if="txnDetail.amount">
-      <div>SDA Amount</div>
-      <div class="relative">
-        <div v-for="sda, item in txnDetail.amount" :key="item">
-          <span class="font-bold">{{ sdaAmount[item][0] }}</span>
-          {{ sdaAmount[item][1]>0?'.':'' }}
-          <span class="text-xxs">{{ sdaAmount[item][1] }}</span>
-          <div class="inline-block text-gray-400 text-txs hover:text-gray-700 duration-300 transition-all">
-            <router-link v-if="sda.name" :to="{ name: 'ViewNamespace', params: { namespaceParam: sda.namespaceID }}" class="hover:text-blue-primary hover:underline">{{ sda.name }}</router-link>
-            {{ sda.name?' / ':'' }}
-            <router-link :to="{ name: 'ViewAsset', params: { id: sda.id }}" class="hover:text-blue-primary hover:underline">{{ sda.id }}</router-link>
-          </div>
-        </div>
-        <div v-if="txnDetail.amount.length == 0">-</div>
-      </div>
-    </div>
     <div>
       <div>Signature</div>
       <div class="break-all">{{ txnDetail.signature }}</div>
@@ -99,6 +60,7 @@
       </div>
     </div>
   </div>
+  <TransferDetailComponent :txnDetail="txnDetail" v-if="txnDetail.type == 'Transfer'" />
 </template>
 
 <script>
@@ -107,10 +69,15 @@ import { useToast } from "primevue/usetoast";
 import { AppState } from '@/state/appState';
 import { Helper } from "@/util/typeHelper";
 import { copyToClipboard } from '@/util/functions';
+import { TransactionUtils } from '@/models/util/transactionUtils';
+import TransferDetailComponent from '@/modules/transaction/components/transactionDetails/TransferDetailComponent';
 export default {
   name: 'TxnDetailComponent',
   props: {
     txnDetail: Object
+  },
+  components: {
+    TransferDetailComponent,
   },
   setup(props) {
     console.log(props.txnDetail)
@@ -120,10 +87,6 @@ export default {
       return props.txnDetail.fee.toString().split('.');
     });
 
-    const transferAmount = computed(() => {
-      return props.txnDetail.amountTransfer.toString().split('.');
-    });
-
     const copy = (id) =>{ 
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
@@ -131,32 +94,12 @@ export default {
       toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
     };
 
-    const assetAmount = computed(() => {
-      if(props.txnDetail.assetAmount){
-        return props.txnDetail.assetAmount.toString().split('.');
-      }else{
-        return '';
-      }
-    });
-
-    const sdaAmount = computed(() => {
-      let formattedSDA = [];
-      if(props.txnDetail.amount){
-        props.txnDetail.amount.forEach(sda => {
-          formattedSDA.push(sda.amount.toString().split('.'));
-        });
-      }
-      return formattedSDA;
-    });
-
     return {
       nativeTokenNamespace,
       maxFee,
       Helper,
       copy,
-      transferAmount,
-      sdaAmount,
-      assetAmount,
+      TransactionUtils
     }
   }
 }
@@ -164,7 +107,7 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-.txn-div{
+.txn-div, .details{
   @apply text-gray-800 text-xs;
   > div{
     @apply flex items-center border-b border-gray-100 py-4;
