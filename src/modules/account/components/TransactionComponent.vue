@@ -57,7 +57,7 @@
             </div>
             <div>
               <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Tx Amount</div>
-              <div class="text-xs uppercase font-bold" >{{ data.amountTransfer ? data.amountTransfer:'-' }} <b v-if="data.amountTransfer">{{ nativeTokenName }}</b></div>
+              <div class="text-xs uppercase font-bold" >{{ data.amountTransfer ? Helper.toCurrencyFormat(data.amountTransfer, currencyDivisibility):'-' }} <b v-if="data.amountTransfer">{{ nativeTokenName }}</b></div>
             </div>
           </template>
         </Column>
@@ -102,7 +102,7 @@
         </Column>
         <Column header="AMOUNT" headerStyle="width:110px" v-if="wideScreen">
           <template #body="{data}">
-            <div class="text-xs" >{{ data.amountTransfer ? data.amountTransfer:'-' }} <b v-if="data.amountTransfer">{{ nativeTokenName }}</b></div>
+            <div class="text-xs" >{{ data.amountTransfer ? Helper.toCurrencyFormat(data.amountTransfer, currencyDivisibility):'-' }} <b v-if="data.amountTransfer">{{ nativeTokenName }}</b></div>
           </template>
         </Column>
         <Column header="SDA" headerStyle="width:40px" v-if="wideScreen">
@@ -334,6 +334,10 @@ export default {
       }
     });
 
+    const currencyDivisibility = computed(() => {
+      return AppState.nativeToken.divisibility;
+    })
+
     return{
       isFetching,
       wideScreen,
@@ -355,6 +359,7 @@ export default {
       naviNext,
       naviLast,
       changeRows,
+      currencyDivisibility,
     }
   }
 }

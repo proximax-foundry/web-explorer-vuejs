@@ -336,10 +336,14 @@ export class TransactionUtils {
   static async getResolvedAsset(mosaicId: MosaicId, blockHeight: number): Promise<MosaicId>{
 
     let resolvedAsset: MosaicId = null;
-
     if(TransactionUtils.isNamespace(mosaicId)){
 
       let receipts = await AppState.chainAPI.blockAPI.getBlockReceipts(blockHeight);
+
+      // fix for genesis block height
+      if(receipts.mosaicResolutionStatements.length == 0){
+        resolvedAsset = mosaicId;
+      }
 
       for(let i=0; i < receipts.mosaicResolutionStatements.length; ++i){
         let unresolved = receipts.mosaicResolutionStatements[i].unresolved;
@@ -535,7 +539,6 @@ export class TransactionUtils {
         return {txn: {}, txnStatus, isFound: true};
       }else{
         txn = await AppState.chainAPI.transactionAPI.getTransaction(hash);
-        console.log(txn)
       }
 
       // get fee
@@ -2976,10 +2979,8 @@ static async extractPartialTransfer(transferTxn: TransferTransaction): Promise<I
   }
 
   static async accountTxns(publicKey: string, transactionQueryParams: TransactionQueryParams): Promise<Transaction[]>{
-    console.log(publicKey)
     let publicAccount = PublicAccount.createFromPublicKey(publicKey, AppState.networkType)
     let transactionSearchResult: Transaction[] = await AppState.chainAPI.accountAPI.transactions(publicAccount, transactionQueryParams);
-    console.log(transactionSearchResult)
     return transactionSearchResult;
   }
 

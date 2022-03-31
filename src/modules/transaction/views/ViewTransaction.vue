@@ -73,7 +73,6 @@ export default {
       }
 
       let transaction = await TransactionUtils.getTransaction(props.hash);
-      console.log(transaction)
       if(transaction.isFound == 'error'){
         formattedTransaction.value = transaction;
         isFetching.value = false;
