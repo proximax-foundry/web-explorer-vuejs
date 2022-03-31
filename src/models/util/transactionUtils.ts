@@ -3097,7 +3097,6 @@ static async extractPartialTransfer(transferTxn: TransferTransaction): Promise<I
           let isSendWithNamespace = TransactionUtils.isNamespace(transferTxn.mosaics[y].id);
           let assetId = await TransactionUtils.getResolvedAsset(transferTxn.mosaics[y].id, txn.block);
           let assetIdHex = assetId.toHex();
-
           if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
             txn.amountTransfer += TransactionUtils.convertToExactNativeAmount(actualAmount);
             continue;
