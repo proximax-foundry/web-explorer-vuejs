@@ -602,8 +602,8 @@ export class TransactionUtils {
       // extra transaction details for various transaction type
       txn.detail = {};
       switch(txn.type){
-        case TransactionType.ADDRESS_ALIAS:
-          txn.detail = await TransactionUtils.formatTransfer(txn, txnStatus.group);
+        case TransactionType.ADDRESS_ALIAS || TransactionType.MOSAIC_ALIAS:
+          txn.detail = await TransactionUtils.formatAliasTransaction(txn, txnStatus.group);
           break;
         case TransactionType.ADD_EXCHANGE_OFFER:
           break;
@@ -635,10 +635,10 @@ export class TransactionUtils {
           break;
         case TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION:
           break;
-        case TransactionType.MODIFY_MULTISIG_ACCOUNT:
-          break;
-        case TransactionType.MOSAIC_ALIAS:
-          break;
+        // case TransactionType.MODIFY_MULTISIG_ACCOUNT:
+        //   txn.detail = await TransactionUtils.formatAccountTransaction(txn, txnStatus.group);
+        //   break;
+        
         case TransactionType.MOSAIC_DEFINITION:
           break;
         case TransactionType.MOSAIC_SUPPLY_CHANGE:
@@ -650,7 +650,7 @@ export class TransactionUtils {
         case TransactionType.SECRET_PROOF:
           break;
         case TransactionType.TRANSFER:
-          txn.detail = await TransactionUtils.formatTransfer(txn, txnStatus.group);
+          txn.detail = await TransactionUtils.formatTransferTransaction(txn, txnStatus.group);
           break;
         case TransactionType.ACCOUNT_METADATA_V2:
           break;
@@ -3487,7 +3487,7 @@ static async extractUnconfirmedTransfer(transferTxn: TransferTransaction): Promi
     return formatedTxns;
 }
 
-  static async formatTransfer(transaction: Transaction, groupType: string): Promise<ConfirmedTransferTransaction|UnconfirmedTransferTransaction|PartialTransferTransaction>{
+  static async formatTransferTransaction(transaction: Transaction, groupType: string): Promise<ConfirmedTransferTransaction|UnconfirmedTransferTransaction|PartialTransferTransaction>{
     let formattedTxn:any, txn:any
     if(groupType == 'partial'){
       formattedTxn = await TransactionUtils.formatPartialTransaction(transaction);
@@ -3544,6 +3544,10 @@ static async extractUnconfirmedTransfer(transferTxn: TransferTransaction): Promi
           let isSendWithNamespace = TransactionUtils.isNamespace(transferTxn.mosaics[y].id);
           let assetId = await TransactionUtils.getResolvedAsset(transferTxn.mosaics[y].id, txn.block);
           let assetIdHex = assetId.toHex();
+
+          console.log(AppState.nativeToken.assetId)
+          console.log(nativeTokenNamespaceId.value)
+          console.log(assetIdHex)
 
           if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
             txn.amountTransfer += TransactionUtils.convertToExactNativeAmount(actualAmount);
@@ -3609,254 +3613,91 @@ static async extractUnconfirmedTransfer(transferTxn: TransferTransaction): Promi
   }
 
   //----------Account Transaction----------------------------------------------------------
-  static async formatUnconfirmedAccountTransaction(txns: Transaction[]): Promise<UnconfirmedAccountTransaction[]>{
+  static async formatAccountTransaction(transaction: Transaction, groupType: string): Promise<PartialAccountTransaction|ConfirmedAccountTransaction|UnconfirmedAccountTransaction>{
 
-    let formatedTxns : UnconfirmedAccountTransaction[] = [];
-
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(txns[i]);
-        let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedAccountTransaction, formattedTxn) as UnconfirmedAccountTransaction;
-
-        if(txns[i].type === TransactionType.MODIFY_MULTISIG_ACCOUNT){
-            let modifyMultisigTxn = txns[i] as ModifyMultisigAccountTransaction;
-
-            txn.approvalDelta = modifyMultisigTxn.minApprovalDelta;
-            txn.removalDelta = modifyMultisigTxn.minRemovalDelta;
-            txn.addedCosigner = modifyMultisigTxn.modifications.filter(x => x.type === MultisigCosignatoryModificationType.Add)
-                .map(x => x.cosignatoryPublicAccount.publicKey);
-            txn.removedCosigner = modifyMultisigTxn.modifications.filter(x => x.type === MultisigCosignatoryModificationType.Remove)
-                .map(x => x.cosignatoryPublicAccount.publicKey);
-
-            try {
-                let multisigInfo = await AppState.chainAPI.accountAPI.getMultisigAccountInfo(modifyMultisigTxn.signer.address);
-
-                if(multisigInfo){
-                    txn.oldApprovalNumber = multisigInfo.minApproval;
-                    txn.oldRemovalNumber = multisigInfo.minRemoval;
-                }
-
-            } catch (error) {
-                txn.oldApprovalNumber = 0;
-                txn.oldRemovalNumber = 0;
-            }
-        }
-        
-        formatedTxns.push(txn);
+    let formattedTxn:any, txn:any
+    if(groupType == 'partial'){
+      formattedTxn = await TransactionUtils.formatPartialTransaction(transaction);
+      txn = PartialTransaction.convertToSubClass(PartialAccountTransaction, formattedTxn) as PartialAccountTransaction;
+    }else if(groupType == 'unconfirmed'){
+      formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(transaction);
+      txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedAccountTransaction, formattedTxn) as UnconfirmedAccountTransaction;
+    }else{
+      formattedTxn = await TransactionUtils.formatConfirmedTransaction(transaction);
+      txn = ConfirmedTransaction.convertToSubClass(ConfirmedAccountTransaction, formattedTxn) as ConfirmedAccountTransaction;
     }
 
-    return formatedTxns;
-  }
+    if(transaction.type === TransactionType.MODIFY_MULTISIG_ACCOUNT){
+      let modifyMultisigTxn = transaction as ModifyMultisigAccountTransaction;
 
-  static async formatConfirmedAccountTransaction(txns: Transaction[]): Promise<ConfirmedAccountTransaction[]>{
+      txn.approvalDelta = modifyMultisigTxn.minApprovalDelta;
+      txn.removalDelta = modifyMultisigTxn.minRemovalDelta;
+      txn.addedCosigner = modifyMultisigTxn.modifications.filter(x => x.type === MultisigCosignatoryModificationType.Add)
+          .map(x => x.cosignatoryPublicAccount.publicKey);
+      txn.removedCosigner = modifyMultisigTxn.modifications.filter(x => x.type === MultisigCosignatoryModificationType.Remove)
+          .map(x => x.cosignatoryPublicAccount.publicKey);
 
-    let formatedTxns : ConfirmedAccountTransaction[] = [];
-
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatConfirmedTransaction(txns[i]);
-        let txn = ConfirmedTransaction.convertToSubClass(ConfirmedAccountTransaction, formattedTxn) as ConfirmedAccountTransaction;
-        
-        if(txns[i].type === TransactionType.MODIFY_MULTISIG_ACCOUNT){
-            let modifyMultisigTxn = txns[i] as ModifyMultisigAccountTransaction;
-
-            txn.approvalDelta = modifyMultisigTxn.minApprovalDelta;
-            txn.removalDelta = modifyMultisigTxn.minRemovalDelta;
-            txn.addedCosigner = modifyMultisigTxn.modifications.filter(x => x.type === MultisigCosignatoryModificationType.Add)
-                .map(x => x.cosignatoryPublicAccount.publicKey);
-            txn.removedCosigner = modifyMultisigTxn.modifications.filter(x => x.type === MultisigCosignatoryModificationType.Remove)
-                .map(x => x.cosignatoryPublicAccount.publicKey);
+      try {
+        let multisigInfo = await AppState.chainAPI.accountAPI.getMultisigAccountInfo(modifyMultisigTxn.signer.address);
+        if(multisigInfo){
+          txn.oldApprovalNumber = multisigInfo.minApproval;
+          txn.oldRemovalNumber = multisigInfo.minRemoval;
         }
-
-        formatedTxns.push(txn);
+      } catch (error) {
+        txn.oldApprovalNumber = 0;
+        txn.oldRemovalNumber = 0;
+      }
     }
-
-    return formatedTxns;
-  }
-
-  static async formatPartialAccountTransaction(txns: Transaction[]): Promise<PartialAccountTransaction[]>{
-
-    let formatedTxns : PartialAccountTransaction[] = [];
-
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatPartialTransaction(txns[i]);
-        let txn = PartialTransaction.convertToSubClass(PartialAccountTransaction, formattedTxn) as PartialAccountTransaction;
-        
-        if(txns[i].type === TransactionType.MODIFY_MULTISIG_ACCOUNT){
-            let modifyMultisigTxn = txns[i] as ModifyMultisigAccountTransaction;
-
-            txn.approvalDelta = modifyMultisigTxn.minApprovalDelta;
-            txn.removalDelta = modifyMultisigTxn.minRemovalDelta;
-            txn.addedCosigner = modifyMultisigTxn.modifications.filter(x => x.type === MultisigCosignatoryModificationType.Add)
-                .map(x => x.cosignatoryPublicAccount.publicKey);
-            txn.removedCosigner = modifyMultisigTxn.modifications.filter(x => x.type === MultisigCosignatoryModificationType.Remove)
-                .map(x => x.cosignatoryPublicAccount.publicKey);
-
-            try {
-                let multisigInfo = await AppState.chainAPI.accountAPI.getMultisigAccountInfo(modifyMultisigTxn.signer.address);
-
-                if(multisigInfo){
-                    txn.oldApprovalNumber = multisigInfo.minApproval;
-                    txn.oldRemovalNumber = multisigInfo.minRemoval;
-                }
-
-            } catch (error) {
-                txn.oldApprovalNumber = 0;
-                txn.oldRemovalNumber = 0;
-            }
-        }
-
-        formatedTxns.push(txn);
-    }
-
-    return formatedTxns;
+    return txn;
   }
 
   //------------------Alias Transaction--------------------------------------------------------------------
-  static async formatUnconfirmedAliasTransaction(txns: Transaction[]): Promise<UnconfirmedAliasTransaction[]>{
+  static async formatAliasTransaction(transaction: Transaction, groupType: string): Promise<ConfirmedAliasTransaction|PartialAliasTransaction|UnconfirmedAliasTransaction>{
 
-    let formatedTxns : UnconfirmedAliasTransaction[] = [];
-
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(txns[i]);
-        let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedAliasTransaction, formattedTxn) as UnconfirmedAliasTransaction;
-
-        if(txns[i].type === TransactionType.ADDRESS_ALIAS){
-            let addressAliasTxn = txns[i] as AddressAliasTransaction;
-
-            txn.address = addressAliasTxn.address.plain();
-            txn.aliasType = addressAliasTxn.actionType;
-            txn.aliasTypeName = addressAliasTxn.actionType === AliasActionType.Link ? "Link" : "Unlink";
-    
-            let nsId = addressAliasTxn.namespaceId;
-
-            try {
-                let nsName = await TransactionUtils.getNamespacesName([nsId]);
-
-                txn.aliasName = nsName[0].name;
-            } catch (error) {
-                
-            }
-        }
-        else if(txns[i].type === TransactionType.MOSAIC_ALIAS){
-            let assetAliasTxn = txns[i] as MosaicAliasTransaction;
-
-            txn.assetId = assetAliasTxn.mosaicId.toHex();
-            txn.aliasType = assetAliasTxn.actionType;
-            txn.aliasTypeName = assetAliasTxn.actionType === AliasActionType.Link ? "Link" : "Unlink";
-    
-            let nsId = assetAliasTxn.namespaceId;
-
-            try {
-                let nsName = await TransactionUtils.getNamespacesName([nsId]);
-
-                txn.aliasName = nsName[0].name;
-            } catch (error) {
-                
-            }
-        }
-
-        formatedTxns.push(txn);
+    let formattedTxn:any, txn:any
+    if(groupType == 'partial'){
+      formattedTxn = await TransactionUtils.formatPartialTransaction(transaction);
+      txn = PartialTransaction.convertToSubClass(PartialAliasTransaction, formattedTxn) as PartialAliasTransaction;
+    }else if(groupType == 'unconfirmed'){
+      formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(transaction);
+      txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedAliasTransaction, formattedTxn) as UnconfirmedAliasTransaction;
+    }else{
+      formattedTxn = await TransactionUtils.formatConfirmedTransaction(transaction);
+      txn = ConfirmedTransaction.convertToSubClass(ConfirmedAliasTransaction, formattedTxn) as ConfirmedAliasTransaction;
     }
 
-    return formatedTxns;
-}
+    if(transaction.type === TransactionType.ADDRESS_ALIAS){
+      let addressAliasTxn = transaction as AddressAliasTransaction;
 
-  static async formatConfirmedAliasTransaction(txns: Transaction[]): Promise<ConfirmedAliasTransaction[]>{
+      txn.address = addressAliasTxn.address.plain();
+      txn.aliasType = addressAliasTxn.actionType;
+      txn.aliasTypeName = addressAliasTxn.actionType === AliasActionType.Link ? "Link" : "Unlink";
 
-    let formatedTxns : ConfirmedAliasTransaction[] = [];
+      let nsId = addressAliasTxn.namespaceId;
 
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatConfirmedTransaction(txns[i]);
-        let txn = ConfirmedTransaction.convertToSubClass(ConfirmedAliasTransaction, formattedTxn) as ConfirmedAliasTransaction;
-        
-        if(txns[i].type === TransactionType.ADDRESS_ALIAS){
-            let addressAliasTxn = txns[i] as AddressAliasTransaction;
+      try {
+        let nsName = await TransactionUtils.getNamespacesName([nsId]);
 
-            txn.address = addressAliasTxn.address.plain();
-            txn.aliasType = addressAliasTxn.actionType;
-            txn.aliasTypeName = addressAliasTxn.actionType === AliasActionType.Link ? "Link" : "Unlink";
-    
-            let nsId = addressAliasTxn.namespaceId;
-
-            try {
-                let nsName = await TransactionUtils.getNamespacesName([nsId]);
-
-                txn.aliasName = nsName[0].name;
-            } catch (error) {
-                
-            }
-        }
-        else if(txns[i].type === TransactionType.MOSAIC_ALIAS){
-            let assetAliasTxn = txns[i] as MosaicAliasTransaction;
-
-            txn.assetId = assetAliasTxn.mosaicId.toHex();
-            txn.aliasType = assetAliasTxn.actionType;
-            txn.aliasTypeName = assetAliasTxn.actionType === AliasActionType.Link ? "Link" : "Unlink";
-    
-            let nsId = assetAliasTxn.namespaceId;
-
-            try {
-                let nsName = await TransactionUtils.getNamespacesName([nsId]);
-
-                txn.aliasName = nsName[0].name;
-            } catch (error) {
-                
-            }
-        }
-
-        formatedTxns.push(txn);
+        txn.aliasName = nsName[0].name;
+      } catch (error) {}
     }
+    else if(transaction.type === TransactionType.MOSAIC_ALIAS){
+      let assetAliasTxn = transaction as MosaicAliasTransaction;
 
-    return formatedTxns;
-}
+      txn.assetId = assetAliasTxn.mosaicId.toHex();
+      txn.aliasType = assetAliasTxn.actionType;
+      txn.aliasTypeName = assetAliasTxn.actionType === AliasActionType.Link ? "Link" : "Unlink";
 
-  static async formatPartialAliasTransaction(txns: Transaction[]): Promise<PartialAliasTransaction[]>{
+      let nsId = assetAliasTxn.namespaceId;
 
-    let formatedTxns : PartialAliasTransaction[] = [];
+      try {
+        let nsName = await TransactionUtils.getNamespacesName([nsId]);
 
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatPartialTransaction(txns[i]);
-        let txn = PartialTransaction.convertToSubClass(PartialAliasTransaction, formattedTxn) as PartialAliasTransaction;
-        
-        if(txns[i].type === TransactionType.ADDRESS_ALIAS){
-            let addressAliasTxn = txns[i] as AddressAliasTransaction;
-
-            txn.address = addressAliasTxn.address.plain();
-            txn.aliasType = addressAliasTxn.actionType;
-            txn.aliasTypeName = addressAliasTxn.actionType === AliasActionType.Link ? "Link" : "Unlink";
-    
-            let nsId = addressAliasTxn.namespaceId;
-
-            try {
-                let nsName = await TransactionUtils.getNamespacesName([nsId]);
-
-                txn.aliasName = nsName[0].name;
-            } catch (error) {
-                
-            }
-        }
-        else if(txns[i].type === TransactionType.MOSAIC_ALIAS){
-            let assetAliasTxn = txns[i] as MosaicAliasTransaction;
-
-            txn.assetId = assetAliasTxn.mosaicId.toHex();
-            txn.aliasType = assetAliasTxn.actionType;
-            txn.aliasTypeName = assetAliasTxn.actionType === AliasActionType.Link ? "Link" : "Unlink";
-    
-            let nsId = assetAliasTxn.namespaceId;
-
-            try {
-                let nsName = await TransactionUtils.getNamespacesName([nsId]);
-
-                txn.aliasName = nsName[0].name;
-            } catch (error) {
-                
-            }
-        }
-
-        formatedTxns.push(txn);
+        txn.aliasName = nsName[0].name;
+      } catch (error) {}
     }
-
-    return formatedTxns;
-}
+    return txn;
+  }
 
   //-------------Metadata Txn-----------------------------------------------------------
   static async formatUnconfirmedMetadataTransaction(txns: Transaction[]): Promise<UnconfirmedMetadataTransaction[]>{

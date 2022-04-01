@@ -9,7 +9,7 @@
           <div class="w-32 font-bold text-xs text-center p-2 relative" :class="`${ (currentPage != 'detail')?'cursor-pointer':'' }`" @click="currentPage = 'detail'">Overview<div v-if="currentPage == 'detail'" class="absolute w-full border-b border-yellow-500 transition-all duration-200" style="bottom: -1px;"></div></div>
           <div class="w-32 font-bold text-xs text-center p-2 relative" :class="`${ (currentPage != 'inner')?'cursor-pointer':'' }`" @click="currentPage = 'inner'" v-if="innerTransaction">Inner Txns<div v-if="currentPage == 'inner'" class="absolute w-full border-b border-yellow-500 transition-all duration-200" style="bottom: -1px;"></div></div>
         </div>
-        <TxnDetailComponent v-if="currentPage == 'detail'" :txnDetail="formattedTransaction" />
+        <TxnDetailComponent v-if="currentPage == 'detail'" :txnDetail="formattedTransaction" :txnType="txnType" />
         <InnerTxnComponent v-else :innerTxn="innerTransaction" :txn="txn" :txnGroup="formattedTransaction.group" />
       </div>
       <div v-else-if="formattedTransaction.isFound==='error'" class="p-3 bg-yellow-100 text-yellow-700">Transaction not found in {{ networkName }}</div>
@@ -43,6 +43,7 @@ export default {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const currentPage = ref('detail');
+    const txnType = ref('');
     const isFetching = ref(true);
     const isTxnFailed = ref(false);
     const failedStatus = ref('');''
@@ -88,6 +89,8 @@ export default {
             }else{
               formattedTransaction.value.cosigners = {}
             }
+
+            txnType.value = transaction.txn.type;
 
             // if(transaction.txn.amountTransfer!=undefined){
             //   formattedTransaction.value.amountTransfer = transaction.txn.amountTransfer;
@@ -139,6 +142,7 @@ export default {
       isFetching,
       txn,
       networkName,
+      txnType,
     }
   }
 }

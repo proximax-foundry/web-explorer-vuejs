@@ -60,7 +60,7 @@
       </div>
     </div>
   </div>
-  <TransferDetailComponent :txnDetail="txnDetail" v-if="txnDetail.type == 'Transfer'" />
+  <TransferDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.TRANSFER" />
 </template>
 
 <script>
@@ -101,16 +101,17 @@ import { Helper } from "@/util/typeHelper";
 import { copyToClipboard } from '@/util/functions';
 import { TransactionUtils } from '@/models/util/transactionUtils';
 import TransferDetailComponent from '@/modules/transaction/components/transactionDetails/TransferDetailComponent';
+import { TransactionType } from 'tsjs-xpx-chain-sdk'
 export default {
   name: 'TxnDetailComponent',
   props: {
-    txnDetail: Object
+    txnDetail: Object,
+    txnType: Number,
   },
   components: {
     TransferDetailComponent,
   },
   setup(props) {
-    console.log(props.txnDetail)
     const toast = useToast();
     const nativeTokenNamespace = AppState.nativeToken.label;
     const maxFee = computed(() => {
@@ -129,7 +130,8 @@ export default {
       maxFee,
       Helper,
       copy,
-      TransactionUtils
+      TransactionUtils,
+      TransactionType
     }
   }
 }

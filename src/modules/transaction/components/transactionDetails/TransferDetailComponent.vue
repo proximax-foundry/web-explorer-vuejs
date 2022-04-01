@@ -2,7 +2,12 @@
   <div class="details">
     <div>
       <div>Recipient</div>
-      <div>{{ txnDetail.detail.recipient }}</div>
+      <div class="flex">
+        <router-link :to="{ name: 'ViewAccount', params: { accountParam: txnDetail.detail.recipient }}" class="mr-2 hover:text-blue-primary hover:underline text-blue-600"  id="recipient" :copyValue="Helper.createAddress(txnDetail.detail.recipient).pretty()" copySubject="Recipient address">
+          {{ Helper.createAddress(txnDetail.detail.recipient).pretty() }}
+        </router-link>
+        <img src="@/assets/img/icon-copy.svg" @click="copy('recipient')" class="cursor-pointer" />
+      </div>
     </div>
     <div v-if="txnDetail.detail.amountTransfer">
       <div>Amount</div>
@@ -63,6 +68,7 @@ export default {
     txnDetail: Object
   },
   setup(props) {
+    const toast = useToast();
     const nativeTokenNamespace = AppState.nativeToken.label;
     const transferAmount = computed(() => {
       return props.txnDetail.detail.amountTransfer.toString().split('.');
@@ -119,10 +125,10 @@ export default {
     > div:nth-child(2){
       @apply text-xs w-full;
     }
+  }
 
-    > div:last-child{
-      @apply border-none;
-    }
+  > div:last-child{
+    @apply border-none;
   }
 }
 </style>
