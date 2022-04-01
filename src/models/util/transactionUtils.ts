@@ -612,9 +612,9 @@ export class TransactionUtils {
           // to be displayed in innerTxnDetail
           txn.detail = await TransactionUtils.formatAggregateTransaction(txn, txnStatus.group);
           break;
-        case TransactionType.CHAIN_CONFIGURE:
-          break;
-        case TransactionType.CHAIN_UPGRADE:
+        case TransactionType.CHAIN_CONFIGURE: case TransactionType.CHAIN_UPGRADE:
+          // to be displayed in innerTxnDetail
+          // txn.detail = await TransactionUtils.formatChainTransaction(txn, txnStatus.group);
           break;
         case TransactionType.EXCHANGE_OFFER: case TransactionType.ADD_EXCHANGE_OFFER: case TransactionType.REMOVE_EXCHANGE_OFFER:
           txn.detail = await TransactionUtils.formatExchangeTransaction(txn, txnStatus.group);
@@ -4032,56 +4032,32 @@ static async extractUnconfirmedTransfer(transferTxn: TransferTransaction): Promi
     return formatedTxns;
   }
 
-  static async formatConfirmedChainTransaction(txns: Transaction[]): Promise<ConfirmedChainTransaction[]>{
+  static async formatChainTransaction(transaction: Transaction, groupType: string): Promise<UnconfirmedChainTransaction|ConfirmedChainTransaction|PartialChainTransaction>{
 
-    let formatedTxns : ConfirmedChainTransaction[] = [];
-
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatConfirmedTransaction(txns[i]);
-        let txn = ConfirmedTransaction.convertToSubClass(ConfirmedChainTransaction, formattedTxn) as ConfirmedChainTransaction;
-        
-        if(txns[i].type === TransactionType.CHAIN_CONFIGURE){
-            let chainConfigureTxn = txns[i] as ChainConfigTransaction;
-
-            txn.applyHeightDelta = chainConfigureTxn.applyHeightDelta.compact();
-        }
-        else if(txns[i].type === TransactionType.CHAIN_UPGRADE){
-            let chainUpgradeTxn = txns[i] as ChainUpgradeTransaction;
-
-            txn.upgradePeriod = chainUpgradeTxn.upgradePeriod.compact();
-            txn.newVersion = chainUpgradeTxn.newBlockchainVersion.toHex()
-        }
-
-        formatedTxns.push(txn);
+    let formattedTxn:any, txn:any
+    if(groupType == 'partial'){
+      formattedTxn = await TransactionUtils.formatPartialTransaction(transaction);
+      txn = PartialTransaction.convertToSubClass(PartialChainTransaction, formattedTxn) as PartialChainTransaction;
+    }else if(groupType == 'unconfirmed'){
+      formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(transaction);
+      txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedChainTransaction, formattedTxn) as UnconfirmedChainTransaction;
+    }else{
+      formattedTxn = await TransactionUtils.formatConfirmedTransaction(transaction);
+      txn = ConfirmedTransaction.convertToSubClass(ConfirmedChainTransaction, formattedTxn) as ConfirmedChainTransaction;
     }
 
-    return formatedTxns;
-  }
+    if(transaction.type === TransactionType.CHAIN_CONFIGURE){
+        let chainConfigureTxn = transaction as ChainConfigTransaction;
 
-  static async formatPartialChainTransaction(txns: Transaction[]): Promise<PartialChainTransaction[]>{
-
-    let formatedTxns : PartialChainTransaction[] = [];
-
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatPartialTransaction(txns[i]);
-        let txn = PartialTransaction.convertToSubClass(PartialChainTransaction, formattedTxn) as PartialChainTransaction;
-        
-        if(txns[i].type === TransactionType.CHAIN_CONFIGURE){
-            let chainConfigureTxn = txns[i] as ChainConfigTransaction;
-
-            txn.applyHeightDelta = chainConfigureTxn.applyHeightDelta.compact();
-        }
-        else if(txns[i].type === TransactionType.CHAIN_UPGRADE){
-            let chainUpgradeTxn = txns[i] as ChainUpgradeTransaction;
-
-            txn.upgradePeriod = chainUpgradeTxn.upgradePeriod.compact();
-            txn.newVersion = chainUpgradeTxn.newBlockchainVersion.toHex()
-        }
-
-        formatedTxns.push(txn);
+        txn.applyHeightDelta = chainConfigureTxn.applyHeightDelta.compact();
     }
+    else if(transaction.type === TransactionType.CHAIN_UPGRADE){
+        let chainUpgradeTxn = transaction as ChainUpgradeTransaction;
 
-    return formatedTxns;
+        txn.upgradePeriod = chainUpgradeTxn.upgradePeriod.compact();
+        txn.newVersion = chainUpgradeTxn.newBlockchainVersion.toHex()
+    }
+    return txn;
   }
 
   //-------------Exchange Txn-----------------------------------------------------------
