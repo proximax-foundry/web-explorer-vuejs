@@ -67,6 +67,7 @@
   <ExchangeDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.EXCHANGE_OFFER || txnType == TransactionType.ADD_EXCHANGE_OFFER || txnType == TransactionType.REMOVE_EXCHANGE_OFFER" />
   <LockDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.LOCK" />
   <LinkAccountDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.LINK_ACCOUNT" />
+  <RestrictionDetailComponent :txnDetail="txnDetail" :txnGroup="txnType" v-if="txnType == TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS || txnType == TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC || txnType == TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION" />
 </template>
 
 <script>
@@ -106,6 +107,7 @@ import NamespaceDetailComponent from '@/modules/transaction/components/transacti
 import ExchangeDetailComponent from '@/modules/transaction/components/transactionDetails/ExchangeDetailComponent';
 import LockDetailComponent from '@/modules/transaction/components/transactionDetails/LockDetailComponent';
 import LinkAccountDetailComponent from '@/modules/transaction/components/transactionDetails/LinkAccountDetailComponent';
+import RestrictionDetailComponent from '@/modules/transaction/components/transactionDetails/RestrictionDetailComponent';
 import { TransactionType } from 'tsjs-xpx-chain-sdk'
 export default {
   name: 'TxnDetailComponent',
@@ -121,6 +123,7 @@ export default {
     ExchangeDetailComponent,
     LockDetailComponent,
     LinkAccountDetailComponent,
+    RestrictionDetailComponent,
   },
   setup(props) {
     const toast = useToast();

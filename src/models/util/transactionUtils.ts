@@ -631,11 +631,8 @@ export class TransactionUtils {
           break;
         case TransactionType.MODIFY_NAMESPACE_METADATA:
           break;
-        case TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS:
-          break;
-        case TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC:
-          break;
-        case TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION:
+        case TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS: case TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC: case TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION:
+          txn.detail = await TransactionUtils.formatRestrictionTransaction(txn, txnStatus.group);
           break;
         case TransactionType.MODIFY_MULTISIG_ACCOUNT:
           // to be displayed in innerTxnDetail
@@ -671,6 +668,10 @@ export class TransactionUtils {
 
   static isNamespace(mosaicId: MosaicId): boolean{
     return Array.from(namespaceIdFirstCharacterString).includes(mosaicId.toHex().toUpperCase().substring(0, 1));
+  }
+
+  static isNamespaceWithString(mosaicId: string): boolean{
+    return Array.from(namespaceIdFirstCharacterString).includes(mosaicId.toUpperCase().substring(0, 1));
   }
 
   static async getAssetAlias(namespaceId: NamespaceId): Promise<MosaicId>{
@@ -4291,275 +4292,90 @@ static async extractUnconfirmedTransfer(transferTxn: TransferTransaction): Promi
   }
 
   //-------------Restriction Txn-----------------------------------------------------------
-  static async formatUnconfirmedRestrictionTransaction(txns: Transaction[]): Promise<UnconfirmedRestrictionTransaction[]>{
+  static async formatRestrictionTransaction(transaction: Transaction, groupType: string): Promise<ConfirmedRestrictionTransaction|UnconfirmedRestrictionTransaction|PartialRestrictionTransaction>{
 
-    let formatedTxns : UnconfirmedRestrictionTransaction[] = [];
-
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(txns[i]);
-        let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedRestrictionTransaction, formattedTxn) as UnconfirmedRestrictionTransaction;
-
-        if(txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS){
-
-            let accAddressRestrictionTxn = txns[i] as AccountAddressRestrictionModificationTransaction;
-
-            txn.restrictionTypeOutput = TransactionUtils.getRestrictionTypeName(accAddressRestrictionTxn.restrictionType).action;
-
-            for(let i = 0; i < accAddressRestrictionTxn.modifications.length; ++i){
-                
-                let modification = accAddressRestrictionTxn.modifications[i];
-
-                let newRestrictionModification: RestrictionModification = {
-                    action: modification.modificationType === RestrictionModificationType.Add ? "Add" : "Remove",
-                    value: modification.value
-                };
-                txn.modification.push(newRestrictionModification);
-            }
-        }
-        else if(txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC){
-
-            let accAssetRestrictionTxn = txns[i] as AccountMosaicRestrictionModificationTransaction;
-
-            txn.restrictionTypeOutput = TransactionUtils.getRestrictionTypeName(accAssetRestrictionTxn.restrictionType).action;
-
-            for(let i = 0; i < accAssetRestrictionTxn.modifications.length; ++i){
-                
-                let modification = accAssetRestrictionTxn.modifications[i];
-
-                let newRestrictionModification: RestrictionModification = {
-                    action: modification.modificationType === RestrictionModificationType.Add ? "Add" : "Remove",
-                    value: new MosaicId(modification.value).toHex()
-                };
-
-                try {
-                    let assetId = newRestrictionModification.value;
-                    if(assetId === AppState.nativeToken.assetId){
-                        newRestrictionModification.name = AppState.nativeToken.label;
-                    }
-                    else{
-                        let assetName = await TransactionUtils.getAssetName(assetId);
-
-                        if(assetName.names.length){
-                            newRestrictionModification.name = assetName.names[0].name;
-                        }
-                    }
-
-                } catch (error) {
-                    
-                } 
-
-                txn.modification.push(newRestrictionModification);
-            }
-        }
-        else if(txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION){
-
-            let accOperationRestrictionTxn = txns[i] as AccountOperationRestrictionModificationTransaction;
-
-            txn.restrictionTypeOutput = TransactionUtils.getRestrictionTypeName(accOperationRestrictionTxn.restrictionType).action;
-
-            for(let i = 0; i < accOperationRestrictionTxn.modifications.length; ++i){
-    
-                let modification = accOperationRestrictionTxn.modifications[i];
-
-                let newRestrictionModification: RestrictionModification = {
-                    action: modification.modificationType === RestrictionModificationType.Add ? "Add" : "Remove",
-                    value: TransactionUtils.getTransactionTypeNameByEnum(modification.value)
-                };
-
-                txn.modification.push(newRestrictionModification);
-            }
-        }
-
-        let allAddModification = txn.modification.filter(x => x.action === "Add");
-        let allRemoveModification = txn.modification.filter(x => x.action === "Remove");
-
-        txn.modification = allAddModification.concat(allRemoveModification);
-
-        formatedTxns.push(txn);
+    let formattedTxn:any, txn:any
+    if(groupType == 'partial'){
+      formattedTxn = await TransactionUtils.formatPartialTransaction(transaction);
+      txn = PartialTransaction.convertToSubClass(PartialRestrictionTransaction, formattedTxn) as PartialRestrictionTransaction;
+    }else if(groupType == 'unconfirmed'){
+      formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(transaction);
+      txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedRestrictionTransaction, formattedTxn) as UnconfirmedRestrictionTransaction;
+    }else{
+      formattedTxn = await TransactionUtils.formatConfirmedTransaction(transaction);
+      txn = ConfirmedTransaction.convertToSubClass(ConfirmedRestrictionTransaction, formattedTxn) as ConfirmedRestrictionTransaction;
     }
 
-    return formatedTxns;
-  }
+    if(transaction.type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS){
 
-  static async formatConfirmedRestrictionTransaction(txns: Transaction[]): Promise<ConfirmedRestrictionTransaction[]>{
+      let accAddressRestrictionTxn = transaction as AccountAddressRestrictionModificationTransaction;
 
-    let formatedTxns : ConfirmedRestrictionTransaction[] = [];
+      txn.restrictionTypeOutput = TransactionUtils.getRestrictionTypeName(accAddressRestrictionTxn.restrictionType).action;
 
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatConfirmedTransaction(txns[i]);
-        let txn = ConfirmedTransaction.convertToSubClass(ConfirmedRestrictionTransaction, formattedTxn) as ConfirmedRestrictionTransaction;
-        
-        if(txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS){
+      for(let i = 0; i < accAddressRestrictionTxn.modifications.length; ++i){
+        let modification = accAddressRestrictionTxn.modifications[i];
 
-            let accAddressRestrictionTxn = txns[i] as AccountAddressRestrictionModificationTransaction;
+        let newRestrictionModification: RestrictionModification = {
+          action: modification.modificationType === RestrictionModificationType.Add ? "Add" : "Remove",
+          value: modification.value
+        };
+        txn.modification.push(newRestrictionModification);
+      }
+    }
+    else if(transaction.type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC){
 
-            txn.restrictionTypeOutput = TransactionUtils.getRestrictionTypeName(accAddressRestrictionTxn.restrictionType).action;
+      let accAssetRestrictionTxn = transaction as AccountMosaicRestrictionModificationTransaction;
 
-            for(let i = 0; i < accAddressRestrictionTxn.modifications.length; ++i){
-                
-                let modification = accAddressRestrictionTxn.modifications[i];
+      txn.restrictionTypeOutput = TransactionUtils.getRestrictionTypeName(accAssetRestrictionTxn.restrictionType).action;
 
-                let newRestrictionModification: RestrictionModification = {
-                    action: modification.modificationType === RestrictionModificationType.Add ? "Add" : "Remove",
-                    value: modification.value
-                };
-                txn.modification.push(newRestrictionModification);
+      for(let i = 0; i < accAssetRestrictionTxn.modifications.length; ++i){
+        let modification = accAssetRestrictionTxn.modifications[i];
+
+        let newRestrictionModification: RestrictionModification = {
+          action: modification.modificationType === RestrictionModificationType.Add ? "Add" : "Remove",
+          value: new MosaicId(modification.value).toHex()
+        };
+
+        try {
+          let assetId = newRestrictionModification.value;
+          if(assetId === AppState.nativeToken.assetId){
+            newRestrictionModification.name = AppState.nativeToken.label;
+          }
+          else{
+            let assetName = await TransactionUtils.getAssetName(assetId);
+
+            if(assetName.names.length){
+              newRestrictionModification.name = assetName.names[0].name;
             }
+          }
+        } catch (error) {}
+        txn.modification.push(newRestrictionModification);
+      }
+    }
+    else if(transaction.type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION){
+
+        let accOperationRestrictionTxn = transaction as AccountOperationRestrictionModificationTransaction;
+
+        txn.restrictionTypeOutput = TransactionUtils.getRestrictionTypeName(accOperationRestrictionTxn.restrictionType).action;
+
+        for(let i = 0; i < accOperationRestrictionTxn.modifications.length; ++i){
+
+          let modification = accOperationRestrictionTxn.modifications[i];
+
+          let newRestrictionModification: RestrictionModification = {
+            action: modification.modificationType === RestrictionModificationType.Add ? "Add" : "Remove",
+            value: TransactionUtils.getTransactionTypeNameByEnum(modification.value)
+          };
+          txn.modification.push(newRestrictionModification);
         }
-        else if(txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC){
-
-            let accAssetRestrictionTxn = txns[i] as AccountMosaicRestrictionModificationTransaction;
-
-            txn.restrictionTypeOutput = TransactionUtils.getRestrictionTypeName(accAssetRestrictionTxn.restrictionType).action;
-
-            for(let i = 0; i < accAssetRestrictionTxn.modifications.length; ++i){
-                
-                let modification = accAssetRestrictionTxn.modifications[i];
-
-                let newRestrictionModification: RestrictionModification = {
-                    action: modification.modificationType === RestrictionModificationType.Add ? "Add" : "Remove",
-                    value: new MosaicId(modification.value).toHex()
-                };
-
-                try {
-                    let assetId = newRestrictionModification.value;
-                    if(assetId === AppState.nativeToken.assetId){
-                        newRestrictionModification.name = AppState.nativeToken.label;
-                    }
-                    else{
-                        let assetName = await TransactionUtils.getAssetName(assetId);
-
-                        if(assetName.names.length){
-                            newRestrictionModification.name = assetName.names[0].name;
-                        }
-                    }
-
-                } catch (error) {
-                    
-                } 
-
-                txn.modification.push(newRestrictionModification);
-            }
-        }
-        else if(txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION){
-
-            let accOperationRestrictionTxn = txns[i] as AccountOperationRestrictionModificationTransaction;
-
-            txn.restrictionTypeOutput = TransactionUtils.getRestrictionTypeName(accOperationRestrictionTxn.restrictionType).action;
-
-            for(let i = 0; i < accOperationRestrictionTxn.modifications.length; ++i){
-    
-                let modification = accOperationRestrictionTxn.modifications[i];
-
-                let newRestrictionModification: RestrictionModification = {
-                    action: modification.modificationType === RestrictionModificationType.Add ? "Add" : "Remove",
-                    value: TransactionUtils.getTransactionTypeNameByEnum(modification.value)
-                };
-
-                txn.modification.push(newRestrictionModification);
-            }
-        }
-
-        let allAddModification = txn.modification.filter(x => x.action === "Add");
-        let allRemoveModification = txn.modification.filter(x => x.action === "Remove");
-
-        txn.modification = allAddModification.concat(allRemoveModification);
-
-        formatedTxns.push(txn);
     }
 
-    return formatedTxns;
-  }
+    let allAddModification = txn.modification.filter(x => x.action === "Add");
+    let allRemoveModification = txn.modification.filter(x => x.action === "Remove");
 
-  static async formatPartialRestrictionTransaction(txns: Transaction[]): Promise<PartialRestrictionTransaction[]>{
+    txn.modification = allAddModification.concat(allRemoveModification);
 
-    let formatedTxns : PartialRestrictionTransaction[] = [];
-
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatPartialTransaction(txns[i]);
-        let txn = PartialTransaction.convertToSubClass(PartialRestrictionTransaction, formattedTxn) as PartialRestrictionTransaction;
-        
-        if(txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS){
-
-            let accAddressRestrictionTxn = txns[i] as AccountAddressRestrictionModificationTransaction;
-
-            txn.restrictionTypeOutput = TransactionUtils.getRestrictionTypeName(accAddressRestrictionTxn.restrictionType).action;
-
-            for(let i = 0; i < accAddressRestrictionTxn.modifications.length; ++i){
-                
-                let modification = accAddressRestrictionTxn.modifications[i];
-
-                let newRestrictionModification: RestrictionModification = {
-                    action: modification.modificationType === RestrictionModificationType.Add ? "Add" : "Remove",
-                    value: modification.value
-                };
-                txn.modification.push(newRestrictionModification);
-            }
-        }
-        else if(txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC){
-
-            let accAssetRestrictionTxn = txns[i] as AccountMosaicRestrictionModificationTransaction;
-
-            txn.restrictionTypeOutput = TransactionUtils.getRestrictionTypeName(accAssetRestrictionTxn.restrictionType).action;
-
-            for(let i = 0; i < accAssetRestrictionTxn.modifications.length; ++i){
-                
-                let modification = accAssetRestrictionTxn.modifications[i];
-
-                let newRestrictionModification: RestrictionModification = {
-                    action: modification.modificationType === RestrictionModificationType.Add ? "Add" : "Remove",
-                    value: new MosaicId(modification.value).toHex()
-                };
-
-                try {
-                    let assetId = newRestrictionModification.value;
-
-                    if(assetId === AppState.nativeToken.assetId){
-                        newRestrictionModification.name = AppState.nativeToken.label;
-                    }
-                    else{
-                        let assetName = await TransactionUtils.getAssetName(assetId);
-
-                        if(assetName.names.length){
-                            newRestrictionModification.name = assetName.names[0].name;
-                        }
-                    }
-                    
-                } catch (error) {
-                    
-                } 
-
-                txn.modification.push(newRestrictionModification);
-            }
-        }
-        else if(txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION){
-
-            let accOperationRestrictionTxn = txns[i] as AccountOperationRestrictionModificationTransaction;
-
-            txn.restrictionTypeOutput = TransactionUtils.getRestrictionTypeName(accOperationRestrictionTxn.restrictionType).action;
-
-            for(let i = 0; i < accOperationRestrictionTxn.modifications.length; ++i){
-    
-                let modification = accOperationRestrictionTxn.modifications[i];
-
-                let newRestrictionModification: RestrictionModification = {
-                    action: modification.modificationType === RestrictionModificationType.Add ? "Add" : "Remove",
-                    value: TransactionUtils.getTransactionTypeNameByEnum(modification.value)
-                };
-
-                txn.modification.push(newRestrictionModification);
-            }
-        }
-
-        let allAddModification = txn.modification.filter(x => x.action === "Add");
-        let allRemoveModification = txn.modification.filter(x => x.action === "Remove");
-
-        txn.modification = allAddModification.concat(allRemoveModification);
-
-        formatedTxns.push(txn);
-    }
-
-    return formatedTxns;
+    return txn;
   }
 
   //-------------Secret Txn-----------------------------------------------------------
