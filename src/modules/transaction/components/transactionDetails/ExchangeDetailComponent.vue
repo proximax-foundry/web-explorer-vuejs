@@ -13,7 +13,7 @@
       <div>
         <span class="font-bold">{{ formatCurrency(offer.cost)[0] }}</span>
         <span class="text-xxs" v-if="formatCurrency(offer.cost)[1]">.{{ formatCurrency(offer.cost)[1] }}</span>
-        <span class="font-bold">{{nativeTokenNamespace}}</span>
+        <div class="font-bold inline-block ml-1">{{nativeTokenNamespace}}</div>
       </div>
     </div>
     <div v-if="offer.amount">

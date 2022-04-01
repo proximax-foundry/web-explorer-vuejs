@@ -618,11 +618,11 @@ export class TransactionUtils {
           break;
         case TransactionType.EXCHANGE_OFFER: case TransactionType.ADD_EXCHANGE_OFFER: case TransactionType.REMOVE_EXCHANGE_OFFER:
           txn.detail = await TransactionUtils.formatExchangeTransaction(txn, txnStatus.group);
-          console.log(txn.detail)
           break;
         case TransactionType.LINK_ACCOUNT:
           break;
         case TransactionType.LOCK:
+          txn.detail = await TransactionUtils.formatUnconfirmedLockTransaction(txn, txnStatus.group);
           break;
         case TransactionType.MODIFY_ACCOUNT_METADATA:
           break;
@@ -4264,75 +4264,35 @@ static async extractUnconfirmedTransfer(transferTxn: TransferTransaction): Promi
   }
 
   //-------------Lock Txn-----------------------------------------------------------
-  static async formatUnconfirmedLockTransaction(txns: Transaction[]): Promise<UnconfirmedLockTransaction[]>{
+  static async formatUnconfirmedLockTransaction(transaction: Transaction, groupType: string): Promise<UnconfirmedLockTransaction|ConfirmedLockTransaction|PartialLockTransaction>{
 
-    let formatedTxns : UnconfirmedLockTransaction[] = [];
-
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(txns[i]);
-        let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedLockTransaction, formattedTxn) as UnconfirmedLockTransaction;
-
-        let lockFundTxn = txns[i] as LockFundsTransaction;
-        
-        txn.lockHash = lockFundTxn.hash;
-        txn.duration = lockFundTxn.duration.compact();
-        let amount = lockFundTxn.mosaic.amount.compact()
-        txn.amountLocking = AppState.nativeToken.divisibility ? amount / Math.pow(10, AppState.nativeToken.divisibility) : amount;
-
-        formatedTxns.push(txn);
+    let formattedTxn:any, txn:any
+    if(groupType == 'partial'){
+      formattedTxn = await TransactionUtils.formatPartialTransaction(transaction);
+      txn = PartialTransaction.convertToSubClass(PartialLockTransaction, formattedTxn) as PartialLockTransaction;
+    }else if(groupType == 'unconfirmed'){
+      formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(transaction);
+      txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedLockTransaction, formattedTxn) as UnconfirmedLockTransaction;
+    }else{
+      formattedTxn = await TransactionUtils.formatConfirmedTransaction(transaction);
+      txn = ConfirmedTransaction.convertToSubClass(ConfirmedLockTransaction, formattedTxn) as ConfirmedLockTransaction;
     }
 
-    return formatedTxns;
-  }
+    let lockFundTxn = transaction as LockFundsTransaction;
+    txn.lockHash = lockFundTxn.hash;
+    txn.duration = lockFundTxn.duration.compact();
+    let amount = lockFundTxn.mosaic.amount.compact()
+    txn.amountLocking = AppState.nativeToken.divisibility ? amount / Math.pow(10, AppState.nativeToken.divisibility) : amount;
 
-  static async formatConfirmedLockTransaction(txns: Transaction[]): Promise<ConfirmedLockTransaction[]>{
-
-    let formatedTxns : ConfirmedLockTransaction[] = [];
-
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatConfirmedTransaction(txns[i]);
-        let txn = ConfirmedTransaction.convertToSubClass(ConfirmedLockTransaction, formattedTxn) as ConfirmedLockTransaction;
-        
-        let lockFundTxn = txns[i] as LockFundsTransaction;
-
-        txn.lockHash = lockFundTxn.hash;
-        txn.duration = lockFundTxn.duration.compact();
-
-        let amount = lockFundTxn.mosaic.amount.compact()
-        txn.amountLocking = AppState.nativeToken.divisibility ? amount / Math.pow(10, AppState.nativeToken.divisibility) : amount;
-
-        try {
-            let txnStatus = await AppState.chainAPI.transactionAPI.getTransactionStatus(lockFundTxn.hash);
-            txn.isRefunded = txnStatus.group === TransactionGroupType.CONFIRMED;
-        } catch (error) {
-            txn.isRefunded = false;
-        }
-
-        formatedTxns.push(txn);
+    if(groupType == 'confirmed'){
+      try {
+        let txnStatus = await AppState.chainAPI.transactionAPI.getTransactionStatus(lockFundTxn.hash);
+        txn.isRefunded = txnStatus.group === TransactionGroupType.CONFIRMED;
+      } catch (error) {
+        txn.isRefunded = false;
+      }
     }
-
-    return formatedTxns;
-  }
-
-  static async formatPartialLockTransaction(txns: Transaction[]): Promise<PartialLockTransaction[]>{
-
-    let formatedTxns : PartialLockTransaction[] = [];
-
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatPartialTransaction(txns[i]);
-        let txn = PartialTransaction.convertToSubClass(PartialLockTransaction, formattedTxn) as PartialLockTransaction;
-        
-        let lockFundTxn = txns[i] as LockFundsTransaction;
-
-        txn.lockHash = lockFundTxn.hash;
-        txn.duration = lockFundTxn.duration.compact();
-        let amount = lockFundTxn.mosaic.amount.compact()
-        txn.amountLocking = AppState.nativeToken.divisibility ? amount / Math.pow(10, AppState.nativeToken.divisibility) : amount;
-
-        formatedTxns.push(txn);
-    }
-
-    return formatedTxns;
+    return txn;
   }
 
   //-------------Namespace Txn-----------------------------------------------------------

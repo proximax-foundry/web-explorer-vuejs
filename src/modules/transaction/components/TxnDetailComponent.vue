@@ -65,6 +65,7 @@
   <AggregateDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.AGGREGATE_BONDED || txnType == TransactionType.AGGREGATE_COMPLETE" />
   <NamespaceDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.REGISTER_NAMESPACE" />
   <ExchangeDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.EXCHANGE_OFFER || txnType == TransactionType.ADD_EXCHANGE_OFFER || txnType == TransactionType.REMOVE_EXCHANGE_OFFER" />
+  <LockDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.LOCK" />
 </template>
 
 <script>
@@ -102,6 +103,7 @@ import AliasDetailComponent from '@/modules/transaction/components/transactionDe
 import AggregateDetailComponent from '@/modules/transaction/components/transactionDetails/AggregateDetailComponent';
 import NamespaceDetailComponent from '@/modules/transaction/components/transactionDetails/NamespaceDetailComponent';
 import ExchangeDetailComponent from '@/modules/transaction/components/transactionDetails/ExchangeDetailComponent';
+import LockDetailComponent from '@/modules/transaction/components/transactionDetails/LockDetailComponent';
 import { TransactionType } from 'tsjs-xpx-chain-sdk'
 export default {
   name: 'TxnDetailComponent',
@@ -115,6 +117,7 @@ export default {
     AggregateDetailComponent,
     NamespaceDetailComponent,
     ExchangeDetailComponent,
+    LockDetailComponent,
   },
   setup(props) {
     const toast = useToast();
