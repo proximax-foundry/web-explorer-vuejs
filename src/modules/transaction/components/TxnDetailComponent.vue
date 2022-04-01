@@ -62,16 +62,15 @@
   </div>
   <TransferDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.TRANSFER" />
   <AliasDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.ADDRESS_ALIAS || txnType == TransactionType.MOSAIC_ALIAS" />
+  <AggregateDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.AGGREGATE_BONDED || txnType == TransactionType.AGGREGATE_COMPLETE" />
+  <NamespaceDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.REGISTER_NAMESPACE" />
+  <ExchangeDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.EXCHANGE_OFFER || txnType == TransactionType.ADD_EXCHANGE_OFFER || txnType == TransactionType.REMOVE_EXCHANGE_OFFER" />
 </template>
 
 <script>
 /*
-Register Namespace
-SDA Definition
-SDA Supply Change
+
 Modify Multisig Account
-Aggregate Complete
-Aggregate Bonded
 LockFund
 Account Link
 Exchange Offer
@@ -90,8 +89,7 @@ Secret Proof
 Account Metadata
 SDA Metadata
 Namespace Metadata
-Modify SDA Levy
-Remove SDA Levy
+
 */
 import { computed, defineComponent, getCurrentInstance, inject, ref, watch } from "vue";
 import { useToast } from "primevue/usetoast";
@@ -101,6 +99,9 @@ import { copyToClipboard } from '@/util/functions';
 import { TransactionUtils } from '@/models/util/transactionUtils';
 import TransferDetailComponent from '@/modules/transaction/components/transactionDetails/TransferDetailComponent';
 import AliasDetailComponent from '@/modules/transaction/components/transactionDetails/AliasDetailComponent';
+import AggregateDetailComponent from '@/modules/transaction/components/transactionDetails/AggregateDetailComponent';
+import NamespaceDetailComponent from '@/modules/transaction/components/transactionDetails/NamespaceDetailComponent';
+import ExchangeDetailComponent from '@/modules/transaction/components/transactionDetails/ExchangeDetailComponent';
 import { TransactionType } from 'tsjs-xpx-chain-sdk'
 export default {
   name: 'TxnDetailComponent',
@@ -111,6 +112,9 @@ export default {
   components: {
     TransferDetailComponent,
     AliasDetailComponent,
+    AggregateDetailComponent,
+    NamespaceDetailComponent,
+    ExchangeDetailComponent,
   },
   setup(props) {
     const toast = useToast();

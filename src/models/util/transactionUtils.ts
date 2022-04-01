@@ -608,19 +608,17 @@ export class TransactionUtils {
         case TransactionType.ADDRESS_ALIAS: case TransactionType.MOSAIC_ALIAS:
           txn.detail = await TransactionUtils.formatAliasTransaction(txn, txnStatus.group);
           break;
-        case TransactionType.ADD_EXCHANGE_OFFER:
-          break;
-        case TransactionType.AGGREGATE_BONDED:
-          break;
-        case TransactionType.AGGREGATE_COMPLETE:
+        case TransactionType.AGGREGATE_BONDED: case TransactionType.AGGREGATE_COMPLETE:
+          // to be displayed in innerTxnDetail
+          txn.detail = await TransactionUtils.formatAggregateTransaction(txn, txnStatus.group);
           break;
         case TransactionType.CHAIN_CONFIGURE:
           break;
         case TransactionType.CHAIN_UPGRADE:
           break;
-        case TransactionType.EXCHANGE_OFFER:
-          break;
-        case TransactionType.REMOVE_EXCHANGE_OFFER:
+        case TransactionType.EXCHANGE_OFFER: case TransactionType.ADD_EXCHANGE_OFFER: case TransactionType.REMOVE_EXCHANGE_OFFER:
+          txn.detail = await TransactionUtils.formatExchangeTransaction(txn, txnStatus.group);
+          console.log(txn.detail)
           break;
         case TransactionType.LINK_ACCOUNT:
           break;
@@ -638,15 +636,15 @@ export class TransactionUtils {
           break;
         case TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION:
           break;
-        // case TransactionType.MODIFY_MULTISIG_ACCOUNT:
-        //   txn.detail = await TransactionUtils.formatAccountTransaction(txn, txnStatus.group);
-        //   break;
-        
-        case TransactionType.MOSAIC_DEFINITION:
+        case TransactionType.MODIFY_MULTISIG_ACCOUNT:
+          // to be displayed in innerTxnDetail
+          //   txn.detail = await TransactionUtils.formatAccountTransaction(txn, txnStatus.group);
           break;
-        case TransactionType.MOSAIC_SUPPLY_CHANGE:
+        case TransactionType.MOSAIC_DEFINITION: case TransactionType.MOSAIC_SUPPLY_CHANGE: case TransactionType.MODIFY_MOSAIC_LEVY: case TransactionType.REMOVE_MOSAIC_LEVY:
+          // to be displayed in innerTxnDetail
           break;
         case TransactionType.REGISTER_NAMESPACE:
+          txn.detail = await TransactionUtils.formatNamespaceTransaction(txn, txnStatus.group);
           break;
         case TransactionType.SECRET_LOCK:
           break;
@@ -661,10 +659,6 @@ export class TransactionUtils {
           break;
         case TransactionType.NAMESPACE_METADATA_V2:
           break;
-        case TransactionType.MODIFY_MOSAIC_LEVY:
-          break;
-        case TransactionType.REMOVE_MOSAIC_LEVY:
-          break;  
       }
       // console.log(txn)
       return {txn, txnStatus, isFound: true};
@@ -3667,7 +3661,6 @@ static async extractUnconfirmedTransfer(transferTxn: TransferTransaction): Promi
       formattedTxn = await TransactionUtils.formatConfirmedTransaction(transaction);
       txn = ConfirmedTransaction.convertToSubClass(ConfirmedAliasTransaction, formattedTxn) as ConfirmedAliasTransaction;
     }
-    console.log('..........................')
 
     if(transaction.type === TransactionType.ADDRESS_ALIAS){
       let addressAliasTxn = transaction as AddressAliasTransaction;
@@ -3973,431 +3966,42 @@ static async extractUnconfirmedTransfer(transferTxn: TransferTransaction): Promi
 }
 
   //-------------Aggregate Txn-----------------------------------------------------------
-  static async formatUnconfirmedAggregateTransaction(txns: Transaction[]): Promise<UnconfirmedAggregateTransaction[]>{
+  static async formatAggregateTransaction(transaction: Transaction, groupType: string): Promise<UnconfirmedAggregateTransaction|ConfirmedAggregateTransaction|PartialAggregateTransaction>{
 
-    let formatedTxns : UnconfirmedAggregateTransaction[] = [];
-
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(txns[i]);
-        let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedAggregateTransaction, formattedTxn) as UnconfirmedAggregateTransaction;
-
-        if(txns[i].type === TransactionType.AGGREGATE_BONDED || txns[i].type === TransactionType.AGGREGATE_COMPLETE){
-            let aggregateTxn = await TransactionUtils.autoFindAggregateTransaction(txn.hash);
-            txn.aggregateLength = aggregateTxn.innerTransactions.length;
-            txn.cosigners = aggregateTxn.cosignatures.map(cosignature => cosignature.signer.publicKey);
-            
-            for(let x=0; x < aggregateTxn.innerTransactions.length; ++x){
-                let txnType = aggregateTxn.innerTransactions[x].type;
-                let listFound = txn.txnList.find(txn => txn.type === txnType);
-                
-                if(listFound){
-                    listFound.total += 1;
-                }
-                else{
-                    let txnList: TxnList = {
-                        type: txnType,
-                        name: TransactionUtils.getTransactionTypeName(txnType),
-                        total: 1
-                    }; 
-                    txn.txnList.push(txnList);
-                }
-            }
-        }
-
-        formatedTxns.push(txn);
+    let formattedTxn:any, txn:any
+    if(groupType == 'partial'){
+      formattedTxn = await TransactionUtils.formatPartialTransaction(transaction);
+      txn = PartialTransaction.convertToSubClass(PartialAggregateTransaction, formattedTxn) as PartialAggregateTransaction;
+    }else if(groupType == 'unconfirmed'){
+      formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(transaction);
+      txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedAggregateTransaction, formattedTxn) as UnconfirmedAggregateTransaction;
+    }else{
+      formattedTxn = await TransactionUtils.formatConfirmedTransaction(transaction);
+      txn = ConfirmedTransaction.convertToSubClass(ConfirmedAggregateTransaction, formattedTxn) as ConfirmedAggregateTransaction;
     }
 
-    return formatedTxns;
-  }
+    if(transaction.type === TransactionType.AGGREGATE_BONDED || transaction.type === TransactionType.AGGREGATE_COMPLETE){
+      let aggregateTxn = await TransactionUtils.autoFindAggregateTransaction(txn.hash);
+      txn.aggregateLength = aggregateTxn.innerTransactions.length;
+      txn.cosigners = aggregateTxn.cosignatures.map(cosignature => cosignature.signer.publicKey);
 
-  static async formatConfirmedAggregateTransaction(txns: Transaction[]): Promise<ConfirmedAggregateTransaction[]>{
-
-    let formatedTxns : ConfirmedAggregateTransaction[] = [];
-
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatConfirmedTransaction(txns[i]);
-        let txn = ConfirmedTransaction.convertToSubClass(ConfirmedAggregateTransaction, formattedTxn) as ConfirmedAggregateTransaction;
-
-        if(txns[i].type === TransactionType.AGGREGATE_BONDED || txns[i].type === TransactionType.AGGREGATE_COMPLETE){
-            let aggregateTxn = await TransactionUtils.autoFindAggregateTransaction(txn.hash);
-            txn.aggregateLength = aggregateTxn.innerTransactions.length;
-            txn.cosigners = aggregateTxn.cosignatures.map(cosignature => cosignature.signer.publicKey);
-
-            for(let x=0; x < aggregateTxn.innerTransactions.length; ++x){
-                let txnType = aggregateTxn.innerTransactions[x].type;
-                let listFound = txn.txnList.find(txn => txn.type === txnType);
-
-                if(listFound){
-                    listFound.total += 1;
-                }
-                else{
-                    let txnList: TxnList = {
-                        type: txnType,
-                        name: TransactionUtils.getTransactionTypeName(txnType),
-                        total: 1
-                    }; 
-                    txn.txnList.push(txnList);
-                }
-            }
+      for(let x=0; x < aggregateTxn.innerTransactions.length; ++x){
+        let txnType = aggregateTxn.innerTransactions[x].type;
+        let listFound = txn.txnList.find(tx => tx.type === txnType);
+        if(listFound){
+          listFound.total += 1;
         }
-
-        formatedTxns.push(txn);
+        else{
+          let txnList: TxnList = {
+            type: txnType,
+            name: TransactionUtils.getTransactionTypeName(txnType),
+            total: 1
+          };
+          txn.txnList.push(txnList);
+        }
+      }
     }
-
-    return formatedTxns;
-  }
-
-  static async formatPartialAggregateTransaction(txns: Transaction[]): Promise<PartialAggregateTransaction[]>{
-
-    let formatedTxns : PartialAggregateTransaction[] = [];
-
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatPartialTransaction(txns[i]);
-        let txn = PartialTransaction.convertToSubClass(PartialAggregateTransaction, formattedTxn) as PartialAggregateTransaction;
-        
-        if(txns[i].type === TransactionType.AGGREGATE_BONDED || txns[i].type === TransactionType.AGGREGATE_COMPLETE){
-            let aggregateTxn = await TransactionUtils.autoFindAggregateTransaction(txn.hash);
-            txn.aggregateLength = aggregateTxn.innerTransactions.length;
-            txn.cosigners = aggregateTxn.cosignatures.map(cosignature => cosignature.signer.publicKey);
-            
-            for(let x=0; x < aggregateTxn.innerTransactions.length; ++x){
-                let txnType = aggregateTxn.innerTransactions[x].type;
-                let listFound = txn.txnList.find(txn => txn.type === txnType);
-                
-                if(listFound){
-                    listFound.total += 1;
-                }
-                else{
-                    let txnList: TxnList = {
-                        type: txnType,
-                        name: TransactionUtils.getTransactionTypeName(txnType),
-                        total: 1
-                    }; 
-                    txn.txnList.push(txnList);
-                }
-            }
-        }
-
-        formatedTxns.push(txn);
-    }
-
-    return formatedTxns;
-  }
-
-  //-------------Asset Txn-----------------------------------------------------------
-  static async formatUnconfirmedAssetTransaction(txns: Transaction[]): Promise<UnconfirmedAssetTransaction[]>{
-
-    let formatedTxns : UnconfirmedAssetTransaction[] = [];
-
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(txns[i]);
-        let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedAssetTransaction, formattedTxn) as UnconfirmedAssetTransaction;
-
-        if(txns[i].type === TransactionType.MOSAIC_DEFINITION){
-            let assetDefinitionTxn = txns[i] as MosaicDefinitionTransaction;
-
-            txn.assetId = assetDefinitionTxn.mosaicId.toHex();
-            txn.divisibility = assetDefinitionTxn.mosaicProperties.divisibility;
-            txn.duration = assetDefinitionTxn.mosaicProperties.duration ? 
-                assetDefinitionTxn.mosaicProperties.duration.compact() : undefined;
-            txn.transferable = assetDefinitionTxn.mosaicProperties.transferable;
-            txn.supplyMutable = assetDefinitionTxn.mosaicProperties.supplyMutable;
-            txn.nonce = assetDefinitionTxn.mosaicNonce.toNumber();
-        }
-        else if(txns[i].type === TransactionType.MOSAIC_SUPPLY_CHANGE){
-            let assetSupplyChangeTxn = txns[i] as MosaicSupplyChangeTransaction;
-
-            let assetId = assetSupplyChangeTxn.mosaicId.toHex();
-
-            txn.assetId = assetId;
-            txn.supplyDelta = assetSupplyChangeTxn.delta.compact();
-            txn.supplyDeltaIsRaw = true;
-
-            if(assetSupplyChangeTxn.direction === MosaicSupplyType.Decrease){
-                txn.supplyDelta = -txn.supplyDelta;
-            }
-
-            try {
-                let assetInfo = await TransactionUtils.getAssetInfo(assetId);
-
-                txn.supplyDelta = TransactionUtils.convertToExactAmount(txn.supplyDelta, assetInfo.divisibility);
-
-                txn.supplyDeltaIsRaw = false;
-                
-            } catch (error) {
-                
-            }
-        }
-        else if(txns[i].type === TransactionType.MODIFY_MOSAIC_LEVY){
-            let assetModifyLevyTxn = txns[i] as MosaicModifyLevyTransaction;
-
-            let assetId = assetModifyLevyTxn.mosaicId.toHex();
-            let levyAssetId = assetModifyLevyTxn.mosaicLevy.mosaicId.toHex();
-            let levyAmount = assetModifyLevyTxn.mosaicLevy.fee.compact();
-
-            txn.assetId = assetId;
-            txn.levyAssetId = levyAssetId;
-            txn.levyAssetAmount = levyAmount;
-            txn.levyAssetAmountIsRaw = true;
-            txn.levyType = assetModifyLevyTxn.mosaicLevy.type;
-            txn.levyRecipient = assetModifyLevyTxn.mosaicLevy.recipient.plain();
-
-            try {
-                let assetName = await TransactionUtils.getAssetName(assetId);
-
-                if(assetName.names.length){
-                    txn.namespaceName = assetName.names[0].name;
-                }
-
-                let levyAssetInfo = await TransactionUtils.getAssetInfo(levyAssetId);
-
-                txn.levyAssetAmount = TransactionUtils.convertToExactAmount(levyAmount, levyAssetInfo.divisibility);
-
-                txn.levyAssetAmountIsRaw = false;
-
-                let levyAssetName = await TransactionUtils.getAssetName(levyAssetId);
-
-                if(levyAssetName.names.length){
-                    txn.levyAssetName = levyAssetName.names[0].name;
-                }
-            
-            } catch (error) {
-                
-            }
-        }
-        else if(txns[i].type === TransactionType.REMOVE_MOSAIC_LEVY){
-            let assetRemoveLevyTxn = txns[i] as MosaicRemoveLevyTransaction;
-
-            let assetId = assetRemoveLevyTxn.mosaicId.toHex();
-
-            txn.assetId = assetId;
-            
-            try {
-                let assetName = await TransactionUtils.getAssetName(assetId);
-
-                if(assetName.names.length){
-                    txn.namespaceName = assetName.names[0].name;
-                }
-            
-            } catch (error) {
-                
-            }
-        }
-        
-        formatedTxns.push(txn);
-    }
-
-    return formatedTxns;
-  }
-
-  static async formatConfirmedAssetTransaction(txns: Transaction[]): Promise<ConfirmedAssetTransaction[]>{
-
-    let formatedTxns : ConfirmedAssetTransaction[] = [];
-
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatConfirmedTransaction(txns[i]);
-        let txn = ConfirmedTransaction.convertToSubClass(ConfirmedAssetTransaction, formattedTxn) as ConfirmedAssetTransaction;
-        
-        if(txns[i].type === TransactionType.MOSAIC_DEFINITION){
-            let assetDefinitionTxn = txns[i] as MosaicDefinitionTransaction;
-
-            txn.assetId = assetDefinitionTxn.mosaicId.toHex();
-            txn.divisibility = assetDefinitionTxn.mosaicProperties.divisibility;
-            txn.duration = assetDefinitionTxn.mosaicProperties.duration ? 
-                assetDefinitionTxn.mosaicProperties.duration.compact() : undefined;
-            txn.transferable = assetDefinitionTxn.mosaicProperties.transferable;
-            txn.supplyMutable = assetDefinitionTxn.mosaicProperties.supplyMutable;
-            txn.nonce = assetDefinitionTxn.mosaicNonce.toNumber();
-        }
-        else if(txns[i].type === TransactionType.MOSAIC_SUPPLY_CHANGE){
-            let assetSupplyChangeTxn = txns[i] as MosaicSupplyChangeTransaction;
-
-            let assetId = assetSupplyChangeTxn.mosaicId.toHex();
-
-            txn.assetId = assetId;
-            txn.supplyDelta = assetSupplyChangeTxn.delta.compact();
-            txn.supplyDeltaIsRaw = true;
-
-            if(assetSupplyChangeTxn.direction === MosaicSupplyType.Decrease){
-                txn.supplyDelta = -txn.supplyDelta;
-            }
-
-            try {
-                let assetInfo = await TransactionUtils.getAssetInfo(assetId);
-
-                txn.supplyDelta = TransactionUtils.convertToExactAmount(txn.supplyDelta, assetInfo.divisibility);
-
-                txn.supplyDeltaIsRaw = false;
-                
-            } catch (error) {
-                
-            }
-        }
-        else if(txns[i].type === TransactionType.MODIFY_MOSAIC_LEVY){
-            let assetModifyLevyTxn = txns[i] as MosaicModifyLevyTransaction;
-
-            let assetId = assetModifyLevyTxn.mosaicId.toHex();
-            let levyAssetId = assetModifyLevyTxn.mosaicLevy.mosaicId.toHex();
-            let levyAmount = assetModifyLevyTxn.mosaicLevy.fee.compact();
-
-            txn.assetId = assetId;
-            txn.levyAssetId = levyAssetId;
-            txn.levyAssetAmount = levyAmount;
-            txn.levyAssetAmountIsRaw = true;
-            txn.levyType = assetModifyLevyTxn.mosaicLevy.type;
-            txn.levyRecipient = assetModifyLevyTxn.mosaicLevy.recipient.plain();
-
-            try {
-                let assetName = await TransactionUtils.getAssetName(assetId);
-
-                if(assetName.names.length){
-                    txn.namespaceName = assetName.names[0].name;
-                }
-
-                let levyAssetInfo = await TransactionUtils.getAssetInfo(levyAssetId);
-
-                txn.levyAssetAmount = TransactionUtils.convertToExactAmount(levyAmount, levyAssetInfo.divisibility);
-
-                txn.levyAssetAmountIsRaw = false;
-
-                let levyAssetName = await TransactionUtils.getAssetName(levyAssetId);
-
-                if(levyAssetName.names.length){
-                    txn.levyAssetName = levyAssetName.names[0].name;
-                }
-            
-            } catch (error) {
-                
-            }
-        }
-        else if(txns[i].type === TransactionType.REMOVE_MOSAIC_LEVY){
-            let assetRemoveLevyTxn = txns[i] as MosaicRemoveLevyTransaction;
-
-            let assetId = assetRemoveLevyTxn.mosaicId.toHex();
-
-            txn.assetId = assetId;
-            
-            try {
-                let assetName = await TransactionUtils.getAssetName(assetId);
-
-                if(assetName.names.length){
-                    txn.namespaceName = assetName.names[0].name;
-                }
-            
-            } catch (error) {
-                
-            }
-        }
-
-        formatedTxns.push(txn);
-    }
-
-    return formatedTxns;
-  }
-
-  static async formatPartialAssetTransaction(txns: Transaction[]): Promise<PartialAssetTransaction[]>{
-
-    let formatedTxns : PartialAssetTransaction[] = [];
-
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatPartialTransaction(txns[i]);
-        let txn = PartialTransaction.convertToSubClass(PartialAssetTransaction, formattedTxn) as PartialAssetTransaction;
-        
-        if(txns[i].type === TransactionType.MOSAIC_DEFINITION){
-            let assetDefinitionTxn = txns[i] as MosaicDefinitionTransaction;
-
-            txn.assetId = assetDefinitionTxn.mosaicId.toHex();
-            txn.divisibility = assetDefinitionTxn.mosaicProperties.divisibility;
-            txn.duration = assetDefinitionTxn.mosaicProperties.duration ? 
-                assetDefinitionTxn.mosaicProperties.duration.compact() : undefined;
-            txn.transferable = assetDefinitionTxn.mosaicProperties.transferable;
-            txn.supplyMutable = assetDefinitionTxn.mosaicProperties.supplyMutable;
-            txn.nonce = assetDefinitionTxn.mosaicNonce.toNumber();
-        }
-        else if(txns[i].type === TransactionType.MOSAIC_SUPPLY_CHANGE){
-            let assetSupplyChangeTxn = txns[i] as MosaicSupplyChangeTransaction;
-
-            let assetId = assetSupplyChangeTxn.mosaicId.toHex();
-
-            txn.assetId = assetId;
-            txn.supplyDelta = assetSupplyChangeTxn.delta.compact();
-            txn.supplyDeltaIsRaw = true;
-
-            if(assetSupplyChangeTxn.direction === MosaicSupplyType.Decrease){
-                txn.supplyDelta = -txn.supplyDelta;
-            }
-
-            try {
-                let assetInfo = await TransactionUtils.getAssetInfo(assetId);
-
-                txn.supplyDelta = TransactionUtils.convertToExactAmount(txn.supplyDelta, assetInfo.divisibility);
-
-                txn.supplyDeltaIsRaw = false;
-                
-            } catch (error) {
-                
-            }
-        }
-        else if(txns[i].type === TransactionType.MODIFY_MOSAIC_LEVY){
-            let assetModifyLevyTxn = txns[i] as MosaicModifyLevyTransaction;
-
-            let assetId = assetModifyLevyTxn.mosaicId.toHex();
-            let levyAssetId = assetModifyLevyTxn.mosaicLevy.mosaicId.toHex();
-            let levyAmount = assetModifyLevyTxn.mosaicLevy.fee.compact();
-
-            txn.assetId = assetId;
-            txn.levyAssetId = levyAssetId;
-            txn.levyAssetAmount = levyAmount;
-            txn.levyAssetAmountIsRaw = true;
-            txn.levyType = assetModifyLevyTxn.mosaicLevy.type;
-            txn.levyRecipient = assetModifyLevyTxn.mosaicLevy.recipient.plain();
-
-            try {
-                let assetName = await TransactionUtils.getAssetName(assetId);
-
-                if(assetName.names.length){
-                    txn.namespaceName = assetName.names[0].name;
-                }
-
-                let levyAssetInfo = await TransactionUtils.getAssetInfo(levyAssetId);
-
-                txn.levyAssetAmount = TransactionUtils.convertToExactAmount(levyAmount, levyAssetInfo.divisibility);
-
-                txn.levyAssetAmountIsRaw = false;
-
-                let levyAssetName = await TransactionUtils.getAssetName(levyAssetId);
-
-                if(levyAssetName.names.length){
-                    txn.levyAssetName = levyAssetName.names[0].name;
-                }
-            
-            } catch (error) {
-                
-            }
-        }
-        else if(txns[i].type === TransactionType.REMOVE_MOSAIC_LEVY){
-            let assetRemoveLevyTxn = txns[i] as MosaicRemoveLevyTransaction;
-
-            let assetId = assetRemoveLevyTxn.mosaicId.toHex();
-
-            txn.assetId = assetId;
-            
-            try {
-                let assetName = await TransactionUtils.getAssetName(assetId);
-
-                if(assetName.names.length){
-                    txn.namespaceName = assetName.names[0].name;
-                }
-            
-            } catch (error) {
-                
-            }
-        }
-
-        formatedTxns.push(txn);
-    }
-
-    return formatedTxns;
+    return txn;
   }
 
   //-------------Chain Txn-----------------------------------------------------------
@@ -4480,378 +4084,115 @@ static async extractUnconfirmedTransfer(transferTxn: TransferTransaction): Promi
   }
 
   //-------------Exchange Txn-----------------------------------------------------------
-  static async formatUnconfirmedExchangeTransaction(txns: Transaction[]): Promise<UnconfirmedExchangeTransaction[]>{
+  static async formatExchangeTransaction(transaction: Transaction, groupType: string): Promise<ConfirmedExchangeTransaction|UnconfirmedExchangeTransaction|PartialExchangeTransaction>{
 
-    let formatedTxns : UnconfirmedExchangeTransaction[] = [];
-
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(txns[i]);
-        let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedExchangeTransaction, formattedTxn) as UnconfirmedExchangeTransaction;
-
-        if(txns[i].type === TransactionType.EXCHANGE_OFFER){
-            txn.isTakingOffer = true;
-            let exchangeOfferTxn = txns[i] as ExchangeOfferTransaction;
-
-            for(let i = 0; i < exchangeOfferTxn.offers.length; ++i){
-                let tempExchangeOffer = exchangeOfferTxn.offers[i];
-
-                let assetId = tempExchangeOffer.mosaicId.toHex();
-                let amount = tempExchangeOffer.mosaicAmount.compact();
-
-                let newTxnExchangeOffer: TxnExchangeOffer = {
-                    amount: amount,
-                    amountIsRaw: true,
-                    assetId: assetId,
-                    cost: TransactionUtils.convertToExactNativeAmount(tempExchangeOffer.cost.compact()),
-                    owner: tempExchangeOffer.owner.publicKey,
-                    type: tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy", 
-                }; 
-
-                try {
-                    let assetInfo = await TransactionUtils.getAssetInfo(assetId);
-
-                    newTxnExchangeOffer.amountIsRaw = false;
-                    newTxnExchangeOffer.amount = TransactionUtils.convertToExactAmount(amount, assetInfo.divisibility);
-                    
-                    let assetName = await TransactionUtils.getAssetName(assetId);
-
-                    if(assetName.names.length){
-                        newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
-                    }
-
-                } catch (error) {
-                    
-                }                    
-
-                txn.exchangeOffers.push(newTxnExchangeOffer);
-            }
-        }
-        else if(txns[i].type === TransactionType.ADD_EXCHANGE_OFFER){
-
-            let addExchangeOfferTxn = txns[i] as AddExchangeOfferTransaction;
-
-            for(let i = 0; i < addExchangeOfferTxn.offers.length; ++i){
-                let tempExchangeOffer = addExchangeOfferTxn.offers[i];
-
-                let assetId = tempExchangeOffer.mosaicId.toHex();
-                let amount = tempExchangeOffer.mosaicAmount.compact();
-
-                let newTxnExchangeOffer: TxnExchangeOffer = {
-                    amount: amount,
-                    amountIsRaw: true,
-                    assetId: assetId,
-                    cost: TransactionUtils.convertToExactNativeAmount(tempExchangeOffer.cost.compact()),
-                    duration: tempExchangeOffer.duration.compact(),
-                    type: tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy", 
-                }; 
-
-                try {
-                    let assetInfo = await TransactionUtils.getAssetInfo(assetId);
-
-                    newTxnExchangeOffer.amountIsRaw = false;
-                    newTxnExchangeOffer.amount = TransactionUtils.convertToExactAmount(amount, assetInfo.divisibility);
-
-                    let assetName = await TransactionUtils.getAssetName(assetId);
-
-                    if(assetName.names.length){
-                        newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
-                    }
-
-                } catch (error) {
-                    
-                }                    
-
-                txn.exchangeOffers.push(newTxnExchangeOffer);
-            }
-        }
-        else if(txns[i].type === TransactionType.REMOVE_EXCHANGE_OFFER){
-
-            let removeExchangeOfferTxn = txns[i] as RemoveExchangeOfferTransaction;
-
-            for(let i = 0; i < removeExchangeOfferTxn.offers.length; ++i){
-                let tempExchangeOffer = removeExchangeOfferTxn.offers[i];
-
-                let assetId = tempExchangeOffer.mosaicId.toHex();
-
-                let newTxnExchangeOffer: TxnExchangeOffer = {
-                    assetId: assetId,
-                    type: tempExchangeOffer.offerType === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy", 
-                }; 
-
-                try {
-                    let assetName = await TransactionUtils.getAssetName(assetId);
-
-                    if(assetName.names.length){
-                        newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
-                    }
-
-                } catch (error) {
-                    
-                }                    
-
-                txn.exchangeOffers.push(newTxnExchangeOffer);
-            }
-        }
-
-        let allBuyOffers = txn.exchangeOffers.filter(x => x.type === "Buy");
-        let allSellOffers = txn.exchangeOffers.filter(x => x.type === "Sell");
-
-        txn.exchangeOffers = txn.isTakingOffer ? allSellOffers.concat(allBuyOffers) : allBuyOffers.concat(allSellOffers);
-        
-        formatedTxns.push(txn);
+    let formattedTxn:any, txn:any
+    if(groupType == 'partial'){
+      formattedTxn = await TransactionUtils.formatPartialTransaction(transaction);
+      txn = PartialTransaction.convertToSubClass(PartialExchangeTransaction, formattedTxn) as PartialExchangeTransaction;
+    }else if(groupType == 'unconfirmed'){
+      formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(transaction);
+      txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedExchangeTransaction, formattedTxn) as UnconfirmedExchangeTransaction;
+    }else{
+      formattedTxn = await TransactionUtils.formatConfirmedTransaction(transaction);
+      txn = ConfirmedTransaction.convertToSubClass(ConfirmedExchangeTransaction, formattedTxn) as ConfirmedExchangeTransaction;
     }
 
-    return formatedTxns;
-}
+    if(transaction.type === TransactionType.EXCHANGE_OFFER){
+      txn.isTakingOffer = true;
+      let exchangeOfferTxn = transaction as ExchangeOfferTransaction;
 
-  static async formatConfirmedExchangeTransaction(txns: Transaction[]): Promise<ConfirmedExchangeTransaction[]>{
+      for(let i = 0; i < exchangeOfferTxn.offers.length; ++i){
+        let tempExchangeOffer = exchangeOfferTxn.offers[i];
 
-    let formatedTxns : ConfirmedExchangeTransaction[] = [];
+        let assetId = tempExchangeOffer.mosaicId.toHex();
+        let amount = tempExchangeOffer.mosaicAmount.compact();
 
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatConfirmedTransaction(txns[i]);
-        let txn = ConfirmedTransaction.convertToSubClass(ConfirmedExchangeTransaction, formattedTxn) as ConfirmedExchangeTransaction;
+        let newTxnExchangeOffer: TxnExchangeOffer = {
+          amount: amount,
+          amountIsRaw: true,
+          assetId: assetId,
+          cost: TransactionUtils.convertToExactNativeAmount(tempExchangeOffer.cost.compact()),
+          owner: tempExchangeOffer.owner.publicKey,
+          type: tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy", 
+        };
 
-        if(txns[i].type === TransactionType.EXCHANGE_OFFER){
-            txn.isTakingOffer = true;
-            let exchangeOfferTxn = txns[i] as ExchangeOfferTransaction;
+        try {
+          let assetInfo = await TransactionUtils.getAssetInfo(assetId);
+          newTxnExchangeOffer.amountIsRaw = false;
+          newTxnExchangeOffer.amount = TransactionUtils.convertToExactAmount(amount, assetInfo.divisibility);
+          let assetName = await TransactionUtils.getAssetName(assetId);
+          if(assetName.names.length){
+            newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
+          }
+        } catch (error) {}
+        txn.exchangeOffers.push(newTxnExchangeOffer);
+      }
+    }
+    else if(transaction.type === TransactionType.ADD_EXCHANGE_OFFER){
 
-            for(let i = 0; i < exchangeOfferTxn.offers.length; ++i){
-                let tempExchangeOffer = exchangeOfferTxn.offers[i];
+      let addExchangeOfferTxn = transaction as AddExchangeOfferTransaction;
 
-                let assetId = tempExchangeOffer.mosaicId.toHex();
-                let amount = tempExchangeOffer.mosaicAmount.compact();
+      for(let i = 0; i < addExchangeOfferTxn.offers.length; ++i){
+        let tempExchangeOffer = addExchangeOfferTxn.offers[i];
+        let assetId = tempExchangeOffer.mosaicId.toHex();
+        let amount = tempExchangeOffer.mosaicAmount.compact();
 
-                let newTxnExchangeOffer: TxnExchangeOffer = {
-                    amount: amount,
-                    amountIsRaw: true,
-                    assetId: assetId,
-                    cost: TransactionUtils.convertToExactNativeAmount(tempExchangeOffer.cost.compact()),
-                    owner: tempExchangeOffer.owner.publicKey,
-                    type: tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy", 
-                }; 
+        let newTxnExchangeOffer: TxnExchangeOffer = {
+          amount: amount,
+          amountIsRaw: true,
+          assetId: assetId,
+          cost: TransactionUtils.convertToExactNativeAmount(tempExchangeOffer.cost.compact()),
+          duration: tempExchangeOffer.duration.compact(),
+          type: tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy", 
+        };
 
-                try {
-                    let assetInfo = await TransactionUtils.getAssetInfo(assetId);
+        try {
+          let assetInfo = await TransactionUtils.getAssetInfo(assetId);
 
-                    newTxnExchangeOffer.amountIsRaw = false;
-                    newTxnExchangeOffer.amount = TransactionUtils.convertToExactAmount(amount, assetInfo.divisibility);
+          newTxnExchangeOffer.amountIsRaw = false;
+          newTxnExchangeOffer.amount = TransactionUtils.convertToExactAmount(amount, assetInfo.divisibility);
 
-                    let assetName = await TransactionUtils.getAssetName(assetId);
+          let assetName = await TransactionUtils.getAssetName(assetId);
 
-                    if(assetName.names.length){
-                        newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
-                    }
+          if(assetName.names.length){
+            newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
+          }
+        } catch (error) {}
+        txn.exchangeOffers.push(newTxnExchangeOffer);
+      }
+    }
+    else if(transaction.type === TransactionType.REMOVE_EXCHANGE_OFFER){
 
-                } catch (error) {
-                    
-                }                    
+      let removeExchangeOfferTxn = transaction as RemoveExchangeOfferTransaction;
 
-                txn.exchangeOffers.push(newTxnExchangeOffer);
-            }
-        }
-        else if(txns[i].type === TransactionType.ADD_EXCHANGE_OFFER){
+      for(let i = 0; i < removeExchangeOfferTxn.offers.length; ++i){
+        let tempExchangeOffer = removeExchangeOfferTxn.offers[i];
 
-            let addExchangeOfferTxn = txns[i] as AddExchangeOfferTransaction;
+        let assetId = tempExchangeOffer.mosaicId.toHex();
 
-            for(let i = 0; i < addExchangeOfferTxn.offers.length; ++i){
-                let tempExchangeOffer = addExchangeOfferTxn.offers[i];
+        let newTxnExchangeOffer: TxnExchangeOffer = {
+          assetId: assetId,
+          type: tempExchangeOffer.offerType === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy", 
+        };
 
-                let assetId = tempExchangeOffer.mosaicId.toHex();
-                let amount = tempExchangeOffer.mosaicAmount.compact();
+        try {
+          let assetName = await TransactionUtils.getAssetName(assetId);
 
-                let newTxnExchangeOffer: TxnExchangeOffer = {
-                    amount: amount,
-                    amountIsRaw: true,
-                    assetId: assetId,
-                    cost: TransactionUtils.convertToExactNativeAmount(tempExchangeOffer.cost.compact()),
-                    duration: tempExchangeOffer.duration.compact(),
-                    type: tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy", 
-                }; 
-
-                try {
-                    let assetInfo = await TransactionUtils.getAssetInfo(assetId);
-
-                    newTxnExchangeOffer.amountIsRaw = false;
-                    newTxnExchangeOffer.amount = TransactionUtils.convertToExactAmount(amount, assetInfo.divisibility);
-
-                    let assetName = await TransactionUtils.getAssetName(assetId);
-
-                    if(assetName.names.length){
-                        newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
-                    }
-
-                } catch (error) {
-                    
-                }                    
-
-                txn.exchangeOffers.push(newTxnExchangeOffer);
-            }
-        }
-        else if(txns[i].type === TransactionType.REMOVE_EXCHANGE_OFFER){
-
-            let removeExchangeOfferTxn = txns[i] as RemoveExchangeOfferTransaction;
-
-            for(let i = 0; i < removeExchangeOfferTxn.offers.length; ++i){
-                let tempExchangeOffer = removeExchangeOfferTxn.offers[i];
-
-                let assetId = tempExchangeOffer.mosaicId.toHex();
-
-                let newTxnExchangeOffer: TxnExchangeOffer = {
-                    assetId: assetId,
-                    type: tempExchangeOffer.offerType === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy", 
-                }; 
-
-                try {
-                    let assetName = await TransactionUtils.getAssetName(assetId);
-
-                    if(assetName.names.length){
-                        newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
-                    }
-
-                } catch (error) {
-                    
-                }                    
-
-                txn.exchangeOffers.push(newTxnExchangeOffer);
-            }
-        }
-
-        let allBuyOffers = txn.exchangeOffers.filter(x => x.type === "Buy");
-        let allSellOffers = txn.exchangeOffers.filter(x => x.type === "Sell");
-
-        txn.exchangeOffers = txn.isTakingOffer ? allSellOffers.concat(allBuyOffers) : allBuyOffers.concat(allSellOffers);
-
-        formatedTxns.push(txn);
+          if(assetName.names.length){
+            newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
+          }
+        } catch (error) {}
+        txn.exchangeOffers.push(newTxnExchangeOffer);
+      }
     }
 
-    return formatedTxns;
+    let allBuyOffers = txn.exchangeOffers.filter(x => x.type === "Buy");
+    let allSellOffers = txn.exchangeOffers.filter(x => x.type === "Sell");
+
+    txn.exchangeOffers = txn.isTakingOffer ? allSellOffers.concat(allBuyOffers) : allBuyOffers.concat(allSellOffers);
+    return txn;
   }
-
-  static async formatPartialExchangeTransaction(txns: Transaction[]): Promise<PartialExchangeTransaction[]>{
-
-    let formatedTxns : PartialExchangeTransaction[] = [];
-
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatPartialTransaction(txns[i]);
-        let txn = PartialTransaction.convertToSubClass(PartialExchangeTransaction, formattedTxn) as PartialExchangeTransaction;
-        
-        if(txns[i].type === TransactionType.EXCHANGE_OFFER){
-            txn.isTakingOffer = true;
-            let exchangeOfferTxn = txns[i] as ExchangeOfferTransaction;
-
-            for(let i = 0; i < exchangeOfferTxn.offers.length; ++i){
-                let tempExchangeOffer = exchangeOfferTxn.offers[i];
-
-                let assetId = tempExchangeOffer.mosaicId.toHex();
-                let amount = tempExchangeOffer.mosaicAmount.compact();
-
-                let newTxnExchangeOffer: TxnExchangeOffer = {
-                    amount: amount,
-                    amountIsRaw: true,
-                    assetId: assetId,
-                    cost: TransactionUtils.convertToExactNativeAmount(tempExchangeOffer.cost.compact()),
-                    owner: tempExchangeOffer.owner.publicKey,
-                    type: tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy", 
-                }; 
-
-                try {
-                    let assetInfo = await TransactionUtils.getAssetInfo(assetId);
-
-                    newTxnExchangeOffer.amountIsRaw = false;
-                    newTxnExchangeOffer.amount = TransactionUtils.convertToExactAmount(amount, assetInfo.divisibility);
-
-                    let assetName = await TransactionUtils.getAssetName(assetId);
-
-                    if(assetName.names.length){
-                        newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
-                    }
-
-                } catch (error) {
-                    
-                }                    
-
-                txn.exchangeOffers.push(newTxnExchangeOffer);
-            }
-        }
-        else if(txns[i].type === TransactionType.ADD_EXCHANGE_OFFER){
-
-            let addExchangeOfferTxn = txns[i] as AddExchangeOfferTransaction;
-
-            for(let i = 0; i < addExchangeOfferTxn.offers.length; ++i){
-                let tempExchangeOffer = addExchangeOfferTxn.offers[i];
-
-                let assetId = tempExchangeOffer.mosaicId.toHex();
-                let amount = tempExchangeOffer.mosaicAmount.compact();
-
-                let newTxnExchangeOffer: TxnExchangeOffer = {
-                    amount: amount,
-                    amountIsRaw: true,
-                    assetId: assetId,
-                    cost: TransactionUtils.convertToExactNativeAmount(tempExchangeOffer.cost.compact()),
-                    duration: tempExchangeOffer.duration.compact(),
-                    type: tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy", 
-                }; 
-
-                try {
-                    let assetInfo = await TransactionUtils.getAssetInfo(assetId);
-
-                    newTxnExchangeOffer.amountIsRaw = false;
-                    newTxnExchangeOffer.amount = TransactionUtils.convertToExactAmount(amount, assetInfo.divisibility);
-
-                    let assetName = await TransactionUtils.getAssetName(assetId);
-
-                    if(assetName.names.length){
-                        newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
-                    }
-
-                } catch (error) {
-                    
-                }                    
-
-                txn.exchangeOffers.push(newTxnExchangeOffer);
-            }
-        }
-        else if(txns[i].type === TransactionType.REMOVE_EXCHANGE_OFFER){
-
-            let removeExchangeOfferTxn = txns[i] as RemoveExchangeOfferTransaction;
-
-            for(let i = 0; i < removeExchangeOfferTxn.offers.length; ++i){
-                let tempExchangeOffer = removeExchangeOfferTxn.offers[i];
-
-                let assetId = tempExchangeOffer.mosaicId.toHex();
-
-                let newTxnExchangeOffer: TxnExchangeOffer = {
-                    assetId: assetId,
-                    type: tempExchangeOffer.offerType === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy", 
-                }; 
-
-                try {
-                    let assetName = await TransactionUtils.getAssetName(assetId);
-
-                    if(assetName.names.length){
-                        newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
-                    }
-
-                } catch (error) {
-                    
-                }                    
-
-                txn.exchangeOffers.push(newTxnExchangeOffer);
-            }
-        }
-
-        let allBuyOffers = txn.exchangeOffers.filter(x => x.type === "Buy");
-        let allSellOffers = txn.exchangeOffers.filter(x => x.type === "Sell");
-
-        txn.exchangeOffers = txn.isTakingOffer ? allSellOffers.concat(allBuyOffers) : allBuyOffers.concat(allSellOffers);
-
-        formatedTxns.push(txn);
-    }
-
-    return formatedTxns;
-  }
-
   //-------------Link Txn-----------------------------------------------------------
   static async formatUnconfirmedLinkTransaction(txns: Transaction[]): Promise<UnconfirmedLinkTransaction[]>{
 
@@ -4995,109 +4336,41 @@ static async extractUnconfirmedTransfer(transferTxn: TransferTransaction): Promi
   }
 
   //-------------Namespace Txn-----------------------------------------------------------
-  static async formatUnconfirmedNamespaceTransaction(txns: Transaction[]): Promise<UnconfirmedNamespaceTransaction[]>{
+  static async formatNamespaceTransaction(transaction: Transaction, groupType: string): Promise<ConfirmedNamespaceTransaction|UnconfirmedNamespaceTransaction|PartialNamespaceTransaction>{
 
-    let formatedTxns : UnconfirmedNamespaceTransaction[] = [];
+    let formattedTxn:any, txn:any
+    if(groupType == 'partial'){
+      formattedTxn = await TransactionUtils.formatPartialTransaction(transaction);
+      txn = PartialTransaction.convertToSubClass(PartialNamespaceTransaction, formattedTxn) as PartialNamespaceTransaction;
+    }else if(groupType == 'unconfirmed'){
+      formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(transaction);
+      txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedNamespaceTransaction, formattedTxn) as UnconfirmedNamespaceTransaction;
+    }else{
+      formattedTxn = await TransactionUtils.formatConfirmedTransaction(transaction);
+      txn = ConfirmedTransaction.convertToSubClass(ConfirmedNamespaceTransaction, formattedTxn) as ConfirmedNamespaceTransaction;
+    }
 
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(txns[i]);
-        let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedNamespaceTransaction, formattedTxn) as UnconfirmedNamespaceTransaction;
+    if(transaction.type === TransactionType.REGISTER_NAMESPACE){
+      let registerTxn = transaction as RegisterNamespaceTransaction;
+      console.log(registerTxn)
+      txn.namespaceName = registerTxn.namespaceName;
+      txn.namespaceId = registerTxn.namespaceId.id.toHex();
 
-        if(txns[i].type === TransactionType.REGISTER_NAMESPACE){
-            let registerTxn = txns[i] as RegisterNamespaceTransaction;
-            
-            txn.namespaceName = registerTxn.namespaceName;
-
-            if(registerTxn.namespaceType === NamespaceType.RootNamespace){
-                txn.duration = registerTxn.duration.compact();
-                txn.registerType = NamespaceType.RootNamespace;
-                txn.registerTypeName = "Root namespace";
-            }
-            else{
-                txn.registerType = NamespaceType.SubNamespace;
-                txn.registerTypeName = "Sub namespace";
-                txn.parentId = registerTxn.parentId.toHex();
-                let namespaceName = await TransactionUtils.getNamespacesName([registerTxn.parentId]);
-                txn.parentName = namespaceName[0].name;
-            }
-
-            txn.namespaceId = registerTxn.namespaceId.toHex();
-        }
-        
-        formatedTxns.push(txn);
+      if(registerTxn.namespaceType === NamespaceType.RootNamespace){
+        txn.duration = registerTxn.duration.compact();
+        txn.registerType = NamespaceType.RootNamespace;
+        txn.registerTypeName = "Root namespace";
       }
-
-      return formatedTxns;
-  }
-
-  static async formatConfirmedNamespaceTransaction(txns: Transaction[]): Promise<ConfirmedNamespaceTransaction[]>{
-
-    let formatedTxns : ConfirmedNamespaceTransaction[] = [];
-
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatConfirmedTransaction(txns[i]);
-        let txn = ConfirmedTransaction.convertToSubClass(ConfirmedNamespaceTransaction, formattedTxn) as ConfirmedNamespaceTransaction;
-        
-        if(txns[i].type === TransactionType.REGISTER_NAMESPACE){
-            let registerTxn = txns[i] as RegisterNamespaceTransaction;
-            
-            txn.namespaceName = registerTxn.namespaceName;
-
-            if(registerTxn.namespaceType === NamespaceType.RootNamespace){
-                txn.duration = registerTxn.duration.compact();
-                txn.registerType = NamespaceType.RootNamespace;
-                txn.registerTypeName = "Root namespace";
-            }
-            else{
-                txn.registerType = NamespaceType.SubNamespace;
-                txn.registerTypeName = "Sub namespace";
-                txn.parentId = registerTxn.parentId.toHex();
-                let namespaceName = await TransactionUtils.getNamespacesName([registerTxn.parentId]);
-                txn.parentName = namespaceName[0].name;
-            }
-
-            txn.namespaceId = registerTxn.namespaceId.toHex();
-        }
-        
-        formatedTxns.push(txn);
+      else{
+        txn.registerType = NamespaceType.SubNamespace;
+        txn.registerTypeName = "Sub namespace";
+        txn.parentId = registerTxn.parentId.toHex();
+        let namespaceName = await TransactionUtils.getNamespacesName([registerTxn.parentId]);
+        txn.parentName = namespaceName[0].name;
+      }
+      txn.namespaceId = registerTxn.namespaceId.toHex();
     }
-
-    return formatedTxns;
-  }
-
-  static async formatPartialNamespaceTransaction(txns: Transaction[]): Promise<PartialNamespaceTransaction[]>{
-
-    let formatedTxns : PartialNamespaceTransaction[] = [];
-
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatPartialTransaction(txns[i]);
-        let txn = PartialTransaction.convertToSubClass(PartialNamespaceTransaction, formattedTxn) as PartialNamespaceTransaction;
-        
-        if(txns[i].type === TransactionType.REGISTER_NAMESPACE){
-            let registerTxn = txns[i] as RegisterNamespaceTransaction;
-            
-            txn.namespaceName = registerTxn.namespaceName;
-
-            if(registerTxn.namespaceType === NamespaceType.RootNamespace){
-                txn.duration = registerTxn.duration.compact();
-                txn.registerType = NamespaceType.RootNamespace;
-                txn.registerTypeName = "Root namespace";
-            }
-            else{
-                txn.registerType = NamespaceType.SubNamespace;
-                txn.registerTypeName = "Sub namespace";
-                txn.parentId = registerTxn.parentId.toHex();
-                let namespaceName = await TransactionUtils.getNamespacesName([registerTxn.parentId]);
-                txn.parentName = namespaceName[0].name;
-            }
-
-            txn.namespaceId = registerTxn.namespaceId.toHex();
-        }
-        
-        formatedTxns.push(txn);
-    }
-
-    return formatedTxns;
+    return txn;
   }
 
   //-------------Restriction Txn-----------------------------------------------------------
