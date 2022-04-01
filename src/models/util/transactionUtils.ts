@@ -605,7 +605,7 @@ export class TransactionUtils {
       // extra transaction details for various transaction type
       txn.detail = {};
       switch(txn.type){
-        case TransactionType.ADDRESS_ALIAS || TransactionType.MOSAIC_ALIAS:
+        case TransactionType.ADDRESS_ALIAS: case TransactionType.MOSAIC_ALIAS:
           txn.detail = await TransactionUtils.formatAliasTransaction(txn, txnStatus.group);
           break;
         case TransactionType.ADD_EXCHANGE_OFFER:
@@ -666,7 +666,7 @@ export class TransactionUtils {
         case TransactionType.REMOVE_MOSAIC_LEVY:
           break;  
       }
-      console.log(txn)
+      // console.log(txn)
       return {txn, txnStatus, isFound: true};
     }catch (e){
       console.error(e)
@@ -3667,6 +3667,7 @@ static async extractUnconfirmedTransfer(transferTxn: TransferTransaction): Promi
       formattedTxn = await TransactionUtils.formatConfirmedTransaction(transaction);
       txn = ConfirmedTransaction.convertToSubClass(ConfirmedAliasTransaction, formattedTxn) as ConfirmedAliasTransaction;
     }
+    console.log('..........................')
 
     if(transaction.type === TransactionType.ADDRESS_ALIAS){
       let addressAliasTxn = transaction as AddressAliasTransaction;

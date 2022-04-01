@@ -61,6 +61,7 @@
     </div>
   </div>
   <TransferDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.TRANSFER" />
+  <AliasDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.ADDRESS_ALIAS || txnType == TransactionType.MOSAIC_ALIAS" />
 </template>
 
 <script>
@@ -71,8 +72,6 @@ SDA Supply Change
 Modify Multisig Account
 Aggregate Complete
 Aggregate Bonded
-SDA Alias
-Address Alias
 LockFund
 Account Link
 Exchange Offer
@@ -101,6 +100,7 @@ import { Helper } from "@/util/typeHelper";
 import { copyToClipboard } from '@/util/functions';
 import { TransactionUtils } from '@/models/util/transactionUtils';
 import TransferDetailComponent from '@/modules/transaction/components/transactionDetails/TransferDetailComponent';
+import AliasDetailComponent from '@/modules/transaction/components/transactionDetails/AliasDetailComponent';
 import { TransactionType } from 'tsjs-xpx-chain-sdk'
 export default {
   name: 'TxnDetailComponent',
@@ -110,6 +110,7 @@ export default {
   },
   components: {
     TransferDetailComponent,
+    AliasDetailComponent,
   },
   setup(props) {
     const toast = useToast();
