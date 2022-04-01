@@ -11,7 +11,7 @@
     </div>
 
     <div class="relative">
-      <div v-if='toggleSelection' class="absolute border border-t-0 w-full z-50 bg-white max-h-40 overflow-auto px-1 filter drop-shodow-xl pb-2">
+      <div v-if='toggleSelection' class="absolute border border-t-0 w-full z-50 bg-white max-h-52 overflow-auto px-1 filter drop-shodow-xl pb-2">
         <div v-if='networks.length > 0' class="pl-2 pt-4 text-xxs text-gray-400">SELECT NETWORK</div>
         <div v-else class="text-xxs pt-2 pl-2 pb-2">The list is empty.</div>
         <div v-for='(items, index) in networks' :key="items" class="px-2 py-3 flex cursor-pointer items-center hover:bg-gray-50 transition-all duration-300" @click="selectNetwork(items.name, items.node, items.index);$emit('update:modelValue', selectedNetwork);$emit('select-network', selectedNetwork);" :class='`${(index != networks.length - 1)?"border-b border-gray-200":""}`'>

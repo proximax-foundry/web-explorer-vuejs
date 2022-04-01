@@ -354,10 +354,14 @@ export class TransactionUtils {
   static async getResolvedAsset(mosaicId: MosaicId, blockHeight: number): Promise<MosaicId>{
 
     let resolvedAsset: MosaicId = null;
-
     if(TransactionUtils.isNamespace(mosaicId)){
 
       let receipts = await AppState.chainAPI.blockAPI.getBlockReceipts(blockHeight);
+
+      // fix for genesis block height
+      if(receipts.mosaicResolutionStatements.length == 0){
+        resolvedAsset = mosaicId;
+      }
 
       for(let i=0; i < receipts.mosaicResolutionStatements.length; ++i){
         let unresolved = receipts.mosaicResolutionStatements[i].unresolved;
@@ -553,7 +557,6 @@ export class TransactionUtils {
         return {txn: {}, txnStatus, isFound: true};
       }else{
         txn = await AppState.chainAPI.transactionAPI.getTransaction(hash);
-        console.log(txn)
       }
 
       // get fee
@@ -3149,7 +3152,6 @@ static async extractUnconfirmedTransfer(transferTxn: TransferTransaction): Promi
           let isSendWithNamespace = TransactionUtils.isNamespace(transferTxn.mosaics[y].id);
           let assetId = await TransactionUtils.getResolvedAsset(transferTxn.mosaics[y].id, txn.block);
           let assetIdHex = assetId.toHex();
-
           if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
             txn.amountTransfer += TransactionUtils.convertToExactNativeAmount(actualAmount);
             continue;
