@@ -12,7 +12,7 @@
     <div v-if="txnDetail.detail.amountTransfer">
       <div>Amount</div>
       <div class="relative">
-        <span class="font-bold">{{ transferAmount[0] }}</span>
+        <span class="font-bold">{{ Helper.toCurrencyFormat(transferAmount[0], nativeTokenDivisibility) }}</span>
         {{ transferAmount[1]>0?'.':'' }}
         <span class="text-xxs">{{ transferAmount[1] }}</span>
         <span class="font-bold">{{ nativeTokenNamespace }}</span>
@@ -22,7 +22,7 @@
     <div v-if="txnDetail.detail.assetAmount">
       <div>Amount</div>
       <div class="relative">
-        <span class="font-bold">{{ assetAmount[0] }}</span>
+        <span class="font-bold">{{ Helper.toCurrencyFormat(assetAmount[0], nativeTokenDivisibility) }}</span>
         {{ assetAmount[1]>0?'.':'' }}
         <span class="text-xxs">{{ assetAmount[1] }}</span>
         <div class="inline-block text-gray-400 text-txs hover:text-gray-700 duration-300 transition-all">
@@ -70,6 +70,7 @@ export default {
   setup(props) {
     const toast = useToast();
     const nativeTokenNamespace = AppState.nativeToken.label;
+    const nativeTokenDivisibility = AppState.nativeToken.divisibility;
     const transferAmount = computed(() => {
       return props.txnDetail.detail.amountTransfer.toString().split('.');
     });
@@ -106,6 +107,7 @@ export default {
       transferAmount,
       sdaAmount,
       assetAmount,
+      nativeTokenDivisibility
     }
   }
 }
