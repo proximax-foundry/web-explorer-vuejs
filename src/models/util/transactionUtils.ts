@@ -644,9 +644,8 @@ export class TransactionUtils {
         case TransactionType.REGISTER_NAMESPACE:
           txn.detail = await TransactionUtils.formatNamespaceTransaction(txn, txnStatus.group);
           break;
-        case TransactionType.SECRET_LOCK:
-          break;
-        case TransactionType.SECRET_PROOF:
+        case TransactionType.SECRET_LOCK: case TransactionType.SECRET_PROOF:
+          txn.detail = await TransactionUtils.formatSecretTransaction(txn, txnStatus.group);
           break;
         case TransactionType.TRANSFER:
           txn.detail = await TransactionUtils.formatTransferTransaction(txn, txnStatus.group);
@@ -4379,205 +4378,80 @@ static async extractUnconfirmedTransfer(transferTxn: TransferTransaction): Promi
   }
 
   //-------------Secret Txn-----------------------------------------------------------
-  static async formatUnconfirmedSecretTransaction(txns: Transaction[]): Promise<UnconfirmedSecretTransaction[]>{
+  static async formatSecretTransaction(transaction: Transaction, groupType: string): Promise<UnconfirmedSecretTransaction|PartialSecretTransaction|ConfirmedSecretTransaction>{
 
-    let formatedTxns : UnconfirmedSecretTransaction[] = [];
-
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(txns[i]);
-        let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedSecretTransaction, formattedTxn) as UnconfirmedSecretTransaction;
-
-        if(txns[i].type === TransactionType.SECRET_LOCK){
-            let secretLockTxn = txns[i] as SecretLockTransaction;
-            txn.duration = secretLockTxn.duration.compact();
-            txn.secret = secretLockTxn.secret;
-            txn.recipient = secretLockTxn.recipient.plain();
-            txn.amount = secretLockTxn.mosaic.amount.compact();
-            txn.hashType = myHashType[secretLockTxn.hashType];
-
-            let isNamespace = TransactionUtils.isNamespace(secretLockTxn.mosaic.id);
-
-            try {
-                if(!isNamespace){
-                    txn.assetId = secretLockTxn.mosaic.id.toHex();
-
-                    let assetsNames = await TransactionUtils.getAssetsName([secretLockTxn.mosaic.id]);
-
-                    if(assetsNames[0].names.length){
-                        txn.namespaceName = assetsNames[0].names[0].name;
-                    }
-                }
-                else{
-                    let namespaceId = new NamespaceId(secretLockTxn.mosaic.id.toDTO().id);
-                    let linkedAssetId = await TransactionUtils.getAssetAlias(namespaceId);
-
-                    txn.assetId = linkedAssetId.toHex();
-                    txn.isSendWithNamespace = true;
-
-                    let nsNames = await TransactionUtils.getNamespacesName([namespaceId]);
-                    txn.namespaceName = nsNames[0].name;
-                }
-
-                if(txn.namespaceName && txn.namespaceName === AppState.nativeToken.fullNamespace){
-                    txn.namespaceName = AppState.nativeToken.label;
-                }
-
-                let assetInfo = await TransactionUtils.getAssetInfo(txn.assetId);
-
-                if(assetInfo.divisibility > 0){
-                    txn.amount = TransactionUtils.convertToExactAmount(txn.amount, assetInfo.divisibility);
-                }
-                
-                txn.amountIsRaw = false;                    
-            } catch (error) {
-                
-            }
-        }
-        else if(txns[i].type === TransactionType.SECRET_PROOF){
-            let secretProofTxn = txns[i] as SecretProofTransaction;
-            txn.secret = secretProofTxn.secret;
-            txn.recipient = secretProofTxn.recipient.plain();
-            txn.hashType = myHashType[secretProofTxn.hashType];
-            txn.proof = secretProofTxn.proof;
-        }
-        formatedTxns.push(txn);
+    let formattedTxn:any, txn:any
+    if(groupType == 'partial'){
+      formattedTxn = await TransactionUtils.formatPartialTransaction(transaction);
+      txn = PartialTransaction.convertToSubClass(PartialSecretTransaction, formattedTxn) as PartialSecretTransaction;
+    }else if(groupType == 'unconfirmed'){
+      formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(transaction);
+      txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedSecretTransaction, formattedTxn) as UnconfirmedSecretTransaction;
+    }else{
+      formattedTxn = await TransactionUtils.formatConfirmedTransaction(transaction);
+      txn = ConfirmedTransaction.convertToSubClass(ConfirmedSecretTransaction, formattedTxn) as ConfirmedSecretTransaction;
     }
 
-    return formatedTxns;
-  }
+    if(transaction.type === TransactionType.SECRET_LOCK){
+      let secretLockTxn = transaction as SecretLockTransaction;
+      txn.duration = secretLockTxn.duration.compact();
+      txn.secret = secretLockTxn.secret;
+      txn.recipient = secretLockTxn.recipient.plain();
+      txn.amount = secretLockTxn.mosaic.amount.compact();
+      txn.hashType = myHashType[secretLockTxn.hashType];
 
-  static async formatConfirmedSecretTransaction(txns: Transaction[]): Promise<ConfirmedSecretTransaction[]>{
+      let isNamespace = TransactionUtils.isNamespace(secretLockTxn.mosaic.id);
 
-    let formatedTxns : ConfirmedSecretTransaction[] = [];
+      if(groupType == 'confirmed'){
+        let resolvedAssetId = await TransactionUtils.getResolvedAsset(secretLockTxn.mosaic.id, txn.block);
+        txn.assetId = resolvedAssetId.toHex();
+      }
 
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatConfirmedTransaction(txns[i]);
-        let txn = ConfirmedTransaction.convertToSubClass(ConfirmedSecretTransaction, formattedTxn) as ConfirmedSecretTransaction;
+      try {
+        if(!isNamespace){
+          if(groupType != 'confirmed'){
+            txn.assetId = secretLockTxn.mosaic.id.toHex();
+          }
 
-        if(txns[i].type === TransactionType.SECRET_LOCK){
-            let secretLockTxn = txns[i] as SecretLockTransaction;
-            txn.duration = secretLockTxn.duration.compact();
-            txn.secret = secretLockTxn.secret;
-            txn.recipient = secretLockTxn.recipient.plain();
-            txn.amount = secretLockTxn.mosaic.amount.compact();
-            txn.hashType = myHashType[secretLockTxn.hashType];
+          let assetsNames = await TransactionUtils.getAssetsName([secretLockTxn.mosaic.id]);
 
-            let isNamespace = TransactionUtils.isNamespace(secretLockTxn.mosaic.id);
-            let resolvedAssetId = await TransactionUtils.getResolvedAsset(secretLockTxn.mosaic.id, txn.block); 
+          if(assetsNames[0].names.length){
+            txn.namespaceName = assetsNames[0].names[0].name;
+          }
+        }else{
+          let namespaceId = new NamespaceId(secretLockTxn.mosaic.id.toDTO().id);
+          if(groupType != 'confirmed'){
+            let linkedAssetId = await TransactionUtils.getAssetAlias(namespaceId);
+            txn.assetId = linkedAssetId.toHex();
+          }
+          txn.isSendWithNamespace = true;
 
-            txn.assetId = resolvedAssetId.toHex();
-
-            try {
-                if(!isNamespace){
-                    let assetsNames = await TransactionUtils.getAssetsName([secretLockTxn.mosaic.id]);
-
-                    if(assetsNames[0].names.length){
-                        txn.namespaceName = assetsNames[0].names[0].name;
-                    }
-                }
-                else{
-                    txn.isSendWithNamespace = true;
-                    let namespaceId = new NamespaceId(secretLockTxn.mosaic.id.toDTO().id);
-
-                    let nsNames = await TransactionUtils.getNamespacesName([namespaceId]);
-                    txn.namespaceName = nsNames[0].name;
-                }
-
-                if(txn.namespaceName && txn.namespaceName === AppState.nativeToken.fullNamespace){
-                    txn.namespaceName = AppState.nativeToken.label;
-                }
-
-                let assetInfo = await TransactionUtils.getAssetInfo(txn.assetId);
-
-                if(assetInfo.divisibility > 0){
-                    txn.amount = TransactionUtils.convertToExactAmount(txn.amount, assetInfo.divisibility);
-                }
-                
-                txn.amountIsRaw = false;                    
-            } catch (error) {
-                
-            }
+          let nsNames = await TransactionUtils.getNamespacesName([namespaceId]);
+          txn.namespaceName = nsNames[0].name;
         }
-        else if(txns[i].type === TransactionType.SECRET_PROOF){
-            let secretProofTxn = txns[i] as SecretProofTransaction;
-            txn.secret = secretProofTxn.secret;
-            txn.recipient = secretProofTxn.recipient.plain();
-            txn.hashType = myHashType[secretProofTxn.hashType];
-            txn.proof = secretProofTxn.proof;
+
+        if(txn.namespaceName && txn.namespaceName === AppState.nativeToken.fullNamespace){
+          txn.namespaceName = AppState.nativeToken.label;
         }
-        formatedTxns.push(txn);
+
+        let assetInfo = await TransactionUtils.getAssetInfo(txn.assetId);
+
+        if(assetInfo.divisibility > 0){
+          txn.amount = TransactionUtils.convertToExactAmount(txn.amount, assetInfo.divisibility);
+        }
+        txn.amountIsRaw = false;
+      } catch (error) {}
+    }
+    else if(transaction.type === TransactionType.SECRET_PROOF){
+      let secretProofTxn = transaction as SecretProofTransaction;
+      txn.secret = secretProofTxn.secret;
+      txn.recipient = secretProofTxn.recipient.plain();
+      txn.hashType = myHashType[secretProofTxn.hashType];
+      txn.proof = secretProofTxn.proof;
     }
 
-    return formatedTxns;
+    return txn;
   }
-
-  static async formatPartialSecretTransaction(txns: Transaction[]): Promise<PartialSecretTransaction[]>{
-
-    let formatedTxns : PartialSecretTransaction[] = [];
-
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatPartialTransaction(txns[i]);
-        let txn = PartialTransaction.convertToSubClass(PartialSecretTransaction, formattedTxn) as PartialSecretTransaction;
-
-        if(txns[i].type === TransactionType.SECRET_LOCK){
-            let secretLockTxn = txns[i] as SecretLockTransaction;
-            txn.duration = secretLockTxn.duration.compact();
-            txn.secret = secretLockTxn.secret;
-            txn.recipient = secretLockTxn.recipient.plain();
-            txn.amount = secretLockTxn.mosaic.amount.compact();
-            txn.hashType = myHashType[secretLockTxn.hashType];
-
-            let isNamespace = TransactionUtils.isNamespace(secretLockTxn.mosaic.id);
-
-            try {
-                if(!isNamespace){
-                    txn.assetId = secretLockTxn.mosaic.id.toHex();
-
-                    let assetsNames = await TransactionUtils.getAssetsName([secretLockTxn.mosaic.id]);
-
-                    if(assetsNames[0].names.length){
-                        txn.namespaceName = assetsNames[0].names[0].name;
-                    }
-                }
-                else{
-                    let namespaceId = new NamespaceId(secretLockTxn.mosaic.id.toDTO().id);
-                    let linkedAssetId = await TransactionUtils.getAssetAlias(namespaceId);
-
-                    txn.assetId = linkedAssetId.toHex();
-                    txn.isSendWithNamespace = true;
-
-                    let nsNames = await TransactionUtils.getNamespacesName([namespaceId]);
-                    txn.namespaceName = nsNames[0].name;
-                }
-
-                if(txn.namespaceName && txn.namespaceName === AppState.nativeToken.fullNamespace){
-                    txn.namespaceName = AppState.nativeToken.label;
-                }
-
-                let assetInfo = await TransactionUtils.getAssetInfo(txn.assetId);
-
-                if(assetInfo.divisibility > 0){
-                    txn.amount = TransactionUtils.convertToExactAmount(txn.amount, assetInfo.divisibility);
-                }
-                
-                txn.amountIsRaw = false;                    
-            } catch (error) {
-                
-            }
-        }
-        else if(txns[i].type === TransactionType.SECRET_PROOF){
-            let secretProofTxn = txns[i] as SecretProofTransaction;
-            txn.secret = secretProofTxn.secret;
-            txn.recipient = secretProofTxn.recipient.plain();
-            txn.hashType = myHashType[secretProofTxn.hashType];
-            txn.proof = secretProofTxn.proof;
-        }
-        formatedTxns.push(txn);
-    }
-
-    return formatedTxns;
-  }
-
   //------------- format groupType transaction ------------------------------------------
   static async formatPartialTransaction(txn: Transaction): Promise<PartialTransaction>{
 
