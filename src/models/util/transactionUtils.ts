@@ -620,6 +620,7 @@ export class TransactionUtils {
           txn.detail = await TransactionUtils.formatExchangeTransaction(txn, txnStatus.group);
           break;
         case TransactionType.LINK_ACCOUNT:
+          txn.detail = await TransactionUtils.formatUnconfirmedLinkTransaction(txn, txnStatus.group);
           break;
         case TransactionType.LOCK:
           txn.detail = await TransactionUtils.formatUnconfirmedLockTransaction(txn, txnStatus.group);
@@ -4194,73 +4195,29 @@ static async extractUnconfirmedTransfer(transferTxn: TransferTransaction): Promi
     return txn;
   }
   //-------------Link Txn-----------------------------------------------------------
-  static async formatUnconfirmedLinkTransaction(txns: Transaction[]): Promise<UnconfirmedLinkTransaction[]>{
+  static async formatUnconfirmedLinkTransaction(transaction: Transaction, groupType: string): Promise<ConfirmedLinkTransaction|UnconfirmedLinkTransaction|PartialLinkTransaction>{
 
-    let formatedTxns : UnconfirmedLinkTransaction[] = [];
-
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(txns[i]);
-        let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedLinkTransaction, formattedTxn) as UnconfirmedLinkTransaction;
-
-        if(txns[i].type === TransactionType.LINK_ACCOUNT){
-
-            let linkAccTxn = txns[i] as AccountLinkTransaction;
-
-            txn.action = linkAccTxn.linkAction === LinkAction.Link ? "Link" : "Unlink";
-
-            txn.remotePublicKey = linkAccTxn.remoteAccountKey;
-        }
-
-        formatedTxns.push(txn);
+    let formattedTxn:any, txn:any
+    if(groupType == 'partial'){
+      formattedTxn = await TransactionUtils.formatPartialTransaction(transaction);
+      txn = PartialTransaction.convertToSubClass(PartialLinkTransaction, formattedTxn) as PartialLinkTransaction;
+    }else if(groupType == 'unconfirmed'){
+      formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(transaction);
+      txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedLinkTransaction, formattedTxn) as UnconfirmedLinkTransaction;
+    }else{
+      formattedTxn = await TransactionUtils.formatConfirmedTransaction(transaction);
+      txn = ConfirmedTransaction.convertToSubClass(ConfirmedLinkTransaction, formattedTxn) as ConfirmedLinkTransaction;
     }
 
-    return formatedTxns;
-  }
+    if(transaction.type === TransactionType.LINK_ACCOUNT){
 
-  static async formatConfirmedLinkTransaction(txns: Transaction[]): Promise<ConfirmedLinkTransaction[]>{
+        let linkAccTxn = transaction as AccountLinkTransaction;
 
-    let formatedTxns : ConfirmedLinkTransaction[] = [];
+        txn.action = linkAccTxn.linkAction === LinkAction.Link ? "Link" : "Unlink";
 
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatConfirmedTransaction(txns[i]);
-        let txn = ConfirmedTransaction.convertToSubClass(ConfirmedLinkTransaction, formattedTxn) as ConfirmedLinkTransaction;
-        
-        if(txns[i].type === TransactionType.LINK_ACCOUNT){
-
-            let linkAccTxn = txns[i] as AccountLinkTransaction;
-
-            txn.action = linkAccTxn.linkAction === LinkAction.Link ? "Link" : "Unlink";
-
-            txn.remotePublicKey = linkAccTxn.remoteAccountKey;
-        }
-
-        formatedTxns.push(txn);
+        txn.remotePublicKey = linkAccTxn.remoteAccountKey;
     }
-
-    return formatedTxns;
-  }
-
-  static async formatPartialLinkTransaction(txns: Transaction[]): Promise<PartialLinkTransaction[]>{
-
-    let formatedTxns : PartialLinkTransaction[] = [];
-
-    for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatPartialTransaction(txns[i]);
-        let txn = PartialTransaction.convertToSubClass(PartialLinkTransaction, formattedTxn) as PartialLinkTransaction;
-        
-        if(txns[i].type === TransactionType.LINK_ACCOUNT){
-
-            let linkAccTxn = txns[i] as AccountLinkTransaction;
-
-            txn.action = linkAccTxn.linkAction === LinkAction.Link ? "Link" : "Unlink";
-
-            txn.remotePublicKey = linkAccTxn.remoteAccountKey;
-        }
-
-        formatedTxns.push(txn);
-    }
-
-    return formatedTxns;
+    return txn;
   }
 
   //-------------Lock Txn-----------------------------------------------------------

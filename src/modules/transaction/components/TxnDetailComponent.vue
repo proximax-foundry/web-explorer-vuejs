@@ -66,6 +66,7 @@
   <NamespaceDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.REGISTER_NAMESPACE" />
   <ExchangeDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.EXCHANGE_OFFER || txnType == TransactionType.ADD_EXCHANGE_OFFER || txnType == TransactionType.REMOVE_EXCHANGE_OFFER" />
   <LockDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.LOCK" />
+  <LinkAccountDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.LINK_ACCOUNT" />
 </template>
 
 <script>
@@ -104,6 +105,7 @@ import AggregateDetailComponent from '@/modules/transaction/components/transacti
 import NamespaceDetailComponent from '@/modules/transaction/components/transactionDetails/NamespaceDetailComponent';
 import ExchangeDetailComponent from '@/modules/transaction/components/transactionDetails/ExchangeDetailComponent';
 import LockDetailComponent from '@/modules/transaction/components/transactionDetails/LockDetailComponent';
+import LinkAccountDetailComponent from '@/modules/transaction/components/transactionDetails/LinkAccountDetailComponent';
 import { TransactionType } from 'tsjs-xpx-chain-sdk'
 export default {
   name: 'TxnDetailComponent',
@@ -118,6 +120,7 @@ export default {
     NamespaceDetailComponent,
     ExchangeDetailComponent,
     LockDetailComponent,
+    LinkAccountDetailComponent,
   },
   setup(props) {
     const toast = useToast();
