@@ -47,7 +47,7 @@
           <template #body="{data}">
             <div>
               <div class="uppercase text-xs text-gray-300 font-bold mb-2 -mt-1">Fee</div>
-              <div class="uppercase font-bold text-xs">{{data.fee + data.amountTransfer}}</div>
+              <div class="uppercase font-bold text-xs">{{data.fee + data.amountTransfer + " " + nativeTokenNamespace}}</div>
               <div class="mb-7"></div>
             </div>
           </template>
@@ -55,27 +55,27 @@
       <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem;padding-left: 1rem;" field="TX Hash" header="TX HASH" class="ml-4" v-if="wideScreen"> 
         <template #body="{data}">                
           <div>
-            <router-link :to="{ name: 'ViewTransaction', params: {hash: data.hash}}" class="uppercase text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex truncate w-24 mt-4"><span class="text-xs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 10)}}...</span></router-link>
-            <div class="text-xs text-gray-500 mb-4 mt-1">{{countDuration(data.timestamp)}} ago</div>
+            <router-link :to="{ name: 'ViewTransaction', params: {hash: data.hash}}" class="uppercase text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex truncate w-24 pt-3"><span class="text-xs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 10)}}...</span></router-link>
+            <div class="text-txs text-gray-500 mb-4 pt-1">{{countDuration(data.timestamp)}} ago</div>
           </div>
         </template> 
       </Column>
-      <Column style="width: 150px; padding-bottom: 0rem; padding-top: 0rem;" field="Signer / Tx Type" header="SIGNER / TX TYPE" v-if="wideScreen"> 
+      <Column style="width: 100px; padding-bottom: 0rem; padding-top: 0rem;" field="Signer / Tx Type" header="SIGNER / TX TYPE" v-if="wideScreen"> 
         <template #body="{data}"> 
           <div>
             <div class="text-xs text-gray-500 inline-flex truncate w-80 mt-4">SIGNER:
               <div class="uppercase text-xs pl-1.5"><router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signerAddress}}" class="uppercase text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex"><span class="text-xs" v-tooltip.top="Helper.createAddress(data.signerAddress).pretty()">{{shortenedString(Helper.createAddress(data.signerAddress).pretty())}}</span></router-link></div>
             </div>
-            <div class="text-xs text-gray-500 inline-flex truncate w-80 px-px mb-4 mt-1">TX TYPE:
-              <div class="uppercase text-xs pl-1.5">{{data.type}}</div>
+            <div class="text-txs text-gray-500 inline-flex truncate w-80 px-px mb-4 pt-1.5">TX TYPE:
+              <div class="pl-2">{{data.type}}</div>
             </div>
           </div>
         </template> 
       </Column>
-      <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem; padding-right: 1rem; " field="Fee" header="FEE" v-if="wideScreen"> 
+      <Column style="width: 100px; padding-bottom: 0rem; padding-top: 0rem; padding-right: 1rem; " field="Fee" header="FEE" v-if="wideScreen"> 
         <template #body="{data}"> 
           <div>
-            <div class="text-xs mt-2">{{data.fee + data.amountTransfer}}</div>
+            <div class="text-xs pt-2.5">{{data.fee + data.amountTransfer + " " + nativeTokenNamespace}}</div>
           </div>
           <div class="mb-7"></div>
         </template> 
@@ -109,6 +109,7 @@ export default{
     const wideScreen = ref(false);
     const isFetching = ref(true);
     const transactions = ref([]);
+    const nativeTokenNamespace = AppState.nativeToken.label;
 
     const screenResizeHandler = () => {
       if(window.innerWidth < 1024){
@@ -178,7 +179,8 @@ export default{
       wideScreen,
       isFetching,
       shortenedString,
-      Tooltip
+      Tooltip,
+      nativeTokenNamespace
     }
   }
 }

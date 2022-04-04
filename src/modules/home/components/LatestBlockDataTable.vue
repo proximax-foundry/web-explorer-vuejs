@@ -43,7 +43,7 @@
           <template #body="{data}">
             <div>
               <div class="uppercase text-xs text-gray-300 font-bold -mt-1">fee</div>
-              <div class="uppercase font-bold text-xs mt-1">{{data.totalFee.lower}}</div>
+              <div class="uppercase font-bold text-xs mt-1">{{data.totalFee.lower + " " + nativeTokenNamespace}}</div>
               <div class="mb-7"></div>    
             </div>
           </template>
@@ -53,22 +53,22 @@
           <div> 
             <div class="uppercase text-xs mt-4">
             <router-link :to="{ name: 'ViewBlock', params: { blockHeight: data.height.compact()}}" class="truncate inline-block text-xs break-all text-blue-600 hover:text-blue-primary hover:underline"><span class="text-xs" v-tooltip.bottom="data.hash">{{data.height.compact()}}</span></router-link></div>
-            <div class="text-xs text-gray-500 mb-4">{{ countDuration(data.timestamp.compact()+ Deadline.timestampNemesisBlock * 1000)}} ago</div>
+            <div class="text-txs text-gray-500 mb-4">{{ countDuration(data.timestamp.compact()+ Deadline.timestampNemesisBlock * 1000)}} ago</div>
           </div>
         </template>           
       </Column>
-      <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem;" field="Validator" header="VALIDATOR" v-if="wideScreen"> 
+      <Column style="width: 30px; padding-bottom: 0rem; padding-top: 0rem;" field="Validator" header="VALIDATOR" v-if="wideScreen"> 
         <template #body="{data}" > 
           <div>
             <div class="uppercase text-xs text-blue-primary inline-flex w-80 mt-4"><router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signer.publicKey}}" class="uppercase text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex"><span class="text-xs" v-tooltip.bottom="data.signer.publicKey">{{shortenedPublicKey(data.signer.publicKey)}}</span></router-link></div>         
-            <div class="text-xs text-gray-500 mb-4 mt-1">{{data.numTransactions>1?data.numTransactions+" trxs":data.numTransactions+" trx"}}</div>
+            <div class="text-txs text-gray-500 mb-4 mt-1">{{data.numTransactions>1?data.numTransactions+" trxs":data.numTransactions+" trx"}}</div>
           </div>
         </template> 
       </Column>
-      <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem; padding-right: 1rem;" field="Fee" header="FEE" v-if="wideScreen"> 
+      <Column style="width: 70px; padding-bottom: 0rem; padding-top: 0rem; padding-right: 1rem;" field="Fee" header="FEE" v-if="wideScreen"> 
         <template #body="{data}" > 
           <div>
-            <div class="text-xs mt-2">{{data.totalFee.lower}}</div>
+            <div class="text-xs pt-2">{{data.totalFee.lower+" "+nativeTokenNamespace}}</div>
             <div class="mb-7"></div>
           </div>
         </template> 
@@ -96,6 +96,7 @@ export default{
   setup(){
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    const nativeTokenNamespace = AppState.nativeToken.label;
     const wideScreen = ref(false);
     const isFetching = ref(true);
     const blockDataTable =  ref([]);
@@ -156,7 +157,8 @@ export default{
       shortenedPublicKey,
       Deadline,
       Tooltip,
-      blockDataTable
+      blockDataTable,
+      nativeTokenNamespace
     }
   }
 }
