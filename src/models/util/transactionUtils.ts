@@ -558,6 +558,7 @@ export class TransactionUtils {
       }else{
         txn = await AppState.chainAPI.transactionAPI.getTransaction(hash);
       }
+      console.log(txn)
 
       // get fee
       let transactionInfo: TransactionInfo | AggregateTransactionInfo = txn.transactionInfo;
@@ -1539,9 +1540,13 @@ export class TransactionUtils {
         let infos: TxnDetails[] = [];
         let sdas = [];
 
-        let sdaString = `${secretLockFormat.amount} ${secretLockFormat.assetId}` + secretLockFormat.namespaceName ? ` (${secretLockFormat.namespaceName})`: '';
-
-        sdas.push(sdaString);
+        // let sdaString = `${secretLockFormat.amount} ${secretLockFormat.assetId}` + secretLockFormat.namespaceName ? ` (${secretLockFormat.namespaceName})`: '';
+        let sdaObj = {
+          amount: secretLockFormat.amount,
+          assetId: secretLockFormat.assetId,
+          namespace: secretLockFormat.namespaceName ? secretLockFormat.namespaceName: ''
+        }
+        sdas.push(sdaObj);
 
         let recipientInfo: TxnDetails = {
           type: MsgType.NONE,
@@ -1673,19 +1678,35 @@ export class TransactionUtils {
           infos.push(msgInfo);
         }
 
+        let sdaObj = {};
+
         if(transferFormat.amountTransfer){
-          sdas.push(`${transferFormat.amountTransfer} ${AppState.nativeToken.label}`);
+          sdaObj = {
+            amount: transferFormat.amountTransfer,
+            assetId: AppState.nativeToken.assetId,
+            namespace: AppState.nativeToken.label
+          }
+          sdas.push(sdaObj);
         }
 
         for(let i = 0; i < transferFormat.sda.length; ++i){
           let tempSDA = transferFormat.sda[i];
-          let sdaString = '';
           if(tempSDA.currentAlias && tempSDA.currentAlias.length){
-            sdaString = (tempSDA.amount + ` ${tempSDA.id} ` + `(${tempSDA.currentAlias[0].name})`);
+            sdaObj = {
+              amount: tempSDA.amount,
+              assetId: tempSDA.id,
+              namespace: tempSDA.currentAlias[0].name
+            }
+            // sdaString = (tempSDA.amount + ` ${tempSDA.id} ` + `(${tempSDA.currentAlias[0].name})`);
           }else{
-            sdaString = (tempSDA.amount + ' ' + tempSDA.id);
+            sdaObj = {
+              amount: tempSDA.amount,
+              assetId: tempSDA.id,
+              namespace: ''
+            }
+            // sdaString = (tempSDA.amount + ' ' + tempSDA.id);
           }
-          sdas.push(sdaString);
+          sdas.push(sdaObj);
         }
 
         transactionDetails = {
@@ -1726,23 +1747,25 @@ export class TransactionUtils {
 
         infos.push(scopedMetadataKeyInfo);
 
-        if(accMetadataFormat.oldValue){
-          let oldValueInfo: TxnDetails = {
+        if(groupType != 'confirmed'){
+          if(accMetadataFormat.oldValue){
+            let oldValueInfo: TxnDetails = {
+              type: MsgType.NONE,
+              label: "Current Value",
+              value: accMetadataFormat.oldValue
+            };
+
+            infos.push(oldValueInfo);
+          }
+
+          let newValueInfo: TxnDetails = {
             type: MsgType.NONE,
-            label: "Current Value",
-            value: accMetadataFormat.oldValue
+            label: "New Value",
+            value: accMetadataFormat.newValue
           };
 
-          infos.push(oldValueInfo);
+          infos.push(newValueInfo);
         }
-
-        let newValueInfo: TxnDetails = {
-          type: MsgType.NONE,
-          label: "New Value",
-          value: accMetadataFormat.newValue
-        };
-
-        infos.push(newValueInfo);
 
         transactionDetails = {
           signer: accMetadataFormat.signer,
@@ -1779,23 +1802,25 @@ export class TransactionUtils {
 
         infos.push(scopedMetadataKeyInfo);
 
-        if(namespaceMetadataFormat.oldValue){
-          let oldValueInfo: TxnDetails = {
+        if(groupType != 'confirmed'){
+          if(namespaceMetadataFormat.oldValue){
+            let oldValueInfo: TxnDetails = {
+              type: MsgType.NONE,
+              label: "Current Value",
+              value: namespaceMetadataFormat.oldValue
+            };
+
+            infos.push(oldValueInfo);
+          }
+
+          let newValueInfo: TxnDetails = {
             type: MsgType.NONE,
-            label: "Current Value",
-            value: namespaceMetadataFormat.oldValue
+            label: "New Value",
+            value: namespaceMetadataFormat.newValue
           };
 
-          infos.push(oldValueInfo);
+          infos.push(newValueInfo);
         }
-
-        let newValueInfo: TxnDetails = {
-          type: MsgType.NONE,
-          label: "New Value",
-          value: namespaceMetadataFormat.newValue
-        };
-
-        infos.push(newValueInfo);
 
         transactionDetails = {
           signer: namespaceMetadataFormat.signer,
@@ -1831,24 +1856,25 @@ export class TransactionUtils {
         };
 
         infos.push(scopedMetadataKeyInfo);
+        if(groupType != 'confirmed'){
+          if(assetMetadataFormat.oldValue){
+              let oldValueInfo: TxnDetails = {
+                  type: MsgType.NONE,
+                  label: "Current Value",
+                  value: assetMetadataFormat.oldValue
+              };
 
-        if(assetMetadataFormat.oldValue){
-            let oldValueInfo: TxnDetails = {
-                type: MsgType.NONE,
-                label: "Current Value",
-                value: assetMetadataFormat.oldValue
-            };
+              infos.push(oldValueInfo);
+          }
 
-            infos.push(oldValueInfo);
+          let newValueInfo: TxnDetails = {
+              type: MsgType.NONE,
+              label: "New Value",
+              value: assetMetadataFormat.newValue
+          };
+
+          infos.push(newValueInfo);
         }
-
-        let newValueInfo: TxnDetails = {
-            type: MsgType.NONE,
-            label: "New Value",
-            value: assetMetadataFormat.newValue
-        };
-
-        infos.push(newValueInfo);
 
         transactionDetails = {
             signer: assetMetadataFormat.signer,
