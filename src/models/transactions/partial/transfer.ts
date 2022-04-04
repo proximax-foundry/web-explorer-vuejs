@@ -1,12 +1,12 @@
 import {SDA} from "../sda";
-import { ConfirmedTransaction } from "./confirmedTransaction";
+import { PartialTransaction } from "./partialTransaction";
 
-export class ConfirmedTransferTransaction extends ConfirmedTransaction{
+export class PartialTransferTransaction extends PartialTransaction{
 
     sender: string | null = null;
     recipient: string | null = null;
-    recipientNamespaceId: string | null = null; 
-    recipientNamespaceName: string | null = null; 
+    recipientNamespaceId: string | null = null;
+    recipientNamespaceName: string | null = null;    
     sda: SDA[] = [];
     amountTransfer: number = 0;
     message: string | null = null;
@@ -16,4 +16,4 @@ export class ConfirmedTransferTransaction extends ConfirmedTransaction{
     constructor(txnHash: string){
       super(txnHash);
     }
-  }
+}

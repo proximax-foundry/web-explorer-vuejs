@@ -8,11 +8,21 @@
         </div>
         <div>
           <div>Public Key</div>
-          <div>{{ item.signer.publicKey }}</div>
+          <div class="flex items-center">
+            <router-link id="publicKey" :to="{ name: 'ViewAccount', params: { accountParam: item.signer.publicKey }}" class="hover:text-blue-primary hover:underline text-blue-600" :copyValue="item.signer.publicKey" copySubject="Public Key">
+              {{item.signer.publicKey}}
+            </router-link>
+            <img src="@/assets/img/icon-copy.svg" @click="copy('publicKey')" class="ml-2 w-4 h-4 cursor-pointer" />
+          </div>
         </div>
         <div>
           <div>Signer</div>
-          <div>{{ item.signer.address.address }}</div>
+          <div class="flex items-center">
+            <router-link id="signerAddress" :to="{ name: 'ViewAccount', params: { accountParam: item.signer.address.address }}" class="hover:text-blue-primary hover:underline text-blue-600" :copyValue="item.signer.address.address" copySubject="Address">
+              {{ item.signer.address.address }}
+            </router-link>
+            <img src="@/assets/img/icon-copy.svg" @click="copy('signerAddress')" class="ml-2 w-4 h-4 cursor-pointer" />
+          </div>
         </div>
         <div>
           <div>Fully signed</div>
@@ -22,7 +32,23 @@
       <div class="table_div" v-if="innerTxnExtractedData[index]!=undefined">
         <div v-for="(info, infoListindex) in innerTxnExtractedData[index].infoList" :key="infoListindex">
           <div>{{ info.label ? info.label : '' }}</div>
-          <div>{{ info.short ? info.short : info.value }}</div>
+          <div v-if="info.label.toLowerCase()=='namespace'">
+            <router-link :to="{ name: 'ViewNamespace', params:{ namespaceParam: info.short ? info.short : info.value }}" class="text-blue-600 hover:text-blue-primary hover:underline">
+              {{ info.short ? info.short : info.value }}
+            </router-link>
+          </div>
+          <div v-else-if="info.label.toLowerCase()=='asset'">
+            <router-link :to="{ name: 'ViewAsset', params:{ id: info.short ? info.short : info.value }}" class="text-blue-600 hover:text-blue-primary hover:underline">
+              {{ info.short ? info.short : info.value }}
+            </router-link>
+          </div>
+          <div v-else-if="info.label.toLowerCase()=='account' || info.label.toLowerCase()=='recipient'" class="flex items-center">
+            <router-link id="metadataAccount" :to="{ name: 'ViewAccount', params:{ accountParam: info.short ? info.short : info.value }}" class="text-blue-600 hover:text-blue-primary hover:underline"  :copyValue="info.short ? info.short : info.value" copySubject="Address">
+              {{ info.short ? info.short : info.value }}
+            </router-link>
+            <img src="@/assets/img/icon-copy.svg" @click="copy('metadataAccount')" class="ml-2 w-4 h-4 cursor-pointer" />
+          </div>
+          <div v-else>{{ info.short ? info.short : info.value }}</div>
         </div>
         <div v-if="innerTxnExtractedData[index].infoGreenList.length > 0">
           <div v-if="innerTxnExtractedData[index].legendType === InnerTxnLegendType.ADD_REMOVE" >Add</div>
@@ -44,7 +70,22 @@
         </div>
         <div v-if="innerTxnExtractedData[index].sdas.length > 0">
           <div>SDAs</div>
-          <div>{{ innerTxnExtractedData[index].sdas.join("<br>") }}</div>
+          <div>
+            <div v-for="sda, index in innerTxnExtractedData[index].sdas" :key="index">
+              <div class="inline-block">
+                <span class="font-bold text-xs">{{ Helper.toCurrencyFormat(formatCurrency(sda.amount)[0], 0) }}</span>
+                <span class="text-xxs">{{ formatCurrency(sda.amount)[1]?'.' + formatCurrency(sda.amount)[1]:'' }}</span>
+              </div>
+              <div v-if="sda.namespace" class="inline-block ml-2">
+                <router-link :to="{ name: 'ViewAsset', params:{ id: sda.assetId }}" class="text-blue-600 hover:text-blue-primary hover:underline">{{ sda.namespace }}</router-link>
+              </div>
+              <div v-else class="text-gray-400 hover:text-gray-700 duration-300 transition-all inline-block ml-2">
+                <router-link :to="{ name: 'ViewAsset', params: { id: sda.assetId }}" class="hover:text-blue-primary hover:underline">
+                  {{ sda.assetId }}
+                </router-link>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -58,6 +99,9 @@ import { TransactionUtils, MsgType, InnerTxnLegendType } from '@/models/util/tra
 import { TransactionUtils as TxnUtils } from '@/util/transactionUtils';
 import { Helper } from "@/util/typeHelper";
 import { CosignUtils } from '@/util/cosignUtils';
+import { copyToClipboard } from '@/util/functions';
+import { useToast } from "primevue/usetoast";
+
 export default {
   name: 'InnerTxnComponent',
   props: {
@@ -66,6 +110,19 @@ export default {
     txnGroup: String,
   },
   setup(props) {
+    const toast = useToast();
+
+    const copy = (id) =>{
+      let stringToCopy = document.getElementById(id).getAttribute("copyValue");
+      let copySubject = document.getElementById(id).getAttribute("copySubject");
+      copyToClipboard(stringToCopy);
+
+      toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
+    };
+
+    const formatCurrency = (cost) => {
+      return cost.toString().split('.');
+    };
 
     let allCosigners = []; // hold all the final cosigners public Keys
     let cosignedSigner = []; // all the cosigned final signers, include multisig account (calculated)
@@ -93,11 +150,12 @@ export default {
           oriSignedSigners = cosignedSigner.concat([txn.signer.publicKey]);
           signedSigners = [...oriSignedSigners];
 
-          let extractedData = await TransactionUtils.extractInnerTransaction(txn);
+          let extractedData = await TransactionUtils.extractInnerTransaction(txn, props.txnGroup);
             extractedData.infoInfoList = extractedData.infos.filter(info => !info.label && info.type === MsgType.INFO);
             extractedData.infoGreenList = extractedData.infos.filter(info => !info.label && info.type === MsgType.GREEN);
             extractedData.infoRedList = extractedData.infos.filter(info => !info.label && info.type === MsgType.RED);
             extractedData.infoList = extractedData.infos.filter(info => info.type === MsgType.NONE);
+            console.log(extractedData)
             innerTxnExtractedData.value[item] = extractedData;
 
           let innerSigner = txn.signer;
@@ -128,7 +186,7 @@ export default {
             }
             signedSigners = Array.from(new Set(signedSigners));
             let isSigned = flatCosigners.every((val) => signedSigners.includes(val));
-            console.log(isSigned)
+            // console.log(isSigned)
             innerSignedList.value.push(isSigned);
           }else{
             try {
@@ -170,6 +228,8 @@ export default {
       InnerTxnLegendType,
       TransactionType,
       innerTxnExtractedData,
+      copy,
+      formatCurrency,
     }
   }
 }
