@@ -3,7 +3,7 @@ name: deploy-testnet
 on: 
   push:
     tags: 
-      - v*
+      - release-v*
   
 jobs:
   build:
@@ -59,8 +59,9 @@ jobs:
 
       - name: Apply Testnet Config
         run: |
-          rm dist/chainProfile.json
-          cp config/chainProfile-testnet.json dist/chainProfile.json
+          rm chainProfile.json
+          cp config/chainProfile-testnet.json ./chainProfile.json
+      
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -69,5 +70,5 @@ jobs:
 
       - name: Copy files to testnet website
         run: |
-          aws s3 sync --delete ./dist s3://$S3_BUCKET
+          aws s3 sync --delete . s3://$S3_BUCKET
           aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --path "/*"
