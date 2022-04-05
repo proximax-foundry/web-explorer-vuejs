@@ -30,7 +30,7 @@ export class AssetUtils {
             let asset = await chainRESTCall.assetAPI.getMosaic(assetId);
             
             assetInfo = {
-                owner: asset.owner.address.pretty(),
+                owner: asset.owner.address.plain().toString(),
                 height: asset.height.compact(),
                 assetId: asset.mosaicId.toHex(),
                 expiry: asset.duration.compact(),
