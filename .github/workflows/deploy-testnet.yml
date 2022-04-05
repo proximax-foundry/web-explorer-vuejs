@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: testnet
-      url: 'http://bctestnetexplorer.xpxsirius.io'
+      url: 'https://bctestnetexplorer.xpxsirius.io'
     permissions:
       id-token: write
       contents: read
@@ -60,7 +60,7 @@ jobs:
       - name: Apply Testnet Config
         run: |
           rm dist/chainProfile.json
-          cp public/config/chainProfile-testnet.json dist/chainProfile.json
+          cp config/chainProfile-testnet.json dist/chainProfile.json
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
