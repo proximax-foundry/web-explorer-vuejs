@@ -2,8 +2,8 @@ name: deploy-testnet
 
 on: 
   push:
-    tags: 
-      - v*
+    branches: 
+      - fix-ci
   
 jobs:
   build:
@@ -45,12 +45,12 @@ jobs:
     name: Deploy to testnet
     needs: [build]
     runs-on: ubuntu-latest
-    environment:
-      name: testnet
-      url: 'https://bctestnetexplorer.xpxsirius.io'
-    permissions:
-      id-token: write
-      contents: read
+    # environment:
+    #   name: testnet
+    #   url: 'https://bctestnetexplorer.xpxsirius.io'
+    # permissions:
+    #   id-token: write
+    #   contents: read
     steps:
       - name: Download artifact 
         uses: actions/download-artifact@v3
@@ -59,15 +59,16 @@ jobs:
 
       - name: Apply Testnet Config
         run: |
+          ls -al
           rm dist/chainProfile.json
           cp config/chainProfile-testnet.json dist/chainProfile.json
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: $AWS_ROLE
-          aws-region: $AWS_REGION
+      # - name: Configure AWS Credentials
+      #   uses: aws-actions/configure-aws-credentials@v1
+      #   with:
+      #     role-to-assume: $AWS_ROLE
+      #     aws-region: $AWS_REGION
 
-      - name: Copy files to testnet website
-        run: |
-          aws s3 sync --delete ./dist s3://$S3_BUCKET
-          aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --path "/*"
+      # - name: Copy files to testnet website
+      #   run: |
+      #     aws s3 sync --delete ./dist s3://$S3_BUCKET
+      #     aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --path "/*"
