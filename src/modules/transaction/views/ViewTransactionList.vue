@@ -1,8 +1,16 @@
 <template>
   <div>
-    <p class="text-gray-500 mb-5 text-sm font-bold">
+    <div class="flex justify-between">
+      <p class="text-gray-500 mb-5 text-sm font-bold">
       Transactions
-    </p>
+      </p>
+      <div class="bg-gray-50">
+        <select v-model="selectedTxnType" @change="changeSearchTxnType" class="border border-gray-200 px-2 py-1 focus:outline-none">
+          <option value="all" class="text-sm">All</option>
+          <option v-bind:key="txnType.value" v-for="txnType in txnTypeList" :value="txnType.value" class="text-sm">{{ txnType.label}}</option>
+        </select>
+      </div>
+    </div>
     <div v-if="isFetching">
       <div class="flex justify-center items-center border-gray-400 mt-15">
         <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-navy-primary mr-2"></div>
@@ -10,130 +18,20 @@
       </div>
     </div>
     <div v-else>
-      <DataTable
-        :value="transactions"
-        :paginator="false"
-        :rows="Number(pages)"
-        scrollDirection="horizontal"
-        :alwaysShowPaginator="false"
-        responsiveLayout="scroll"
-        paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-        currentPageReportTemplate=""
-        :globalFilterFields="['recipient','sender', 'signerAddress', 'type']"
-        >
-        <Column style="width: 200px" v-if="!wideScreen">
-          <template #body="{data}">
-            <div>
-              <div class="uppercase text-xs text-gray-300 font-bold mb-1 break-all">Tx Hash</div>
-              <router-link class="uppercase font-bold text-xs block text-blue-600 hover:text-blue-primary hover:underline" :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}">
-                <span class="text-xs break-all hover:underline hover:text-blue-primary" v-tooltip.right="data.hash">{{data.hash.substring(0, 15) }}...</span>
-              </router-link>
-            </div>
-            <div>
-              <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Type</div>
-              <div class="flex items-center">
-                <div class="uppercase font-bold text-xs mr-2">{{data.type}}</div>
-              </div>
-            </div>
-            <div>
-              <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5" v-if="data.recipient != '' && data.recipient != null">Receipient</div>
-              <div class="uppercase font-bold text-xs">
-                <span v-if="data.recipient === '' || data.recipient === null"></span>
-                <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.recipient }}" v-tooltip.right="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-xs break-all text-blue-600 hover:text-blue-primary hover:underline">{{ shortenedAddress(Helper.createAddress(data.recipient).pretty()) }}</router-link>
-              </div>
-            </div>
-          </template>
-        </Column>
-        <Column style="width: 200px" v-if="!wideScreen">
-          <template #body="{data}">
-            <div>
-              <div class="uppercase text-xs text-gray-300 font-bold mb-1">Timestamp</div>
-              <div class="uppercase font-bold text-xs">{{ Helper.convertDisplayDateTimeFormat24(data.timestamp) }}</div>
-            </div>
-            <div>
-              <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Sender</div>
-              <div class="uppercase font-bold text-xs">
-                <span v-if="data.sender === '' || data.sender === null"></span>
-                <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.sender }}" v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-xs break-all text-blue-600 hover:text-blue-primary hover:underline">
-                  {{ shortenedAddress(Helper.createAddress(data.sender).pretty()) }}
-                </router-link>
-              </div>
-            </div>
-            <div>
-              <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Tx Amount</div>
-              <div class="text-xs uppercase font-bold" >{{ data.amountTransfer ? Helper.toCurrencyFormat(data.amountTransfer, currencyDivisibility):'-' }} <b v-if="data.amountTransfer">{{ nativeTokenName }}</b></div>
-            </div>
-          </template>
-        </Column>
-        <Column field="hash" header="TX HASH" headerStyle="width:100px" v-if="wideScreen">
-          <template #body="{data}">
-            <router-link :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}" class="text-xs text-blue-600 hover:text-blue-primary hover:underline" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 15) }}...</router-link>
-          </template>
-        </Column>
-        <Column field="timestamp" v-if="wideScreen" header="TIMESTAMP" headerStyle="width:110px">
-          <template #body="{data}">
-            <span class="text-xs">{{ Helper.convertDisplayDateTimeFormat24(data.timestamp) }}</span>
-          </template>
-        </Column>
-        <Column field="type" header="TYPE" headerStyle="width:110px" v-if="wideScreen">
-          <template #body="{data}">
-            <span class="text-xs">{{data.type}}</span>
-          </template>
-        </Column>
-        <Column field="block" v-if="wideScreen" header="BLOCK" headerStyle="width:110px">
-          <template #body="{data}">
-            <router-link :to="{ name: 'ViewBlock', params: { blockHeight: data.block}}" class="text-blue-600 hover:text-blue-primary hover:underline text-xs">{{ data.block }}</router-link>
-          </template>
-        </Column>
-        <Column field="signer" header="SENDER" headerStyle="width:110px" v-if="wideScreen">
-          <template #body="{data}">
-            <span v-if="data.sender === '' || data.sender === null"></span>
-            <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.sender }}" v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-xs text-blue-600 hover:text-blue-primary hover:underline">
-              {{ shortenedAddress(Helper.createAddress(data.sender).pretty()) }}
-            </router-link>
-          </template>
-        </Column>
-        <Column field="recipient" header="RECIPIENT" headerStyle="width:110px" v-if="wideScreen">
-          <template #body="{data}">
-            <span v-if="data.recipient === '' || data.recipient === null"></span>
-            <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.recipient }}" v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-xs text-blue-600 hover:text-blue-primary hover:underline">
-              {{ shortenedAddress(Helper.createAddress(data.recipient).pretty()) }}
-            </router-link>
-          </template>
-        </Column>
-        <Column header="TX FEE" v-if="wideScreen" headerStyle="width:110px">
-          <template #body="{data}">
-            <div class="text-xs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
-          </template>
-        </Column>
-        <Column header="AMOUNT" headerStyle="width:110px" v-if="wideScreen">
-          <template #body="{data}">
-            <div class="text-xs" >{{ data.amountTransfer ? Helper.toCurrencyFormat(data.amountTransfer, currencyDivisibility):'-' }} <b v-if="data.amountTransfer">{{ nativeTokenName }}</b></div>
-          </template>
-        </Column>
-        <Column header="SDA" headerStyle="width:40px" v-if="wideScreen">
-          <template #body="{data}">
-            <div>
-              <img src="@/modules/transaction/img/icon-sda.svg" class="inline-block" v-if="checkOtherAsset(data.sda)" v-tooltip.left="'<tiptitle>Sirius Digital Asset</tiptitle><tiptext>' + displaySDAs(data.sda) + '</tiptext>'">
-              <span v-else>-</span>
-            </div>
-          </template>
-        </Column>
-        <Column header="MESSAGE" headerStyle="width:40px" v-if="wideScreen">
-          <template #body="{data}">
-            <div>
-              <img src="@/modules/transaction/img/icon-message.svg" v-tooltip.left="'<tiptitle>' + data.messageTypeTitle + '</tiptitle><tiptext>' + data.message + '</tiptext>'" class="inline-block" v-if="data.message && data.messageType !== 1">
-              <div v-else class="w-full text-center">-</div>
-            </div>
-          </template>
-        </Column>
-        <template #empty>
-          No transaction found
-        </template>
-        <template #loading>
-          Fetching transactions
-        </template>
-      </DataTable>
+      <MixedTxnDataTable :transactions="transactions" :pages="pages" v-if="selectedTxnType == 'all'" />
+      <TransferTxnDataTable :transactions="transactions" :pages="pages" v-else-if="selectedTxnType === TransactionFilterType.TRANSFER" />
+      <AccountTxnDataTable :transactions="transactions" :pages="pages" v-else-if="selectedTxnType === TransactionFilterType.ACCOUNT" />
+      <AggregateTxnDataTable :transactions="transactions" :pages="pages" :selectedGroupType="transactionGroupType.CONFIRMED" v-else-if="selectedTxnType === TransactionFilterType.AGGREGATE" />
+      <AliasTxnDataTable :transactions="transactions" :pages="pages" :selectedGroupType="transactionGroupType.CONFIRMED" v-else-if="selectedTxnType === TransactionFilterType.ALIAS" />
+      <AssetTxnDataTable :transactions="transactions" :pages="pages" :selectedGroupType="transactionGroupType.CONFIRMED" v-else-if="selectedTxnType === TransactionFilterType.ASSET" />
+      <NamespaceTxnDataTable :transactions="transactions" :pages="pages" :selectedGroupType="transactionGroupType.CONFIRMED" v-else-if="selectedTxnType === TransactionFilterType.NAMESPACE" />
+      <MetadataTxnDataTable :transactions="transactions" :pages="pages" :selectedGroupType="transactionGroupType.CONFIRMED" v-else-if="selectedTxnType === TransactionFilterType.METADATA" />
+      <ExchangeTxnDataTable :transactions="transactions" :pages="pages" :selectedGroupType="transactionGroupType.CONFIRMED" v-else-if="selectedTxnType === TransactionFilterType.EXCHANGE" />
+      <LockTxnDataTable :transactions="transactions" :pages="pages" :selectedGroupType="transactionGroupType.CONFIRMED" v-else-if="selectedTxnType === TransactionFilterType.LOCK" />
+      <LinkTxnDataTable :transactions="transactions" :pages="pages" :selectedGroupType="transactionGroupType.CONFIRMED" v-else-if="selectedTxnType === TransactionFilterType.LINK" />
+      <RestrictionTxnDataTable :transactions="transactions" :pages="pages" :selectedGroupType="transactionGroupType.CONFIRMED" v-else-if="selectedTxnType === TransactionFilterType.RESTRICTION" />
+      <SecretTxnDataTable :transactions="transactions" :pages="pages" :selectedGroupType="transactionGroupType.CONFIRMED" v-else-if="selectedTxnType === TransactionFilterType.SECRET" />
+      <ChainTxnDataTable :transactions="transactions" :pages="pages" :selectedGroupType="transactionGroupType.CONFIRMED" v-else-if="selectedTxnType === TransactionFilterType.CHAIN" />
       <div class="sm:flex sm:justify-between my-5 mb-15" v-if="totalPages > 1">
         <div class="text-xs text-gray-700 mb-3 sm:mb-0 text-center sm:text-left">Show
           <select v-model="pages" class="border border-gray-300 rounded-md p-1" @change="changeRows">
@@ -158,89 +56,53 @@
 </template>
 
 <script>
-import { computed, defineComponent, getCurrentInstance, inject, ref, watch, onMounted, onUnmounted } from "vue";
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
+import { getCurrentInstance, computed, ref, watch } from "vue";
+import { TransactionFilterType, TransactionFilterTypes } from '@/models/transactions/transaction';
 import { AppState } from '@/state/appState';
 import { Helper } from "@/util/typeHelper";
-// import { TransactionFilterTypes } from '@/models/transactions/transactionFilterType';
 import { TransactionUtils } from '@/models/util/transactionUtils';
-import Tooltip from 'primevue/tooltip';
+import MixedTxnDataTable from '@/modules/transaction/components/txnDataTables/MixedTxnDataTable';
+import TransferTxnDataTable from '@/modules/transaction/components/txnDataTables/TransferTxnDataTable';
+import AccountTxnDataTable from '@/modules/transaction/components/txnDataTables/AccountTxnDataTable';
+import AggregateTxnDataTable from '@/modules/transaction/components/txnDataTables/AggregateTxnDataTable';
+import AliasTxnDataTable from '@/modules/transaction/components/txnDataTables/AliasTxnDataTable';
+import AssetTxnDataTable from '@/modules/transaction/components/txnDataTables/AssetTxnDataTable';
+import NamespaceTxnDataTable from '@/modules/transaction/components/txnDataTables/NamespaceTxnDataTable';
+import MetadataTxnDataTable from '@/modules/transaction/components/txnDataTables/MetadataTxnDataTable';
+import ExchangeTxnDataTable from '@/modules/transaction/components/txnDataTables/ExchangeTxnDataTable';
+import LockTxnDataTable from '@/modules/transaction/components/txnDataTables/LockTxnDataTable';
+import LinkTxnDataTable from '@/modules/transaction/components/txnDataTables/LinkTxnDataTable';
+import RestrictionTxnDataTable from '@/modules/transaction/components/txnDataTables/RestrictionTxnDataTable';
+import SecretTxnDataTable from '@/modules/transaction/components/txnDataTables/SecretTxnDataTable';
+import ChainTxnDataTable from '@/modules/transaction/components/txnDataTables/ChainTxnDataTable';
+
 
 export default {
   name: 'ViewTransactionList',
   components: {
-    DataTable,
-    Column
-  },
-  directives: {
-    'tooltip': Tooltip
-  },
-  props: {
-    hash: String
+    MixedTxnDataTable,
+    TransferTxnDataTable,
+    AccountTxnDataTable,
+    AggregateTxnDataTable,
+    AliasTxnDataTable,
+    AssetTxnDataTable,
+    NamespaceTxnDataTable,
+    MetadataTxnDataTable,
+    ExchangeTxnDataTable,
+    LockTxnDataTable,
+    LinkTxnDataTable,
+    RestrictionTxnDataTable,
+    SecretTxnDataTable,
+    ChainTxnDataTable,
   },
   setup(){
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
+
+    let selectedTxnType = ref("all");
     const isFetching = ref(true);
-    const wideScreen = ref(false);
-    const screenResizeHandler = () => {
-      if(window.innerWidth < 1024){
-        wideScreen.value = false;
-      }else{
-        wideScreen.value = true;
-      }
-    };
-    screenResizeHandler();
 
-    onUnmounted(() => {
-      window.removeEventListener("resize", screenResizeHandler);
-    });
-
-    onMounted(() => {
-      window.addEventListener("resize", screenResizeHandler);
-    });
-
-    const nativeTokenName = computed(()=> AppState.nativeToken.label);
-
-    const displaySDAs = (sdas) => {
-      let sda_rows = [];
-      if(sdas.length > 0){
-        for(const sda of sdas){
-          let asset_div = displayAssetDiv(sda);
-          sda_rows.push(asset_div);
-        }
-        return sda_rows.join("<br>");
-      }
-    }
-
-    const checkOtherAsset = (assets) => {
-      if(assets){
-        if(assets.length > 0){
-          return true;
-        }
-      }
-      return false;
-    }
-
-    const displayAssetDiv = (sda) => {
-      let asset_div;
-      let assetArray = []
-      assetArray.push(sda.id);
-
-      if(sda.currentAlias && sda.currentAlias.length){
-        asset_div = (sda.amount + ' ' + sda.currentAlias[0].name);
-      }
-      else{
-        asset_div = (sda.amount + ' - ' + sda.id);
-      }
-      return asset_div;
-    }
-
-    const shortenedAddress = (address) => {
-      return address.substring(0, 4) + '...' + address.substring(address.length - 4, address.length);
-      // return address;
-    }
+    let txnTypeList = Object.entries(TransactionFilterType).map(([label, value])=>({label, value}));
 
     const pages = ref(20);
     const currentPage = ref(1)
@@ -264,49 +126,56 @@ export default {
 
     const naviFirst = () => {
       currentPage.value = 1;
-      loadRecentTransferTransactions();
+      loadRecentTransactions();
     }
 
     const naviPrevious = () => {
       --currentPage.value;
-      loadRecentTransferTransactions();
+      loadRecentTransactions();
     }
 
     const naviNext = () => {
       ++currentPage.value;
-      loadRecentTransferTransactions();
+      loadRecentTransactions();
     }
 
     const naviLast = () => {
       currentPage.value = totalPages.value;
-      loadRecentTransferTransactions();
+      loadRecentTransactions();
     }
 
     const changeRows = () => {
-      loadRecentTransferTransactions();
+      loadRecentTransactions();
     }
 
     const transactions = ref([]);
+    const QueryParamsType = ref('');
     let transactionGroupType = Helper.getTransactionGroupType();
     let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
 
-    let loadRecentTransferTransactions = async() =>{
+    let loadRecentTransactions = async() =>{
       isFetching.value = true;
       if(!AppState.isReady){
-        setTimeout(loadRecentTransferTransactions, 1000);
+        setTimeout(loadRecentTransactions, 1000);
       }
       let txnQueryParams = Helper.createTransactionQueryParams();
       let blockHeight = await AppState.chainAPI.chainAPI.getBlockchainHeight();
       txnQueryParams.pageSize = pages.value;
       txnQueryParams.pageNumber = currentPage.value;
       txnQueryParams.embedded = false;
-      txnQueryParams.fromHeight = blockHeight - 20000;
+      // txnQueryParams.fromHeight = blockHeight - 20000;
+      if(QueryParamsType.value!=undefined){
+        txnQueryParams.type = QueryParamsType.value;
+      }
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
 
       let transactionSearchResult = await TransactionUtils.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams);
-
+      console.log(txnQueryParams)
+      console.log(transactionSearchResult)
       if(transactionSearchResult.transactions.length > 0){
-        let formattedTxns = await TransactionUtils.formatConfirmedMixedTxns(transactionSearchResult.transactions);
+        // let formattedTxns = await TransactionUtils.formatConfirmedMixedTxns(transactionSearchResult.transactions);
+       let formattedTxns = await formatConfirmedTransaction(transactionSearchResult.transactions);
+
         transactions.value = formattedTxns;
         totalPages.value = transactionSearchResult.pagination.totalPages;
       }else{
@@ -314,28 +183,223 @@ export default {
       }
       isFetching.value = false;
     };
-    loadRecentTransferTransactions();
+    loadRecentTransactions();
+
+    const changeSearchTxnType = () =>{
+      isFetching.value = true;
+      transactions.value = [];
+      let txnFilterGroup = selectedTxnType.value;
+      switch (txnFilterGroup) {
+        case TransactionFilterType.TRANSFER:
+          QueryParamsType.value = TransactionFilterTypes.getTransferTypes();
+          break;
+        case TransactionFilterType.ACCOUNT:
+          console.log('re')
+          QueryParamsType.value = TransactionFilterTypes.getAccountTypes();
+          break;
+        case TransactionFilterType.ASSET:
+          QueryParamsType.value = TransactionFilterTypes.getAssetTypes();
+          break;
+        case TransactionFilterType.ALIAS:
+          QueryParamsType.value = TransactionFilterTypes.getAliasTypes();
+          break;
+        case TransactionFilterType.NAMESPACE:
+          QueryParamsType.value = TransactionFilterTypes.getNamespaceTypes();
+          break;
+        case TransactionFilterType.METADATA:
+          QueryParamsType.value = TransactionFilterTypes.getMetadataTypes();
+          break;
+        case TransactionFilterType.CHAIN:
+          QueryParamsType.value = TransactionFilterTypes.getChainTypes();
+          break;
+        case TransactionFilterType.EXCHANGE:
+          QueryParamsType.value = TransactionFilterTypes.getExchangeTypes();
+          break;
+        case TransactionFilterType.AGGREGATE:
+          QueryParamsType.value = TransactionFilterTypes.getAggregateTypes();
+          break;
+        case TransactionFilterType.LINK:
+          QueryParamsType.value = TransactionFilterTypes.getLinkTypes();
+          break;
+        case TransactionFilterType.LOCK:
+          QueryParamsType.value = TransactionFilterTypes.getLockTypes();
+          break;
+        case TransactionFilterType.SECRET:
+          QueryParamsType.value = TransactionFilterTypes.getSecretTypes();
+          break;
+        case TransactionFilterType.RESTRICTION:
+          QueryParamsType.value = TransactionFilterTypes.getRestrictionTypes();
+          break;
+        default:
+          QueryParamsType.value = undefined;
+          break;
+      }
+
+      loadRecentTransactions();
+    }
+
+    const formatConfirmedTransaction = async(transactions)=>{
+
+      let formattedTxns = [];
+
+      switch(selectedTxnType.value){
+        case TransactionFilterType.TRANSFER:
+          formattedTxns = await TransactionUtils.formatConfirmedMixedTxns(transactions);
+          break;
+        case TransactionFilterType.ACCOUNT:
+          formattedTxns = await TransactionUtils.formatConfirmedAccountTransaction(transactions);
+          break;
+        case TransactionFilterType.AGGREGATE:
+          formattedTxns = await TransactionUtils.formatConfirmedAggregateTransaction(transactions);
+          break;
+        case TransactionFilterType.RESTRICTION:
+          formattedTxns = await TransactionUtils.formatConfirmedRestrictionTransaction(transactions);
+          break;
+        case TransactionFilterType.SECRET:
+          formattedTxns = await TransactionUtils.formatConfirmedSecretTransaction(transactions);
+          break;
+        case TransactionFilterType.ALIAS:
+          formattedTxns = await TransactionUtils.formatConfirmedAliasTransaction(transactions);
+          break;
+        case TransactionFilterType.ASSET:
+          formattedTxns = await TransactionUtils.formatConfirmedAssetTransaction(transactions);
+          break;
+        case TransactionFilterType.METADATA:
+          formattedTxns = await TransactionUtils.formatConfirmedMetadataTransaction(transactions);
+          break;
+        case TransactionFilterType.CHAIN:
+          formattedTxns = await TransactionUtils.formatConfirmedChainTransaction(transactions);
+          break;
+        case TransactionFilterType.EXCHANGE:
+          formattedTxns = await TransactionUtils.formatConfirmedExchangeTransaction(transactions);
+          break;
+        case TransactionFilterType.LINK:
+          formattedTxns = await TransactionUtils.formatConfirmedLinkTransaction(transactions);
+          break;
+        case TransactionFilterType.LOCK:
+          formattedTxns = await TransactionUtils.formatConfirmedLockTransaction(transactions);
+          break;
+        case TransactionFilterType.NAMESPACE:
+          formattedTxns = await TransactionUtils.formatConfirmedNamespaceTransaction(transactions);
+          break;
+        default:
+          formattedTxns = await TransactionUtils.formatConfirmedMixedTxns(transactions);
+          break;
+      }
+
+      return formattedTxns;
+    }
+
+    const formatUnconfirmedTransaction = async(transactions)=>{
+
+      let formattedTxns = [];
+
+      switch(selectedTxnType.value){
+        case TransactionFilterType.TRANSFER:
+          formattedTxns = await TransactionUtils.formatUnconfirmedMixedTxns(transactions);
+          break;
+        case TransactionFilterType.ACCOUNT:
+          formattedTxns = await TransactionUtils.formatUnconfirmedAccountTransaction(transactions);
+          break;
+        case TransactionFilterType.AGGREGATE:
+          formattedTxns = await TransactionUtils.formatUnconfirmedAggregateTransaction(transactions);
+          break;
+        case TransactionFilterType.RESTRICTION:
+          formattedTxns = await TransactionUtils.formatUnconfirmedRestrictionTransaction(transactions);
+          break;
+        case TransactionFilterType.SECRET:
+          formattedTxns = await TransactionUtils.formatUnconfirmedSecretTransaction(transactions);
+          break;
+        case TransactionFilterType.ALIAS:
+          formattedTxns = await TransactionUtils.formatUnconfirmedAliasTransaction(transactions);
+          break;
+        case TransactionFilterType.ASSET:
+          formattedTxns = await TransactionUtils.formatUnconfirmedAssetTransaction(transactions);
+          break;
+        case TransactionFilterType.METADATA:
+          formattedTxns = await TransactionUtils.formatUnconfirmedMetadataTransaction(transactions);
+          break;
+        case TransactionFilterType.CHAIN:
+          formattedTxns = await TransactionUtils.formatUnconfirmedChainTransaction(transactions);
+          break;
+        case TransactionFilterType.EXCHANGE:
+          formattedTxns = await TransactionUtils.formatUnconfirmedExchangeTransaction(transactions);
+          break;
+        case TransactionFilterType.LINK:
+          formattedTxns = await TransactionUtils.formatUnconfirmedLinkTransaction(transactions);
+          break;
+        case TransactionFilterType.LOCK:
+          formattedTxns = await TransactionUtils.formatUnconfirmedLockTransaction(transactions);
+          break;
+        case TransactionFilterType.NAMESPACE:
+          formattedTxns = await TransactionUtils.formatUnconfirmedNamespaceTransaction(transactions);
+          break;
+      }
+
+      return formattedTxns;
+    }
+
+    const formatPartialTransaction = async(transactions)=>{
+
+      let formattedTxns = [];
+      switch(selectedTxnType.value){
+        case TransactionFilterType.TRANSFER:
+          formattedTxns = await TransactionUtils.formatPartialMixedTxns(transactions);
+          break;
+        case TransactionFilterType.ACCOUNT:
+          formattedTxns = await TransactionUtils.formatPartialAccountTransaction(transactions);
+          break;
+        case TransactionFilterType.AGGREGATE:
+          formattedTxns = await TransactionUtils.formatPartialAggregateTransaction(transactions);
+          break;
+        case TransactionFilterType.RESTRICTION:
+          formattedTxns = await TransactionUtils.formatPartialRestrictionTransaction(transactions);
+          break;
+        case TransactionFilterType.SECRET:
+          formattedTxns = await TransactionUtils.formatPartialSecretTransaction(transactions);
+          break;
+        case TransactionFilterType.ALIAS:
+          formattedTxns = await TransactionUtils.formatPartialAliasTransaction(transactions);
+          break;
+        case TransactionFilterType.ASSET:
+          formattedTxns = await TransactionUtils.formatPartialAssetTransaction(transactions);
+          break;
+        case TransactionFilterType.METADATA:
+          formattedTxns = await TransactionUtils.formatPartialMetadataTransaction(transactions);
+          break;
+        case TransactionFilterType.CHAIN:
+          formattedTxns = await TransactionUtils.formatPartialChainTransaction(transactions);
+          break;
+        case TransactionFilterType.EXCHANGE:
+          formattedTxns = await TransactionUtils.formatPartialExchangeTransaction(transactions);
+          break;
+        case TransactionFilterType.LINK:
+          formattedTxns = await TransactionUtils.formatPartialLinkTransaction(transactions);
+          break;
+        case TransactionFilterType.LOCK:
+          formattedTxns = await TransactionUtils.formatPartialLockTransaction(transactions);
+          break;
+        case TransactionFilterType.NAMESPACE:
+          formattedTxns = await TransactionUtils.formatPartialNamespaceTransaction(transactions);
+          break;
+      }
+
+      return formattedTxns;
+    }
 
     emitter.on('CHANGE_NETWORK', payload => {
       isFetching.value = true;
       if(payload){
-        loadRecentTransferTransactions();
+        loadRecentTransactions();
       }
     });
 
-    const currencyDivisibility = computed(() => {
-      return AppState.nativeToken.divisibility;
-    })
 
     return {
       isFetching,
-      wideScreen,
+      TransactionFilterType,
       transactions,
-      nativeTokenName,
-      checkOtherAsset,
-      displaySDAs,
       Helper,
-      shortenedAddress,
       pages,
       currentPage,
       totalPages,
@@ -348,7 +412,11 @@ export default {
       naviNext,
       naviLast,
       changeRows,
-      currencyDivisibility
+      txnTypeList,
+      selectedTxnType,
+      changeSearchTxnType,
+      QueryParamsType,
+      transactionGroupType
     }
   }
 }

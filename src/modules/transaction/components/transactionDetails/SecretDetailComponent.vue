@@ -3,7 +3,7 @@
     <div>
       <div>Recipient</div>
       <div class="flex">
-        <router-link :to="{ name: 'ViewAccount', params: { accountParam: txnDetail.detail.recipient } }" class="inline-block ml-1 hover:text-blue-primary hover:underline text-blue-600" id="recipientAddress" :copyValue="Helper.createAddress(txnDetail.detail.recipient).pretty()" copySubject="Recipient address">
+        <router-link :to="{ name: 'ViewAccount', params: { accountParam: txnDetail.detail.recipient } }" class="inline-block hover:text-blue-primary hover:underline text-blue-600" id="recipientAddress" :copyValue="Helper.createAddress(txnDetail.detail.recipient).pretty()" copySubject="Recipient address">
           {{ Helper.createAddress(txnDetail.detail.recipient).pretty() }}
         </router-link>
         <img src="@/assets/img/icon-copy.svg" @click="copy('recipientAddress')" class="cursor-pointer ml-2" />
