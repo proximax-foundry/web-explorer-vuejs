@@ -27,7 +27,11 @@
           <div>
             <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Asset ID</div>
             <div class="flex items-center">
-              <div class="text-xs font-bold">{{ data.assetId }}{{ data.namespaceName ? `(${data.namespaceName})`: "" }}</div>
+              <div class="text-xs font-bold">
+                <router-link :to="{ name: 'ViewAsset', params:{ id: data.assetId }}" class="text-blue-600 hover:text-blue-primary hover:underline">
+                  {{ data.assetId }} {{ data.namespaceName ? ` (${data.namespaceName})`: "" }}
+                </router-link>
+              </div>
             </div>
           </div>
         </template>
@@ -46,13 +50,13 @@
               <div v-bind:class="['inline-block','text-black', 'py-1', 'px-2', 'my-1', 'mr-1', 'text-xs', 'font-bold', 'rounded', (data.transferable) ? 'bg-green-200 text-green-700' : 'bg-red-200 text-red-700']" v-if="data.transferable !== null">Transferable</div>
               <div v-bind:class="['inline-block','text-black', 'py-1', 'px-2', 'my-1', 'mr-1', 'text-xs', 'font-bold', 'rounded', (data.supplyMutable) ? 'bg-green-200 text-green-700' : 'bg-red-200 text-red-700']" v-if="data.supplyMutable !== null">Supply Mutable</div>
               <div class="inline-block bg-blue-100 text-blue-700 font-bold text-xs py-1 px-2 my-1 mr-1 rounded" v-if="data.duration">Duration: {{data.duration}}</div>
-              <div class="inline-block bg-blue-100 text-blue-700 font-bold text-xs py-1 px-2 my-1 mr-1 rounded" v-if="data.supplyDelta !== null">Supply:{{ data.supplyDelta > 0 ? "+" + data.supplyDelta : data.supplyDelta }}</div>
+              <div class="inline-block bg-blue-100 text-blue-700 font-bold text-xs py-1 px-2 my-1 mr-1 rounded" v-if="data.supplyDelta !== null">Supply:{{ data.supplyDelta > 0 ? "+" + Helper.toCurrencyFormat(data.supplyDelta, 0) : Helper.toCurrencyFormat(data.supplyDelta, 0) }}</div>
               <div v-if="data.levyAssetId">
                 <div class="inline-block bg-blue-100 text-blue-700 font-bold text-xs py-1 px-2 my-1 mr-1 rounded">
                   Levy: {{ data.levyAssetId }}{{ data.levyAssetName ? `(${data.levyAssetName})`: "" }}
                 </div>
                 <div class="inline-block bg-blue-100 text-blue-700 font-bold text-xs py-1 px-2 my-1 mr-1 rounded" >
-                  Levy Amount: {{ data.levyAssetAmount }}
+                  Levy Amount: {{ Helper.toCurrencyFormat(data.levyAssetAmount, 0) }}
                 </div>
                 <div v-tooltip.bottom="data.levyRecipient" class="inline-block bg-blue-100 text-blue-700 font-bold text-xs rounded py-1 px-2 my-1 mr-1 truncate">
                   Levy Recipient: {{ data.levyRecipient }}
@@ -100,13 +104,13 @@
           <span v-bind:class="['inline-block','text-black', 'py-1', 'px-2', 'my-1', 'mx-1', 'text-xs', 'font-bold', 'rounded', (data.transferable) ? 'bg-green-200 text-green-700' : 'bg-red-200 text-red-700']" v-if="data.transferable !== null">Transferable</span>
           <span v-bind:class="['inline-block','text-black', 'py-1', 'px-2', 'my-1', 'mx-1', 'text-xs', 'font-bold', 'rounded', (data.supplyMutable) ? 'bg-green-200 text-green-700' : 'bg-red-200 text-red-700']" v-if="data.supplyMutable !== null">Supply Mutable</span>
           <span class="inline-block bg-blue-100 text-blue-700 font-bold text-xs py-1 px-2 my-1 mx-1 rounded" v-if="data.duration">Duration: {{data.duration}} </span>
-          <span class="inline-block bg-blue-100 text-blue-700 font-bold text-xs py-1 px-2 my-1 mx-1 rounded" v-if="data.supplyDelta !== null">Supply:{{ data.supplyDelta > 0 ? "+" + data.supplyDelta : data.supplyDelta }}</span>
+          <span class="inline-block bg-blue-100 text-blue-700 font-bold text-xs py-1 px-2 my-1 mx-1 rounded" v-if="data.supplyDelta !== null">Supply:{{ data.supplyDelta > 0 ? "+" + Helper.toCurrencyFormat(data.supplyDelta, 0) : Helper.toCurrencyFormat(data.supplyDelta, 0) }}</span>
           <span v-if="data.levyAssetId">
             <span class="inline-block bg-blue-100 text-blue-700 font-bold text-xs py-1 px-2 my-1 mx-1 rounded">
               Levy: {{ data.levyAssetId }}{{ data.levyAssetName ? `(${data.levyAssetName})`: "" }}
             </span>
             <span class="inline-block bg-blue-100 text-blue-700 font-bold text-xs py-1 px-2 my-1 mx-1 rounded" >
-              Levy Amount: {{ data.levyAssetAmount }}
+              Levy Amount: {{ Helper.toCurrencyFormat(data.levyAssetAmount, 0) }}
             </span>
             <span v-tooltip.bottom="data.levyRecipient" class="inline-block bg-blue-100 text-blue-700 font-bold text-xs rounded py-1 px-2 my-1 mx-1 truncate">
               Levy Recipient: {{ data.levyRecipient }}

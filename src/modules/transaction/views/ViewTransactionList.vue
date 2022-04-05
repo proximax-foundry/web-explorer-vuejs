@@ -159,7 +159,7 @@ export default {
         setTimeout(loadRecentTransactions, 1000);
       }
       let txnQueryParams = Helper.createTransactionQueryParams();
-      // let blockHeight = await AppState.chainAPI.chainAPI.getBlockchainHeight();
+      let blockHeight = await AppState.chainAPI.chainAPI.getBlockchainHeight();
       txnQueryParams.pageSize = pages.value;
       txnQueryParams.pageNumber = currentPage.value;
       if(selectedTxnType.value == undefined || selectedTxnType.value == 'all' || selectedTxnType.value == TransactionFilterType.ASSET){

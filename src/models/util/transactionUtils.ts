@@ -613,8 +613,7 @@ export class TransactionUtils {
           txn.detail = await TransactionUtils.formatAggregateTransaction(txn, txnStatus.group);
           break;
         case TransactionType.CHAIN_CONFIGURE: case TransactionType.CHAIN_UPGRADE:
-          // to be displayed in innerTxnDetail
-          // txn.detail = await TransactionUtils.formatChainTransaction(txn, txnStatus.group);
+          txn.detail = await TransactionUtils.formatChainTransaction(txn, txnStatus.group);
           break;
         case TransactionType.EXCHANGE_OFFER: case TransactionType.ADD_EXCHANGE_OFFER: case TransactionType.REMOVE_EXCHANGE_OFFER:
           txn.detail = await TransactionUtils.formatExchangeTransaction(txn, txnStatus.group);
@@ -635,11 +634,9 @@ export class TransactionUtils {
           txn.detail = await TransactionUtils.formatRestrictionTransaction(txn, txnStatus.group);
           break;
         case TransactionType.MODIFY_MULTISIG_ACCOUNT:
-          // to be displayed in innerTxnDetail
-          //   txn.detail = await TransactionUtils.formatAccountTransaction(txn, txnStatus.group);
+          txn.detail = await TransactionUtils.formatAccountTransaction(txn, txnStatus.group);
           break;
         case TransactionType.MOSAIC_DEFINITION: case TransactionType.MOSAIC_SUPPLY_CHANGE: case TransactionType.MODIFY_MOSAIC_LEVY: case TransactionType.REMOVE_MOSAIC_LEVY:
-          // to be displayed in innerTxnDetail
           txn.detail = await TransactionUtils.formatAssetTransaction(txn, txnStatus.group);
           break;
         case TransactionType.REGISTER_NAMESPACE:
@@ -651,11 +648,8 @@ export class TransactionUtils {
         case TransactionType.TRANSFER:
           txn.detail = await TransactionUtils.formatTransferTransaction(txn, txnStatus.group);
           break;
-        case TransactionType.ACCOUNT_METADATA_V2:
-          break;
-        case TransactionType.MOSAIC_METADATA_V2:
-          break;
-        case TransactionType.NAMESPACE_METADATA_V2:
+        case TransactionType.ACCOUNT_METADATA_V2: case TransactionType.MOSAIC_METADATA_V2: case TransactionType.NAMESPACE_METADATA_V2:
+          txn.detail = await TransactionUtils.formatMetadataTransaction(txn, txnStatus.group);
           break;
       }
       // console.log(txn)
@@ -2801,13 +2795,13 @@ export class TransactionUtils {
       txnDetails.amountIsRaw = false;
     } catch (error) {}
     return txnDetails;
-}
+  }
 
-static async extractUnconfirmedSecretLock(secretLockTxn: SecretLockTransaction): Promise<InnerSecretTransaction> {
+  static async extractUnconfirmedSecretLock(secretLockTxn: SecretLockTransaction): Promise<InnerSecretTransaction> {
     return TransactionUtils.extractPartialSecretLock(secretLockTxn);
-}
+  }
 
-static async extractPartialSecretLock(secretLockTxn: SecretLockTransaction): Promise<InnerSecretTransaction> {
+  static async extractPartialSecretLock(secretLockTxn: SecretLockTransaction): Promise<InnerSecretTransaction> {
     let txnDetails = new InnerSecretTransaction();
 
     txnDetails.signer = secretLockTxn.signer.publicKey;
@@ -2856,146 +2850,146 @@ static async extractPartialSecretLock(secretLockTxn: SecretLockTransaction): Pro
     } catch (error) {}
 
     return txnDetails;
-}
+  }
 
-static async extractNonconfirmedSecretLock(secretLockTxn: SecretLockTransaction, txnGroupType: TransactionGroupType = TransactionGroupType.UNCONFIRMED): Promise<InnerSecretTransaction> {
+  static async extractNonconfirmedSecretLock(secretLockTxn: SecretLockTransaction, txnGroupType: TransactionGroupType = TransactionGroupType.UNCONFIRMED): Promise<InnerSecretTransaction> {
     if(txnGroupType === TransactionGroupType.UNCONFIRMED){
         return await TransactionUtils.extractUnconfirmedSecretLock(secretLockTxn);
     }
     else{
         return await TransactionUtils.extractPartialSecretLock(secretLockTxn);
     }
-}
-// --------------------------------------end------------------------------------------------------------------
-
-static async extractUnconfirmedTransfer(transferTxn: TransferTransaction): Promise<InnerTransferTransaction> {
-  let txnDetails = await TransactionUtils.extractPartialTransfer(transferTxn);
-
-  if(txnDetails.messageType === MessageType.PlainMessage){
-    let newType = TransactionUtils.convertToSwapType(txnDetails.message);
-
-    if(newType){
-        txnDetails.type = newType;
-    }
   }
-  return txnDetails;
-}
+  // --------------------------------------end------------------------------------------------------------------
+
+  static async extractUnconfirmedTransfer(transferTxn: TransferTransaction): Promise<InnerTransferTransaction> {
+    let txnDetails = await TransactionUtils.extractPartialTransfer(transferTxn);
+
+    if(txnDetails.messageType === MessageType.PlainMessage){
+      let newType = TransactionUtils.convertToSwapType(txnDetails.message);
+
+      if(newType){
+          txnDetails.type = newType;
+      }
+    }
+    return txnDetails;
+  }
 
   static async extractPartialTransfer(transferTxn: TransferTransaction): Promise<InnerTransferTransaction> {
-  let txnDetails = new InnerTransferTransaction();
-  txnDetails.signer = transferTxn.signer.publicKey;
-  txnDetails.signerAddress = transferTxn.signer.address.plain();
-  txnDetails.type = TransactionUtils.getTransactionTypeName(transferTxn.type);
+    let txnDetails = new InnerTransferTransaction();
+    txnDetails.signer = transferTxn.signer.publicKey;
+    txnDetails.signerAddress = transferTxn.signer.address.plain();
+    txnDetails.type = TransactionUtils.getTransactionTypeName(transferTxn.type);
 
-  let sdas: SDA[] = [];
+    let sdas: SDA[] = [];
 
-  txnDetails.message = transferTxn.message.payload;
-  txnDetails.messageType = transferTxn.message.type;
+    txnDetails.message = transferTxn.message.payload;
+    txnDetails.messageType = transferTxn.message.type;
 
-  switch(txnDetails.messageType){
-    case MessageType.PlainMessage:
-      txnDetails.messageTypeTitle = "Plain Message";
-      break;
-    case MessageType.EncryptedMessage:
-      txnDetails.messageTypeTitle = "Encrypted Message";
-      break;
-    case MessageType.HexadecimalMessage:
-      txnDetails.messageTypeTitle = "Hexadecimal Message";
-      break;
-  }
-  let recipientIsNamespace = transferTxn.recipient instanceof NamespaceId ? true : false;
+    switch(txnDetails.messageType){
+      case MessageType.PlainMessage:
+        txnDetails.messageTypeTitle = "Plain Message";
+        break;
+      case MessageType.EncryptedMessage:
+        txnDetails.messageTypeTitle = "Encrypted Message";
+        break;
+      case MessageType.HexadecimalMessage:
+        txnDetails.messageTypeTitle = "Hexadecimal Message";
+        break;
+    }
+    let recipientIsNamespace = transferTxn.recipient instanceof NamespaceId ? true : false;
 
-  let recipient;
+    let recipient;
 
-  if(transferTxn.recipient instanceof NamespaceId){
-    txnDetails.recipientNamespaceId = transferTxn.recipient.toHex();
-    recipient = await TransactionUtils.getAddressAlias(transferTxn.recipient);
-    let namespacesName = await TransactionUtils.getNamespacesName([transferTxn.recipient]);
-    txnDetails.recipientNamespaceName = namespacesName[0].name;
-  }
-  else{
-      recipient = transferTxn.recipient;
-  }
+    if(transferTxn.recipient instanceof NamespaceId){
+      txnDetails.recipientNamespaceId = transferTxn.recipient.toHex();
+      recipient = await TransactionUtils.getAddressAlias(transferTxn.recipient);
+      let namespacesName = await TransactionUtils.getNamespacesName([transferTxn.recipient]);
+      txnDetails.recipientNamespaceName = namespacesName[0].name;
+    }
+    else{
+        recipient = transferTxn.recipient;
+    }
 
-  txnDetails.recipient = recipient.plain();
-  txnDetails.sender = transferTxn.signer.address.plain();
-  
-  for(let y = 0; y < transferTxn.mosaics.length; ++y){
+    txnDetails.recipient = recipient.plain();
+    txnDetails.sender = transferTxn.signer.address.plain();
+    
+    for(let y = 0; y < transferTxn.mosaics.length; ++y){
 
-      let rawAmount = transferTxn.mosaics[y].amount.compact();
-      let actualAmount = rawAmount;
+        let rawAmount = transferTxn.mosaics[y].amount.compact();
+        let actualAmount = rawAmount;
 
-      let assetId;
-      let isSendWithNamespace = TransactionUtils.isNamespace(transferTxn.mosaics[y].id);
+        let assetId;
+        let isSendWithNamespace = TransactionUtils.isNamespace(transferTxn.mosaics[y].id);
 
-      if(isSendWithNamespace){
-          let namespaceId = new NamespaceId(transferTxn.mosaics[y].id.toDTO().id);
-          assetId = await TransactionUtils.getAssetAlias(namespaceId);
-      }
-      else{
-          assetId = transferTxn.mosaics[y].id;
-      }
-
-      let assetIdHex = assetId.toHex();
-
-      if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
-          txnDetails.amountTransfer = TransactionUtils.convertToExactNativeAmount(actualAmount);
-          continue;
-      }
-
-      let newSDA: SDA = {
-          amount: rawAmount,
-          divisibility: 0,
-          id: assetIdHex,
-          amountIsRaw: true,
-          sendWithNamespace: isSendWithNamespace
-      };
-
-      if(isSendWithNamespace){
-          let namespaceId = transferTxn.mosaics[y].id;
-
-          newSDA.sendWithAlias = {
-              idHex: namespaceId.toHex(),
-              id: namespaceId.toDTO().id
-          }
-      }
-
-      sdas.push(newSDA);
-  }
-
-  let namespaceIds = sdas.filter(sda => sda.sendWithNamespace).map(sda => Helper.createNamespaceId(sda.sendWithAlias.id));
-
-  let allAssetId = sdas.filter(sda =>{ 
-      return sda.amountIsRaw
-  }).map(sda => Helper.createAssetId(sda.id));
-
-  if(namespaceIds.length || allAssetId.length){
-      let namespacesNames: NamespaceName[] = [];
-      namespacesNames = await AppState.chainAPI.namespaceAPI.getNamespacesName(namespaceIds);
-      let assetsProperties = await AppState.chainAPI.assetAPI.getMosaics(allAssetId);
-      let aliasNames: MosaicNames[] = await AppState.chainAPI.assetAPI.getMosaicsNames(allAssetId);
-
-      for(let x= 0; x < sdas.length; ++x){
-
-        let assetProperties = assetsProperties.filter(aliasName=> aliasName.mosaicId.toHex() === sdas[x].id)[0];
-
-        sdas[x].divisibility = assetProperties.divisibility;
-        sdas[x].amount = TransactionUtils.convertToExactAmount(sdas[x].amount, assetProperties.divisibility);
-        sdas[x].amountIsRaw = false;
-
-        let mosaicNames: MosaicNames = aliasNames.filter(aliaName => aliaName.mosaicId.toHex() === sdas[x].id)[0];
-        let currentAliasNames: NamespaceName[] = mosaicNames.names;
-        sdas[x].currentAlias = currentAliasNames.map(currentAlias =>{ 
-            return { name: currentAlias.name, id: currentAlias.namespaceId.toDTO().id, idHex: currentAlias.namespaceId.toHex() }
-        });
-
-        if(sdas[x].sendWithAlias){
-            sdas[x].sendWithAlias.name = namespacesNames
-                .filter(nsName => nsName.namespaceId.toHex() === sdas[x].sendWithAlias.idHex)
-                .map(nsName => nsName.name)[0]
+        if(isSendWithNamespace){
+            let namespaceId = new NamespaceId(transferTxn.mosaics[y].id.toDTO().id);
+            assetId = await TransactionUtils.getAssetAlias(namespaceId);
         }
-      }
-  }
+        else{
+            assetId = transferTxn.mosaics[y].id;
+        }
+
+        let assetIdHex = assetId.toHex();
+
+        if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
+            txnDetails.amountTransfer = TransactionUtils.convertToExactNativeAmount(actualAmount);
+            continue;
+        }
+
+        let newSDA: SDA = {
+            amount: rawAmount,
+            divisibility: 0,
+            id: assetIdHex,
+            amountIsRaw: true,
+            sendWithNamespace: isSendWithNamespace
+        };
+
+        if(isSendWithNamespace){
+            let namespaceId = transferTxn.mosaics[y].id;
+
+            newSDA.sendWithAlias = {
+                idHex: namespaceId.toHex(),
+                id: namespaceId.toDTO().id
+            }
+        }
+
+        sdas.push(newSDA);
+    }
+
+    let namespaceIds = sdas.filter(sda => sda.sendWithNamespace).map(sda => Helper.createNamespaceId(sda.sendWithAlias.id));
+
+    let allAssetId = sdas.filter(sda =>{ 
+        return sda.amountIsRaw
+    }).map(sda => Helper.createAssetId(sda.id));
+
+    if(namespaceIds.length || allAssetId.length){
+        let namespacesNames: NamespaceName[] = [];
+        namespacesNames = await AppState.chainAPI.namespaceAPI.getNamespacesName(namespaceIds);
+        let assetsProperties = await AppState.chainAPI.assetAPI.getMosaics(allAssetId);
+        let aliasNames: MosaicNames[] = await AppState.chainAPI.assetAPI.getMosaicsNames(allAssetId);
+
+        for(let x= 0; x < sdas.length; ++x){
+
+          let assetProperties = assetsProperties.filter(aliasName=> aliasName.mosaicId.toHex() === sdas[x].id)[0];
+
+          sdas[x].divisibility = assetProperties.divisibility;
+          sdas[x].amount = TransactionUtils.convertToExactAmount(sdas[x].amount, assetProperties.divisibility);
+          sdas[x].amountIsRaw = false;
+
+          let mosaicNames: MosaicNames = aliasNames.filter(aliaName => aliaName.mosaicId.toHex() === sdas[x].id)[0];
+          let currentAliasNames: NamespaceName[] = mosaicNames.names;
+          sdas[x].currentAlias = currentAliasNames.map(currentAlias =>{ 
+              return { name: currentAlias.name, id: currentAlias.namespaceId.toDTO().id, idHex: currentAlias.namespaceId.toHex() }
+          });
+
+          if(sdas[x].sendWithAlias){
+              sdas[x].sendWithAlias.name = namespacesNames
+                  .filter(nsName => nsName.namespaceId.toHex() === sdas[x].sendWithAlias.idHex)
+                  .map(nsName => nsName.name)[0]
+          }
+        }
+    }
     txnDetails.sda = sdas;
     return txnDetails;
   }
@@ -4303,173 +4297,242 @@ static async extractUnconfirmedTransfer(transferTxn: TransferTransaction): Promi
   }
 
   //-------------Metadata Txn-----------------------------------------------------------
+  static async formatMetadataTransaction(transaction: Transaction, groupType: string): Promise<UnconfirmedMetadataTransaction|ConfirmedMetadataTransaction|PartialMetadataTransaction>{
+
+    let formattedTxn:any, txn:any
+    if(groupType == 'partial'){
+      formattedTxn = await TransactionUtils.formatPartialTransaction(transaction);
+      txn = PartialTransaction.convertToSubClass(PartialAliasTransaction, formattedTxn) as PartialAliasTransaction;
+    }else if(groupType == 'unconfirmed'){
+      formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(transaction);
+      txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedAliasTransaction, formattedTxn) as UnconfirmedAliasTransaction;
+    }else{
+      formattedTxn = await TransactionUtils.formatConfirmedTransaction(transaction);
+      txn = ConfirmedTransaction.convertToSubClass(ConfirmedAliasTransaction, formattedTxn) as ConfirmedAliasTransaction;
+    }
+
+    if(transaction.type === TransactionType.MOSAIC_METADATA_V2){
+      let assetMetadataTxn = transaction as MosaicMetadataTransaction;
+
+      let assetId = assetMetadataTxn.targetMosaicId.toHex();
+
+      txn.metadataType = MetadataType.MOSAIC;
+      txn.metadataTypeName = "Asset";
+      txn.scopedMetadataKey = assetMetadataTxn.scopedMetadataKey.toHex();
+      txn.targetId = assetId;
+      txn.targetPublicKey = assetMetadataTxn.targetPublicKey.publicKey;
+      txn.sizeChanged = assetMetadataTxn.valueSizeDelta;
+      if(groupType != 'confirmed'){
+        txn.valueChange = Convert.uint8ToHex(assetMetadataTxn.valueDifferences);
+      }
+
+      try {
+        let assetName = await TransactionUtils.getAssetName(assetId);
+
+        if(assetName.names.length){
+          txn.targetIdName = assetName.names[0].name;
+        }
+
+        let assetMetadataEntry = await TransactionUtils.getAssetMetadata(assetMetadataTxn.targetMosaicId, assetMetadataTxn.scopedMetadataKey);
+        if(assetMetadataEntry){
+          txn.oldValue = assetMetadataEntry.value;
+          txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+        }
+      } catch (error) {}
+    }else if(transaction.type === TransactionType.NAMESPACE_METADATA_V2){
+      let namespaceMetadataTxn = transaction as NamespaceMetadataTransaction;
+
+      let nsId = namespaceMetadataTxn.targetNamespaceId.toHex();
+
+      txn.metadataType = MetadataType.NAMESPACE;
+      txn.metadataTypeName = "Namespace";
+      txn.scopedMetadataKey = namespaceMetadataTxn.scopedMetadataKey.toHex();
+      txn.targetId = nsId;
+      txn.targetPublicKey = namespaceMetadataTxn.targetPublicKey.publicKey;
+      txn.sizeChanged = namespaceMetadataTxn.valueSizeDelta;
+      if(groupType != 'confirmed'){
+        txn.valueChange = Convert.uint8ToHex(namespaceMetadataTxn.valueDifferences);
+      }
+
+      try {
+        let nsName = await TransactionUtils.getNamespacesName([NamespaceId.createFromEncoded(nsId)]);
+
+        if(nsName.length){
+            txn.targetIdName = nsName[0].name;
+        }
+
+        let nsMetadataEntry = await TransactionUtils.getNamespaceMetadata(namespaceMetadataTxn.targetNamespaceId, namespaceMetadataTxn.scopedMetadataKey);
+        if(nsMetadataEntry){
+          txn.oldValue = nsMetadataEntry.value;
+          txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+        }
+      } catch (error) {}
+    }else if(transaction.type === TransactionType.ACCOUNT_METADATA_V2){
+      let accountMetadataTxn = transaction as AccountMetadataTransaction;
+
+      txn.metadataType = MetadataType.ACCOUNT;
+      txn.metadataTypeName = "Account";
+
+      txn.scopedMetadataKey = accountMetadataTxn.scopedMetadataKey.toHex();
+      txn.targetPublicKey = accountMetadataTxn.targetPublicKey.publicKey;
+      txn.sizeChanged = accountMetadataTxn.valueSizeDelta;
+      if(groupType != 'confirmed'){
+        txn.valueChange = Convert.uint8ToHex(accountMetadataTxn.valueDifferences);
+      }
+
+      try {
+        let nsMetadataEntry = await TransactionUtils.getAccountMetadata(accountMetadataTxn.targetPublicKey, accountMetadataTxn.scopedMetadataKey);
+        if(nsMetadataEntry){
+          txn.oldValue = nsMetadataEntry.value;
+          txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+        }
+      } catch (error) {}
+    }
+
+    return txn;
+  }
+
   static async formatUnconfirmedMetadataTransaction(txns: Transaction[]): Promise<UnconfirmedMetadataTransaction[]>{
 
     let formatedTxns : UnconfirmedMetadataTransaction[] = [];
 
     for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(txns[i]);
-        let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedMetadataTransaction, formattedTxn) as UnconfirmedMetadataTransaction;
+      let formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(txns[i]);
+      let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedMetadataTransaction, formattedTxn) as UnconfirmedMetadataTransaction;
 
-        if(txns[i].type === TransactionType.MOSAIC_METADATA_V2){
-            let assetMetadataTxn = txns[i] as MosaicMetadataTransaction;
+      if(txns[i].type === TransactionType.MOSAIC_METADATA_V2){
+        let assetMetadataTxn = txns[i] as MosaicMetadataTransaction;
 
-            let assetId = assetMetadataTxn.targetMosaicId.toHex();
+        let assetId = assetMetadataTxn.targetMosaicId.toHex();
 
-            txn.metadataType = MetadataType.MOSAIC;
-            txn.metadataTypeName = "Asset";
-            txn.scopedMetadataKey = assetMetadataTxn.scopedMetadataKey.toHex();
-            txn.targetId = assetId;
-            txn.targetPublicKey = assetMetadataTxn.targetPublicKey.publicKey;
-            txn.sizeChanged = assetMetadataTxn.valueSizeDelta;
-            txn.valueChange = Convert.uint8ToHex(assetMetadataTxn.valueDifferences);
+        txn.metadataType = MetadataType.MOSAIC;
+        txn.metadataTypeName = "Asset";
+        txn.scopedMetadataKey = assetMetadataTxn.scopedMetadataKey.toHex();
+        txn.targetId = assetId;
+        txn.targetPublicKey = assetMetadataTxn.targetPublicKey.publicKey;
+        txn.sizeChanged = assetMetadataTxn.valueSizeDelta;
+        txn.valueChange = Convert.uint8ToHex(assetMetadataTxn.valueDifferences);
 
-            try {
-                let assetName = await TransactionUtils.getAssetName(assetId);
+        try {
+          let assetName = await TransactionUtils.getAssetName(assetId);
 
-                if(assetName.names.length){
-                    txn.targetIdName = assetName.names[0].name;
-                }
+          if(assetName.names.length){
+              txn.targetIdName = assetName.names[0].name;
+          }
 
-                let assetMetadataEntry = await TransactionUtils.getAssetMetadata(assetMetadataTxn.targetMosaicId, assetMetadataTxn.scopedMetadataKey);
-                
-                if(assetMetadataEntry){
-                    txn.oldValue = assetMetadataEntry.value;
-                    txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
-                }
+          let assetMetadataEntry = await TransactionUtils.getAssetMetadata(assetMetadataTxn.targetMosaicId, assetMetadataTxn.scopedMetadataKey);
+          if(assetMetadataEntry){
+              txn.oldValue = assetMetadataEntry.value;
+              txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+          }
+        } catch (error) {}
+      }else if(txns[i].type === TransactionType.NAMESPACE_METADATA_V2){
+        let namespaceMetadataTxn = txns[i] as NamespaceMetadataTransaction;
 
-            } catch (error) {
-                
+        let nsId = namespaceMetadataTxn.targetNamespaceId.toHex();
+
+        txn.metadataType = MetadataType.NAMESPACE;
+        txn.metadataTypeName = "Namespace";
+        txn.scopedMetadataKey = namespaceMetadataTxn.scopedMetadataKey.toHex();
+        txn.targetId = nsId;
+        txn.targetPublicKey = namespaceMetadataTxn.targetPublicKey.publicKey;
+        txn.sizeChanged = namespaceMetadataTxn.valueSizeDelta;
+        txn.valueChange = Convert.uint8ToHex(namespaceMetadataTxn.valueDifferences);
+
+        try {
+          let nsName = await TransactionUtils.getNamespacesName([NamespaceId.createFromEncoded(nsId)]);
+
+          if(nsName.length){
+              txn.targetIdName = nsName[0].name;
+          }
+
+          let nsMetadataEntry = await TransactionUtils.getNamespaceMetadata(namespaceMetadataTxn.targetNamespaceId, namespaceMetadataTxn.scopedMetadataKey);
+          if(nsMetadataEntry){
+            txn.oldValue = nsMetadataEntry.value;
+            txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+          }
+        } catch (error) {}
+      }else if(txns[i].type === TransactionType.ACCOUNT_METADATA_V2){
+        let accountMetadataTxn = txns[i] as AccountMetadataTransaction;
+
+        txn.metadataType = MetadataType.ACCOUNT;
+        txn.metadataTypeName = "Account";
+
+        txn.scopedMetadataKey = accountMetadataTxn.scopedMetadataKey.toHex();
+        txn.targetPublicKey = accountMetadataTxn.targetPublicKey.publicKey;
+        txn.sizeChanged = accountMetadataTxn.valueSizeDelta;
+        txn.valueChange = Convert.uint8ToHex(accountMetadataTxn.valueDifferences);
+
+        try {
+            let nsMetadataEntry = await TransactionUtils.getAccountMetadata(accountMetadataTxn.targetPublicKey, accountMetadataTxn.scopedMetadataKey);
+            if(nsMetadataEntry){
+                txn.oldValue = nsMetadataEntry.value;
+                txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
             }
-        }
-        else if(txns[i].type === TransactionType.NAMESPACE_METADATA_V2){
-            let namespaceMetadataTxn = txns[i] as NamespaceMetadataTransaction;
-
-            let nsId = namespaceMetadataTxn.targetNamespaceId.toHex();
-
-            txn.metadataType = MetadataType.NAMESPACE;
-            txn.metadataTypeName = "Namespace";
-            txn.scopedMetadataKey = namespaceMetadataTxn.scopedMetadataKey.toHex();
-            txn.targetId = nsId;
-            txn.targetPublicKey = namespaceMetadataTxn.targetPublicKey.publicKey;
-            txn.sizeChanged = namespaceMetadataTxn.valueSizeDelta;
-            txn.valueChange = Convert.uint8ToHex(namespaceMetadataTxn.valueDifferences);
-
-            try {
-                let nsName = await TransactionUtils.getNamespacesName([NamespaceId.createFromEncoded(nsId)]);
-
-                if(nsName.length){
-                    txn.targetIdName = nsName[0].name;
-                }
-
-                let nsMetadataEntry = await TransactionUtils.getNamespaceMetadata(namespaceMetadataTxn.targetNamespaceId, namespaceMetadataTxn.scopedMetadataKey);
-                
-                if(nsMetadataEntry){
-                    txn.oldValue = nsMetadataEntry.value;
-                    txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
-                }
-                
-            } catch (error) {
-                
-            }
-        }
-        else if(txns[i].type === TransactionType.ACCOUNT_METADATA_V2){
-            let accountMetadataTxn = txns[i] as AccountMetadataTransaction;
-
-            txn.metadataType = MetadataType.ACCOUNT;
-            txn.metadataTypeName = "Account";
-
-            txn.scopedMetadataKey = accountMetadataTxn.scopedMetadataKey.toHex();
-            txn.targetPublicKey = accountMetadataTxn.targetPublicKey.publicKey;
-            txn.sizeChanged = accountMetadataTxn.valueSizeDelta;
-            txn.valueChange = Convert.uint8ToHex(accountMetadataTxn.valueDifferences);
-
-            try {
-                let nsMetadataEntry = await TransactionUtils.getAccountMetadata(accountMetadataTxn.targetPublicKey, accountMetadataTxn.scopedMetadataKey);
-                
-                if(nsMetadataEntry){
-                    txn.oldValue = nsMetadataEntry.value;
-                    txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
-                }
-            } catch (error) {
-                
-            }
-        }
-
-        formatedTxns.push(txn);
+        } catch (error) {}
+      }
+      formatedTxns.push(txn);
     }
 
     return formatedTxns;
   }
 
   static async formatConfirmedMetadataTransaction(txns: Transaction[]): Promise<ConfirmedMetadataTransaction[]>{
-    console.log(txns)
     let formatedTxns : ConfirmedMetadataTransaction[] = [];
 
     for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatConfirmedTransaction(txns[i]);
-        let txn = ConfirmedTransaction.convertToSubClass(ConfirmedMetadataTransaction, formattedTxn) as ConfirmedMetadataTransaction;
-        
-        if(txns[i].type === TransactionType.MOSAIC_METADATA_V2){
-            let assetMetadataTxn = txns[i] as MosaicMetadataTransaction;
+      let formattedTxn = await TransactionUtils.formatConfirmedTransaction(txns[i]);
+      let txn = ConfirmedTransaction.convertToSubClass(ConfirmedMetadataTransaction, formattedTxn) as ConfirmedMetadataTransaction;
+      if(txns[i].type === TransactionType.MOSAIC_METADATA_V2){
+        let assetMetadataTxn = txns[i] as MosaicMetadataTransaction;
 
-            let assetId = assetMetadataTxn.targetMosaicId.toHex();
+        let assetId = assetMetadataTxn.targetMosaicId.toHex();
 
-            txn.metadataType = MetadataType.MOSAIC;
-            txn.metadataTypeName = "Asset";
-            txn.scopedMetadataKey = assetMetadataTxn.scopedMetadataKey.toHex();
-            txn.targetId = assetId;
-            txn.targetPublicKey = assetMetadataTxn.targetPublicKey.publicKey;
-            txn.sizeChanged = assetMetadataTxn.valueSizeDelta;
+        txn.metadataType = MetadataType.MOSAIC;
+        txn.metadataTypeName = "Asset";
+        txn.scopedMetadataKey = assetMetadataTxn.scopedMetadataKey.toHex();
+        txn.targetId = assetId;
+        txn.targetPublicKey = assetMetadataTxn.targetPublicKey.publicKey;
+        txn.sizeChanged = assetMetadataTxn.valueSizeDelta;
 
-            try {
-                let assetName = await TransactionUtils.getAssetName(assetId);
+        try {
+            let assetName = await TransactionUtils.getAssetName(assetId);
 
-                if(assetName.names.length){
-                    txn.targetIdName = assetName.names[0].name;
-                }
-                
-            } catch (error) {
-                
+            if(assetName.names.length){
+                txn.targetIdName = assetName.names[0].name;
             }
-        }
-        else if(txns[i].type === TransactionType.NAMESPACE_METADATA_V2){
-            let namespaceMetadataTxn = txns[i] as NamespaceMetadataTransaction;
+        } catch (error) {}
+      }else if(txns[i].type === TransactionType.NAMESPACE_METADATA_V2){
+        let namespaceMetadataTxn = txns[i] as NamespaceMetadataTransaction;
 
-            let nsId = namespaceMetadataTxn.targetNamespaceId.toHex();
+        let nsId = namespaceMetadataTxn.targetNamespaceId.toHex();
 
-            txn.metadataType = MetadataType.NAMESPACE;
-            txn.metadataTypeName = "Namespace";
-            txn.scopedMetadataKey = namespaceMetadataTxn.scopedMetadataKey.toHex();
-            txn.targetId = nsId;
-            txn.targetPublicKey = namespaceMetadataTxn.targetPublicKey.publicKey;
-            txn.sizeChanged = namespaceMetadataTxn.valueSizeDelta;
+        txn.metadataType = MetadataType.NAMESPACE;
+        txn.metadataTypeName = "Namespace";
+        txn.scopedMetadataKey = namespaceMetadataTxn.scopedMetadataKey.toHex();
+        txn.targetId = nsId;
+        txn.targetPublicKey = namespaceMetadataTxn.targetPublicKey.publicKey;
+        txn.sizeChanged = namespaceMetadataTxn.valueSizeDelta;
 
-            try {
-                let nsName = await TransactionUtils.getNamespacesName([NamespaceId.createFromEncoded(nsId)]);
+        try {
+          let nsName = await TransactionUtils.getNamespacesName([NamespaceId.createFromEncoded(nsId)]);
 
-                if(nsName.length){
-                    txn.targetIdName = nsName[0].name;
-                }
-                
-            } catch (error) {
-                
-            }
-        }
-        else if(txns[i].type === TransactionType.ACCOUNT_METADATA_V2){
-            let accountMetadataTxn = txns[i] as AccountMetadataTransaction;
+          if(nsName.length){
+              txn.targetIdName = nsName[0].name;
+          }
+        } catch (error) {}
+      }else if(txns[i].type === TransactionType.ACCOUNT_METADATA_V2){
+        let accountMetadataTxn = txns[i] as AccountMetadataTransaction;
 
-            txn.metadataType = MetadataType.ACCOUNT;
-            txn.metadataTypeName = "Account";
+        txn.metadataType = MetadataType.ACCOUNT;
+        txn.metadataTypeName = "Account";
 
-            txn.scopedMetadataKey = accountMetadataTxn.scopedMetadataKey.toHex();
-            txn.targetPublicKey = accountMetadataTxn.targetPublicKey.publicKey;
-            txn.sizeChanged = accountMetadataTxn.valueSizeDelta;
-        }
-
-        formatedTxns.push(txn);
+        txn.scopedMetadataKey = accountMetadataTxn.scopedMetadataKey.toHex();
+        txn.targetPublicKey = accountMetadataTxn.targetPublicKey.publicKey;
+        txn.sizeChanged = accountMetadataTxn.valueSizeDelta;
+      }
+      formatedTxns.push(txn);
     }
-
     return formatedTxns;
   }
 
@@ -4478,95 +4541,92 @@ static async extractUnconfirmedTransfer(transferTxn: TransferTransaction): Promi
     let formatedTxns : PartialMetadataTransaction[] = [];
 
     for(let i=0; i < txns.length; ++i){
-        let formattedTxn = await TransactionUtils.formatPartialTransaction(txns[i]);
-        let txn = PartialTransaction.convertToSubClass(PartialMetadataTransaction, formattedTxn) as PartialMetadataTransaction;
-        
-        if(txns[i].type === TransactionType.MOSAIC_METADATA_V2){
-            let assetMetadataTxn = txns[i] as MosaicMetadataTransaction;
+      let formattedTxn = await TransactionUtils.formatPartialTransaction(txns[i]);
+      let txn = PartialTransaction.convertToSubClass(PartialMetadataTransaction, formattedTxn) as PartialMetadataTransaction;
+      if(txns[i].type === TransactionType.MOSAIC_METADATA_V2){
+          let assetMetadataTxn = txns[i] as MosaicMetadataTransaction;
 
-            let assetId = assetMetadataTxn.targetMosaicId.toHex();
+          let assetId = assetMetadataTxn.targetMosaicId.toHex();
 
-            txn.metadataType = MetadataType.MOSAIC;
-            txn.metadataTypeName = "Asset";
-            txn.scopedMetadataKey = assetMetadataTxn.scopedMetadataKey.toHex();
-            txn.targetId = assetId;
-            txn.targetPublicKey = assetMetadataTxn.targetPublicKey.publicKey;
-            txn.sizeChanged = assetMetadataTxn.valueSizeDelta;
-            txn.valueChange = Convert.uint8ToHex(assetMetadataTxn.valueDifferences);
+          txn.metadataType = MetadataType.MOSAIC;
+          txn.metadataTypeName = "Asset";
+          txn.scopedMetadataKey = assetMetadataTxn.scopedMetadataKey.toHex();
+          txn.targetId = assetId;
+          txn.targetPublicKey = assetMetadataTxn.targetPublicKey.publicKey;
+          txn.sizeChanged = assetMetadataTxn.valueSizeDelta;
+          txn.valueChange = Convert.uint8ToHex(assetMetadataTxn.valueDifferences);
 
-            try {
-                let assetName = await TransactionUtils.getAssetName(assetId);
+          try {
+              let assetName = await TransactionUtils.getAssetName(assetId);
 
-                if(assetName.names.length){
-                    txn.targetIdName = assetName.names[0].name;
-                }
+              if(assetName.names.length){
+                  txn.targetIdName = assetName.names[0].name;
+              }
 
-                let assetMetadataEntry = await TransactionUtils.getAssetMetadata(assetMetadataTxn.targetMosaicId, assetMetadataTxn.scopedMetadataKey);
-                
-                if(assetMetadataEntry){
-                    txn.oldValue = assetMetadataEntry.value;
-                    txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
-                }
-                
-            } catch (error) {
-                
-            }
-        }
-        else if(txns[i].type === TransactionType.NAMESPACE_METADATA_V2){
-            let namespaceMetadataTxn = txns[i] as NamespaceMetadataTransaction;
+              let assetMetadataEntry = await TransactionUtils.getAssetMetadata(assetMetadataTxn.targetMosaicId, assetMetadataTxn.scopedMetadataKey);
+              
+              if(assetMetadataEntry){
+                  txn.oldValue = assetMetadataEntry.value;
+                  txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+              }
+              
+          } catch (error) {
+              
+          }
+      }else if(txns[i].type === TransactionType.NAMESPACE_METADATA_V2){
+          let namespaceMetadataTxn = txns[i] as NamespaceMetadataTransaction;
 
-            let nsId = namespaceMetadataTxn.targetNamespaceId.toHex();
+          let nsId = namespaceMetadataTxn.targetNamespaceId.toHex();
 
-            txn.metadataType = MetadataType.NAMESPACE;
-            txn.metadataTypeName = "Namespace";
-            txn.scopedMetadataKey = namespaceMetadataTxn.scopedMetadataKey.toHex();
-            txn.targetId = nsId;
-            txn.targetPublicKey = namespaceMetadataTxn.targetPublicKey.publicKey;
-            txn.sizeChanged = namespaceMetadataTxn.valueSizeDelta;
-            txn.valueChange = Convert.uint8ToHex(namespaceMetadataTxn.valueDifferences);
+          txn.metadataType = MetadataType.NAMESPACE;
+          txn.metadataTypeName = "Namespace";
+          txn.scopedMetadataKey = namespaceMetadataTxn.scopedMetadataKey.toHex();
+          txn.targetId = nsId;
+          txn.targetPublicKey = namespaceMetadataTxn.targetPublicKey.publicKey;
+          txn.sizeChanged = namespaceMetadataTxn.valueSizeDelta;
+          txn.valueChange = Convert.uint8ToHex(namespaceMetadataTxn.valueDifferences);
 
-            try {
-                let nsName = await TransactionUtils.getNamespacesName([NamespaceId.createFromEncoded(nsId)]);
+          try {
+              let nsName = await TransactionUtils.getNamespacesName([NamespaceId.createFromEncoded(nsId)]);
 
-                if(nsName.length){
-                    txn.targetIdName = nsName[0].name;
-                }
+              if(nsName.length){
+                  txn.targetIdName = nsName[0].name;
+              }
 
-                let nsMetadataEntry = await TransactionUtils.getNamespaceMetadata(namespaceMetadataTxn.targetNamespaceId, namespaceMetadataTxn.scopedMetadataKey);
-                
-                if(nsMetadataEntry){
-                    txn.oldValue = nsMetadataEntry.value;
-                    txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
-                }
-                
-            } catch (error) {
-                
-            }
-        }
-        else if(txns[i].type === TransactionType.ACCOUNT_METADATA_V2){
-            let accountMetadataTxn = txns[i] as AccountMetadataTransaction;
+              let nsMetadataEntry = await TransactionUtils.getNamespaceMetadata(namespaceMetadataTxn.targetNamespaceId, namespaceMetadataTxn.scopedMetadataKey);
+              
+              if(nsMetadataEntry){
+                  txn.oldValue = nsMetadataEntry.value;
+                  txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+              }
+              
+          } catch (error) {
+              
+          }
+      }else if(txns[i].type === TransactionType.ACCOUNT_METADATA_V2){
+          let accountMetadataTxn = txns[i] as AccountMetadataTransaction;
 
-            txn.metadataType = MetadataType.ACCOUNT;
-            txn.metadataTypeName = "Account";
+          txn.metadataType = MetadataType.ACCOUNT;
+          txn.metadataTypeName = "Account";
 
-            txn.scopedMetadataKey = accountMetadataTxn.scopedMetadataKey.toHex();
-            txn.targetPublicKey = accountMetadataTxn.targetPublicKey.publicKey;
-            txn.sizeChanged = accountMetadataTxn.valueSizeDelta;
-            txn.valueChange = Convert.uint8ToHex(accountMetadataTxn.valueDifferences);
+          txn.scopedMetadataKey = accountMetadataTxn.scopedMetadataKey.toHex();
+          txn.targetPublicKey = accountMetadataTxn.targetPublicKey.publicKey;
+          txn.sizeChanged = accountMetadataTxn.valueSizeDelta;
+          txn.valueChange = Convert.uint8ToHex(accountMetadataTxn.valueDifferences);
 
-            try {
-                let nsMetadataEntry = await TransactionUtils.getAccountMetadata(accountMetadataTxn.targetPublicKey, accountMetadataTxn.scopedMetadataKey);
-                
-                if(nsMetadataEntry){
-                    txn.oldValue = nsMetadataEntry.value;
-                    txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
-                }
-            } catch (error) {
-                
-            }
-        }
+          try {
+              let nsMetadataEntry = await TransactionUtils.getAccountMetadata(accountMetadataTxn.targetPublicKey, accountMetadataTxn.scopedMetadataKey);
+              
+              if(nsMetadataEntry){
+                  txn.oldValue = nsMetadataEntry.value;
+                  txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+              }
+          } catch (error) {
+              
+          }
+      }
 
-        formatedTxns.push(txn);
+      formatedTxns.push(txn);
     }
 
     return formatedTxns;
