@@ -71,7 +71,7 @@ jobs:
       - name: Copy files to testnet website
         env:
           BUCKET: ${{ secrets.S3_BUCKET}}
-          CF_DIST_ID: ${{ CLOUDFRONT_DISTRIBUTION_ID }}
+          CF_DIST_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
         run: |
           aws s3 sync --delete . s3://$BUCKET
           aws cloudfront create-invalidation --distribution-id $CF_DIST_ID --path "/*"
