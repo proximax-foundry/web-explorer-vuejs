@@ -610,7 +610,6 @@ export class TransactionUtils {
           txn.detail = await TransactionUtils.formatAliasTransaction(txn, txnStatus.group);
           break;
         case TransactionType.AGGREGATE_BONDED: case TransactionType.AGGREGATE_COMPLETE:
-          // to be displayed in innerTxnDetail
           txn.detail = await TransactionUtils.formatAggregateTransaction(txn, txnStatus.group);
           break;
         case TransactionType.CHAIN_CONFIGURE: case TransactionType.CHAIN_UPGRADE:
@@ -641,6 +640,7 @@ export class TransactionUtils {
           break;
         case TransactionType.MOSAIC_DEFINITION: case TransactionType.MOSAIC_SUPPLY_CHANGE: case TransactionType.MODIFY_MOSAIC_LEVY: case TransactionType.REMOVE_MOSAIC_LEVY:
           // to be displayed in innerTxnDetail
+          txn.detail = await TransactionUtils.formatAssetTransaction(txn, txnStatus.group);
           break;
         case TransactionType.REGISTER_NAMESPACE:
           txn.detail = await TransactionUtils.formatNamespaceTransaction(txn, txnStatus.group);
@@ -3568,10 +3568,6 @@ static async extractUnconfirmedTransfer(transferTxn: TransferTransaction): Promi
           let assetId = await TransactionUtils.getResolvedAsset(transferTxn.mosaics[y].id, txn.block);
           let assetIdHex = assetId.toHex();
 
-          console.log(AppState.nativeToken.assetId)
-          console.log(nativeTokenNamespaceId.value)
-          console.log(assetIdHex)
-
           if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
             txn.amountTransfer += TransactionUtils.convertToExactNativeAmount(actualAmount);
             continue;
@@ -3636,6 +3632,99 @@ static async extractUnconfirmedTransfer(transferTxn: TransferTransaction): Promi
   }
 
   //-------------Asset Txn-----------------------------------------------------------
+  static async formatAssetTransaction(transaction: Transaction, groupType: string): Promise<UnconfirmedAssetTransaction[]>{
+    let formattedTxn:any, txn:any
+    if(groupType == 'partial'){
+      formattedTxn = await TransactionUtils.formatPartialTransaction(transaction);
+      txn = PartialTransaction.convertToSubClass(PartialTransferTransaction, formattedTxn) as PartialTransferTransaction;
+    }else if(groupType == 'unconfirmed'){
+      formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(transaction);
+      txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedTransferTransaction, formattedTxn) as UnconfirmedTransferTransaction;
+    }else{
+      formattedTxn = await TransactionUtils.formatConfirmedTransaction(transaction);
+      txn = ConfirmedTransaction.convertToSubClass(ConfirmedTransferTransaction, formattedTxn) as ConfirmedTransferTransaction;
+    }
+
+    if(transaction.type === TransactionType.MOSAIC_DEFINITION){
+      let assetDefinitionTxn = transaction as MosaicDefinitionTransaction;
+
+      txn.assetId = assetDefinitionTxn.mosaicId.toHex();
+      txn.divisibility = assetDefinitionTxn.mosaicProperties.divisibility;
+      txn.duration = assetDefinitionTxn.mosaicProperties.duration ?
+          assetDefinitionTxn.mosaicProperties.duration.compact() : undefined;
+      txn.transferable = assetDefinitionTxn.mosaicProperties.transferable;
+      txn.supplyMutable = assetDefinitionTxn.mosaicProperties.supplyMutable;
+      txn.nonce = assetDefinitionTxn.mosaicNonce.toNumber();
+    }else if(transaction.type === TransactionType.MOSAIC_SUPPLY_CHANGE){
+      let assetSupplyChangeTxn = transaction as MosaicSupplyChangeTransaction;
+
+      let assetId = assetSupplyChangeTxn.mosaicId.toHex();
+
+      txn.assetId = assetId;
+      txn.supplyDelta = assetSupplyChangeTxn.delta.compact();
+      txn.supplyDeltaIsRaw = true;
+
+      if(assetSupplyChangeTxn.direction === MosaicSupplyType.Decrease){
+        txn.supplyDelta = -txn.supplyDelta;
+      }
+
+      try {
+        let assetInfo = await TransactionUtils.getAssetInfo(assetId);
+
+        txn.supplyDelta = TransactionUtils.convertToExactAmount(txn.supplyDelta, assetInfo.divisibility);
+
+        txn.supplyDeltaIsRaw = false;
+      } catch (error) {}
+    }else if(transaction.type === TransactionType.MODIFY_MOSAIC_LEVY){
+      let assetModifyLevyTxn = transaction as MosaicModifyLevyTransaction;
+
+      let assetId = assetModifyLevyTxn.mosaicId.toHex();
+      let levyAssetId = assetModifyLevyTxn.mosaicLevy.mosaicId.toHex();
+      let levyAmount = assetModifyLevyTxn.mosaicLevy.fee.compact();
+
+      txn.assetId = assetId;
+      txn.levyAssetId = levyAssetId;
+      txn.levyAssetAmount = levyAmount;
+      txn.levyAssetAmountIsRaw = true;
+      txn.levyType = assetModifyLevyTxn.mosaicLevy.type;
+      txn.levyRecipient = assetModifyLevyTxn.mosaicLevy.recipient.plain();
+
+      try {
+        let assetName = await TransactionUtils.getAssetName(assetId);
+
+        if(assetName.names.length){
+          txn.namespaceName = assetName.names[0].name;
+        }
+
+        let levyAssetInfo = await TransactionUtils.getAssetInfo(levyAssetId);
+
+        txn.levyAssetAmount = TransactionUtils.convertToExactAmount(levyAmount, levyAssetInfo.divisibility);
+
+        txn.levyAssetAmountIsRaw = false;
+
+        let levyAssetName = await TransactionUtils.getAssetName(levyAssetId);
+
+        if(levyAssetName.names.length){
+          txn.levyAssetName = levyAssetName.names[0].name;
+        }
+      } catch (error) {}
+    }else if(transaction.type === TransactionType.REMOVE_MOSAIC_LEVY){
+      let assetRemoveLevyTxn = transaction as MosaicRemoveLevyTransaction;
+
+      let assetId = assetRemoveLevyTxn.mosaicId.toHex();
+
+      txn.assetId = assetId;
+      try {
+        let assetName = await TransactionUtils.getAssetName(assetId);
+
+        if(assetName.names.length){
+          txn.namespaceName = assetName.names[0].name;
+        }
+      } catch (error) {}
+    }
+    return txn;
+  }
+
   static async formatUnconfirmedAssetTransaction(txns: Transaction[]): Promise<UnconfirmedAssetTransaction[]>{
 
     let formatedTxns : UnconfirmedAssetTransaction[] = [];
@@ -3654,8 +3743,7 @@ static async extractUnconfirmedTransfer(transferTxn: TransferTransaction): Promi
         txn.transferable = assetDefinitionTxn.mosaicProperties.transferable;
         txn.supplyMutable = assetDefinitionTxn.mosaicProperties.supplyMutable;
         txn.nonce = assetDefinitionTxn.mosaicNonce.toNumber();
-      }
-      else if(txns[i].type === TransactionType.MOSAIC_SUPPLY_CHANGE){
+      }else if(txns[i].type === TransactionType.MOSAIC_SUPPLY_CHANGE){
         let assetSupplyChangeTxn = txns[i] as MosaicSupplyChangeTransaction;
 
         let assetId = assetSupplyChangeTxn.mosaicId.toHex();
