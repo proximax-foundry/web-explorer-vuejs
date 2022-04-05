@@ -35,7 +35,7 @@
             <div class="-ml-1">
               <div class="uppercase text-xs text-gray-300 font-bold -mt-3 mb-2">Signer / TX Type</div>
               <div class="text-xs text-gray-500 inline-flex">Signer:
-              <div class="uppercase font-bold text-xs text-blue-primary"><router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signerAddress}}" class="uppercase text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex">{{shortenedString(Helper.createAddress(data.signerAddress).pretty())}}</router-link></div>
+              <div class="uppercase font-bold text-xs text-blue-primary ml-1"><router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signerAddress}}" class="uppercase text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex">{{shortenedString(Helper.createAddress(data.signerAddress).pretty())}}</router-link></div>
             </div>
             <div>
             <div class="text-xs text-gray-500 inline-flex mt-1">TX Type: 
@@ -48,26 +48,26 @@
           <template #body="{data}">
             <div>
               <div class="uppercase text-xs text-gray-300 font-bold mb-2">Fee</div>
-              <div class="uppercase font-bold text-xs mt-1">{{data.fee + data.amountTransfer + " " + nativeTokenNamespace}}</div>
+              <div class="uppercase font-bold text-xs mt-1 pl-0.5">{{data.fee + data.amountTransfer + " " + nativeTokenNamespace}}</div>
               <div class="mb-7"></div>
             </div>
           </template>
         </Column>
-      <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem;padding-left: 1rem;" field="TX Hash" header="TX HASH" class="ml-4" v-if="wideScreen"> 
+      <Column style="width: 80px; padding-bottom: 0rem; padding-top: 0rem;padding-left: 1rem;" field="TX Hash" header="TX HASH" class="ml-4" v-if="wideScreen"> 
         <template #body="{data}">                
           <div>
-            <router-link :to="{ name: 'ViewTransaction', params: {hash: data.hash}}" class="uppercase text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex truncate w-24 pt-3"><span class="text-xs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 10)}}...</span></router-link>
+            <router-link :to="{ name: 'ViewTransaction', params: {hash: data.hash}}" class="uppercase text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex truncate w-24 pt-3"><span class="text-xs" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 8)}}...</span></router-link>
             <div class="text-txs text-gray-500 mb-4 pt-1">{{countDuration(data.timestamp)}} ago</div>
           </div>
         </template> 
       </Column>
-      <Column style="width: 90px; padding-bottom: 0rem; padding-top: 0rem;" field="Signer / Tx Type" header="SIGNER / TX TYPE" v-if="wideScreen"> 
+      <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem;" field="Signer / Tx Type" header="SIGNER / TX TYPE" v-if="wideScreen"> 
         <template #body="{data}"> 
           <div>
-            <div class="text-xs text-gray-500 inline-flex truncate w-80 pt-2">SIGNER:
+            <div class="text-xs text-gray-500 inline-flex truncate w-72 pt-2">SIGNER:
               <div class="uppercase text-xs pl-1.5"><router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signerAddress}}" class="uppercase text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex"><span class="text-xs" v-tooltip.top="Helper.createAddress(data.signerAddress).pretty()">{{shortenedString(Helper.createAddress(data.signerAddress).pretty())}}</span></router-link></div>
             </div>
-            <div class="text-txs text-gray-500 inline-flex truncate w-80 px-px mb-3 pt-1.5">TX TYPE:
+            <div class="text-txs text-gray-500 inline-flex truncate w-72 px-px mb-3 pt-1.5">TX TYPE:
               <div class="pl-2">{{data.type}}</div>
             </div>
           </div>
@@ -131,9 +131,9 @@ export default{
 
     const shortenedString = (value) => {
       if(wideScreen.value == true){
-        return value.substring(0, 4) + '...' + value.substring(value.length - 25, value.length);
+        return value.substring(0, 4) + '...' + value.substring(value.length - 22, value.length);
       }else{
-        return value.substring(0, 4) + '...' + value.substring(value.length - 21, value.length);
+        return value.substring(0, 4) + '...' + value.substring(value.length - 15, value.length);
       }
     }
 
