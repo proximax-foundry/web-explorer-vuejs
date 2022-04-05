@@ -30,24 +30,25 @@
             </div>
           </template>
         </Column>
-        <Column style="width: 280px" v-if="!wideScreen">
+        <Column style="width: 270px" v-if="!wideScreen">
           <template #body="{data}">
-            <div>
+            <div class="-ml-1">
               <div class="uppercase text-xs text-gray-300 font-bold -mt-3 mb-2">Signer / TX Type</div>
               <div class="text-xs text-gray-500 inline-flex">Signer:
               <div class="uppercase font-bold text-xs text-blue-primary"><router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signerAddress}}" class="uppercase text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex">{{shortenedString(Helper.createAddress(data.signerAddress).pretty())}}</router-link></div>
             </div>
-            <div class="text-xs text-gray-500 inline-flex mt-1">TX Type:
-              <div class="uppercase text-xs ml-1">{{data.type}}</div>
+            <div>
+            <div class="text-xs text-gray-500 inline-flex mt-1">TX Type: 
+              <div class="uppercase text-xs ml-1">{{data.type}}</div></div>
             </div>
             </div>
           </template>
         </Column>
-        <Column style="width:80px" v-if="!wideScreen">
+        <Column style="width:100px" v-if="!wideScreen">
           <template #body="{data}">
             <div>
-              <div class="uppercase text-xs text-gray-300 font-bold mb-2 -mt-1">Fee</div>
-              <div class="uppercase font-bold text-xs">{{data.fee + data.amountTransfer + " " + nativeTokenNamespace}}</div>
+              <div class="uppercase text-xs text-gray-300 font-bold mb-2">Fee</div>
+              <div class="uppercase font-bold text-xs mt-1">{{data.fee + data.amountTransfer + " " + nativeTokenNamespace}}</div>
               <div class="mb-7"></div>
             </div>
           </template>
@@ -60,19 +61,19 @@
           </div>
         </template> 
       </Column>
-      <Column style="width: 100px; padding-bottom: 0rem; padding-top: 0rem;" field="Signer / Tx Type" header="SIGNER / TX TYPE" v-if="wideScreen"> 
+      <Column style="width: 90px; padding-bottom: 0rem; padding-top: 0rem;" field="Signer / Tx Type" header="SIGNER / TX TYPE" v-if="wideScreen"> 
         <template #body="{data}"> 
           <div>
-            <div class="text-xs text-gray-500 inline-flex truncate w-80 mt-4">SIGNER:
+            <div class="text-xs text-gray-500 inline-flex truncate w-80 pt-2">SIGNER:
               <div class="uppercase text-xs pl-1.5"><router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signerAddress}}" class="uppercase text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex"><span class="text-xs" v-tooltip.top="Helper.createAddress(data.signerAddress).pretty()">{{shortenedString(Helper.createAddress(data.signerAddress).pretty())}}</span></router-link></div>
             </div>
-            <div class="text-txs text-gray-500 inline-flex truncate w-80 px-px mb-4 pt-1.5">TX TYPE:
+            <div class="text-txs text-gray-500 inline-flex truncate w-80 px-px mb-3 pt-1.5">TX TYPE:
               <div class="pl-2">{{data.type}}</div>
             </div>
           </div>
         </template> 
       </Column>
-      <Column style="width: 100px; padding-bottom: 0rem; padding-top: 0rem; padding-right: 1rem; " field="Fee" header="FEE" v-if="wideScreen"> 
+      <Column style="width: 120px; padding-bottom: 0rem; padding-top: 0rem; padding-right: 1rem; " field="Fee" header="FEE" v-if="wideScreen"> 
         <template #body="{data}"> 
           <div>
             <div class="text-xs pt-2.5">{{data.fee + data.amountTransfer + " " + nativeTokenNamespace}}</div>

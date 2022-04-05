@@ -1,4 +1,5 @@
-<template>        
+<template> 
+  <div>       
     <div v-if="isShowInvalid">
       <p class="text-gray-500 mb-5 text-sm font-bold">Block Details</p>
       <div class="p-3 bg-yellow-100 text-yellow-700">Block is not available in {{ networkName }}</div>
@@ -42,8 +43,18 @@
           </div>
         </div>
       </div>
+      <div v-if="blockInfo.numTransactions > 0">
+        <p class="text-gray-500 mb-5 text-sm font-bold">
+        Transactions
+        </p>
+        <div class="filter shadow-xl border border-gray-50 p-5 mb-15">
+          <TransactionComponent  :blockHeight="blockInfo.height" />
+        </div>
+      </div>
     </div>
   </div>
+  </div>
+
 </template>
 
 <script>
@@ -51,8 +62,10 @@ import { computed, getCurrentInstance, ref, watch } from "vue";
 import { BlockUtils } from "@/util/blockUtil"
 import { AppState } from '@/state/appState';
 import { networkState } from '@/state/networkState';
+import TransactionComponent from '@/modules/block/components/TransactionComponent.vue';
 
 export default {
+  components: { TransactionComponent },
   name: 'ViewBlock',
   props: {
     blockHeight: Number
