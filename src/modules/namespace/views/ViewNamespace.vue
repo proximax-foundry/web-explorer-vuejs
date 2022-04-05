@@ -60,17 +60,29 @@
       <div v-if="namespaceInfo.alias">
         <div class="text-sm font-bold mb-4">Alias</div>
         <div class="py-3 text-xs">
-          <div class="py-3 grid grid-cols-2 font-bold border-b border-gray-100"><div>{{ (namespaceInfo.alias.type==1)?'Asset ID':'Address' }}</div><div>Type</div></div>
+          <div class="py-3 grid grid-cols-2 font-bold border-b border-gray-100">
+            <div v-if="!namespaceInfo.alias.type==0">{{ (namespaceInfo.alias.type==1)?'Asset ID':'Address' }}</div>
+            <div v-else> Asset ID / Address</div>
+          <div>Type</div>
+          </div>
           <div class="py-3 grid grid-cols-2">
             <div>
-              <span v-if="namespaceInfo.alias.type==1" class="text-blue-600 hover:text-blue-primary hover:underline" :to="{ name: 'ViewAccount', params: { accountParam: namespaceInfo.alias.id } }">
-                {{ namespaceInfo.alias.id }}
-              </span>
-              <router-link v-else-if="namespaceInfo.alias.type==2" class="text-blue-600 hover:text-blue-primary hover:underline" :to="{ name: 'ViewAccount', params: { accountParam: namespaceInfo.alias.id } }">
-                {{ namespaceInfo.alias.id }}
-              </router-link>
+              <div v-if="namespaceInfo.alias.type==1">
+                <router-link  class="uppercase text-blue-600 hover:text-blue-primary hover:underline" :to="{ name: 'ViewAsset', params:{ id:namespaceInfo.alias.id }}" >
+                  {{ namespaceInfo.alias.id }}
+                </router-link>
+              </div>
+                <!-- {{ namespaceInfo.alias.id }} -->
+              <div v-else-if="namespaceInfo.alias.type==2">
+                <router-link  class="uppercase text-blue-600 hover:text-blue-primary hover:underline" :to="{ name: 'ViewAccount', params: { accountParam: namespaceInfo.alias.id }}">
+                  {{ namespaceInfo.alias.id }}
+                </router-link>
+              </div>
+              <div v-else> No linked Asset / Address
+              </div>
             </div>
-            <div>{{ namespaceInfo.alias.type }}</div>
+            <div v-if="!namespaceInfo.alias.type==0">{{ namespaceInfo.alias.type==1?"Asset":"Address" }}</div>
+            <div v-else> - </div>
           </div>
         </div>
       </div>
@@ -80,7 +92,7 @@
           <div>Namespace ID</div>
           <div>Name</div>
         </div>
-        <div v-for="level, index in namespaceInfo.levels" :key="index" class="py-3 text-xs grid grid-cols-2" :class="`${ index<(namespaceInfo.levels.length-1)?'border-b border-gray-100':'' }`">
+        <div v-for="level, index in namespaceInfo.levels" :key="index" class="py-3 text-xs grid grid-cols-2 uppercase" :class="`${ index<(namespaceInfo.levels.length-1)?'border-b border-gray-100':'' }`">
           <div><router-link v-if="level.id" class="text-blue-600 hover:text-blue-primary hover:underline" :to="{ name: 'ViewNamespace', params: { namespaceParam: level.id } }">{{ level.id }}</router-link></div>
           <div>{{ level.name }}</div>
         </div>
@@ -111,8 +123,9 @@ export default {
       if(!AppState.isReady){
         setTimeout(fetchNamespaceDetail, 1000);
       }
-
+    
       let fetchInfo = await NamespaceUtils.fetchNamespaceInfo(props.namespaceParam);
+      console.log(fetchInfo);
       if(fetchInfo != false){
         namespaceInfo.value = fetchInfo;
         isShowInvalid.value = false;
