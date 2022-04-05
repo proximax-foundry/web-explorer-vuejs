@@ -32,7 +32,7 @@
       <RestrictionTxnDataTable :transactions="transactions" :pages="pages" :selectedGroupType="transactionGroupType.CONFIRMED" v-else-if="selectedTxnType === TransactionFilterType.RESTRICTION" />
       <SecretTxnDataTable :transactions="transactions" :pages="pages" :selectedGroupType="transactionGroupType.CONFIRMED" v-else-if="selectedTxnType === TransactionFilterType.SECRET" />
       <ChainTxnDataTable :transactions="transactions" :pages="pages" :selectedGroupType="transactionGroupType.CONFIRMED" v-else-if="selectedTxnType === TransactionFilterType.CHAIN" />
-      <div class="sm:flex sm:justify-between my-5 mb-15" v-if="totalPages > 1">
+      <div class="sm:flex sm:justify-between my-5 mb-15" v-if="totalPages > 1 && transactions.length > 0">
         <div class="text-xs text-gray-700 mb-3 sm:mb-0 text-center sm:text-left">Show
           <select v-model="pages" class="border border-gray-300 rounded-md p-1" @change="changeRows">
             <option value=10>10</option>
@@ -162,16 +162,20 @@ export default {
       let blockHeight = await AppState.chainAPI.chainAPI.getBlockchainHeight();
       txnQueryParams.pageSize = pages.value;
       txnQueryParams.pageNumber = currentPage.value;
-      txnQueryParams.embedded = false;
-      // txnQueryParams.fromHeight = blockHeight - 20000;
+      if(selectedTxnType.value == undefined || selectedTxnType.value == 'all'){
+        txnQueryParams.embedded = false;
+      }else{
+        txnQueryParams.embedded = true;
+      }
+      // txnQueryParams.embedded = false;
+      console.log(txnQueryParams.embedded)
+      txnQueryParams.fromHeight = blockHeight - 2000000;
       if(QueryParamsType.value!=undefined){
         txnQueryParams.type = QueryParamsType.value;
       }
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
 
       let transactionSearchResult = await TransactionUtils.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams);
-      console.log(txnQueryParams)
-      console.log(transactionSearchResult)
       if(transactionSearchResult.transactions.length > 0){
         // let formattedTxns = await TransactionUtils.formatConfirmedMixedTxns(transactionSearchResult.transactions);
        let formattedTxns = await formatConfirmedTransaction(transactionSearchResult.transactions);

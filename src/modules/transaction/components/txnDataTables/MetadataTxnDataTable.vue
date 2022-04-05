@@ -13,21 +13,21 @@
       <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Hash</div>
+            <div class="uppercase text-xs text-gray-300 font-bold mb-1">Hash</div>
             <router-link class="uppercase font-bold text-xs block text-blue-600 hover:text-blue-primary hover:underline" :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}">
               <span class="text-xs break-all hover:underline hover:text-blue-primary" v-tooltip.right="data.hash">{{data.hash.substring(0, 15) }}...</span>
             </router-link>
           </div>
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Type</div>
+            <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Type</div>
             <div class="flex items-center">
-              <div class="uppercase font-bold text-txs">{{data.type}}</div>
+              <div class="uppercase font-bold text-xs">{{data.type}}</div>
             </div>
           </div>
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Scoped Metadata Key</div>
+            <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Scoped Metadata Key</div>
             <div class="flex items-center">
-              <div class="font-bold text-txs">{{ data.scopedMetadataKey }}</div>
+              <div class="font-bold text-xs">{{ data.scopedMetadataKey }}</div>
             </div>
           </div>
         </template>
@@ -35,23 +35,23 @@
       <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
           <div v-if="selectedGroupType === transactionGroupType.CONFIRMED">
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1">Timestamp</div>
-            <div class="uppercase font-bold text-txs">{{ convertLocalTime(data.timestamp) }}</div>
+            <div class="uppercase text-xs text-gray-300 font-bold mb-1">Timestamp</div>
+            <div class="uppercase font-bold text-xs">{{ convertLocalTime(data.timestamp) }}</div>
           </div>
           <div>
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Target</div>
-            <span class="text-txs font-bold" v-if="data.metadataTypeName === 'Account'" v-tooltip.bottom="data.targetPublicKey">
+            <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Target</div>
+            <span class="text-xs font-bold" v-if="data.metadataTypeName === 'Account'" v-tooltip.bottom="data.targetPublicKey">
               {{data.targetPublicKey.substring(0, 20) }}...
             </span>
-            <span class="text-txs font-bold" v-else-if="data.metadataTypeName === 'Asset'" >
+            <span class="text-xs font-bold" v-else-if="data.metadataTypeName === 'Asset'" >
               {{data.targetId}} {{ data.targetIdName ? `(${data.targetIdName})`:'' }}
             </span>
-            <span class="text-txs font-bold" v-else-if="data.metadataTypeName === 'Namespace'" >
+            <span class="text-xs font-bold" v-else-if="data.metadataTypeName === 'Namespace'" >
               {{ data.targetIdName ? data.targetIdName: data.targetId }}
             </span>
           </div>
           <div v-if="selectedGroupType !== transactionGroupType.CONFIRMED">
-            <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">Value</div>
+            <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Value</div>
             <div><img src="@/modules/transaction/img/icon-message.svg" v-if="data.valueChange" v-tooltip.left="'<tiptext>' + constructValueDisplay(data) + '</tiptext>'" class="inline-block"></div>
           </div>
         </template>
@@ -63,38 +63,38 @@
       </Column>
       <Column field="timestamp" header="Timestamp" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
         <template #body="{data}">
-          <span class="text-txs">{{ convertLocalTime(data.timestamp) }}</span>
+          <span class="text-xs">{{ convertLocalTime(data.timestamp) }}</span>
         </template>
       </Column>
       <Column field="typeName" header="Type" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
-          <span class="text-txs">{{data.type}}</span>
+          <span class="text-xs">{{data.type}}</span>
         </template>
       </Column>
       <Column field="block" header="Block" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
         <template #body="{data}">
-          <div class="text-txs">{{ data.block }}</div>
+          <div class="text-xs">{{ data.block }}</div>
         </template>
       </Column>
       <Column header="Tx Fee" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px">
         <template #body="{data}">
-          <div class="text-txs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
+          <div class="text-xs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
         </template>
       </Column>
       <Column header="Scoped Metadata Key" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
-          <div class="text-txs">{{ data.scopedMetadataKey }}</div>
+          <div class="text-xs">{{ data.scopedMetadataKey }}</div>
         </template>
       </Column>
       <Column header="Target" headerStyle="width:60px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
-          <span class="text-txs" v-if="data.metadataTypeName === 'Account'" v-tooltip.bottom="data.targetPublicKey">
+          <span class="text-xs" v-if="data.metadataTypeName === 'Account'" v-tooltip.bottom="data.targetPublicKey">
             {{data.targetPublicKey.substring(0, 20) }}...
           </span>
-          <span class="text-txs" v-else-if="data.metadataTypeName === 'Asset'" >
+          <span class="text-xs" v-else-if="data.metadataTypeName === 'Asset'" >
             {{data.targetId}} {{ data.targetIdName ? `(${data.targetIdName})`:'' }}
           </span>
-          <span class="text-txs" v-else-if="data.metadataTypeName === 'Namespace'" >
+          <span class="text-xs" v-else-if="data.metadataTypeName === 'Namespace'" >
             {{ data.targetIdName ? data.targetIdName: data.targetId }}
           </span>
         </template>

@@ -173,9 +173,9 @@ export default defineComponent({
 
     const displayExchangeSDA = (exchangeOffer: TxnExchangeOffer)=>{
 
-      let asset_div = (exchangeOffer.amount > 0)?(exchangeOffer.amount + " "):'';
+      let asset_div = (exchangeOffer.amount > 0)?(Helper.convertToCurrency(exchangeOffer.amount, 0) + " "):'';
       asset_div += (exchangeOffer.assetNamespace ?  exchangeOffer.assetNamespace : exchangeOffer.assetId);
-      asset_div += (exchangeOffer.cost > 0)?(" - " + exchangeOffer.cost + " " + nativeTokenName.value):'';
+      asset_div += (exchangeOffer.cost > 0)?(" - " + Helper.convertToCurrency(exchangeOffer.cost, 0) + " " + nativeTokenName.value):'';
 
       return asset_div;
     }

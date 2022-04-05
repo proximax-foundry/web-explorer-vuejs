@@ -27,7 +27,7 @@
           <div>
             <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Account</div>
             <div class="flex items-center">
-              <div class="uppercase font-bold text-xs mr-2 truncate" v-tooltip.right="Helper.createAddress(data.signerAddress).pretty()">{{ Helper.createAddress(data.signerAddress).pretty() }}</div>
+              <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.signerAddress }}" v-tooltip.right="Helper.createAddress(data.signerAddress).pretty()" class="uppercase font-bold truncate inline-block text-xs break-all text-blue-600 hover:text-blue-primary hover:underline">{{ shortenedAddress(Helper.createAddress(data.signerAddress).pretty()) }}</router-link>
             </div>
           </div>
         </template>
@@ -90,7 +90,7 @@
       </Column>
       <Column header="Account" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
-          <div class="text-xs truncate inline-block" v-tooltip.bottom="Helper.createAddress(data.signerAddress).pretty()">{{ Helper.createAddress(data.signerAddress).pretty() }}</div>
+          <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.signerAddress }}" v-tooltip.right="Helper.createAddress(data.signerAddress).pretty()" class="truncate inline-block text-xs break-all text-blue-600 hover:text-blue-primary hover:underline">{{ shortenedAddress(Helper.createAddress(data.signerAddress).pretty()) }}</router-link>
         </template>
       </Column>
       <Column header="Approval Delta" headerStyle="width:60px;text-transform:uppercase" v-if="wideScreen">
@@ -194,6 +194,10 @@ export default {
       return Helper.convertDisplayDateTimeFormat24(dateTimeInJSON);
     };
 
+    const shortenedAddress = (address) => {
+      return address.substring(0, 4) + '...' + address.substring(address.length - 4, address.length);
+    }
+
     return {
       constructValueDisplay,
       nativeTokenName,
@@ -201,6 +205,7 @@ export default {
       transactionGroupType,
       wideScreen,
       Helper,
+      shortenedAddress,
     }
   }
 }
