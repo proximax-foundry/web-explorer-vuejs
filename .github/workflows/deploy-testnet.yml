@@ -65,10 +65,13 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: $AWS_ROLE
-          aws-region: $AWS_REGION
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Copy files to testnet website
+        env:
+          BUCKET: ${{ secrets.S3_BUCKET}}
+          CF_DIST_ID: ${{ CLOUDFRONT_DISTRIBUTION_ID }}
         run: |
-          aws s3 sync --delete . s3://$S3_BUCKET
-          aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --path "/*"
+          aws s3 sync --delete . s3://$BUCKET
+          aws cloudfront create-invalidation --distribution-id $CF_DIST_ID --path "/*"
