@@ -1,0 +1,73 @@
+name: deploy-testnet
+
+on: 
+  push:
+    tags: 
+      - v*
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Node 16.x
+        uses: actions/setup-node@v2-beta
+        with:
+          node-version: '16'
+      
+      - name: Cache node modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+          
+      - name: Installing Dependencies
+        run: npm install
+      
+      - name: build for testnet
+        run: npm run build-staging
+      
+      - name: Archive artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: |
+            dist
+
+  deploy-testnet:
+    name: Deploy to testnet
+    needs: [build]
+    runs-on: ubuntu-latest
+    environment:
+      name: testnet
+      url: 'https://bctestnetexplorer.xpxsirius.io'
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Download artifact 
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+
+      - name: Apply Testnet Config
+        run: |
+          rm dist/chainProfile.json
+          cp config/chainProfile-testnet.json dist/chainProfile.json
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: $AWS_ROLE
+          aws-region: $AWS_REGION
+
+      - name: Copy files to testnet website
+        run: |
+          aws s3 sync --delete ./dist s3://$S3_BUCKET
+          aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --path "/*"
