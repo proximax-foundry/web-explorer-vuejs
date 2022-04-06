@@ -57,8 +57,8 @@
     <div>
       <div>Levy Recipient</div>
       <div>
-        <router-link :to="{ name: 'ViewAccount', params: { accountParam: txnDetail.detail.levyRecipient }}" class="hover:text-blue-primary hover:underline">
-          {{ txnDetail.detail.levyRecipient }}
+        <router-link :to="{ name: 'ViewAccount', params: { accountParam: txnDetail.detail.levyRecipient }}" class="hover:text-blue-primary hover:underline text-blue-600">
+          {{ Helper.createAddress(txnDetail.detail.levyRecipient).pretty() }}
         </router-link>
       </div>
     </div>
