@@ -42,8 +42,8 @@
         <Column style="width: 100px" v-if="!wideScreen">
           <template #body="{data}">
             <div>
-              <div class="uppercase text-xs text-gray-300 font-bold -mt-2">fee</div>
-              <div class="uppercase font-bold text-xs mt-1">{{data.totalFee.lower + " " + nativeTokenNamespace}}</div>
+              <div class="uppercase text-xs text-gray-300 font-bold -mt-2 ml-2">fee</div>
+              <div class="uppercase font-bold text-xs mt-1 ml-2">{{data.totalFee.lower + " " + nativeTokenNamespace}}</div>
               <div class="mb-7"></div>    
             </div>
           </template>
@@ -60,12 +60,12 @@
       <Column style="width: 20px; padding-bottom: 0rem; padding-top: 0rem;" field="Validator" header="VALIDATOR" v-if="wideScreen"> 
         <template #body="{data}" > 
           <div>
-            <div class="uppercase text-xs text-blue-primary inline-flex w-80 pt-3"><router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signer.publicKey}}" class="uppercase text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex"><span class="text-xs" v-tooltip.bottom="data.signer.publicKey">{{shortenedPublicKey(data.signer.publicKey)}}</span></router-link></div>         
+            <div class="uppercase text-xs text-blue-primary inline-flex w-72 pt-3"><router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signer.publicKey}}" class="uppercase text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex"><span class="text-xs" v-tooltip.bottom="data.signer.publicKey">{{shortenedPublicKey(data.signer.publicKey)}}</span></router-link></div>         
             <div class="text-txs text-gray-500 mb-4 mt-1">{{data.numTransactions>1?data.numTransactions+" trxs":data.numTransactions+" trx"}}</div>
           </div>
         </template> 
       </Column>
-      <Column style="width: 100px; padding-bottom: 0rem; padding-top: 0rem; padding-right: 1rem;" field="Fee" header="FEE" v-if="wideScreen"> 
+      <Column style="width: 110px; padding-bottom: 0rem; padding-top: 0rem; padding-right: 1rem;" field="Fee" header="FEE" v-if="wideScreen"> 
         <template #body="{data}" > 
           <div>
             <div class="text-xs pt-2.5">{{data.totalFee.lower+" "+nativeTokenNamespace}}</div>
@@ -118,9 +118,9 @@ export default{
 
     const shortenedPublicKey = (publicKey) => {
       if(wideScreen.value == true){
-         return publicKey.substring(0, 4) + '...' + publicKey.substring(publicKey.length - 37, publicKey.length);
+         return publicKey.substring(0, 4) + '...' + publicKey.substring(publicKey.length - 34, publicKey.length);
       }else{
-        return publicKey.substring(0, 4) + '...' + publicKey.substring(publicKey.length - 26, publicKey.length);
+        return publicKey.substring(0, 4) + '...' + publicKey.substring(publicKey.length - 22, publicKey.length);
       }
     };
 
