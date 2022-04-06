@@ -18,8 +18,8 @@
         <div>
           <div>Signer</div>
           <div class="flex items-center">
-            <router-link id="signerAddress" :to="{ name: 'ViewAccount', params: { accountParam: item.signer.address.address }}" class="hover:text-blue-primary hover:underline text-blue-600" :copyValue="item.signer.address.address" copySubject="Address">
-              {{ item.signer.address.address }}
+            <router-link id="signerAddress" :to="{ name: 'ViewAccount', params: { accountParam: item.signer.address.address }}" class="hover:text-blue-primary hover:underline text-blue-600" :copyValue="Helper.createAddress(item.signer.address.address).pretty()" copySubject="Address">
+              {{ Helper.createAddress(item.signer.address.address).pretty() }}
             </router-link>
             <img src="@/assets/img/icon-copy.svg" @click="copy('signerAddress')" class="ml-2 w-4 h-4 cursor-pointer" />
           </div>
@@ -77,7 +77,7 @@
                 <span class="text-xxs">{{ formatCurrency(sda.amount)[1]?'.' + formatCurrency(sda.amount)[1]:'' }}</span>
               </div>
               <div v-if="sda.namespace" class="inline-block ml-2">
-                <router-link :to="{ name: 'ViewAsset', params:{ id: sda.assetId }}" class="text-blue-600 hover:text-blue-primary hover:underline">{{ sda.namespace }}</router-link>
+                <router-link :to="{ name: 'ViewAsset', params:{ id: sda.assetId }}" class="text-blue-600 hover:text-blue-primary hover:underline">{{ sda.namespace.toUpperCase() }}</router-link>
               </div>
               <div v-else class="text-gray-400 hover:text-gray-700 duration-300 transition-all inline-block ml-2">
                 <router-link :to="{ name: 'ViewAsset', params: { id: sda.assetId }}" class="hover:text-blue-primary hover:underline">

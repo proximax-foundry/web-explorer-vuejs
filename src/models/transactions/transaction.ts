@@ -5,5 +5,6 @@ export * from "./restrictionModification";
 export * from "./exchangeOffer";
 export * from "./confirmed/confirmed";
 export * from "./unconfirmed/unconfirmed";
+export * from "./transactionFilterType";
 export * from "./partial/partial";
 export * from "./txnList";

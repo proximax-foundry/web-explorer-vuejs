@@ -69,27 +69,18 @@
   <LinkAccountDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.LINK_ACCOUNT" />
   <RestrictionDetailComponent :txnDetail="txnDetail" :txnGroup="txnType" v-if="txnType == TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS || txnType == TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC || txnType == TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION" />
   <SecretDetailComponent :txnDetail="txnDetail" :txnGroup="txnType" v-if="txnType == TransactionType.SECRET_PROOF || txnType == TransactionType.SECRET_LOCK" />
+  <AssetDetailComponent :txnDetail="txnDetail" :txnGroup="txnType" v-if="txnType == TransactionType.MOSAIC_DEFINITION || txnType == TransactionType.MOSAIC_SUPPLY_CHANGE || txnType == TransactionType.MODIFY_MOSAIC_LEVY || txnType == TransactionType.REMOVE_MOSAIC_LEVY" />
+  <ChainDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.MOSAIC_DEFINITION || txnType == TransactionType.MOSAIC_SUPPLY_CHANGE || txnType == TransactionType.CHAIN_CONFIGURE || txnType == TransactionType.CHAIN_UPGRADE" />
+  <AccountDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.MOSAIC_DEFINITION || txnType == TransactionType.MOSAIC_SUPPLY_CHANGE || txnType == TransactionType.MODIFY_MULTISIG_ACCOUNT" />
+  <MetadataDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.MOSAIC_METADATA_V2 || txnType == TransactionType.NAMESPACE_METADATA_V2 || txnType == TransactionType.CHAIN_CONFIGURE || txnType == TransactionType.ACCOUNT_METADATA_V2" />
 </template>
 
 <script>
 /*
 
-Modify Multisig Account
-LockFund
-Account Link
-Exchange Offer
-Add Exchange Offer
-Remove Exchange Offer
 Modify Account Metadata
 Modify SDA Metadata
 Modify Namespace Metadata
-Modify Account Address Restriction
-Modify Account SDA Restriction
-Modify Account Operation Restriction
-Chain Configure
-Chain Upgrade
-Secret Lock
-Secret Proof
 Account Metadata
 SDA Metadata
 Namespace Metadata
@@ -110,6 +101,10 @@ import LockDetailComponent from '@/modules/transaction/components/transactionDet
 import LinkAccountDetailComponent from '@/modules/transaction/components/transactionDetails/LinkAccountDetailComponent';
 import RestrictionDetailComponent from '@/modules/transaction/components/transactionDetails/RestrictionDetailComponent';
 import SecretDetailComponent from '@/modules/transaction/components/transactionDetails/SecretDetailComponent';
+import AssetDetailComponent from '@/modules/transaction/components/transactionDetails/AssetDetailComponent';
+import ChainDetailComponent from '@/modules/transaction/components/transactionDetails/ChainDetailComponent';
+import AccountDetailComponent from '@/modules/transaction/components/transactionDetails/AccountDetailComponent';
+import MetadataDetailComponent from '@/modules/transaction/components/transactionDetails/MetadataDetailComponent';
 import { TransactionType } from 'tsjs-xpx-chain-sdk'
 export default {
   name: 'TxnDetailComponent',
@@ -127,6 +122,10 @@ export default {
     LinkAccountDetailComponent,
     RestrictionDetailComponent,
     SecretDetailComponent,
+    AssetDetailComponent,
+    ChainDetailComponent,
+    AccountDetailComponent,
+    MetadataDetailComponent,
   },
   setup(props) {
     const toast = useToast();

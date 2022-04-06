@@ -1,16 +1,16 @@
 <template>
   <div class="details">
-    <div>
-      <div>Action</div>
-      <div>{{ txnDetail.detail.action }}</div>
+    <div v-if="txnDetail.detail.applyHeightDelta">
+      <div>Apply Height Delta</div>
+      <div>{{ txnDetail.detail.applyHeightDelta }}</div>
     </div>
-    <div>
-      <div>Remote Public Key</div>
-      <div>
-        <router-link :to="{ name: 'ViewAccount', params:{ accountParam: txnDetail.detail.remotePublicKey }}" class="text-blue-600 hover:text-blue-primary hover:underline">
-          {{ txnDetail.detail.remotePublicKey }}
-        </router-link>
-      </div>
+    <div v-if="txnDetail.detail.upgradePeriod">
+      <div>Upgrade Period</div>
+      <div>{{ txnDetail.detail.upgradePeriod }}</div>
+    </div>
+    <div v-if="txnDetail.detail.newVersion">
+      <div>New Version</div>
+      <div>{{ txnDetail.detail.newVersion }}</div>
     </div>
   </div>
 </template>
