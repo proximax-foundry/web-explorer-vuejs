@@ -14,7 +14,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 
 import { NetworkStateUtils } from './state/utils/networkStateUtils';
-import { ChainUtils } from './util/chainUtils';
+import { ChainUtils } from '@/util/chainUtils';
 import { ChainAPICall } from './models/REST/chainAPICall';
 import { AppStateUtils } from './state/utils/appStateUtils';
 import { ChainProfile, ChainProfileConfig, ChainProfileNames, ChainProfileName, ThemeStyleConfig } from "./models/stores/"

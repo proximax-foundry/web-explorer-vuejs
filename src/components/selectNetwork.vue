@@ -27,6 +27,7 @@
 
 <script>
 import { networkState } from '@/state/networkState';
+import { ChainUtils } from '@/util/chainUtils';
 import { computed, defineComponent, ref, watch, getCurrentInstance } from 'vue';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { ChainProfile } from "@/models/stores/chainProfile";
@@ -57,6 +58,9 @@ export default defineComponent({
       node.value = networkNode;
       NetworkStateUtils.changeNetworkByIndex(parseInt(index));
       toggleSelection.value = false;
+      const chainProfile = new ChainProfile(networkName);
+      chainProfile.init();
+      AppState.networkType = ChainUtils.getNetworkType(chainProfile.network.type);
       emitter.emit("CHANGE_NETWORK", true);
     }
 
