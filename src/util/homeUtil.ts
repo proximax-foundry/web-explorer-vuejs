@@ -1,45 +1,48 @@
 import {
-    MosaicId,
-    PageQueryParams,
-    RichlistEntry,
-    MosaicNames,
-    LimitType,
     BlockInfo,
     BlockchainStorageInfo,
 } from "tsjs-xpx-chain-sdk";
 import { ChainUtils } from "./chainUtils";
 import { networkState } from '@/state/networkState';
 import { ChainAPICall } from "@/models/REST/chainAPICall";
+import { computed } from "vue";
+import { AppState } from "@/state/appState";
+
 
 
 export class HomeUtils {
-    static async getDiagnosticStorage(): Promise<BlockchainStorageInfo> {
-
-        let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile?.httpPort));
-
-        let blockChainStorageInfo = await chainRESTCall.diagnosticAPI.getDiagnosticStorage();
-
-        return blockChainStorageInfo;
+    static async getDiagnosticStorage(): Promise<BlockchainStorageInfo|false> {
+        try {
+            let blockChainStorageInfo = await AppState.chainAPI.diagnosticAPI.getDiagnosticStorage();
+            return blockChainStorageInfo;
+        } catch (error) {
+            console.log(error);            
+            return false;
+        }
+       
     }
 
-    static async getBlocksByHeightWithLimit(height: number): Promise<BlockInfo[]> {
-        let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile?.httpPort));
-        let blockInfo: BlockInfo[] = [];
-        let blockInfoByHeight = await chainRESTCall.blockAPI.getBlocksByHeightWithLimit(height);
+    static async getBlocksByHeightWithLimit(height: number): Promise<BlockInfo[] | false> {
+        try {
+            let blockInfo: BlockInfo[] = [];
+            let blockInfoByHeight = await AppState.chainAPI.blockAPI.getBlocksByHeightWithLimit(height);
         
-        if (blockInfoByHeight.length > 10) {
-            blockInfo = blockInfoByHeight.slice(0, 10);
-        } else {
-            if (blockInfoByHeight.length < 10) {
-                let getPreviousBlockByHeight = await chainRESTCall.blockAPI.getBlocksByHeightWithLimit(height - blockInfoByHeight.length);
-                let totalHeight: number = 10 - blockInfoByHeight.length;
-                let getSlicedBlock: BlockInfo[] = getPreviousBlockByHeight.slice(0, totalHeight);
-                blockInfo = blockInfoByHeight.concat(getSlicedBlock);
+            if (blockInfoByHeight.length > 10) {
+                blockInfo = blockInfoByHeight.slice(0, 10);
             } else {
-                blockInfo = blockInfoByHeight;
+                if (blockInfoByHeight.length < 10) {
+                    let getPreviousBlockByHeight = await AppState.chainAPI.blockAPI.getBlocksByHeightWithLimit(height - blockInfoByHeight.length);
+                    let totalHeight: number = 10 - blockInfoByHeight.length;
+                    let getSlicedBlock: BlockInfo[] = getPreviousBlockByHeight.slice(0, totalHeight);
+                    blockInfo = blockInfoByHeight.concat(getSlicedBlock);
+                } else {
+                    blockInfo = blockInfoByHeight;
+                }
             }
-        } 
-        return blockInfo;
+            return blockInfo;
+        } catch (error) {
+            return false;
+        }
     }
 
     static countDuration = (timestamp:number):string => {
