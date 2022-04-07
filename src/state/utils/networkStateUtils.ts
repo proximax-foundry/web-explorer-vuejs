@@ -110,7 +110,6 @@ export class NetworkStateUtils{
     AppState.wsNodeFullURL = NetworkStateUtils.buildWSEndpointURL(networkState.selectedAPIEndpoint);
     AppState.chainAPI = new ChainAPICall(AppState.nodeFullURL);
     AppState.networkType = ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type);  
-    console.log(AppState.networkType);
   }
 
   static updateChainNode(apiNode: string): void{
