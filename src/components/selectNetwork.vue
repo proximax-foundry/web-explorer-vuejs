@@ -31,7 +31,7 @@ import { computed, defineComponent, ref, watch, getCurrentInstance } from 'vue';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { ChainProfile } from "@/models/stores/chainProfile";
 import { AppState } from '@/state/appState';
-
+import { ChainUtils} from '@/util/chainUtils';
 export default defineComponent({
   name: 'SelectNetwork',
   emits:[
@@ -60,20 +60,23 @@ export default defineComponent({
       emitter.emit("CHANGE_NETWORK", true);
     }
 
-    const node = ref('')
+    const node = ref('');
     const selectedNetwork = computed(()=>{ return {name: networkState.chainNetworkName, node: node.value }});
 
     const init = () =>{
       let currentChainProfile = new ChainProfile(networkState.chainNetworkName);
       currentChainProfile.init();
       networkState.currentNetworkProfile = currentChainProfile;
+      NetworkStateUtils.setAPINodeInit();
       node.value = currentChainProfile.apiNodes[0];
       if(!AppState.isReady){
-        setTimeout(init, 1000);
+         setTimeout(init, 1000);
       }
     }
     init();
 
+
+   
     return {
       networks,
       toggleSelection,
