@@ -76,7 +76,7 @@
       <Column style="width: 120px; padding-bottom: 0rem; padding-top: 0rem; padding-right: 1rem; " field="Fee" header="FEE" v-if="wideScreen"> 
         <template #body="{data}"> 
           <div>
-            <div class="text-xs pt-2.5">{{data.fee + data.amountTransfer + " " + nativeTokenNamespace}}</div>
+            <div class="text-xs pt-2.5">{{data.fee + " " + nativeTokenNamespace}}</div>
           </div>
           <div class="mb-7"></div>
         </template> 
