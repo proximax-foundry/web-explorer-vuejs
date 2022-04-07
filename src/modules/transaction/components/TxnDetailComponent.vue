@@ -71,7 +71,7 @@
   <SecretDetailComponent :txnDetail="txnDetail" :txnGroup="txnType" v-if="txnType == TransactionType.SECRET_PROOF || txnType == TransactionType.SECRET_LOCK" />
   <AssetDetailComponent :txnDetail="txnDetail" :txnGroup="txnType" v-if="txnType == TransactionType.MOSAIC_DEFINITION || txnType == TransactionType.MOSAIC_SUPPLY_CHANGE || txnType == TransactionType.MODIFY_MOSAIC_LEVY || txnType == TransactionType.REMOVE_MOSAIC_LEVY" />
   <ChainDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.MOSAIC_DEFINITION || txnType == TransactionType.MOSAIC_SUPPLY_CHANGE || txnType == TransactionType.CHAIN_CONFIGURE || txnType == TransactionType.CHAIN_UPGRADE" />
-  <AccountDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.MOSAIC_DEFINITION || txnType == TransactionType.MOSAIC_SUPPLY_CHANGE || txnType == TransactionType.MODIFY_MULTISIG_ACCOUNT" />
+  <AccountDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.MODIFY_MULTISIG_ACCOUNT" />
   <MetadataDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.MOSAIC_METADATA_V2 || txnType == TransactionType.NAMESPACE_METADATA_V2 || txnType == TransactionType.CHAIN_CONFIGURE || txnType == TransactionType.ACCOUNT_METADATA_V2" />
 </template>
 
