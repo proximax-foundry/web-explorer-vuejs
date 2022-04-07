@@ -1,19 +1,13 @@
 <template>
-<div>
-    <!-- <p class="text-gray-500 mb-5 text-sm font-bold">
-        Asset Details 
-        <span class="text-blue-primary font-bold">{{assetname}}</span>
-    </p> -->
-
-     <div class="text-gray-500 mb-5 font-bold" v-if="assetname">
-      <div class="text-blue-primary text-md font-bold uppercase">{{ assetname }}</div>
+  <div>
+    <div class="text-gray-500 mb-5 font-bold" v-if="assets.name">
+      <div class="text-blue-primary text-md font-bold uppercase">{{ assets.name }}</div>
       <div class="text-txs text-gray-400 font-normal mt-1">Asset</div>
     </div>
     <div v-else>
-       <p class="text-gray-500 mb-5 text-sm font-bold">
+      <p class="text-gray-500 mb-5 text-sm font-bold">
         Asset Details 
-       <!-- <span class="text-blue-primary font-bold">{{assetname}}</span> -->
-        </p>
+      </p>
     </div>
     <div v-if="isShowInvalid">
       <div class="p-3 bg-yellow-100 text-yellow-700">Asset is not available in {{ networkName }}</div>
@@ -35,9 +29,9 @@
             </div>
             <div class="py-4 text-xs grid grid-cols-5 border-b border-gray-100">
               <div class="font-bold col-span-2">Namespace ID</div>
-              <div class="font-bold uppercase" v-if="namespaceID">
-                <router-link :to="{ name: 'ViewNamespace', params:{ namespaceParam: namespaceID }}" class="text-xs font-semibold mt-1 text-blue-600 col-span-3 hover:text-blue-primary hover:underline">
-                  {{namespaceID}}
+              <div class="font-bold uppercase" v-if="assets.namespaceId">
+                <router-link :to="{ name: 'ViewNamespace', params:{ namespaceParam: assets.namespaceId }}" class="text-xs font-semibold mt-1 text-blue-600 col-span-3 hover:text-blue-primary hover:underline">
+                  {{ assets.namespaceId }}
                 </router-link>
               </div>
                <div class="font-bold col-span-2" v-else>
@@ -103,7 +97,6 @@ import { AppState } from '@/state/appState';
 import { AssetUtils } from '@/util/assetUtil';
 import { Helper } from '@/util/typeHelper';
 import { networkState } from '@/state/networkState';
-import { AccountUtils } from '@/util/accountUtil';
 
 export default {
   name: 'ViewAsset',
@@ -119,9 +112,7 @@ export default {
     const currentComponent = ref('rich');
     const isShowInvalid = ref(null);
     const richList = ref([]);
-    const assetname = ref(null);
     const assets = ref([]);
-    const namespaceID = ref(null);
     const setCurrentComponent = (page) => {
       currentComponent.value = page;
     };
@@ -136,33 +127,16 @@ export default {
       }
       const asset = await AssetUtils.getAssetProperties(props.id);
       const richlist = await AssetUtils.getRichList(props.id);
-      const assetName = await AssetUtils.getAssetName(props.id);
-      let namespaceId = [];
-      if(asset!=false){
-        namespaceId = await AccountUtils.getAccountNamespaces(asset.owner);
-      }
-      setTimeout(() => {
+     
         if(asset!=false){
           isShowInvalid.value = false;
           assets.value = asset;
-          if(assetName.names[0]!=undefined){
-            assetname.value = assetName.names[0].name;
-            let namespace = [];
-            namespace = namespaceId;
-            let namespaceInfo = namespace.find(name=>name.name === assetName.names[0].name);
-            if(namespaceInfo){
-              namespaceID.value = namespaceInfo.id;
-            }
-          }else{
-            assetname.value = null;
-            namespace.value = null;
-          }
-          richList.value = richlist;
+          richList.value = richlist;          
           return;
         }else{
           isShowInvalid.value = true;
         }
-      }, 1000);  
+       
     };
     loadAsset();
 
@@ -181,10 +155,8 @@ return {
       richList,
       Helper,
       setCurrentComponent,
-      assetname,
       isShowInvalid,
       networkName,
-      namespaceID
     }
   }
 }
