@@ -58,10 +58,12 @@ jobs:
           name: dist
 
       - name: Apply Testnet Config
+        env:
+          CHAINPROFILE: ${{ secrets.CHAINPROFILE_JSON}}
         run: |
-          rm chainProfile.json
-          cp config/chainProfile-testnet.json ./chainProfile.json
-      
+          rm chainProfile.json chainSwapProfile.json
+          echo $CHAINPROFILE > ./chainProfile.json
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -69,6 +71,43 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Copy files to testnet website
+        env:
+          BUCKET: ${{ secrets.S3_BUCKET}}
+          CF_DIST_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+        run: |
+          aws s3 sync --delete . s3://$BUCKET
+          aws cloudfront create-invalidation --distribution-id $CF_DIST_ID --path "/*"
+  
+  deploy-mainnet:
+    name: Deploy to mainnet
+    needs: [build]
+    runs-on: ubuntu-latest
+    environment:
+      name: mainnet
+      url: 'https://explorer.xpxsirius.io'
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Download artifact 
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+
+      - name: Apply Testnet Config
+        env:
+          CHAINPROFILE: ${{ secrets.CHAINPROFILE_JSON}}
+        run: |
+          rm chainProfile.json chainSwapProfile.json
+          echo $CHAINPROFILE > ./chainProfile.json
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Copy files to mainnet website
         env:
           BUCKET: ${{ secrets.S3_BUCKET}}
           CF_DIST_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
