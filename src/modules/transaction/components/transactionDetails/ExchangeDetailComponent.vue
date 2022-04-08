@@ -11,7 +11,7 @@
     <div v-if="offer.cost">
       <div>Cost</div>
       <div>
-        <span class="font-bold">{{ formatCurrency(offer.cost)[0] }}</span>
+        <span class="font-bold">{{ Helper.convertToCurrency(formatCurrency(offer.cost)[0], 0) }}</span>
         <span class="text-xxs" v-if="formatCurrency(offer.cost)[1]">.{{ formatCurrency(offer.cost)[1] }}</span>
         <div class="font-bold inline-block ml-1">{{nativeTokenNamespace}}</div>
       </div>
@@ -19,7 +19,7 @@
     <div v-if="offer.amount">
       <div>Amount</div>
       <div>
-        <span class="font-bold">{{ formatCurrency(offer.amount)[0] }}</span>
+        <span class="font-bold">{{ Helper.convertToCurrency(formatCurrency(offer.amount)[0], 0) }}</span>
         <span class="text-xxs" v-if="formatCurrency(offer.amount)[1]">.{{ formatCurrency(offer.amount)[1] }}</span>
         <div class="text-gray-400 hover:text-gray-700 duration-300 transition-all inline-block ml-2">
           <router-link :to="{ name: 'ViewAsset', params: { id: offer.assetId }}" class="hover:text-blue-primary hover:underline">

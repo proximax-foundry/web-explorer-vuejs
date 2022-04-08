@@ -1,9 +1,14 @@
 <template>
-<div>
-    <p class="text-gray-500 mb-5 text-sm font-bold">
+  <div>
+    <div class="text-gray-500 mb-5 font-bold" v-if="assets.name">
+      <div class="text-blue-primary text-md font-bold uppercase">{{ assets.name }}</div>
+      <div class="text-txs text-gray-400 font-normal mt-1">Asset</div>
+    </div>
+    <div v-else>
+      <p class="text-gray-500 mb-5 text-sm font-bold">
         Asset Details 
-        <!-- <span class="text-blue-primary font-bold">{{assetname}}</span> -->
-    </p>
+      </p>
+    </div>
     <div v-if="isShowInvalid">
       <div class="p-3 bg-yellow-100 text-yellow-700">Asset is not available in {{ networkName }}</div>
     </div>
@@ -18,49 +23,55 @@
       <div class="filter shadow-xl border border-gray-50 p-5 mb-15 md:mr-2">
         <div class="text-xs font-bold mb-5 ml-2">Overview</div>
           <div class="txn-div">
-            <div>
-              <div>Asset Name</div>
-              <div class="font-bold" v-if="assetname">
-                {{assetname}}
+            <div class="py-4 text-xs grid grid-cols-5 border-b border-gray-100">
+              <div class="font-bold col-span-2">Asset ID</div>
+              <div class="font-bold uppercase">{{assets.assetId}}</div>
+            </div>
+            <div class="py-4 text-xs grid grid-cols-5 border-b border-gray-100">
+              <div class="font-bold col-span-2">Namespace ID</div>
+              <div class="font-bold uppercase" v-if="assets.namespaceId">
+                <router-link :to="{ name: 'ViewNamespace', params:{ namespaceParam: assets.namespaceId }}" class="text-xs font-semibold mt-1 text-blue-600 col-span-3 hover:text-blue-primary hover:underline">
+                  {{ assets.namespaceId }}
+                </router-link>
               </div>
-              <div v-else>
+               <div class="font-bold col-span-2" v-else>
                 -
               </div>
             </div>
-            <div>
-              <div>Asset ID</div>
-              <div class="font-bold">{{assets.assetId}}</div>
-            </div>
-            <div>
-              <div>Total Supply </div>
+            <div class="py-4 text-xs grid grid-cols-5 border-b border-gray-100">
+               <div class="font-bold col-span-2">Total Supply </div>
               <div>{{Helper.toCurrencyFormat(assets.supply,assets.divisibility)=="NaN"?"":Helper.toCurrencyFormat(assets.supply,assets.divisibility)}}</div>
             </div>
-            <div>
-              <div>Decimals</div>
+            <div class="py-4 text-xs grid grid-cols-5 border-b border-gray-100">
+               <div class="font-bold col-span-2">Decimals</div>
               <div>{{assets.divisibility}}</div>
             </div>
           </div>
         </div>
       <div class="filter shadow-xl border border-gray-50 p-5 mb-15 sm:ml-2">
         <div class="text-xs font-bold mb-5 ml-2">More Info</div>
-        <div class="txn-div w-auto">
-          <div>
-            <div>Creator Address</div>
-            <span class="break-all flex items-center"><router-link :to="{ name: 'ViewAccount', params: {accountParam: assets.owner}}" class="uppercase text-blue-600 hover:text-blue-primary hover:underline inline-flex"> {{assets.owner}}</router-link></span>
+         <div class="txn-div">
+          <div class="py-4 text-xs grid grid-cols-5 border-b border-gray-100">
+            <div class="font-bold col-span-2">Creator Address</div>
+            <div class="break-all uppercase col-span-3">
+              <router-link :to="{ name: 'ViewAccount', params: {accountParam: assets.owner}}" class="uppercase text-blue-600 hover:text-blue-primary hover:underline inline-flex"> {{Helper.createAddress(assets.owner).pretty()}}</router-link>
+            </div>
+          </div> 
+          <div class="py-4 text-xs grid grid-cols-5 border-b border-gray-100">
+            <div class="font-bold col-span-2">Height</div>
+              <div class="col-span-3">
+                <router-link :to="{ name: 'ViewBlock', params: { blockHeight: assets.height}}" class="truncate inline-block break-all text-blue-600 hover:text-blue-primary hover:underline">{{assets.height}}</router-link>
+              </div>
           </div>
-          <div>
-            <div>Height</div>
-            <router-link :to="{ name: 'ViewBlock', params: { blockHeight: assets.height}}" class="truncate inline-block break-all text-blue-600 hover:text-blue-primary hover:underline">{{assets.height}}</router-link>
+          <div class="py-4 text-xs grid grid-cols-5 border-b border-gray-100">
+            <div class="font-bold col-span-2">Expiry</div>
+              <div class="col-span-3">{{assets.expiry==0?'NIL':assets.expiry}}</div>
           </div>
-          <div>
-            <div>Expiry</div>
-            <div >{{assets.expiry==0?'NIL':assets.expiry}}</div>
-          </div>
-          <div>
+          <div class="py-4 text-xs grid grid-cols-4 border-b border-gray-100">
             <div>Supply Mutable</div>
-            <div class="font-bold text-green-600 w-10">{{assets.supplyMutable}}</div>
+            <div class="font-bold text-green-600 w-24 ml-10">{{assets.supplyMutable}}</div>
             <div>Transferable</div>
-            <div class="font-bold text-green-600 w-10">{{assets.transferable}}</div>
+            <div class="font-bold text-green-600 w-24 ml-5">{{assets.transferable}}</div>
           </div>
         </div>
       </div>
@@ -101,9 +112,7 @@ export default {
     const currentComponent = ref('rich');
     const isShowInvalid = ref(null);
     const richList = ref([]);
-    const assetname = ref(false);
     const assets = ref([]);
-
     const setCurrentComponent = (page) => {
       currentComponent.value = page;
     };
@@ -111,29 +120,23 @@ export default {
     const networkName = computed(() => {
       return networkState.chainNetworkName;
     });
-    
+
     const loadAsset = async() => {
       if(!AppState.isReady){
         setTimeout(loadAsset, 1000);
       }
       const asset = await AssetUtils.getAssetProperties(props.id);
       const richlist = await AssetUtils.getRichList(props.id);
-      const assetName = await AssetUtils.getAssetName(props.id);
-      setTimeout(() => {
+     
         if(asset!=false){
           isShowInvalid.value = false;
           assets.value = asset;
-          if(assetName.names[0]!=undefined){
-            assetname.value = assetName.names[0].name;
-          }else{
-            assetname.value = null;
-          }
-          richList.value = richlist;
+          richList.value = richlist;          
           return;
         }else{
           isShowInvalid.value = true;
         }
-      }, 1000);  
+       
     };
     loadAsset();
 
@@ -152,9 +155,8 @@ return {
       richList,
       Helper,
       setCurrentComponent,
-      assetname,
       isShowInvalid,
-      networkName
+      networkName,
     }
   }
 }
@@ -162,8 +164,6 @@ return {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-
-
 .txn-div{
   @apply text-gray-800 text-xs;
   > div{
@@ -178,7 +178,7 @@ return {
     }
 
     > div:nth-child(3){
-      @apply ml-7 w-32 text-xs pl-4 font-bold;
+      @apply pl-4 w-32 text-xs font-bold;
     }
 
     > div:last-child{

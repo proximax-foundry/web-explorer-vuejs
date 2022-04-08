@@ -55,7 +55,7 @@
           <div class="inline-block text-xs font-bold" v-if='splitBalance(asset.balance).right!=null'>.</div>
           <div class="inline-block text-txs font-bold">{{splitBalance(asset.balance).right}}</div>
         </div>
-        <div class="px-2 py-3 text-center"><span class="material-icons md-16 text-green-600 font-bold" v-if="asset.isOwner">done</span><span class="material-icons md-16 text-red-700 font-bold" v-else>close</span></div>
+        <div class="px-2 py-3 text-center"><div v-if="asset.isOwner" >Yes</div><div v-else>No</div></div>
       </div>
     </div>
   </div>

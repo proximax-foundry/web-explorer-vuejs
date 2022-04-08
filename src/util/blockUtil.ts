@@ -3,9 +3,7 @@ import {
     Deadline,
     LimitType,
 } from "tsjs-xpx-chain-sdk";
-import { ChainUtils } from "./chainUtils";
-import { networkState } from '@/state/networkState';
-import { ChainAPICall } from "@/models/REST/chainAPICall";
+import { AppState } from "@/state/appState";
 
 export interface BlockObj {
     height: number,
@@ -21,9 +19,8 @@ export class BlockUtils {
     
     static async getBlockByHeight(blockHeight: number): Promise<BlockObj | boolean> {
         try {
-            let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile?.httpPort));
             let blockInfo: BlockObj;
-            let block = await chainRESTCall.blockAPI.getBlockByHeight(blockHeight);
+            let block = await AppState.chainAPI.blockAPI.getBlockByHeight(blockHeight);
             blockInfo = {
                 height: block.height.compact(),
                 validator: block.signer.publicKey,
@@ -40,16 +37,15 @@ export class BlockUtils {
     }
 
     static async getBlocksList(blockHeight?:number): Promise<BlockInfo[]> {
-        let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile?.httpPort));
         let blockInfo: BlockInfo[] = [];
         if (blockHeight == null) {
-            let height = await chainRESTCall.diagnosticAPI.getDiagnosticStorage();
+            let height = await AppState.chainAPI.diagnosticAPI.getDiagnosticStorage();
             blockHeight = height.numBlocks;
         }
         
-        let blockInfoByHeight = await chainRESTCall.blockAPI.getBlocksByHeightWithLimit(blockHeight, LimitType.N_100);
+        let blockInfoByHeight = await AppState.chainAPI.blockAPI.getBlocksByHeightWithLimit(blockHeight, LimitType.N_100);
         if (blockInfoByHeight.length < 100) {
-            let getPreviousBlockByHeight = await chainRESTCall.blockAPI.getBlocksByHeightWithLimit(blockHeight - blockInfoByHeight.length);
+            let getPreviousBlockByHeight = await AppState.chainAPI.blockAPI.getBlocksByHeightWithLimit(blockHeight - blockInfoByHeight.length);
             let totalHeight: number = 100 - blockInfoByHeight.length;
             let getSlicedBlock: BlockInfo[] = getPreviousBlockByHeight.slice(0, totalHeight);
             blockInfo = blockInfoByHeight.concat(getSlicedBlock);            

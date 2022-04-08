@@ -4,7 +4,7 @@ import { SessionService } from "../../models/stores/sessionService"
 import { ChainProfile, ChainProfileConfig, ChainProfileNames, ChainProfilePreferences } from "../../models/stores/"
 import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { BuildTransactions } from "@/util/buildTransactions";
-
+import { ChainUtils } from "@/util/chainUtils";
 const sessionNetworkName = "networkName";
 const sessionNetworkIndex = "network";
 const sessionSelectedAPINode = "selectedChainNode";
@@ -71,6 +71,7 @@ export class NetworkStateUtils{
     AppState.nativeToken.divisibility = chainProfile.network.currency.divisibility;
     AppState.nativeToken.label = chainProfile.network.currency.name;
     AppState.nativeToken.fullNamespace = chainProfile.network.currency.namespace;
+    AppState.networkType = ChainUtils.getNetworkType(chainProfile.network.type);
 
     const chainProfileConfig = new ChainProfileConfig(networkState.chainNetworkName);
 
@@ -104,11 +105,11 @@ export class NetworkStateUtils{
     }
     SessionService.setNumber('nodePort', networkState.currentNetworkProfile?.httpPort || 3000);
     SessionService.setRaw('selectedChainNode', networkState.selectedAPIEndpoint);
-
     AppState.nodeFullURL = NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint);
     AppState.nodeURL = networkState.selectedAPIEndpoint;
     AppState.wsNodeFullURL = NetworkStateUtils.buildWSEndpointURL(networkState.selectedAPIEndpoint);
     AppState.chainAPI = new ChainAPICall(AppState.nodeFullURL);
+    AppState.networkType = ChainUtils.getNetworkType(networkState.currentNetworkProfile.network.type);  
   }
 
   static updateChainNode(apiNode: string): void{
