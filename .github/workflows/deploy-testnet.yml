@@ -61,7 +61,7 @@ jobs:
         env:
           CHAINPROFILE: ${{ secrets.CHAINPROFILE_JSON}}
         run: |
-          rm chainProfile.json chainSwapProfile.json
+          rm chainProfile.json
           echo $CHAINPROFILE > ./chainProfile.json
 
       - name: Configure AWS Credentials
@@ -98,7 +98,7 @@ jobs:
         env:
           CHAINPROFILE: ${{ secrets.CHAINPROFILE_JSON}}
         run: |
-          rm chainProfile.json chainSwapProfile.json
+          rm chainProfile.json
           echo $CHAINPROFILE > ./chainProfile.json
 
       - name: Configure AWS Credentials
