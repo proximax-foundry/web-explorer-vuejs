@@ -16,7 +16,10 @@
       <div v-for="(asset, index) in accountAssets" :key="index" class="grid grid-cols-5 text-xs md:hidden py-6 px-3 items-center" :class="`${(index != (accountAssets.length - 1))?'gray-line':''}`">
         <div class="px-2 py-3 col-span-2">
           <router-link :to="{ name: 'ViewAsset', params:{ id: asset.id }}" class="text-blue-600 hover:text-blue-primary hover:underline">{{ asset.id }}</router-link>
-          <div class="flex items-center mt-5"><div class="w-14 text-txs">Creator:</div><div class="material-icons md-16 text-green-600 font-bold" v-if="asset.isOwner">done</div><div class="material-icons md-16 text-red-700 font-bold" v-else>close</div></div>
+          <div class="flex items-center mt-5"><div class="w-14 text-txs">Creator:</div>        
+          <div class="text-xs" v-if="asset.isOwner">Yes</div>
+          <div class="text-xs" v-else>No</div>
+        </div>
         </div>
         <div class="px-2 py-3 col-span-2">
           <div class="flex items-center">
@@ -55,7 +58,7 @@
           <div class="inline-block text-xs font-bold" v-if='splitBalance(asset.balance).right!=null'>.</div>
           <div class="inline-block text-txs font-bold">{{splitBalance(asset.balance).right}}</div>
         </div>
-        <div class="px-2 py-3 text-center"><div v-if="asset.isOwner" >Yes</div><div v-else>No</div></div>
+        <div class="px-2 py-3 text-center"><div v-if="asset.isOwner">Yes</div><div v-else>No</div></div>
       </div>
     </div>
   </div>
