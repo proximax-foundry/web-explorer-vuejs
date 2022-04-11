@@ -262,36 +262,35 @@ export default {
 
     const naviFirst = () => {
       currentPage.value = 1;
-      loadRecentTransferTransactions();
+      loadAccountTransactions();
     }
 
     const naviPrevious = () => {
       --currentPage.value;
-      loadRecentTransferTransactions();
+      loadAccountTransactions();
     }
 
     const naviNext = () => {
       ++currentPage.value;
-      loadRecentTransferTransactions();
+      loadAccountTransactions();
     }
 
     const naviLast = () => {
       currentPage.value = totalPages.value;
-      loadRecentTransferTransactions();
+      loadAccountTransactions();
     }
 
     const changeRows = () => {
-      loadRecentTransferTransactions();
+      loadAccountTransactions();
     }
 
     const transactions = ref([]);
     let transactionGroupType = Helper.getTransactionGroupType();
     let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
 
-    let loadRecentTransferTransactions = async() =>{
+    let loadAccountTransactions = async() =>{
       isFetching.value = true;
       let txnQueryParams = Helper.createTransactionQueryParams();
-      let blockHeight = await AppState.chainAPI.chainAPI.getBlockchainHeight();
       txnQueryParams.pageSize = pages.value;
       if(props.accountPublicKey == invalidPublicKey){
         txnQueryParams.address = Helper.createAddress(props.accountAddress).plain();
@@ -300,9 +299,7 @@ export default {
       }
       txnQueryParams.pageNumber = currentPage.value;
       txnQueryParams.embedded = true;
-      txnQueryParams.fromHeight = blockHeight - 200000;
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
-
       let transactionSearchResult = await TransactionUtils.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams);
 
       if(transactionSearchResult.transactions.length > 0){
@@ -316,7 +313,7 @@ export default {
     };
 
     if(AppState.isReady){
-      loadRecentTransferTransactions();
+      loadAccountTransactions();
     }
     else{
       let readyWatcher = watch(AppState, (value) => {
@@ -330,7 +327,7 @@ export default {
     emitter.on('CHANGE_NETWORK', payload => {
       isFetching.value = true;
       if(payload){
-        loadRecentTransferTransactions();
+        loadAccountTransactions();
       }
     });
 
