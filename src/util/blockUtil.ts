@@ -10,6 +10,7 @@ export interface BlockObj {
     validator: string,
     hash: string,
     difficulty: number,
+    feeMultiplier : number,
     totalFee: number,
     numTransactions: number,
     timestamp: string
@@ -26,6 +27,7 @@ export class BlockUtils {
                 validator: block.signer.publicKey,
                 hash: block.hash,
                 difficulty: block.difficulty.compact(),
+                feeMultiplier:block.feeMultiplier,
                 totalFee: block.totalFee.compact(),
                 numTransactions: block.numTransactions,
                 timestamp: this.fmtTime(block.timestamp.compact())
