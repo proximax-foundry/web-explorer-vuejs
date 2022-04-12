@@ -4,7 +4,7 @@
       Blocks
     </p>
     <div v-if="isFetching">
-      <div class="flex justify-center items-center border-gray-400 py-30">
+      <div class="flex justify-center items-center border-gray-400 mt-10">
         <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-navy-primary mr-2"></div>
         <span class="text-tsm">Fetching Blocks</span>
       </div>
