@@ -2,7 +2,7 @@
   <div class="txn-div">
     <div>
       <div>Tx Hash</div>
-      <div class="flex items-center"><div class="mr-2" id="hash" :copyValue="txnDetail.hash" copySubject="Transaction hash">{{ txnDetail.hash }}</div><img src="@/assets/img/icon-copy.svg" @click="copy('hash')" class="cursor-pointer" /></div>
+      <div class="flex items-center break-all"><div class="mr-2" id="hash" :copyValue="txnDetail.hash" copySubject="Transaction hash">{{ txnDetail.hash }}</div><img src="@/assets/img/icon-copy.svg" @click="copy('hash')" class="cursor-pointer" /></div>
     </div>
     <div>
       <div>Status</div>

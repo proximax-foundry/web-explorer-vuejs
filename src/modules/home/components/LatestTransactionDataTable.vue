@@ -35,7 +35,7 @@
             <div class="-ml-1">
               <div class="uppercase text-xs text-gray-300 font-bold -mt-3 mb-2">Signer / TX Type</div>
               <div class="text-xs text-gray-500 inline-flex">Signer:</div>
-              <router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signerAddress}}" class="uppercase font-bold text-xs text-blue-600 ml-1 hover:text-blue-primary hover:underline inline-flex"><span class="text-ellipsis overflow-hidden truncate w-32">{{Helper.createAddress(data.signerAddress).pretty()}}</span></router-link>
+              <router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signerAddress}}" class="uppercase font-bold text-xs text-blue-600 ml-1 hover:text-blue-primary hover:underline inline-flex"><span class="text-ellipsis overflow-hidden truncate w-36">{{Helper.createAddress(data.signerAddress).pretty()}}</span></router-link>
             <div>
             <div class="text-xs text-gray-500 inline-flex mt-1">TX Type: 
               <div class="uppercase text-xs ml-1">{{data.type}}</div></div>
