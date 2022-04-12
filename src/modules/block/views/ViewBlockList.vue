@@ -4,7 +4,7 @@
       Blocks
     </p>
     <div v-if="isFetching">
-      <div class="flex justify-center items-center border-gray-400 mt-15 mb-20">
+      <div class="flex justify-center items-center border-gray-400 py-30">
         <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-navy-primary mr-2"></div>
         <span class="text-tsm">Fetching Blocks</span>
       </div>
@@ -48,7 +48,7 @@
             </div>
             <div>
               <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Fee</div>
-              <div class="text-xs uppercase font-bold" >{{ data.totalFee.compact()}}</div>
+              <div class="text-xs uppercase font-bold" >{{ TransactionUtils.convertToExactNativeAmount(data.totalFee.compact()) + " " + nativeTokenNamespace}}</div>
             </div>
             <div>
               <div class="mb-1 mt-5"></div>
@@ -78,7 +78,7 @@
         </Column>
         <Column field="block" v-if="wideScreen" header="FEE" headerStyle="width:120px">
           <template #body="{data}">
-            <span class="text-xs">{{ data.totalFee.compact()}}</span>
+            <span class="text-xs">{{ TransactionUtils.convertToExactNativeAmount(data.totalFee.compact()) + " " +nativeTokenNamespace}}</span>
           </template>
         </Column>
         <template #empty>
@@ -120,6 +120,8 @@ export default {
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const isFetching = ref(true);
     const wideScreen = ref(false);
+    const nativeTokenNamespace = AppState.nativeToken.label;
+
     const screenResizeHandler = () => {
       if(window.innerWidth < 1024){
         wideScreen.value = false;
@@ -179,7 +181,8 @@ export default {
       shortenedAddress,
       BlockUtils,
       TransactionUtils,
-      shortenedString
+      shortenedString,
+      nativeTokenNamespace
     }
   }
 }
