@@ -1,22 +1,21 @@
 <template>
   <div class="mt-3 border border-gray-200 p-3" v-for="(item, index) in allInnerTransactions" :key="index">
-    <div class="">
-      <div class="table_div">
-        <div>
-          <div>Type</div>
-          <div>{{ TransactionUtils.getTransactionTypeName(item.type) }}</div>
-        </div>
-        <div>
-          <div>Public Key</div>
-          <div class="flex items-center">
-            <router-link id="publicKey" :to="{ name: 'ViewAccount', params: { accountParam: item.signer.publicKey }}" class="hover:text-blue-primary hover:underline text-blue-600" :copyValue="item.signer.publicKey" copySubject="Public Key">
+    <div class="table_div">
+      <div>
+        <div>Type</div>
+        <div>{{ TransactionUtils.getTransactionTypeName(item.type) }}</div>
+      </div>
+      <div>
+        <div>Public Key</div>
+        <div class="flex items-center">
+          <router-link id="publicKey" :to="{ name: 'ViewAccount', params: { accountParam: item.signer.publicKey }}" class="hover:text-blue-primary hover:underline text-blue-600" :copyValue="item.signer.publicKey" copySubject="Public Key">
               {{item.signer.publicKey}}
-            </router-link>
-            <img src="@/assets/img/icon-copy.svg" @click="copy('publicKey')" class="ml-2 w-4 h-4 cursor-pointer" />
-          </div>
+          </router-link>
+          <img src="@/assets/img/icon-copy.svg" @click="copy('publicKey')" class="ml-2 w-4 h-4 cursor-pointer" />
         </div>
+      </div>
         <div>
-          <div>Signer</div>
+          <div>From</div>
           <div class="flex items-center">
             <router-link id="signerAddress" :to="{ name: 'ViewAccount', params: { accountParam: item.signer.address.address }}" class="hover:text-blue-primary hover:underline text-blue-600" :copyValue="Helper.createAddress(item.signer.address.address).pretty()" copySubject="Address">
               {{ Helper.createAddress(item.signer.address.address).pretty() }}
@@ -26,7 +25,7 @@
         </div>
         <div>
           <div>Fully signed</div>
-          <div>{{ innerSignedList[index] }}</div>
+          <div>{{ !innerSignedList[index] && innerSignedList[index] === false?"No":"Yes"}}</div>
         </div>
       </div>
       <div class="table_div" v-if="innerTxnExtractedData[index]!=undefined">
@@ -77,7 +76,11 @@
                 <span class="text-xxs">{{ formatCurrency(sda.amount)[1]?'.' + formatCurrency(sda.amount)[1]:'' }}</span>
               </div>
               <div v-if="sda.namespace" class="inline-block ml-2">
-                <router-link :to="{ name: 'ViewAsset', params:{ id: sda.assetId }}" class="text-blue-600 hover:text-blue-primary hover:underline">{{ sda.namespace.toUpperCase() }}</router-link>
+                <img v-if="sda.namespace.toUpperCase()==nativeTokenNamespace" src="@/modules/account/img/proximax-logo.svg" class="inline-block h-7 w-7 mr-2 border-2 rounded-3xl">
+                <img v-else-if="sda.namespace=='xarcade.xar'" src="@/modules/account/img/xarcade-logo.svg" class="inline-block h-7 w-7 mr-2 border-2 rounded-3xl">
+                 <img v-else-if="sda.namespace=='prx.metx'" src="@/modules/account/img/metx-logo.svg" class="inline-block h-7 w-7 mr-2 border-2 rounded-3xl">
+                <img v-else src="@/modules/transaction/img/proximax-logo-gray.svg" class="inline-block h-7 w-7 mr-2 border-2 rounded-3xl">
+                <router-link :to="{ name: 'ViewAsset', params:{ id: sda.assetId }}" class="text-blue-600 hover:text-blue-primary hover:underline">{{ sda.namespace.toUpperCase()}}</router-link>
               </div>
               <div v-else class="text-gray-400 hover:text-gray-700 duration-300 transition-all inline-block ml-2">
                 <router-link :to="{ name: 'ViewAsset', params: { id: sda.assetId }}" class="hover:text-blue-primary hover:underline">
@@ -89,11 +92,10 @@
         </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script>
-import { computed, defineComponent, getCurrentInstance, inject, ref, watch, toRefs, onBeforeMount  } from "vue";
+import { ref, onBeforeMount } from "vue";
 import { TransactionType } from "tsjs-xpx-chain-sdk";
 import { TransactionUtils, MsgType, InnerTxnLegendType } from '@/models/util/transactionUtils';
 import { TransactionUtils as TxnUtils } from '@/util/transactionUtils';
@@ -101,6 +103,7 @@ import { Helper } from "@/util/typeHelper";
 import { CosignUtils } from '@/util/cosignUtils';
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
+import { AppState } from "@/state/appState";
 
 export default {
   name: 'InnerTxnComponent',
@@ -111,7 +114,7 @@ export default {
   },
   setup(props) {
     const toast = useToast();
-
+    const nativeTokenNamespace = AppState.nativeToken.label;
     const copy = (id) =>{
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
@@ -155,7 +158,6 @@ export default {
             extractedData.infoGreenList = extractedData.infos.filter(info => !info.label && info.type === MsgType.GREEN);
             extractedData.infoRedList = extractedData.infos.filter(info => !info.label && info.type === MsgType.RED);
             extractedData.infoList = extractedData.infos.filter(info => info.type === MsgType.NONE);
-            console.log(extractedData)
             innerTxnExtractedData.value[item] = extractedData;
 
           let innerSigner = txn.signer;
@@ -186,8 +188,8 @@ export default {
             }
             signedSigners = Array.from(new Set(signedSigners));
             let isSigned = flatCosigners.every((val) => signedSigners.includes(val));
-            // console.log(isSigned)
             innerSignedList.value.push(isSigned);
+            console.log(innerSignedList);
           }else{
             try {
               let accountMultisigGraphInfo = await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(innerSigner.address);
@@ -219,7 +221,7 @@ export default {
         });
       }
     });
-
+  console.log(allInnerTransactions);
     return {
       TransactionUtils,
       Helper,
@@ -230,6 +232,7 @@ export default {
       innerTxnExtractedData,
       copy,
       formatCurrency,
+      nativeTokenNamespace
     }
   }
 }
