@@ -281,6 +281,7 @@ export default {
     }
 
     const changeRows = () => {
+      currentPage.value = 1;
       loadAccountTransactions();
     }
 
@@ -297,6 +298,7 @@ export default {
       }else{
         txnQueryParams.publicKey = props.accountPublicKey;
       }
+      console.log(currentPage.value);
       txnQueryParams.pageNumber = currentPage.value;
       txnQueryParams.embedded = true;
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
