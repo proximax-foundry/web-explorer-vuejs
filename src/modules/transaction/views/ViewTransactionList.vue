@@ -12,7 +12,7 @@
       </div>
     </div>
     <div v-if="isFetching">
-      <div class="flex justify-center items-center border-gray-400 mt-15">
+      <div class="flex justify-center items-center border-gray-400 mt-5">
         <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-navy-primary mr-2"></div>
         <span class="text-tsm">Fetching transactions</span>
       </div>
@@ -108,6 +108,7 @@ export default {
     const currentPage = ref(1)
     const totalPages = ref(0);
 
+    
     const enableFirstPage = computed(() => {
       return currentPage.value > 1;
     });
@@ -145,6 +146,7 @@ export default {
     }
 
     const changeRows = () => {
+      currentPage.value = 1;
       loadRecentTransactions();
     }
 
