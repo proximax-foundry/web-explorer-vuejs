@@ -15,7 +15,7 @@
           <div>
             <div class="uppercase text-xs text-gray-300 font-bold mb-1">Hash</div>
             <router-link class="uppercase font-bold text-xs block text-blue-600 hover:text-blue-primary hover:underline" :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}">
-              <span class="text-xs break-all hover:underline hover:text-blue-primary" v-tooltip.right="data.hash">{{data.hash.substring(0, 15) }}...</span>
+              <span class="text-xs truncate inline-flex hover:underline hover:text-blue-primary text-ellipsis overflow-hidden w-44" v-tooltip.right="data.hash">{{data.hash}}</span>...
             </router-link>
           </div>
           <div>
@@ -44,7 +44,7 @@
           </div>
           <div>
             <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Info</div>
-            <div>
+            <div class="inline-grid grid-cols-1 gap-2 break-all">
               <div class="inline-block bg-blue-100 text-blue-700 font-bold text-xs py-1 px-2 my-1 mr-1 rounded" v-if="data.nonce">Nonce: {{data.nonce}} </div>
               <div class="inline-block bg-blue-100 text-blue-700 font-bold text-xs py-1 px-2 my-1 mr-1 rounded" v-if="data.divisibility !== null">Divisibility: {{data.divisibility}} </div>
               <div v-bind:class="['inline-block','text-black', 'py-1', 'px-2', 'my-1', 'mr-1', 'text-xs', 'font-bold', 'rounded', (data.transferable) ? 'bg-green-200 text-green-700' : 'bg-red-200 text-red-700']" v-if="data.transferable !== null">Transferable</div>
@@ -58,8 +58,8 @@
                 <div class="inline-block bg-blue-100 text-blue-700 font-bold text-xs py-1 px-2 my-1 mr-1 rounded" >
                   Levy Amount: {{ Helper.toCurrencyFormat(data.levyAssetAmount, 0) }}
                 </div>
-                <div v-tooltip.bottom="data.levyRecipient" class="inline-block bg-blue-100 text-blue-700 font-bold text-xs rounded py-1 px-2 my-1 mr-1 truncate">
-                  Levy Recipient: {{ data.levyRecipient }}
+                <div v-tooltip.bottom="data.levyRecipient" class="inline-block bg-blue-100 text-blue-700 font-bold text-xs rounded py-1 px-2 my-1">
+                  Levy Recipient: <div class="text-ellipsis overflow-hidden inline-flex truncate w-44">{{ data.levyRecipient }}</div>...
                 </div>
               </div>
             </div>
@@ -68,7 +68,7 @@
       </Column>
       <Column field="hash" header="Hash" headerStyle="width:100px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
-          <router-link :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}" class="text-xs text-blue-600 hover:text-blue-primary hover:underline" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 15) }}...</router-link>
+          <router-link :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}" class="text-xs text-blue-600 hover:text-blue-primary hover:underline truncate inline-flex w-20" v-tooltip.bottom="data.hash"><span class="text-ellipsis overflow-hidden">{{data.hash }}</span>...</router-link>
         </template>
       </Column>
       <Column field="timestamp" header="Timestamp" headerStyle="width:110px;text-transform:uppercase" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" >

@@ -15,7 +15,7 @@
           <div>
             <div class="uppercase text-xs text-gray-300 font-bold mb-1">Hash</div>
             <router-link class="uppercase font-bold text-xs block text-blue-600 hover:text-blue-primary hover:underline" :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}">
-              <span class="text-xs break-all hover:underline hover:text-blue-primary" v-tooltip.right="data.hash">{{data.hash.substring(0, 15) }}...</span>
+              <span class="text-xs break-all hover:underline hover:text-blue-primary truncate inline-flex text-ellipsis overflow-hidden w-44" v-tooltip.right="data.hash">{{data.hash}}</span>...
             </router-link>
           </div>
           <div>
@@ -54,7 +54,7 @@
       </Column>
       <Column field="hash" header="Hash" headerStyle="width:100px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
-          <router-link :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}" class="text-xs text-blue-600 hover:text-blue-primary hover:underline" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 15) }}...</router-link>
+          <router-link :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}" class="text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex" v-tooltip.bottom="data.hash"><span class="text-ellipsis overflow-hidden w-32">{{data.hash }}</span>...</router-link>
         </template>
       </Column>
       <Column field="timestamp" header="Timestamp" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">

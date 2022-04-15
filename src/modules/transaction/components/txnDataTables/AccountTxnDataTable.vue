@@ -15,8 +15,7 @@
           <div>
             <div class="uppercase text-xs text-gray-300 font-bold mb-1">Hash</div>
             <router-link class="uppercase font-bold text-xs block text-blue-600 hover:text-blue-primary hover:underline" :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}">
-              <span class="text-xs break-all hover:underline hover:text-blue-primary" v-tooltip.right="data.hash">{{data.hash.substring(0, 15) }}...</span>
-            </router-link>
+              <span class="text-xs truncate inline-flex  hover:underline hover:text-blue-primary text-ellipsis overflow-hidden w-44" v-tooltip.right="data.hash">{{data.hash }}</span>...</router-link>
           </div>
           <div>
             <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Type</div>
@@ -27,7 +26,7 @@
           <div>
             <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Account</div>
             <div class="flex items-center">
-              <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.signerAddress }}" v-tooltip.right="Helper.createAddress(data.signerAddress).pretty()" class="uppercase font-bold truncate inline-block text-xs break-all text-blue-600 hover:text-blue-primary hover:underline">{{ shortenedAddress(Helper.createAddress(data.signerAddress).pretty()) }}</router-link>
+              <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.signerAddress }}" v-tooltip.right="Helper.createAddress(data.signerAddress).pretty()" class="uppercase font-bold truncate inline-flex text-xs  text-blue-600 hover:text-blue-primary hover:underline w-44"><span class="text-ellipsis overflow-hidden">{{ Helper.createAddress(data.signerAddress).pretty() }}</span >...</router-link>
             </div>
           </div>
         </template>
@@ -39,7 +38,7 @@
             <div class="uppercase font-bold text-xs">{{ convertLocalTime(data.timestamp) }}</div>
           </div>
           <div>
-            <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Approval and Removal</div>
+            <div class="uppercase text-xs text-gray-300 font-bold mb-1">Approval and Removal</div>
             <div class="flex items-center">
               <div class="text-xs">
                 {{ data.oldApprovalNumber ? data.oldApprovalNumber + " " : '' }}{{ data.approvalDelta > 0 ? `+${data.approvalDelta}`: data.approvalDelta }}
@@ -51,21 +50,21 @@
           </div>
           <div>
             <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Info</div>
-            <div class="flex items-center">
-              <span v-bind:key="cosigner" v-tooltip.bottom="'Adding account:<br><br>' + cosigner" v-for="cosigner in data.addedCosigner" class="inline-block bg-green-200 font-bold text-green-700 text-xs rounded py-1 px-2 my-1">
-                {{ cosigner.toString().substring(0, 20) }}...
-              </span>
-              <span v-bind:key="cosigner" v-tooltip.bottom="'Removing account:<br><br>' + cosigner" v-for="cosigner in data.removedCosigner" class="inline-block bg-red-200 font-bold text-red-700 text-xs py-1 px-1 my-1">
-                {{ cosigner.toString().substring(0, 20) }}...
-              </span>
+              <div class="inline-grid grid-cols-1 gap-2 break-all">
+              <div v-bind:key="cosigner" v-tooltip.bottom="'Adding account:<br><br>' + cosigner" v-for="cosigner in data.addedCosigner" class="truncate inline-flex bg-green-200 font-bold text-green-700 text-xs rounded py-1 px-2 my-1 mr-1">
+                <span class="text-ellipsis overflow-hidden w-44">{{ cosigner.toString()}}</span>...
+              </div>
+              <div v-bind:key="cosigner" v-tooltip.bottom="'Removing account:<br><br>' + cosigner" v-for="cosigner in data.removedCosigner" class="truncate inline-block bg-red-200 font-bold text-red-700 text-xs py-1 px-2 my-1 mr-1">
+                <span class="text-ellipsis overflow-hidden w-44">{{ cosigner.toString()}}</span>...
+              </div>
               <span v-if="data.addedCosigner.length ==0  && data.removedCosigner.length ==0">-</span>
             </div>
           </div>
         </template>
       </Column>
-      <Column field="hash" header="Hash" headerStyle="width:100px;text-transform:uppercase"  v-if="wideScreen">
+      <Column field="hash" header="Hash" headerStyle="width:70px;text-transform:uppercase"  v-if="wideScreen">
         <template #body="{data}">
-          <router-link :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}" class="text-xs text-blue-600 hover:text-blue-primary hover:underline" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 15) }}...</router-link>
+          <router-link :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}" class="text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex" v-tooltip.bottom="data.hash"><span class="text-ellipsis overflow-hidden w-44">{{data.hash}}</span>...</router-link>
         </template>
       </Column>
       <Column field="timestamp" header="Timestamp" headerStyle="width:110px;text-transform:uppercase"  v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" >
@@ -73,7 +72,7 @@
           <span class="text-xs">{{ convertLocalTime(data.timestamp) }}</span>
         </template>
       </Column>
-      <Column field="typeName" header="Type" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
+      <Column field="typeName" header="Type" headerStyle="width:140px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <span class="text-xs">{{data.type}}</span>
         </template>
@@ -90,7 +89,7 @@
       </Column>
       <Column header="Account" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
-          <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.signerAddress }}" v-tooltip.right="Helper.createAddress(data.signerAddress).pretty()" class="truncate inline-block text-xs break-all text-blue-600 hover:text-blue-primary hover:underline">{{ shortenedAddress(Helper.createAddress(data.signerAddress).pretty()) }}</router-link>
+          <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.signerAddress }}" v-tooltip.right="Helper.createAddress(data.signerAddress).pretty()" class="truncate inline-flex text-xs break-all text-blue-600 hover:text-blue-primary hover:underline w-44"><span class="text-ellipsis overflow-hidden">{{ Helper.createAddress(data.signerAddress).pretty() }}</span>...</router-link>
         </template>
       </Column>
       <Column header="Approval Delta" headerStyle="width:60px;text-transform:uppercase" v-if="wideScreen">
@@ -109,12 +108,12 @@
       </Column>
       <Column header="Info" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
-          <span v-bind:key="cosigner" v-tooltip.bottom="'Adding account:<br><br>' + cosigner" v-for="cosigner in data.addedCosigner" class="inline-block bg-green-200 font-bold text-green-700 text-xs rounded py-1 px-2 my-1 mx-1">
-            {{ cosigner.toString().substring(0, 20) }}...
-          </span>
-          <span v-bind:key="cosigner" v-tooltip.bottom="'Removing account:<br><br>' + cosigner" v-for="cosigner in data.removedCosigner" class="inline-block bg-red-200 font-bold text-red-700 text-xs rounded py-1 px-1 my-1 mx-1">
-            {{ cosigner.toString().substring(0, 20) }}...
-          </span>
+          <div  v-bind:key="cosigner" v-tooltip.bottom="'Adding account:<br><br>' + cosigner" v-for="cosigner in data.addedCosigner" class="truncate inline-flex bg-green-200 font-bold text-green-700 text-xs rounded py-1 px-2 my-1 mx-1 ">
+            <span class="text-ellipsis overflow-hidden w-48"> {{ cosigner.toString() }}</span>...
+          </div>
+          <div v-bind:key="cosigner" v-tooltip.bottom="'Removing account:<br><br>' + cosigner" v-for="cosigner in data.removedCosigner" class="truncate inline-flex bg-red-200 font-bold text-red-700 text-xs rounded py-1 px-2 my-1 mx-1">
+             <span class="text-ellipsis overflow-hidden w-48">{{ cosigner.toString() }}</span>...
+          </div>
           <!-- <span v-if="data.addedCosigner.length ==0  && data.removedCosigner.length ==0">-</span> -->
         </template>
       </Column>
@@ -194,9 +193,6 @@ export default {
       return Helper.convertDisplayDateTimeFormat24(dateTimeInJSON);
     };
 
-    const shortenedAddress = (address) => {
-      return address.substring(0, 4) + '...' + address.substring(address.length - 4, address.length);
-    }
 
     return {
       constructValueDisplay,
@@ -204,8 +200,7 @@ export default {
       convertLocalTime,
       transactionGroupType,
       wideScreen,
-      Helper,
-      shortenedAddress,
+      Helper
     }
   }
 }

@@ -30,20 +30,23 @@
             </div>
           </template>
         </Column>
-        <Column style="width: 250px" v-if="!wideScreen">
+        <Column style="width: 240px" v-if="!wideScreen">
           <template #body="{data}">
             <div class="-ml-1">
               <div class="uppercase text-xs text-gray-300 font-bold -mt-3 mb-2">Signer / TX Type</div>
               <div class="text-xs text-gray-500 inline-flex">Signer:</div>
               <router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signerAddress}}" class="uppercase font-bold text-xs text-blue-600 ml-1 hover:text-blue-primary hover:underline inline-flex"><span class="text-ellipsis overflow-hidden truncate w-36">{{Helper.createAddress(data.signerAddress).pretty()}}</span></router-link>
             <div>
-            <div class="text-xs text-gray-500 inline-flex mt-1">TX Type: 
-              <div class="uppercase text-xs ml-1">{{data.type}}</div></div>
+            <div class="text-xs inline-flex text-gray-500 mt-1">
+            TX Type: </div>
+              <span class="uppercase truncate break-all text-xs ml-1">{{data.type}}</span>
+            
             </div>
+
             </div>
           </template>
         </Column>
-        <Column style="width:120px" v-if="!wideScreen">
+        <Column style="width:130px" v-if="!wideScreen">
           <template #body="{data}">
             <div>
               <div class="uppercase text-xs text-gray-300 font-bold mb-2">Fee</div>
@@ -128,16 +131,6 @@ export default{
       window.removeEventListener("resize", screenResizeHandler);
     });
 
-    const shortenedString = (value) => {
-      if(wideScreen.value == true){
-        return value.substring(0, 25) + '...' ;
-        //+ value.substring(value.length - 22, value.length);
-      }else{
-        return value.substring(0, 25) + '...' ;
-        //+ value.substring(value.length - 15, value.length);
-      }
-    }
-
      const countDuration = (timestamp) =>{
       let trxDuration = HomeUtils.countDuration(timestamp);
       return trxDuration;
@@ -180,7 +173,6 @@ export default{
       Helper,
       wideScreen,
       isFetching,
-      shortenedString,
       Tooltip,
       nativeTokenNamespace
     }

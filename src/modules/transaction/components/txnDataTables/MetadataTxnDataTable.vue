@@ -15,7 +15,7 @@
           <div>
             <div class="uppercase text-xs text-gray-300 font-bold mb-1">Hash</div>
             <router-link class="uppercase font-bold text-xs block text-blue-600 hover:text-blue-primary hover:underline" :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}">
-              <span class="text-xs break-all hover:underline hover:text-blue-primary" v-tooltip.right="data.hash">{{data.hash.substring(0, 15) }}...</span>
+              <span class="text-xs break-all hover:underline hover:text-blue-primary truncate inline-flex text-ellipsis overflow-hidden w-44" v-tooltip.right="data.hash">{{data.hash }}.</span>..
             </router-link>
           </div>
           <div>
@@ -40,8 +40,8 @@
           </div>
           <div>
             <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Target</div>
-            <span class="text-xs font-bold" v-if="data.metadataTypeName === 'Account'" v-tooltip.bottom="data.targetPublicKey">
-              {{data.targetPublicKey.substring(0, 20) }}...
+            <span class="text-xs font-bold inline-flex" v-if="data.metadataTypeName === 'Account'" v-tooltip.bottom="data.targetPublicKey"><span class="text-ellipsis overflow-hidden w-44">
+              {{data.targetPublicKey }}</span>...
             </span>
             <span class="text-xs font-bold" v-else-if="data.metadataTypeName === 'Asset'" >
               {{data.targetId}} {{ data.targetIdName ? `(${data.targetIdName})`:'' }}
@@ -58,7 +58,7 @@
       </Column>
       <Column field="hash" header="Hash" headerStyle="width:100px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
-          <router-link :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}" class="text-xs text-blue-600 hover:text-blue-primary hover:underline" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 15) }}...</router-link>
+          <router-link :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}" class="text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex" v-tooltip.bottom="data.hash"><span class="text-ellipsis overflow-hidden w-44">{{data.hash }}</span>...</router-link>
         </template>
       </Column>
       <Column field="timestamp" header="Timestamp" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
@@ -88,15 +88,15 @@
       </Column>
       <Column header="Target" headerStyle="width:60px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
-          <span class="text-xs" v-if="data.metadataTypeName === 'Account'" v-tooltip.bottom="data.targetPublicKey">
-            {{data.targetPublicKey.substring(0, 20) }}...
-          </span>
-          <span class="text-xs" v-else-if="data.metadataTypeName === 'Asset'" >
+          <div class="text-xs truncate inline-flex block-all" v-if="data.metadataTypeName === 'Account'" v-tooltip.bottom="data.targetPublicKey">
+            <span class="text-ellipsis overflow-hidden w-40">{{data.targetPublicKey }}</span>...
+          </div>
+          <div class="text-xs" v-else-if="data.metadataTypeName === 'Asset'" >
             {{data.targetId}} {{ data.targetIdName ? `(${data.targetIdName})`:'' }}
-          </span>
-          <span class="text-xs" v-else-if="data.metadataTypeName === 'Namespace'" >
+          </div>
+          <div class="text-xs" v-else-if="data.metadataTypeName === 'Namespace'" >
             {{ data.targetIdName ? data.targetIdName: data.targetId }}
-          </span>
+          </div>
         </template>
       </Column>
       <Column header="Value" v-if="selectedGroupType !== transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:40px">
