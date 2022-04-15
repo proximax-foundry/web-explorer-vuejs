@@ -24,6 +24,12 @@
               <div class="uppercase font-bold text-xs mr-2">{{data.type}}</div>
             </div>
           </div>
+          <div>
+            <div class="text-xs text-gray-300 font-bold mb-1 mt-5">Block</div>
+            <div class="flex items-center">
+              <div class="uppercase font-bold text-xs mr-2">{{data.block}}</div>
+            </div>
+          </div>
         </template>
       </Column>
       <Column style="width: 200px" v-if="!wideScreen">

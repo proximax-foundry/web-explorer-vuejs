@@ -13,7 +13,7 @@
       <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
           <div>
-            <div class="uppercase text-xs text-gray-300 font-bold mb-1">Hasn</div>
+            <div class="uppercase text-xs text-gray-300 font-bold mb-1">Hash</div>
             <router-link class="uppercase font-bold text-xs block text-blue-600 hover:text-blue-primary hover:underline" :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}">
               <span class="text-xs break-all hover:underline hover:text-blue-primary truncate inline-flex text-ellipsis overflow-hidden w-44" v-tooltip.right="data.hash">{{data.hash }}</span>...
             </router-link>
@@ -24,12 +24,18 @@
               <div class="uppercase font-bold text-xs mr-2">{{data.type}}</div>
             </div>
           </div>
+          <div>
+            <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Block</div>
+            <div class="flex items-center">
+              <div class="font-bold text-xs mr-2">{{data.block}}</div>
+            </div>
+          </div>
         </template>
       </Column>
       <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
           <div v-if="selectedGroupType === transactionGroupType.CONFIRMED">
-            <div class="uppercase text-xs text-gray-300 font-bold mb-1">Timestamp</div>
+            <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-4">Timestamp</div>
             <div class="uppercase font-bold text-xs">{{ convertLocalTime(data.timestamp) }}</div>
           </div>
           <div>

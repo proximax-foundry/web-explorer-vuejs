@@ -43,16 +43,18 @@
             <span class="text-xs font-bold inline-flex" v-if="data.metadataTypeName === 'Account'" v-tooltip.bottom="data.targetPublicKey"><span class="text-ellipsis overflow-hidden w-44">
               {{data.targetPublicKey }}</span>...
             </span>
-            <span class="text-xs font-bold" v-else-if="data.metadataTypeName === 'Asset'" >
+            <span class="text-xs uppercase font-bold" v-else-if="data.metadataTypeName === 'Asset'" >
               {{data.targetId}} {{ data.targetIdName ? `(${data.targetIdName})`:'' }}
             </span>
-            <span class="text-xs font-bold" v-else-if="data.metadataTypeName === 'Namespace'" >
+            <span class="text-xs uppercase font-bold" v-else-if="data.metadataTypeName === 'Namespace'" >
               {{ data.targetIdName ? data.targetIdName: data.targetId }}
             </span>
           </div>
           <div v-if="selectedGroupType !== transactionGroupType.CONFIRMED">
             <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Value</div>
             <div><img src="@/modules/transaction/img/icon-message.svg" v-if="data.valueChange" v-tooltip.left="'<tiptext>' + constructValueDisplay(data) + '</tiptext>'" class="inline-block"></div>
+          </div> 
+          <div v-else class="mb-1 mt-14">
           </div>
         </template>
       </Column>
@@ -91,10 +93,10 @@
           <div class="text-xs truncate inline-flex block-all" v-if="data.metadataTypeName === 'Account'" v-tooltip.bottom="data.targetPublicKey">
             <span class="text-ellipsis overflow-hidden w-40">{{data.targetPublicKey }}</span>...
           </div>
-          <div class="text-xs" v-else-if="data.metadataTypeName === 'Asset'" >
+          <div class="text-xs uppercase" v-else-if="data.metadataTypeName === 'Asset'" >
             {{data.targetId}} {{ data.targetIdName ? `(${data.targetIdName})`:'' }}
           </div>
-          <div class="text-xs" v-else-if="data.metadataTypeName === 'Namespace'" >
+          <div class="text-xs uppercase" v-else-if="data.metadataTypeName === 'Namespace'" >
             {{ data.targetIdName ? data.targetIdName: data.targetId }}
           </div>
         </template>

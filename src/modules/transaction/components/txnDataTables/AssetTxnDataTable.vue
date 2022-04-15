@@ -28,7 +28,7 @@
             <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Asset ID</div>
             <div class="flex items-center">
               <div class="text-xs font-bold">
-                <router-link :to="{ name: 'ViewAsset', params:{ id: data.assetId }}" class="text-blue-600 hover:text-blue-primary hover:underline">
+                <router-link :to="{ name: 'ViewAsset', params:{ id: data.assetId }}" class="text-blue-600 uppercase hover:text-blue-primary hover:underline">
                   {{ data.assetId }} {{ data.namespaceName ? ` (${data.namespaceName})`: "" }}
                 </router-link>
               </div>
@@ -94,7 +94,7 @@
 
       <Column header="Asset ID" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
-          <div class="text-xs">{{ data.assetId }}{{ data.namespaceName ? `(${data.namespaceName})`: "" }}</div>
+          <div class="text-xs uppercase"><router-link :to="{ name: 'ViewAsset', params:{ id: data.assetId }}" class="text-blue-600 uppercase hover:text-blue-primary hover:underline">{{ data.assetId }}{{ data.namespaceName ? `(${data.namespaceName})`: "" }}</router-link></div>
         </template>
       </Column>
       <Column header="Info" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
