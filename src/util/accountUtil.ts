@@ -81,7 +81,7 @@ export class AccountUtils{
         ns.depth = namespaceInfo[i].depth;
         ns.endHeight = namespaceInfo[i].endHeight.compact();
 
-        // caluclate expiration
+        // calculate expiration
         let remainingBlockHeight = ns.endHeight - currentBlock;
         let timestamp = (Math.floor(Date.now()) + (remainingBlockHeight*blockTargetTime*1000));
         let date = new Date(timestamp);

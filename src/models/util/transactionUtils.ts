@@ -1245,16 +1245,16 @@ export class TransactionUtils {
           approvalChanges = '';
         }
         else if(modifyMultisigFormat.approvalDelta > 0){
-          approvalChanges = ` (+${modifyMultisigFormat.approvalDelta})`;
+          approvalChanges = `+${modifyMultisigFormat.approvalDelta}`;
         }
         else{
-          approvalChanges = ` (${modifyMultisigFormat.approvalDelta})`;
+          approvalChanges = `${modifyMultisigFormat.approvalDelta}`;
         }
 
         let minApprovalInfo: TxnDetails = {
           type: MsgType.NONE,
           label: "Minimum Approval",
-          value: modifyMultisigFormat.oldApprovalNumber + approvalChanges
+          value: (modifyMultisigFormat.oldApprovalNumber === null ? 0 + " (Current) " : modifyMultisigFormat.oldApprovalNumber + " (Current) ") + (approvalChanges.length == 0 ? "" : approvalChanges + " (New) ")
         };
 
         infos.push(minApprovalInfo);
@@ -1265,16 +1265,16 @@ export class TransactionUtils {
           removalChanges = '';
         }
         else if(modifyMultisigFormat.removalDelta > 0){
-          removalChanges = ` (+${modifyMultisigFormat.removalDelta})`;
+          removalChanges = `+${modifyMultisigFormat.removalDelta}`;
         }
         else{
-          removalChanges = ` (${modifyMultisigFormat.removalDelta})`;
+          removalChanges = `${modifyMultisigFormat.removalDelta}`;
         }
 
         let minRemovalInfo: TxnDetails = {
           type: MsgType.NONE,
           label: "Minimum Removal",
-          value: modifyMultisigFormat.oldRemovalNumber + removalChanges
+          value: (modifyMultisigFormat.oldRemovalNumber === null ? 0 + " (Current) " : modifyMultisigFormat.oldApprovalNumber + " (Current) ") + (removalChanges.length == 0 ? "" : removalChanges + " (New) ")
         };
 
         infos.push(minRemovalInfo);

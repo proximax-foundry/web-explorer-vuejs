@@ -39,7 +39,11 @@
           </div>
           <div>
             <div>Total Fees</div>
-            <div class="font-bold">{{blockInfo.totalFee }}<span class="ml-1">{{ nativeTokenNamespace }}</span> <img src="@/assets/img/icon-xpx.svg" class="inline-block" style="top:-3 width:14px;" /></div>
+            <div class="font-bold">{{ TransactionUtils.convertToExactNativeAmount(blockInfo.totalFee) }}<span class="ml-1">{{ nativeTokenNamespace }}</span> <img src="@/assets/img/icon-xpx.svg" class="inline-block" style="top:-3 width:14px;" /></div>
+          </div>
+          <div>
+            <div>Fee Multiplier</div>
+            <div>{{blockInfo.feeMultiplier}}</div>
           </div>
         </div>
       </div>
@@ -54,7 +58,6 @@
     </div>
   </div>
   </div>
-
 </template>
 
 <script>
@@ -63,6 +66,8 @@ import { BlockUtils } from "@/util/blockUtil"
 import { AppState } from '@/state/appState';
 import { networkState } from '@/state/networkState';
 import TransactionComponent from '@/modules/block/components/TransactionComponent.vue';
+import { Helper } from "@/util/typeHelper";
+import { TransactionUtils } from '@/models/util/transactionUtils';
 
 export default {
   components: { TransactionComponent },
@@ -101,12 +106,19 @@ export default {
         loadBlock();
       }
     });
-    
+
+    const currencyDivisibility = computed(() => {
+      return AppState.nativeToken.divisibility;
+    })
+
     return {
       blockInfo,
       networkName,
       isShowInvalid,
-      nativeTokenNamespace
+      nativeTokenNamespace,
+      Helper,
+      currencyDivisibility,
+      TransactionUtils
     }
   }
 }

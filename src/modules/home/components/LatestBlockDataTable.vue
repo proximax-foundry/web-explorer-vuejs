@@ -32,10 +32,8 @@
           <template #body="{data}">
             <div>
               <div class="uppercase text-xs text-gray-300 font-bold">Validator</div>
-              <div>
-                <div class="uppercase font-bold text-xs text-blue-primary inline-flex mt-2"><router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signer.publicKey}}" class="uppercase text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex">{{shortenedPublicKey(data.signer.publicKey)}}</router-link></div>
+                <div class="uppercase font-bold text-xs text-blue-primary inline-flex mt-2"><router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signer.publicKey}}" class="uppercase text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex"><span class="text-ellipsis overflow-hidden w-40">{{data.signer.publicKey}}</span>...</router-link></div>
                 <div class="text-xs text-gray-500 mb-4 mt-1">{{data.numTransactions>1?data.numTransactions+" trxs":data.numTransactions+" trx"}}</div>
-              </div>
             </div>
           </template>
         </Column>
@@ -43,7 +41,7 @@
           <template #body="{data}">
             <div>
               <div class="uppercase text-xs text-gray-300 font-bold -mt-2 ml-2">fee</div>
-              <div class="uppercase font-bold text-xs mt-1 ml-2">{{data.totalFee.lower + " " + nativeTokenNamespace}}</div>
+              <div class="uppercase font-bold text-xs mt-1 ml-2">{{ TransactionUtils.convertToExactNativeAmount(data.totalFee.compact()) + " " + nativeTokenNamespace}}</div>
               <div class="mb-7"></div>    
             </div>
           </template>
@@ -60,7 +58,7 @@
       <Column style="width: 20px; padding-bottom: 0rem; padding-top: 0rem;" field="Validator" header="VALIDATOR" v-if="wideScreen"> 
         <template #body="{data}" > 
           <div>
-            <div class="uppercase text-xs text-blue-primary inline-flex w-72 pt-3"><router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signer.publicKey}}" class="uppercase text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex"><span class="text-xs" v-tooltip.bottom="data.signer.publicKey">{{shortenedPublicKey(data.signer.publicKey)}}</span></router-link></div>         
+            <div class="uppercase text-xs text-blue-primary inline-flex w-72 pt-3"><router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signer.publicKey}}" class="uppercase text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex"><span class="text-xs text-ellipsis overflow-hidden w-72" v-tooltip.bottom="data.signer.publicKey">{{data.signer.publicKey}}</span>...</router-link></div>         
             <div class="text-txs text-gray-500 mb-4 mt-1">{{data.numTransactions>1?data.numTransactions+" trxs":data.numTransactions+" trx"}}</div>
           </div>
         </template> 
@@ -68,7 +66,7 @@
       <Column style="width: 110px; padding-bottom: 0rem; padding-top: 0rem; padding-right: 1rem;" field="Fee" header="FEE" v-if="wideScreen"> 
         <template #body="{data}" > 
           <div>
-            <div class="text-xs pt-2.5">{{data.totalFee.lower+" "+nativeTokenNamespace}}</div>
+            <div class="text-xs pt-2.5">{{ TransactionUtils.convertToExactNativeAmount(data.totalFee.compact())+" "+nativeTokenNamespace}}</div>
             <div class="mb-7"></div>
           </div>
         </template> 
@@ -86,6 +84,7 @@ import { ref, onMounted, onUnmounted, watch, getCurrentInstance } from 'vue';
 import { Deadline, LimitType } from 'tsjs-xpx-chain-sdk';
 import Tooltip from 'primevue/tooltip';
 import { HomeUtils } from "@/util/homeUtil"
+import { TransactionUtils } from '@/models/util/transactionUtils';
 
 export default{
   components: { DataTable, Column },
@@ -116,13 +115,13 @@ export default{
       window.removeEventListener("resize", screenResizeHandler);
     });
 
-    const shortenedPublicKey = (publicKey) => {
-      if(wideScreen.value == true){
-         return publicKey.substring(0, 4) + '...' + publicKey.substring(publicKey.length - 34, publicKey.length);
-      }else{
-        return publicKey.substring(0, 4) + '...' + publicKey.substring(publicKey.length - 22, publicKey.length);
-      }
-    };
+    // const shortenedPublicKey = (publicKey) => {
+    //   if(wideScreen.value == true){
+    //      return publicKey.substring(0, 4) + '...' + publicKey.substring(publicKey.length - 34, publicKey.length);
+    //   }else{
+    //     return publicKey.substring(0, 4) + '...' + publicKey.substring(publicKey.length - 22, publicKey.length);
+    //   }
+    // };
 
     const getBlockDataTable = async() =>{
       if(!AppState.isReady){
@@ -154,11 +153,12 @@ export default{
       countDuration,
       wideScreen,
       isFetching,
-      shortenedPublicKey,
+      //shortenedPublicKey,
       Deadline,
       Tooltip,
       blockDataTable,
-      nativeTokenNamespace
+      nativeTokenNamespace,
+      TransactionUtils
     }
   }
 }
