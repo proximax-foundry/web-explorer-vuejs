@@ -209,7 +209,6 @@ export default {
       return asset_div;
     }
     const getTransactions = async() =>{
-      console.log(p.blockHeight);
       if(p.blockHeight != null){
         let txnQueryParams = new TransactionQueryParams();
         txnQueryParams.height = p.blockHeight;
