@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="pb-14">
     <p class="text-gray-500 mb-5 text-sm font-bold">Search not found</p>
     <div class="p-3 bg-yellow-100 text-yellow-700">{{ searchType }} is not found in {{ networkName }}</div>
   </div>
