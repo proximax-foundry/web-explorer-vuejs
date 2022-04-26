@@ -71,7 +71,7 @@
       </Column>
       <Column field="recipient" header="Recipient" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
-          <router-link v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" :to="{ name: 'ViewAccount', params: { accountParam: data.recipient }}" class="hover:text-blue-primary hover:underline truncate inline-block text-xs">
+          <router-link v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" :to="{ name: 'ViewAccount', params: { accountParam: data.recipient }}" class="text-blue-600 hover:text-blue-primary hover:underline truncate inline-block text-xs">
             {{ Helper.createAddress(data.recipient).pretty() }}
           </router-link>
         </template>
