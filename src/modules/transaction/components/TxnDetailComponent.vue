@@ -44,7 +44,8 @@
       <div class="break-all">{{ txnDetail.signature }}</div>
     </div>
     <div>
-      <div>Signer</div>
+      <div v-if="txnType == TransactionType.AGGREGATE_BONDED || txnType == TransactionType.AGGREGATE_COMPLETE">Signer</div>
+      <div v-else>From</div>
       <div class="flex justify-start" v-if="txnDetail.signer">
         <router-link :to="{ name: 'ViewAccount', params:{ accountParam: Helper.createAddress(txnDetail.signer).pretty() }}" class="text-blue-600 hover:text-blue-primary hover:underline mr-2" id="signerAddress" :copyValue="Helper.createAddress(txnDetail.signer).pretty()" copySubject="Signer address">{{ Helper.createAddress(txnDetail.signer).pretty() }}</router-link>
         <img src="@/assets/img/icon-copy.svg" @click="copy('signerAddress')" class="cursor-pointer" />
