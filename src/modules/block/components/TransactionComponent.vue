@@ -33,7 +33,7 @@
               </div>
             </div>
             <div>
-              <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Receipient</div>
+              <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Recipient</div>
               <div class="uppercase font-bold text-xs">
                 <span v-if="data.recipient === '' || data.recipient === null">-</span>
                 <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.recipient }}" v-tooltip.right="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-36"><span class="text-ellipsis overflow-hidden">{{ Helper.createAddress(data.recipient).pretty() }}</span>...</router-link>

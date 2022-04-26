@@ -32,7 +32,7 @@
               </div>
             </div>
             <div>
-              <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Receipient</div>
+              <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Recipient</div>
               <div class="uppercase font-bold text-xs">
                 <!-- <span v-if="data.recipient === '' || data.recipient === null"></span> -->
                 <div v-if="data.recipient === '' || data.recipient === null">-</div>
