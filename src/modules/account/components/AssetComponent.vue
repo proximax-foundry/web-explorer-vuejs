@@ -15,7 +15,7 @@
       </div>
       <div v-for="(asset, index) in accountAssets" :key="index" class="grid grid-cols-5 text-xs md:hidden py-6 px-3 items-center" :class="`${(index != (accountAssets.length - 1))?'gray-line':''}`">
         <div class="px-2 py-3 col-span-2">
-          <router-link :to="{ name: 'ViewAsset', params:{ id: asset.id }}" class="text-blue-600 hover:text-blue-primary hover:underline">{{ asset.id }}</router-link>
+          <router-link :to="{ name: 'ViewAsset', params:{ id: asset.id }}" class="uppercase text-blue-600 hover:text-blue-primary hover:underline">{{ asset.id }}</router-link>
           <div class="flex items-center mt-5"><div class="w-14 text-txs">Creator:</div>        
           <div class="text-xs" v-if="asset.isOwner">Yes</div>
           <div class="text-xs" v-else>No</div>
@@ -41,7 +41,7 @@
         </div>
       </div>
       <div v-for="(asset, index) in accountAssets" :key="index" class="hidden md:grid md:grid-cols-8 py-6 px-3 items-center text-xs" :class="`${(index != (accountAssets.length - 1))?'gray-line':''}`">
-        <router-link :to="{ name: 'ViewAsset', params:{ id: asset.id }}" class="text-blue-600 hover:text-blue-primary hover:underline mx-2 my-3 col-span-2">{{ asset.id }}</router-link>
+        <router-link :to="{ name: 'ViewAsset', params:{ id: asset.id }}" class="uppercase text-blue-600 hover:text-blue-primary hover:underline mx-2 my-3 col-span-2">{{ asset.id }}</router-link>
         <div class="px-2 py-3 col-span-3 flex items-center">
           <div class="inline-block mr-2" v-if="displayTokenName(asset.name).name">
             <img v-if="displayTokenName(asset.name).name=='XPX'" src="@/modules/account/img/proximax-logo.svg" class="inline-block h-7 w-7 mr-2 border-2 rounded-3xl">
@@ -66,9 +66,6 @@
 
 <script>
 
-import { watch, ref, computed, getCurrentInstance, toRefs } from "vue";
-import { Helper } from '@/util/typeHelper';
-import { AccountUtils } from "@/util/accountUtil";
 import { AppState } from '@/state/appState';
 export default {
   name:"AssetComponent",

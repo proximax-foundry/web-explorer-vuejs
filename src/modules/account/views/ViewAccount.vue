@@ -25,7 +25,7 @@
 </template>
 
 <script>
-import { computed, defineComponent, getCurrentInstance, inject, ref, watch } from "vue";
+import { computed, getCurrentInstance, ref } from "vue";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import AssetComponent from "@/modules/account/components/AssetComponent.vue";
 import NamespaceComponent from "@/modules/account/components/NamespaceComponent.vue";

@@ -150,7 +150,8 @@ export default {
       let address = Address.createFromRawAddress(strAddress);
       let graphInfo = await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(address);
       let multisigInfos = [];
-
+      console.log(graphInfo); 
+      
       graphInfo.multisigAccounts.forEach((value, key)=>{
         const level = key;
         for(let i =0; i < value.length; ++i){
