@@ -189,7 +189,6 @@ export default {
             signedSigners = Array.from(new Set(signedSigners));
             let isSigned = flatCosigners.every((val) => signedSigners.includes(val));
             innerSignedList.value.push(isSigned);
-            console.log(innerSignedList);
           }else{
             try {
               let accountMultisigGraphInfo = await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(innerSigner.address);
@@ -221,7 +220,6 @@ export default {
         });
       }
     });
-  console.log(allInnerTransactions);
     return {
       TransactionUtils,
       Helper,

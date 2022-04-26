@@ -22,8 +22,8 @@
           <template #body="{data}">
             <div>
               <div class="uppercase text-xs text-gray-300 font-bold mb-1 break-all">Tx Hash</div>
-              <router-link class="uppercase font-bold text-xs block text-blue-600 hover:text-blue-primary hover:underline" :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}">
-                <span class="text-xs break-all hover:underline hover:text-blue-primary" v-tooltip.right="data.hash">{{data.hash.substring(0, 15) }}...</span>
+              <router-link class="uppercase font-bold text-xs text-blue-600 hover:text-blue-primary inline-flex hover:underline w-36" :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}">
+                <span class="text-xs hover:underline hover:text-blue-primary text-ellipsis overflow-hidden" v-tooltip.right="data.hash">{{data.hash }}</span>...
               </router-link>
             </div>
             <div>
@@ -33,10 +33,10 @@
               </div>
             </div>
             <div>
-              <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5" v-if="data.recipient != '' && data.recipient != null">Receipient</div>
+              <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Recipient</div>
               <div class="uppercase font-bold text-xs">
-                <span v-if="data.recipient === '' || data.recipient === null"></span>
-                <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.recipient }}" v-tooltip.right="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-xs break-all text-blue-600 hover:text-blue-primary hover:underline">{{ shortenedAddress(Helper.createAddress(data.recipient).pretty()) }}</router-link>
+                <span v-if="data.recipient === '' || data.recipient === null">-</span>
+                <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.recipient }}" v-tooltip.right="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-36"><span class="text-ellipsis overflow-hidden">{{ Helper.createAddress(data.recipient).pretty() }}</span>...</router-link>
               </div>
             </div>
           </template>
@@ -50,10 +50,9 @@
             <div>
               <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Sender</div>
               <div class="uppercase font-bold text-xs">
-                <span v-if="data.sender === '' || data.sender === null"></span>
-                <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.sender }}" v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-xs break-all text-blue-600 hover:text-blue-primary hover:underline">
-                  {{ shortenedAddress(Helper.createAddress(data.sender).pretty()) }}
-                </router-link>
+                <span v-if="data.sender === '' || data.sender === null">-</span>
+                <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.sender }}" v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-36"><span class="text-ellipsis overflow-hidden">{{ Helper.createAddress(data.sender).pretty() }}</span>
+                ...</router-link>
               </div>
             </div>
             <div>
@@ -64,7 +63,7 @@
         </Column>
         <Column field="hash" header="TX HASH" headerStyle="width:100px" v-if="wideScreen">
           <template #body="{data}">
-            <router-link :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}" class="text-xs text-blue-600 hover:text-blue-primary hover:underline" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 15) }}...</router-link>
+            <router-link :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}" class="text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex w-24" v-tooltip.bottom="data.hash"><span class="text-ellipsis overflow-hidden">{{data.hash }}</span>...</router-link>
           </template>
         </Column>
         <Column field="timestamp" v-if="wideScreen" header="TIMESTAMP" headerStyle="width:130px">
@@ -72,12 +71,12 @@
             <span class="text-xs">{{ Helper.convertDisplayDateTimeFormat24(data.timestamp) }}</span>
           </template>
         </Column>
-        <Column field="type" header="TYPE" headerStyle="width:110px" v-if="wideScreen">
+        <Column field="type" header="TYPE" headerStyle="width:140px" v-if="wideScreen">
           <template #body="{data}">
             <span class="text-xs">{{data.type}}</span>
           </template>
         </Column>
-        <Column field="block" v-if="wideScreen" header="BLOCK" headerStyle="width:90px">
+        <Column field="block" v-if="wideScreen" header="BLOCK" headerStyle="width:60px">
           <template #body="{data}">
             <router-link :to="{ name: 'ViewBlock', params: { blockHeight: data.block}}" class="text-blue-600 hover:text-blue-primary hover:underline text-xs">{{ data.block }}</router-link>
           </template>
@@ -85,22 +84,22 @@
         <Column field="signer" header="SENDER" headerStyle="width:110px" v-if="wideScreen">
           <template #body="{data}">
             <span v-if="data.sender === '' || data.sender === null"></span>
-            <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.sender }}" v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-xs text-blue-600 hover:text-blue-primary hover:underline">
-              {{ shortenedAddress(Helper.createAddress(data.sender).pretty()) }}
+            <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.sender }}" v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-28"><span class="text-ellipsis overflow-hidden ">
+              {{ Helper.createAddress(data.sender).pretty() }}</span>...
             </router-link>
           </template>
         </Column>
         <Column field="recipient" header="RECIPIENT" headerStyle="width:110px" v-if="wideScreen">
           <template #body="{data}">
             <span v-if="data.recipient === '' || data.recipient === null"></span>
-            <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.recipient }}" v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-block text-xs text-blue-600 hover:text-blue-primary hover:underline">
-              {{ shortenedAddress(Helper.createAddress(data.recipient).pretty()) }}
+            <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.recipient }}" v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-28"><span class="text-ellipsis overflow-hidden ">
+              {{ Helper.createAddress(data.recipient).pretty() }}</span>...
             </router-link>
           </template>
         </Column>
         <Column header="TX FEE" v-if="wideScreen" headerStyle="width:110px">
           <template #body="{data}">
-            <div class="text-xs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
+            <div class="text-xs">{{ data.fee }} <b v-if="data.fee==0 || data.fee> 0">{{ nativeTokenName }}</b></div>
           </template>
         </Column>
         <Column header="AMOUNT" headerStyle="width:110px" v-if="wideScreen">
@@ -174,11 +173,6 @@ export default {
       window.removeEventListener("resize", screenResizeHandler);
     });
 
-    const shortenedAddress = (address) => {
-      return address.substring(0, 4) + '...' + address.substring(address.length - 4, address.length);
-      // return address;
-    }
-
     const nativeTokenName = computed(()=> AppState.nativeToken.label);
 
     const displaySDAs = (sdas) => {
@@ -215,7 +209,6 @@ export default {
       return asset_div;
     }
     const getTransactions = async() =>{
-      console.log(p.blockHeight);
       if(p.blockHeight != null){
         let txnQueryParams = new TransactionQueryParams();
         txnQueryParams.height = p.blockHeight;
@@ -239,7 +232,6 @@ export default {
       Helper,
       transactions,
       currencyDivisibility,
-      shortenedAddress,
       nativeTokenName,
       checkOtherAsset
     }

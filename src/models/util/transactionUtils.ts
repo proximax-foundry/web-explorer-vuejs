@@ -558,7 +558,6 @@ export class TransactionUtils {
       }else{
         txn = await AppState.chainAPI.transactionAPI.getTransaction(hash);
       }
-      console.log(txn)
 
       // get fee
       let transactionInfo: TransactionInfo | AggregateTransactionInfo = txn.transactionInfo;
@@ -5529,7 +5528,6 @@ export class TransactionUtils {
 
     if(transaction.type === TransactionType.REGISTER_NAMESPACE){
       let registerTxn = transaction as RegisterNamespaceTransaction;
-      console.log(registerTxn)
       txn.namespaceName = registerTxn.namespaceName;
       txn.namespaceId = registerTxn.namespaceId.id.toHex();
 

@@ -16,10 +16,10 @@
       <div>Info</div>
       <div>
         <span v-bind:key="cosigner" v-tooltip.bottom="'Adding account:<br><br>' + cosigner" v-for="cosigner in txnDetail.detail.addedCosigner" class="inline-block bg-green-200 font-bold text-green-700 text-xs rounded py-1 px-2 my-1 mx-1">
-          {{ cosigner.toString().substring(0, 20) }}...
+          {{ cosigner.toString() }}
         </span>
         <span v-bind:key="cosigner" v-tooltip.bottom="'Removing account:<br><br>' + cosigner" v-for="cosigner in txnDetail.detail.removedCosigner" class="inline-block bg-red-200 font-bold text-red-700 text-xs rounded py-1 px-1 my-1 mx-1">
-          {{ cosigner.toString().substring(0, 20) }}...
+          {{ cosigner.toString() }}
         </span>
       </div>
     </div>
