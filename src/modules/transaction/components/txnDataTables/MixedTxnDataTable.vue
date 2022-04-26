@@ -91,7 +91,7 @@
       </Column>
       <Column header="TX FEE" v-if="wideScreen" headerStyle="width:110px">
         <template #body="{data}">
-          <div class="text-xs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
+          <div class="text-xs">{{ data.fee }}<b v-if="data.fee==0 || data.fee> 0">{{ nativeTokenName }}</b></div>
         </template>
       </Column>
       <Column header="AMOUNT" headerStyle="width:110px" v-if="wideScreen">

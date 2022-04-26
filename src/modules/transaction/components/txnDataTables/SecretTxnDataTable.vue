@@ -79,7 +79,7 @@
       </Column>
       <Column header="Tx Fee" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:80pxwidth:40px;text-transform:uppercase">
         <template #body="{data}">
-          <div class="text-xs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
+          <div class="text-xs">{{ data.fee }} <b v-if="data.fee==0 || data.fee> 0">{{ nativeTokenName }}</b></div>
         </template>
       </Column>
       <Column header="Hash Type" headerStyle="width:40pxwidth:40px;text-transform:uppercase" v-if="wideScreen">
