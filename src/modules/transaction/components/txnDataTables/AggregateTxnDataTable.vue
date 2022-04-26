@@ -66,7 +66,7 @@
       </Column>
       <Column header="Tx Fee" headerStyle="width:110px;text-transform:uppercase" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" >
         <template #body="{data}">
-          <div class="text-xs">{{ data.fee }}<b v-if="data.fee==0 || data.fee> 0">{{ nativeTokenName }}</b></div>
+          <div class="text-xs">{{ data.fee }} <b v-if="data.fee==0 || data.fee> 0">{{ nativeTokenName }}</b></div>
         </template>
       </Column>
       <Column header="Transactions" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
