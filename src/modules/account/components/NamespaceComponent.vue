@@ -24,7 +24,7 @@
             <div v-else class="text-gray-400">No linked asset</div>
           </div>
         </div>
-        <div class="px-2 py-3"><span v-tooltip.bottom="'<tiptitle>End height: '+ namespace.endHeight +'</tiptitle><tiptext>Estimated expiring on ' + namespace.expiringRelativeTime + '</tiptext>'">{{ namespace.endHeight }}</span></div>
+        <div class="px-2 py-3"><span v-if="namespace.expiringRelativeTime=='undefined NaN undefined NaN'" v-tooltip.bottom="'<tiptitle>End height: '+ namespace.endHeight +'</tiptitle><tiptext>No expiry</tiptext>'">{{ namespace.endHeight }}</span><span v-else v-tooltip.bottom="'<tiptitle>End height: '+ namespace.endHeight +'</tiptitle><tiptext>Estimated expiring on ' + namespace.expiringRelativeTime + '</tiptext>'">{{ namespace.endHeight }}</span></div>
         <div class="px-2 py-3 text-center"><span class="material-icons md-16 text-green-600 font-bold" v-if="namespace.active">done</span><span class="material-icons md-16 text-red-700 font-bold" v-else>close</span></div>
       </div>
       <div v-for="(namespace, index) in accountNamespaces" :key="index" class="hidden md:grid md:grid-cols-10 text-xs px-3 items-center" :class="`${(index != (accountNamespaces.length - 1))?'gray-line':''}`">
@@ -35,7 +35,7 @@
           <div v-else-if="namespace.type==2"><router-link :to="{ name: 'ViewAccount', params:{ accountParam: namespace.linkedId } }" class="text-blue-600 hover:text-blue-primary hover:underline break-all">{{ namespace.linkedId }}</router-link></div>
           <div v-else> No linked Asset / Address </div>
         </div>
-        <div class="px-2 py-3"><span v-tooltip.bottom="'<tiptitle>End height: '+ namespace.endHeight +'</tiptitle><tiptext>Estimated expiring on ' + namespace.expiringRelativeTime + '</tiptext>'">{{ namespace.endHeight }}</span></div>
+        <div class="px-2 py-3"><span v-if="namespace.expiringRelativeTime=='undefined NaN undefined NaN'" v-tooltip.bottom="'<tiptitle>End height: '+ namespace.endHeight +'</tiptitle><tiptext>No expiry</tiptext>'">{{ namespace.endHeight }}</span><span v-else v-tooltip.bottom="'<tiptitle>End height: '+ namespace.endHeight +'</tiptitle><tiptext>Estimated expiring on ' + namespace.expiringRelativeTime + '</tiptext>'">{{ namespace.endHeight }}</span></div>
         <div class="px-2 py-3 text-center"><span class="material-icons md-16 text-green-600 font-bold" v-if="namespace.active">done</span><span class="material-icons md-16 text-red-700 font-bold" v-else>close</span></div>
       </div>
     </div>
