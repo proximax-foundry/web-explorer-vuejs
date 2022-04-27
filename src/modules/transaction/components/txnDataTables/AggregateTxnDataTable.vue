@@ -15,7 +15,7 @@
           <div>
             <div class="uppercase text-xs text-gray-300 font-bold mb-1">Hash</div>
             <router-link class="uppercase font-bold text-xs block text-blue-600 hover:text-blue-primary hover:underline" :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}">
-              <span class="text-xs break-all hover:underline hover:text-blue-primary" v-tooltip.right="data.hash">{{data.hash.substring(0, 15) }}...</span>
+              <span class="text-xs truncate inline-flex text-ellipsis overflow-hidden w-44 break-all hover:underline hover:text-blue-primary " v-tooltip.right="data.hash">{{data.hash}}</span>...
             </router-link>
           </div>
           <div>
@@ -29,7 +29,7 @@
       <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
           <div v-if="selectedGroupType === transactionGroupType.CONFIRMED">
-            <div class="uppercase text-xs text-gray-300 font-bold mb-1">Timestamp</div>
+            <div class="uppercase text-xs text-gray-300 font-bold mb-1 pt-4">Timestamp</div>
             <div class="uppercase font-bold text-xs">{{ convertLocalTime(data.timestamp) }}</div>
           </div>
           <div>
@@ -44,12 +44,12 @@
           </div>
         </template>
       </Column>
-      <Column field="hash" header="Hash" headerStyle="width:100px;text-transform:uppercase" v-if="wideScreen">
+      <Column field="hash" header="Hash" headerStyle="width:80px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
-          <router-link :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}" class="text-xs text-blue-600 hover:text-blue-primary hover:underline" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 15) }}...</router-link>
+          <router-link :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}" class="text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex w-44" v-tooltip.bottom="data.hash"><span class="text-ellipsis overflow-hidden">{{data.hash}}</span>...</router-link>
         </template>
       </Column>
-      <Column field="timestamp" header="Timestamp" headerStyle="width:110px;text-transform:uppercase" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" >
+      <Column field="timestamp" header="Timestamp" headerStyle="width:130px;text-transform:uppercase" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" >
         <template #body="{data}">
           <span class="text-xs">{{ convertLocalTime(data.timestamp) }}</span>
         </template>
@@ -66,7 +66,7 @@
       </Column>
       <Column header="Tx Fee" headerStyle="width:110px;text-transform:uppercase" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" >
         <template #body="{data}">
-          <div class="text-xs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
+          <div class="text-xs">{{ data.fee }} <b v-if="data.fee==0 || data.fee> 0">{{ nativeTokenName }}</b></div>
         </template>
       </Column>
       <Column header="Transactions" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">

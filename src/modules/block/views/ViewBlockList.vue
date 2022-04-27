@@ -29,7 +29,7 @@
              <div>
               <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Validator</div>
               <div class="uppercase font-bold text-xs">
-                <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.signer.address.plain() }}" class="truncate text-xs text-blue-600 hover:text-blue-primary hover:underline">{{shortenedString(data.signer.address.pretty())}}</router-link>
+                <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.signer.address.plain() }}" class="truncate text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex w-40"><span class="text-ellipsis overflow-hidden">{{data.signer.address.pretty()}}</span>...</router-link>
               </div>
             </div>
             <div>
@@ -43,7 +43,7 @@
         <Column style="width: 200px" v-if="!wideScreen">
           <template #body="{data}">
             <div>
-              <div class="uppercase text-xs text-gray-300 font-bold mb-1 -mt-6">Timestamp</div>
+              <div class="uppercase text-xs text-gray-300 font-bold mb-1 -mt-7">Timestamp</div>
               <div class="uppercase font-bold text-xs">{{ BlockUtils.fmtTime(data.timestamp.compact()) }}</div>
             </div>
             <div>
@@ -139,19 +139,7 @@ export default {
       window.addEventListener("resize", screenResizeHandler);
     });
 
-    const shortenedString = (value) => {
-      if(wideScreen.value == true){
-        return value.substring(0, 4) + '...' + value.substring(value.length - 32, value.length);
-      }else{
-        return value.substring(0, 4) + '...' + value.substring(value.length - 20, value.length);
-      }
-    }
-
     const nativeTokenName = computed(()=> AppState.nativeToken.label);
-    
-    const shortenedAddress = (address) => {
-      return address.substring(0, 4) + '...' + address.substring(address.length - 4, address.length);
-    }
     
     const transactions = ref([]);
     let loadRecentBlock = async() =>{
@@ -178,10 +166,8 @@ export default {
       transactions,
       nativeTokenName,
       Helper,
-      shortenedAddress,
       BlockUtils,
       TransactionUtils,
-      shortenedString,
       nativeTokenNamespace
     }
   }

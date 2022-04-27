@@ -16,7 +16,7 @@ export class HomeUtils {
             let blockChainStorageInfo = await AppState.chainAPI.diagnosticAPI.getDiagnosticStorage();
             return blockChainStorageInfo;
         } catch (error) {
-            console.log(error);            
+            //console.log(error);            
             return false;
         }
        

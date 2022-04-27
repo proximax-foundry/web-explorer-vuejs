@@ -88,7 +88,7 @@ export class AccountUtils{
         ns.expiringRelativeTime = day[date.getDay()] + ' ' + date.getDate() + ' ' + month[date.getMonth()] + ' ' + date.getFullYear();
 
         if(ns.type == 1){
-          ns.linkedId = namespaceInfo[i].id.toHex();
+          ns.linkedId = namespaceInfo[i].alias.mosaicId.id.toHex();
         }else if(ns.type == 2){
           ns.linkedId = namespaceInfo[i].alias.address.pretty();
         }else{
@@ -103,7 +103,7 @@ export class AccountUtils{
       });
       return namespaceObj;
     } catch (error) {
-      console.log(error);
+      //console.log(error);
       return false;
     }
   }

@@ -32,7 +32,7 @@
           <template #body="{data}">
             <div>
               <div class="uppercase text-xs text-gray-300 font-bold">Validator</div>
-                <div class="uppercase font-bold text-xs text-blue-primary inline-flex mt-2"><router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signer.publicKey}}" class="uppercase text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex"><span class="text-ellipsis overflow-hidden w-40">{{data.signer.publicKey}}</span>...</router-link></div>
+                <div class="uppercase font-bold text-xs text-blue-primary inline-flex mt-2"><router-link :to="{ name: 'ViewAccount', params: {accountParam: data.signer.publicKey}}" class="uppercase text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex"><span class="text-ellipsis overflow-hidden w-44">{{data.signer.publicKey}}</span>...</router-link></div>
                 <div class="text-xs text-gray-500 mb-4 mt-1">{{data.numTransactions>1?data.numTransactions+" trxs":data.numTransactions+" trx"}}</div>
             </div>
           </template>
@@ -40,8 +40,8 @@
         <Column style="width: 100px" v-if="!wideScreen">
           <template #body="{data}">
             <div>
-              <div class="uppercase text-xs text-gray-300 font-bold -mt-2 ml-2">fee</div>
-              <div class="uppercase font-bold text-xs mt-1 ml-2">{{ TransactionUtils.convertToExactNativeAmount(data.totalFee.compact()) + " " + nativeTokenNamespace}}</div>
+              <div class="uppercase text-xs text-gray-300 font-bold -mt-2 ml-1">fee</div>
+              <div class="uppercase font-bold text-xs mt-1 ml-1">{{ TransactionUtils.convertToExactNativeAmount(data.totalFee.compact()) + " " + nativeTokenNamespace}}</div>
               <div class="mb-7"></div>    
             </div>
           </template>
@@ -115,14 +115,6 @@ export default{
       window.removeEventListener("resize", screenResizeHandler);
     });
 
-    // const shortenedPublicKey = (publicKey) => {
-    //   if(wideScreen.value == true){
-    //      return publicKey.substring(0, 4) + '...' + publicKey.substring(publicKey.length - 34, publicKey.length);
-    //   }else{
-    //     return publicKey.substring(0, 4) + '...' + publicKey.substring(publicKey.length - 22, publicKey.length);
-    //   }
-    // };
-
     const getBlockDataTable = async() =>{
       if(!AppState.isReady){
         setTimeout(getBlockDataTable, 1000);
@@ -153,7 +145,6 @@ export default{
       countDuration,
       wideScreen,
       isFetching,
-      //shortenedPublicKey,
       Deadline,
       Tooltip,
       blockDataTable,

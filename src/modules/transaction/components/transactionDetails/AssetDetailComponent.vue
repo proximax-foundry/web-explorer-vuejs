@@ -3,7 +3,7 @@
     <div>
       <div>Asset ID</div>
       <div>
-        <router-link :to="{ name: 'ViewAsset', params:{ id: txnDetail.detail.assetId }}" class="text-blue-600 hover:text-blue-primary hover:underline">
+        <router-link :to="{ name: 'ViewAsset', params:{ id: txnDetail.detail.assetId }}" class="uppercase text-blue-600 hover:text-blue-primary hover:underline">
           {{ txnDetail.detail.assetId }}
         </router-link>
       </div>

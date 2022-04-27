@@ -15,7 +15,7 @@
           <div>
             <div class="uppercase text-xs text-gray-300 font-bold mb-1">Hash</div>
             <router-link class="uppercase font-bold text-xs block text-blue-600 hover:text-blue-primary hover:underline" :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}">
-              <span class="text-xs break-all hover:underline hover:text-blue-primary" v-tooltip.right="data.hash">{{data.hash.substring(0, 15) }}...</span>
+              <span class="text-xs break-all hover:underline hover:text-blue-primary truncate inline-flex text-ellipsis overflow-hidden w-44" v-tooltip.right="data.hash">{{data.hash }}</span>...
             </router-link>
           </div>
           <div>
@@ -27,7 +27,7 @@
           <div>
             <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Lock Hash</div>
             <div class="flex items-center">
-              <div class="font-bold text-xs" v-tooltip.right="data.lockHash">{{data.lockHash.substring(0, 20) }}...</div>
+              <div class="font-bold text-xs inline-flex" v-tooltip.right="data.lockHash"><span class="text-ellipsis overflow-hidden w-44">{{data.lockHash }}</span>...</div>
             </div>
           </div>
         </template>
@@ -50,7 +50,7 @@
       </Column>
       <Column field="hash" header="Hash" headerStyle="width:100px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
-          <router-link :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}" class="text-xs text-blue-600 hover:text-blue-primary hover:underline" v-tooltip.bottom="data.hash">{{data.hash.substring(0, 15) }}...</router-link>
+          <router-link :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}" class="text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex" v-tooltip.bottom="data.hash"><span class="text-ellipsis overflow-hidden w-44">{{data.hash }}</span>...</router-link>
         </template>
       </Column>
       <Column field="timestamp" header="Timestamp" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
@@ -70,12 +70,12 @@
       </Column>
       <Column header="Tx Fee" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
         <template #body="{data}">
-          <div class="text-xs">{{ data.fee }} <b v-if="data.fee">{{ nativeTokenName }}</b></div>
+          <div class="text-xs">{{ data.fee }} <b v-if="data.fee==0 || data.fee> 0">{{ nativeTokenName }}</b></div>
         </template>
       </Column>
       <Column header="Lock Hash" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
-          <span class="text-xs" v-tooltip.bottom="data.lockHash">{{data.lockHash.substring(0, 20) }}...</span>
+          <span class="text-xs truncate inline-flex text-ellipsis overflow-hidden w-44" v-tooltip.bottom="data.lockHash">{{data.lockHash }}</span>...
         </template>
       </Column>
       <Column header="Duration" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
