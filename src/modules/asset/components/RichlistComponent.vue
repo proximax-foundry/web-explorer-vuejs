@@ -109,9 +109,6 @@ export default {
     }
 
     const getPercentage =(amount)=>{
-      console.log(p.supply);
-            console.log(amount);
-
       return (((amount / Math.pow(10, p.divisibility)) / p.supply)*100).toFixed(p.divisibility); 
     }
 
