@@ -62,14 +62,12 @@ export class AssetUtils {
                 }
             }
             
-            
-
             assetInfo = {
                 owner: asset.owner.address.plain().toString(),
                 height: asset.height.compact(),
                 assetId: asset.mosaicId.toHex(),
                 expiry: asset.duration.compact(),
-                supply: asset.supply.compact(),
+                supply: asset.supply.compact() / Math.pow(10, asset.divisibility),
                 divisibility: asset.divisibility,
                 supplyMutable: asset.isSupplyMutable(),
                 transferable: asset.isTransferable(),
