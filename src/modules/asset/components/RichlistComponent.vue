@@ -109,7 +109,7 @@ export default {
     }
 
     const getPercentage =(amount)=>{
-      return ((amount / p.supply) * 100).toFixed(p.divisibility); 
+      return (((amount / Math.pow(10, p.divisibility)) / p.supply)*100).toFixed(p.divisibility); 
     }
 
     const getLinkedNamespace = async(address) =>{
