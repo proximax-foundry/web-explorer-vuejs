@@ -91,12 +91,14 @@
 </template>
 
 <script>
-import { computed, getCurrentInstance, ref, watch } from "vue";
+import { computed, getCurrentInstance, ref } from "vue";
 import RichlistComponent from '@/modules/asset/components/RichlistComponent.vue';
 import { AppState } from '@/state/appState';
 import { AssetUtils } from '@/util/assetUtil';
 import { Helper } from '@/util/typeHelper';
 import { networkState } from '@/state/networkState';
+import { NamespaceId } from "tsjs-xpx-chain-sdk";
+import { NamespaceUtils } from "@/util/namespaceUtil";
 
 export default {
   name: 'ViewAsset',
@@ -134,7 +136,28 @@ export default {
           richList.value = richlist;          
           return;
         }else{
-          isShowInvalid.value = true;
+          let ns = new NamespaceId(props.id.toLowerCase());
+          const namespaceInfo = await NamespaceUtils.fetchNamespaceInfo(ns.toHex());
+                        console.log(namespaceInfo);
+
+          if(namespaceInfo!=false){
+            isShowInvalid.value = false;
+            if(namespaceInfo.alias.type == 1){
+              console.log(namespaceInfo.alias.id);
+              console.log(namespaceInfo.alias);
+              const assetAlias = await AssetUtils.getAssetProperties(namespaceInfo.alias.id);
+              const richlistAlias = await AssetUtils.getRichList(namespaceInfo.alias.id);
+              if(assetAlias!=null){
+                assets.value = assetAlias;
+                richList.value = richlistAlias;
+              }
+            }else{
+              isShowInvalid.value = true;
+            }
+          }else{
+            isShowInvalid.value = true;
+          } 
+          
         }
        
     };
