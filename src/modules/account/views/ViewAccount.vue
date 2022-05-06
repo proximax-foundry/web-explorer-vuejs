@@ -116,7 +116,7 @@ export default {
       cosignatoriesLength.value = multisig.value.cosignatories?multisig.value.cosignatories.length:0;
       multisigLength.value = multisig.value.multisigAccounts?multisig.value.multisigAccounts.length:0;
 
-      let fetchedAccountAssets = await AccountUtils.formatAccountAsset(account.mosaics, strPublicKey.value);
+      let fetchedAccountAssets = await AccountUtils.formatAccountAsset(account.mosaics, accountNamespaces.value, strPublicKey.value);
       accountAssets.value = fetchedAccountAssets;
       isFetching.value = false;
       isShowInvalid.value = false;
