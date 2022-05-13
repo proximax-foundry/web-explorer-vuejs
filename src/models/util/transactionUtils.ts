@@ -2423,6 +2423,9 @@ export class TransactionUtils {
         txnDetails.oldValue = nsMetadataEntry.value;
         txnDetails.newValue = TransactionUtils.applyValueChange(txnDetails.oldValue, txnDetails.valueChange, txnDetails.sizeChanged);
       }
+      else {
+        txnDetails.newValue = TransactionUtils.applyValueChange("", txnDetails.valueChange, txnDetails.sizeChanged);
+      }
     } catch (error) {}
     return txnDetails;
   }
@@ -2499,6 +2502,8 @@ export class TransactionUtils {
       if(nsMetadataEntry){
         txnDetails.oldValue = nsMetadataEntry.value;
         txnDetails.newValue = TransactionUtils.applyValueChange(txnDetails.oldValue, txnDetails.valueChange, txnDetails.sizeChanged);
+      } else {
+        txnDetails.newValue = TransactionUtils.applyValueChange("", txnDetails.valueChange, txnDetails.sizeChanged);
       }
     } catch (error) {}
     return txnDetails;
@@ -2574,6 +2579,8 @@ export class TransactionUtils {
       if(assetMetadataEntry){
         txnDetails.oldValue = assetMetadataEntry.value;
         txnDetails.newValue = TransactionUtils.applyValueChange(txnDetails.oldValue, txnDetails.valueChange, txnDetails.sizeChanged);
+      } else {
+        txnDetails.newValue = TransactionUtils.applyValueChange("", txnDetails.valueChange, txnDetails.sizeChanged);
       }
     } catch (error) {}
     return txnDetails;
@@ -4336,6 +4343,8 @@ export class TransactionUtils {
         if(assetMetadataEntry){
           txn.oldValue = assetMetadataEntry.value;
           txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+        } else {
+          txn.newValue = TransactionUtils.applyValueChange("", txn.valueChange, txn.sizeChanged);
         }
       } catch (error) {}
     }else if(transaction.type === TransactionType.NAMESPACE_METADATA_V2){
@@ -4364,6 +4373,8 @@ export class TransactionUtils {
         if(nsMetadataEntry){
           txn.oldValue = nsMetadataEntry.value;
           txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+        } else {
+          txn.newValue = TransactionUtils.applyValueChange("", txn.valueChange, txn.sizeChanged);
         }
       } catch (error) {}
     }else if(transaction.type === TransactionType.ACCOUNT_METADATA_V2){
@@ -4384,6 +4395,8 @@ export class TransactionUtils {
         if(nsMetadataEntry){
           txn.oldValue = nsMetadataEntry.value;
           txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+        } else {
+          txn.newValue = TransactionUtils.applyValueChange("", txn.valueChange, txn.sizeChanged);
         }
       } catch (error) {}
     }
@@ -4421,8 +4434,10 @@ export class TransactionUtils {
 
           let assetMetadataEntry = await TransactionUtils.getAssetMetadata(assetMetadataTxn.targetMosaicId, assetMetadataTxn.scopedMetadataKey);
           if(assetMetadataEntry){
-              txn.oldValue = assetMetadataEntry.value;
-              txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+            txn.oldValue = assetMetadataEntry.value;
+            txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+          } else {
+            txn.newValue = TransactionUtils.applyValueChange("", txn.valueChange, txn.sizeChanged);
           }
         } catch (error) {}
       }else if(txns[i].type === TransactionType.NAMESPACE_METADATA_V2){
@@ -4449,6 +4464,8 @@ export class TransactionUtils {
           if(nsMetadataEntry){
             txn.oldValue = nsMetadataEntry.value;
             txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+          } else {
+            txn.newValue = TransactionUtils.applyValueChange("", txn.valueChange, txn.sizeChanged);
           }
         } catch (error) {}
       }else if(txns[i].type === TransactionType.ACCOUNT_METADATA_V2){
@@ -4465,8 +4482,10 @@ export class TransactionUtils {
         try {
             let nsMetadataEntry = await TransactionUtils.getAccountMetadata(accountMetadataTxn.targetPublicKey, accountMetadataTxn.scopedMetadataKey);
             if(nsMetadataEntry){
-                txn.oldValue = nsMetadataEntry.value;
-                txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+              txn.oldValue = nsMetadataEntry.value;
+              txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+            } else {
+              txn.newValue = TransactionUtils.applyValueChange("", txn.valueChange, txn.sizeChanged);
             }
         } catch (error) {}
       }
@@ -4565,8 +4584,10 @@ export class TransactionUtils {
               let assetMetadataEntry = await TransactionUtils.getAssetMetadata(assetMetadataTxn.targetMosaicId, assetMetadataTxn.scopedMetadataKey);
               
               if(assetMetadataEntry){
-                  txn.oldValue = assetMetadataEntry.value;
-                  txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+                txn.oldValue = assetMetadataEntry.value;
+                txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+              } else {
+                txn.newValue = TransactionUtils.applyValueChange("", txn.valueChange, txn.sizeChanged);
               }
               
           } catch (error) {
@@ -4595,8 +4616,10 @@ export class TransactionUtils {
               let nsMetadataEntry = await TransactionUtils.getNamespaceMetadata(namespaceMetadataTxn.targetNamespaceId, namespaceMetadataTxn.scopedMetadataKey);
               
               if(nsMetadataEntry){
-                  txn.oldValue = nsMetadataEntry.value;
-                  txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+                txn.oldValue = nsMetadataEntry.value;
+                txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+              } else {
+                txn.newValue = TransactionUtils.applyValueChange("", txn.valueChange, txn.sizeChanged);
               }
               
           } catch (error) {
@@ -4617,8 +4640,10 @@ export class TransactionUtils {
               let nsMetadataEntry = await TransactionUtils.getAccountMetadata(accountMetadataTxn.targetPublicKey, accountMetadataTxn.scopedMetadataKey);
               
               if(nsMetadataEntry){
-                  txn.oldValue = nsMetadataEntry.value;
-                  txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+                txn.oldValue = nsMetadataEntry.value;
+                txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+              } else {
+                txn.newValue = TransactionUtils.applyValueChange("", txn.valueChange, txn.sizeChanged);
               }
           } catch (error) {
               
