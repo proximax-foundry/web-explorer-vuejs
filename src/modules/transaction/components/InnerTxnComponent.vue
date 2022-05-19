@@ -3,7 +3,7 @@
     <div class="table_div">
       <div>
         <div>Type</div>
-        <div>{{ TransactionUtils.getTransactionTypeName(item.type) }}</div>
+        <div>{{ TransactionUtils.getTransactionTypeName(item.type) }}<span class="text-xxs text-gray-500"> (Version: {{ item.version }})</span></div>
       </div>
       <div>
         <div>Public Key</div>
