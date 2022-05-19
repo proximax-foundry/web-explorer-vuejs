@@ -158,7 +158,6 @@ export class AccountUtils {
       let assetDetails;
       for (let key in assets) {
         assetDetails = await AppState.chainAPI.assetAPI.getMosaic(assets[key].id);
-
         let isActive: boolean = false;
         if ((assetDetails.height.compact() + assetDetails.duration.compact()) > currentBlock) {
           isActive = true;
@@ -189,32 +188,29 @@ export class AccountUtils {
         formattedAsset.push(objAsset);
       }
       for (let i = 0; i < namespace.length; i++) {
-        for (let j = 0; j < assets.length; j++) {
-          if (namespace[i].type == 1) {
-            let getAssetwithZeroBalance = assets.filter(getDuplicateAssetId => getDuplicateAssetId.id.toHex() === namespace[i].linkedId);
-              if (getAssetwithZeroBalance.length ==0){
-              assetName = namespace[i].name;
-              namespaceId = namespace[i].id;
-              isOwner = true;
-              let assetId = new MosaicId(namespace[i].linkedId);
-              assetDetails = await AppState.chainAPI.assetAPI.getMosaic(assetId);
-              let isActive: boolean = false;
-              if ((assetDetails.height.compact() + assetDetails.duration.compact()) > currentBlock) {
-                isActive = true;
-              } else if (assetDetails.height.compact() == 1) {
-                isActive = true;
-              }
-
-              objAsset = {
-                id: namespace[i].linkedId,
-                balance: "0",
-                name: assetName,
-                namespaceId,
-                isOwner,
-                isActive,
-              }
-              formattedAsset.push(objAsset);
-            }
+        if (namespace[i].type == 1) {
+          let getAssetwithZeroBalance = assets.filter(getDuplicateAssetId => getDuplicateAssetId.id.toHex() == namespace[i].linkedId);
+          if (getAssetwithZeroBalance.length == 0){
+          assetName = namespace[i].name;
+          namespaceId = namespace[i].id;
+          isOwner = true;
+          let assetId = new MosaicId(namespace[i].linkedId);
+          assetDetails = await AppState.chainAPI.assetAPI.getMosaic(assetId);
+          let isActive: boolean = false;
+          if ((assetDetails.height.compact() + assetDetails.duration.compact()) > currentBlock) {
+            isActive = true;
+          } else if (assetDetails.height.compact() == 1) {
+            isActive = true;
+          }
+          objAsset = {
+            id: namespace[i].linkedId,
+            balance: "0",
+            name: assetName,
+            namespaceId,
+            isOwner,
+            isActive,
+          }
+          formattedAsset.push(objAsset);
           }
         }
       }
