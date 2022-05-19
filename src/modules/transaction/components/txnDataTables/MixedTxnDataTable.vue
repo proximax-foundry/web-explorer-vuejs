@@ -43,8 +43,8 @@
           <div>
             <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">From</div>
             <div class="uppercase font-bold text-xs">
-              <span v-if="data.sender === '' || data.sender === null">-</span>
-              <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.sender }}" v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-40"><span class="text-ellipsis overflow-hidden">{{ Helper.createAddress(data.sender).pretty() }}
+              <span v-if="data.signerAddress === '' || data.signerAddress === null">-</span>
+              <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.signerAddress }}" v-else v-tooltip.bottom="Helper.createAddress(data.signerAddress).pretty()" class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-40"><span class="text-ellipsis overflow-hidden">{{ Helper.createAddress(data.signerAddress).pretty() }}
               </span>...</router-link>
             </div>
           </div>
