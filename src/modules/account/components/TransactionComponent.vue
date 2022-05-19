@@ -48,7 +48,7 @@
               <div class="uppercase font-bold text-xs">{{ Helper.convertDisplayDateTimeFormat24(data.timestamp) }}</div>
             </div>
             <div>
-              <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Sender</div>
+              <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">From</div>
               <div class="uppercase font-bold text-xs">
                 <span v-if="data.sender === '' || data.sender === null">-</span>
                 <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.sender }}" v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-xs break-all text-blue-600 hover:text-blue-primary hover:underline w-44"><span class="text-ellipsis overflow-hidden">
@@ -82,7 +82,7 @@
             <div class="text-xs"><router-link :to="{ name: 'ViewBlock', params: { blockHeight: data.block}}" class="text-blue-600 hover:text-blue-primary hover:underline">{{ data.block }}</router-link></div>
           </template>
         </Column>
-        <Column field="signer" header="SENDER" headerStyle="width:110px" v-if="wideScreen">
+        <Column field="signer" header="FROM" headerStyle="width:110px" v-if="wideScreen">
           <template #body="{data}">
             <span v-if="data.sender === '' || data.sender === null"></span>
             <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.sender }}" v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex w-28"><span class="text-ellipsis overflow-hidden">{{ Helper.createAddress(data.sender).pretty() }}</span>...

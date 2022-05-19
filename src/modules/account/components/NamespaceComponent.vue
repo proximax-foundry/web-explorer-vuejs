@@ -16,8 +16,8 @@
       </div>
       <div v-for="(namespace, index) in accountNamespaces" :key="index" class="grid grid-cols-4 md:hidden text-xs px-3 items-center" :class="`${(index != (accountNamespaces.length - 1))?'gray-line':''}`">
         <div class="px-2 py-3 col-span-2">
-          <router-link :to="{ name: 'ViewNamespace', params:{ namespaceParam: namespace.id }}" class="uppercase text-blue-600 hover:text-blue-primary hover:underline mb-2">{{ namespace.id }}</router-link>
-          <div class="break-word my-2">{{ namespace.name }}</div>
+           <div class="break-word my-2">{{ namespace.name }}</div>
+          <div class="text-xxs mt-4 mb-1 text-gray-400">ID:</div><router-link :to="{ name: 'ViewNamespace', params:{ namespaceParam: namespace.id }}" class="uppercase text-blue-600 hover:text-blue-primary hover:underline mb-2">{{ namespace.id }}</router-link>
           <div class="col-span-4 mt-4">
             <div v-if="namespace.type==1"><div class="text-xxs mb-1 text-gray-400">Linked asset:</div><router-link :to="{ name: 'ViewAsset', params:{ id: namespace.linkedId }}" class="hover:text-blue-primary hover:underline break-all">{{ namespace.linkedId }}</router-link></div>
             <div v-else-if="namespace.type==2"><div class="text-xxs mb-1 text-gray-400">Linked address:</div><router-link :to="{ name: 'ViewAccount', params:{ accountParam: namespace.linkedId }}" class="hover:text-blue-primary hover:underline break-all">{{ namespace.linkedId }}</router-link></div>
