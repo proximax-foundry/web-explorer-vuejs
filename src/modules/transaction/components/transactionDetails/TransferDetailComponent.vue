@@ -38,6 +38,9 @@
             <!-- {{ sda.name?' / ':'' }} -->
             <router-link v-else :to="{ name: 'ViewAsset', params: { id: sda.id }}" class="hover:text-blue-primary hover:underline">{{ sda.id }}</router-link>
           </div>
+            <img v-if="sda.sendWithAlias.name=='XAR'" src="@/modules/account/img/xarcade-logo.svg" class="inline-block h-7 w-7 mr-2 ml-2 border-2 rounded-3xl">
+            <img v-else-if="sda.sendWithAlias.name=='METX'" src="@/modules/account/img/metx-logo.svg" class="inline-block h-7 w-7 mr-2 ml-2 border-2 rounded-3xl">
+            <img v-else src="@/modules/transaction/img/icon-sda.svg" class='inline-block h-6 w-6 mr-2 ml-2'>
         </div>
         <!-- <div v-if="txnDetail.detail.amount.length == 0">-</div> -->
       </div>
