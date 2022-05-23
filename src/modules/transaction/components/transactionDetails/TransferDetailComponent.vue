@@ -13,8 +13,9 @@
       <div>Amount</div>
       <div class="relative">
         <span class="font-bold">{{ Helper.toCurrencyFormat(transferAmount[0], nativeTokenDivisibility) }}</span>{{ transferAmount[1]>0?'.':'' }}<span class="text-xxs">{{ transferAmount[1] }}</span>
-        <span class="font-bold ml-1">{{ nativeTokenNamespace }}</span>
-        <img src="@/assets/img/icon-xpx.svg" class="ml-2 inline-block absolute" style="top: -1px; width:14px;" />
+        <img src="@/assets/img/icon-xpx.svg" class="ml-2 inline-block" style="top: -1px; width:14px;" />
+        <span class="font-bold ml-2">{{ nativeTokenNamespace }}</span>
+
       </div>
     </div>
     <!-- <div v-if="txnDetail.detail.assetAmount">
@@ -29,18 +30,19 @@
       </div>
     </div> -->
     <div v-if="txnDetail.detail.sda.length > 0">
-      <div>SDA Amount</div>
+      <div>Amount</div>
       <div class="relative">
         <div v-for="sda, item in txnDetail.detail.sda" :key="item">
           <span class="font-bold">{{ sdaAmount[item][0] }}</span>{{ sdaAmount[item][1]>0?'.':'' }}<span class="text-xxs">{{ sdaAmount[item][1] }}</span>
-          <div class="inline-block text-gray-400 text-txs hover:text-gray-700 duration-300 transition-all ml-1">
+             <img v-if="sda.sendWithAlias.name=='XAR'" src="@/modules/account/img/xarcade-logo.svg" class="inline-block h-7 w-7 mr-2 ml-2 border-2 rounded-3xl">
+            <img v-else-if="sda.sendWithAlias.name=='METX'" src="@/modules/account/img/metx-logo.svg" class="inline-block h-7 w-7 mr-2 ml-2 border-2 rounded-3xl">
+            <img v-else src="@/modules/transaction/img/icon-sda.svg" class='inline-block h-6 w-6 mr-2 ml-2'>
+          <div class="inline-block text-gray-400 text-txs hover:text-gray-700 duration-300 transition-all">
             <router-link v-if="sda.id" :to="{ name: 'ViewAsset', params: { id: sda.id }}" class="hover:text-blue-primary hover:underline">{{ sda.sendWithAlias.name }}</router-link>
             <!-- {{ sda.name?' / ':'' }} -->
             <router-link v-else :to="{ name: 'ViewAsset', params: { id: sda.id }}" class="hover:text-blue-primary hover:underline">{{ sda.id }}</router-link>
           </div>
-            <img v-if="sda.sendWithAlias.name=='XAR'" src="@/modules/account/img/xarcade-logo.svg" class="inline-block h-7 w-7 mr-2 ml-2 border-2 rounded-3xl">
-            <img v-else-if="sda.sendWithAlias.name=='METX'" src="@/modules/account/img/metx-logo.svg" class="inline-block h-7 w-7 mr-2 ml-2 border-2 rounded-3xl">
-            <img v-else src="@/modules/transaction/img/icon-sda.svg" class='inline-block h-6 w-6 mr-2 ml-2'>
+         
         </div>
         <!-- <div v-if="txnDetail.detail.amount.length == 0">-</div> -->
       </div>
@@ -86,16 +88,12 @@ export default {
         return '';
       }
     });
-
-       // console.log(props.txnDetail.detail.amount);
-        //console.log(props.txnDetail.detail.assetAmount);
+          console.log(props.txnDetail.detail);
 
     const sdaAmount = computed(() => {
       let formattedSDA = [];
       if(props.txnDetail.detail.sda.length > 0){
         props.txnDetail.detail.sda.forEach(sda => {
-                console.log(sda);
-
           formattedSDA.push(sda.amount.toString().split('.'));
         });
       }
