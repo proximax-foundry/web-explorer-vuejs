@@ -1735,7 +1735,7 @@ export class TransactionUtils {
         let scopedMetadataKeyInfo: TxnDetails = {
           type: MsgType.NONE,
           label: "Scoped Metadata Key",
-          value: accMetadataFormat.scopedMetadataKey
+          value: TransactionUtils.convertUtf8(accMetadataFormat.scopedMetadataKey)
         };
 
         infos.push(scopedMetadataKeyInfo);
@@ -1790,7 +1790,7 @@ export class TransactionUtils {
         let scopedMetadataKeyInfo: TxnDetails = {
           type: MsgType.NONE,
           label: "Scoped Metadata Key",
-          value: namespaceMetadataFormat.scopedMetadataKey
+          value: TransactionUtils.convertUtf8(namespaceMetadataFormat.scopedMetadataKey)
         };
 
         infos.push(scopedMetadataKeyInfo);
@@ -1845,7 +1845,7 @@ export class TransactionUtils {
         let scopedMetadataKeyInfo: TxnDetails = {
             type: MsgType.NONE,
             label: "Scoped Metadata Key",
-            value: assetMetadataFormat.scopedMetadataKey
+            value: TransactionUtils.convertUtf8(assetMetadataFormat.scopedMetadataKey)
         };
 
         infos.push(scopedMetadataKeyInfo);
@@ -6302,6 +6302,29 @@ export class TransactionUtils {
     formattedTxn.deadline = deadline;
 
     return formattedTxn;
+  }
+
+  static isASCII = (string )=> {
+    return /^[\x00-\x7F]*$/.test(string);
+  }
+
+  static removeDoubleZero = (string ) =>{
+    let isZero = string.endsWith('00')
+    if(isZero){
+        string = string.substring(0, string.length - 2);
+        string = TransactionUtils.removeDoubleZero(string)
+    }
+    return string
+  }
+
+  static convertUtf8 = (scopedMetadataKey )=>{
+      scopedMetadataKey =  TransactionUtils.removeDoubleZero(scopedMetadataKey )
+      let utf8 = Convert.decodeHexToUtf8(scopedMetadataKey )
+      if(TransactionUtils.isASCII(utf8)){
+          scopedMetadataKey  = utf8
+      }
+      return scopedMetadataKey 
+      
   }
 
   // static async formatConfirmedTransaction(txn: Transaction): Promise<ConfirmedTransaction>{
