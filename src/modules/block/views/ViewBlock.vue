@@ -39,7 +39,8 @@
           </div>
           <div>
             <div>Total Fees</div>
-            <div class="font-bold">{{ TransactionUtils.convertToExactNativeAmount(blockInfo.totalFee) }}<span class="ml-1">{{ nativeTokenNamespace }}</span> <img src="@/assets/img/icon-xpx.svg" class="inline-block" style="top:-3 width:14px;" /></div>
+            <div class="font-bold">{{ TransactionUtils.convertToExactNativeAmount(blockInfo.totalFee) }}<img src="@/assets/img/icon-xpx.svg" class="inline-block ml-2" style="top:-3 width:14px;" />
+            <span class="ml-2">{{ nativeTokenNamespace }}</span> </div>
           </div>
           <div>
             <div>Fee Multiplier</div>

@@ -50,9 +50,9 @@
             <div>
               <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">From</div>
               <div class="uppercase font-bold text-xs">
-                <span v-if="data.sender === '' || data.sender === null">-</span>
-                <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.sender }}" v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate inline-block text-xs break-all text-blue-600 hover:text-blue-primary hover:underline w-44"><span class="text-ellipsis overflow-hidden">
-                  {{ Helper.createAddress(data.sender).pretty() }}</span>
+                <span v-if="data.signerAddress === '' || data.signerAddress === null">-</span>
+                <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.signerAddress }}" v-else v-tooltip.bottom="Helper.createAddress(data.signerAddress).pretty()" class="truncate inline-block text-xs break-all text-blue-600 hover:text-blue-primary hover:underline w-44"><span class="text-ellipsis overflow-hidden">
+                  {{ Helper.createAddress(data.signerAddress).pretty() }}</span>
                 </router-link>
               </div>
             </div>
@@ -84,8 +84,8 @@
         </Column>
         <Column field="signer" header="FROM" headerStyle="width:110px" v-if="wideScreen">
           <template #body="{data}">
-            <span v-if="data.sender === '' || data.sender === null"></span>
-            <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.sender }}" v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex w-28"><span class="text-ellipsis overflow-hidden">{{ Helper.createAddress(data.sender).pretty() }}</span>...
+            <span v-if="data.signerAddress === '' || data.signerAddress === null"></span>
+            <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.signerAddress }}" v-else v-tooltip.bottom="Helper.createAddress(data.signerAddress).pretty()" class="truncate text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex w-28"><span class="text-ellipsis overflow-hidden">{{ Helper.createAddress(data.signerAddress).pretty() }}</span>...
             </router-link>
           </template>
         </Column>
