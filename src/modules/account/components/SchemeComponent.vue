@@ -123,7 +123,7 @@ export default {
           label: convertToAddress(cosignaturies[i]).pretty(),
           numApproveTx:getApproveTx(cosignaturies[i], multisigAccounts),
           numRemoval:getRemoval(cosignaturies[i], multisigAccounts),
-          children: getChildObject(cosigns)
+          children: getChildObject(cosigns,multisigAccounts)
         }); //keep on looping to the end
       }
       return tempArray;
