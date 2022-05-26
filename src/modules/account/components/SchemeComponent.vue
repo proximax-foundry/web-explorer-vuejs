@@ -12,7 +12,7 @@
                   <img src="@/assets/img/icon-copy.svg" @click="copy(data.label)" class="ml-2 w-4 h-4 cursor-pointer" />
                 </div>
                 <div class="flex">
-                  <div class="text-xxs text-gray-500">S: {{ data.numApproveTx }}-of-{{ data.children.length }}</div>
+                  <div class="mr-2 text-xxs text-gray-500">S: {{ data.numApproveTx }}-of-{{ data.children.length }}</div>
                   <div class="text-xxs text-gray-500">D: {{ data.numRemoval }}-of-{{ data.children.length }}</div>
                   <div class="flex ml-auto">
                     <div v-if="data.children.length > 0" class="ml-auto bg-green-500 rounded-2xl w-7 h-7 flex items-center justify-center" title="Multisig">
@@ -123,7 +123,7 @@ export default {
           label: convertToAddress(cosignaturies[i]).pretty(),
           numApproveTx:getApproveTx(cosignaturies[i], multisigAccounts),
           numRemoval:getRemoval(cosignaturies[i], multisigAccounts),
-          children: getChildObject(cosigns)
+          children: getChildObject(cosigns,multisigAccounts)
         }); //keep on looping to the end
       }
       return tempArray;
