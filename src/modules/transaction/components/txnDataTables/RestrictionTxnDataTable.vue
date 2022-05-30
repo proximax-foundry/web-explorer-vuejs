@@ -90,7 +90,7 @@
       <Column header="Modification" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <div v-bind:key="restrictMod.value" v-for="restrictMod in data.modification">
-            <div class="break-all inline-block bg-green-200 font-bold text-green-700 text-xs rounded py-1 px-2 my-1 mx-1" v-if="restrictMod.restrictionTypeOutput === 'Add'">
+            <div class="break-all inline-block bg-green-200 font-bold text-green-700 text-xs rounded py-1 px-2 my-1 mx-1" v-if="restrictMod.action === 'Add'">
               {{ restrictMod.name ? restrictMod.name : restrictMod.value }}
             </div>
             <div class="break-all inline-block bg-red-200 font-bold text-red-700 text-xs rounded py-1 px-2 my-1 mx-1" v-else>
