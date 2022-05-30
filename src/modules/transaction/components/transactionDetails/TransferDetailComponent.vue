@@ -34,15 +34,14 @@
       <div class="relative">
         <div v-for="sda, item in txnDetail.detail.sda" :key="item">
           <span class="font-bold">{{ sdaAmount[item][0] }}</span>{{ sdaAmount[item][1]>0?'.':'' }}<span class="text-xxs">{{ sdaAmount[item][1] }}</span>
-             <img v-if="sda.sendWithAlias.name=='XAR'" src="@/modules/account/img/xarcade-logo.svg" class="inline-block h-7 w-7 mr-2 ml-2 border-2 rounded-3xl">
-            <img v-else-if="sda.sendWithAlias.name=='METX'" src="@/modules/account/img/metx-logo.svg" class="inline-block h-7 w-7 mr-2 ml-2 border-2 rounded-3xl">
+             <img v-if="sdaAsset[0].name=='XAR'" src="@/modules/account/img/xarcade-logo.svg" class="inline-block h-7 w-7 mr-2 ml-2 border-2 rounded-3xl">
+            <img v-else-if="sdaAsset[0].name=='METX'" src="@/modules/account/img/metx-logo.svg" class="inline-block h-7 w-7 mr-2 ml-2 border-2 rounded-3xl">
             <img v-else src="@/modules/transaction/img/icon-sda.svg" class='inline-block h-6 w-6 mr-2 ml-2'>
           <div class="inline-block text-gray-400 text-txs hover:text-gray-700 duration-300 transition-all">
-            <router-link v-if="sda.id" :to="{ name: 'ViewAsset', params: { id: sda.id }}" class="hover:text-blue-primary hover:underline">{{ sda.sendWithAlias.name }}</router-link>
+            <router-link v-if="sda.id" :to="{ name: 'ViewAsset', params: { id: sda.id }}" class="hover:text-blue-primary hover:underline">{{ sdaAsset[0].name }}</router-link>
             <!-- {{ sda.name?' / ':'' }} -->
             <router-link v-else :to="{ name: 'ViewAsset', params: { id: sda.id }}" class="hover:text-blue-primary hover:underline">{{ sda.id }}</router-link>
           </div>
-         
         </div>
         <!-- <div v-if="txnDetail.detail.amount.length == 0">-</div> -->
       </div>
@@ -88,7 +87,23 @@ export default {
         return '';
       }
     });
-          console.log(props.txnDetail.detail);
+    console.log(props.txnDetail.detail.sda);
+
+    const sdaAsset = computed(() => {
+      let formattedSDA = [];
+      if(props.txnDetail.detail.sda.length > 0){
+        props.txnDetail.detail.sda.forEach(sda => {
+         sda.currentAlias.forEach(test=>{
+            formattedSDA.push({
+              name:test.name,
+              id: test.idHex
+          })              
+      });
+      });
+      }
+      console.log(formattedSDA[0].name);
+        return formattedSDA;
+    });
 
     const sdaAmount = computed(() => {
       let formattedSDA = [];
@@ -106,6 +121,7 @@ export default {
       copy,
       transferAmount,
       sdaAmount,
+      sdaAsset,
       assetAmount,
       nativeTokenDivisibility
     }
