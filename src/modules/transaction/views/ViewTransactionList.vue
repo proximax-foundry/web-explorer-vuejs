@@ -5,6 +5,7 @@
       Transactions
       </p>
       <div class="bg-gray-50">
+        <ExportCSVComponent :selectedTxnType="selectedTxnType" :transactions="transactions" :disabled="isFetching||transactions.length==0"/>
         <select v-model="selectedTxnType" @change="changeSearchTxnType" class="border border-gray-200 px-2 py-1 focus:outline-none">
           <option value="all" class="text-sm">All</option>
           <option v-bind:key="txnType.value" v-for="txnType in txnTypeList" :value="txnType.value" class="text-sm">{{ txnType.label}}</option>
@@ -75,6 +76,7 @@ import LinkTxnDataTable from '@/modules/transaction/components/txnDataTables/Lin
 import RestrictionTxnDataTable from '@/modules/transaction/components/txnDataTables/RestrictionTxnDataTable';
 import SecretTxnDataTable from '@/modules/transaction/components/txnDataTables/SecretTxnDataTable';
 import ChainTxnDataTable from '@/modules/transaction/components/txnDataTables/ChainTxnDataTable';
+import ExportCSVComponent from '@/modules/transaction/components/ExportCSVComponent';
 
 
 export default {
@@ -94,6 +96,7 @@ export default {
     RestrictionTxnDataTable,
     SecretTxnDataTable,
     ChainTxnDataTable,
+    ExportCSVComponent
   },
   setup(){
     const internalInstance = getCurrentInstance();
@@ -149,7 +152,6 @@ export default {
       currentPage.value = 1;
       loadRecentTransactions();
     }
-
     const transactions = ref([]);
     const QueryParamsType = ref('');
     let transactionGroupType = Helper.getTransactionGroupType();
@@ -174,12 +176,9 @@ export default {
         txnQueryParams.type = QueryParamsType.value;
       }
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
-
       let transactionSearchResult = await TransactionUtils.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams);
       if(transactionSearchResult.transactions.length > 0){
-        // let formattedTxns = await TransactionUtils.formatConfirmedMixedTxns(transactionSearchResult.transactions);
-       let formattedTxns = await formatConfirmedTransaction(transactionSearchResult.transactions);
-
+        let formattedTxns = await formatConfirmedTransaction(transactionSearchResult.transactions);
         transactions.value = formattedTxns;
         totalPages.value = transactionSearchResult.pagination.totalPages;
       }else{
@@ -188,7 +187,7 @@ export default {
       isFetching.value = false;
     };
     loadRecentTransactions();
-
+ 
     const changeSearchTxnType = () =>{
       isFetching.value = true;
       transactions.value = [];
@@ -198,7 +197,6 @@ export default {
           QueryParamsType.value = TransactionFilterTypes.getTransferTypes();
           break;
         case TransactionFilterType.ACCOUNT:
-          console.log('re')
           QueryParamsType.value = TransactionFilterTypes.getAccountTypes();
           break;
         case TransactionFilterType.ASSET:
@@ -294,110 +292,12 @@ export default {
       return formattedTxns;
     }
 
-    const formatUnconfirmedTransaction = async(transactions)=>{
-
-      let formattedTxns = [];
-
-      switch(selectedTxnType.value){
-        case TransactionFilterType.TRANSFER:
-          formattedTxns = await TransactionUtils.formatUnconfirmedMixedTxns(transactions);
-          break;
-        case TransactionFilterType.ACCOUNT:
-          formattedTxns = await TransactionUtils.formatUnconfirmedAccountTransaction(transactions);
-          break;
-        case TransactionFilterType.AGGREGATE:
-          formattedTxns = await TransactionUtils.formatUnconfirmedAggregateTransaction(transactions);
-          break;
-        case TransactionFilterType.RESTRICTION:
-          formattedTxns = await TransactionUtils.formatUnconfirmedRestrictionTransaction(transactions);
-          break;
-        case TransactionFilterType.SECRET:
-          formattedTxns = await TransactionUtils.formatUnconfirmedSecretTransaction(transactions);
-          break;
-        case TransactionFilterType.ALIAS:
-          formattedTxns = await TransactionUtils.formatUnconfirmedAliasTransaction(transactions);
-          break;
-        case TransactionFilterType.ASSET:
-          formattedTxns = await TransactionUtils.formatUnconfirmedAssetTransaction(transactions);
-          break;
-        case TransactionFilterType.METADATA:
-          formattedTxns = await TransactionUtils.formatUnconfirmedMetadataTransaction(transactions);
-          break;
-        case TransactionFilterType.CHAIN:
-          formattedTxns = await TransactionUtils.formatUnconfirmedChainTransaction(transactions);
-          break;
-        case TransactionFilterType.EXCHANGE:
-          formattedTxns = await TransactionUtils.formatUnconfirmedExchangeTransaction(transactions);
-          break;
-        case TransactionFilterType.LINK:
-          formattedTxns = await TransactionUtils.formatUnconfirmedLinkTransaction(transactions);
-          break;
-        case TransactionFilterType.LOCK:
-          formattedTxns = await TransactionUtils.formatUnconfirmedLockTransaction(transactions);
-          break;
-        case TransactionFilterType.NAMESPACE:
-          formattedTxns = await TransactionUtils.formatUnconfirmedNamespaceTransaction(transactions);
-          break;
-      }
-
-      return formattedTxns;
-    }
-
-    const formatPartialTransaction = async(transactions)=>{
-
-      let formattedTxns = [];
-      switch(selectedTxnType.value){
-        case TransactionFilterType.TRANSFER:
-          formattedTxns = await TransactionUtils.formatPartialMixedTxns(transactions);
-          break;
-        case TransactionFilterType.ACCOUNT:
-          formattedTxns = await TransactionUtils.formatPartialAccountTransaction(transactions);
-          break;
-        case TransactionFilterType.AGGREGATE:
-          formattedTxns = await TransactionUtils.formatPartialAggregateTransaction(transactions);
-          break;
-        case TransactionFilterType.RESTRICTION:
-          formattedTxns = await TransactionUtils.formatPartialRestrictionTransaction(transactions);
-          break;
-        case TransactionFilterType.SECRET:
-          formattedTxns = await TransactionUtils.formatPartialSecretTransaction(transactions);
-          break;
-        case TransactionFilterType.ALIAS:
-          formattedTxns = await TransactionUtils.formatPartialAliasTransaction(transactions);
-          break;
-        case TransactionFilterType.ASSET:
-          formattedTxns = await TransactionUtils.formatPartialAssetTransaction(transactions);
-          break;
-        case TransactionFilterType.METADATA:
-          formattedTxns = await TransactionUtils.formatPartialMetadataTransaction(transactions);
-          break;
-        case TransactionFilterType.CHAIN:
-          formattedTxns = await TransactionUtils.formatPartialChainTransaction(transactions);
-          break;
-        case TransactionFilterType.EXCHANGE:
-          formattedTxns = await TransactionUtils.formatPartialExchangeTransaction(transactions);
-          break;
-        case TransactionFilterType.LINK:
-          formattedTxns = await TransactionUtils.formatPartialLinkTransaction(transactions);
-          break;
-        case TransactionFilterType.LOCK:
-          formattedTxns = await TransactionUtils.formatPartialLockTransaction(transactions);
-          break;
-        case TransactionFilterType.NAMESPACE:
-          formattedTxns = await TransactionUtils.formatPartialNamespaceTransaction(transactions);
-          break;
-      }
-
-      return formattedTxns;
-    }
-
     emitter.on('CHANGE_NETWORK', payload => {
       isFetching.value = true;
       if(payload){
         loadRecentTransactions();
       }
     });
-
 
     return {
       isFetching,
