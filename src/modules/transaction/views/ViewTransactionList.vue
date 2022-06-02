@@ -161,6 +161,7 @@ export default {
       isFetching.value = true;
       if(!AppState.isReady){
         setTimeout(loadRecentTransactions, 1000);
+        return;
       }
       let txnQueryParams = Helper.createTransactionQueryParams();
       let blockHeight = await AppState.chainAPI.chainAPI.getBlockchainHeight();
