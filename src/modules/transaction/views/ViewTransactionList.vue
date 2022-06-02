@@ -171,7 +171,11 @@ export default {
       }else{
         txnQueryParams.embedded = true;
       }
-      txnQueryParams.fromHeight = blockHeight - 2000000;
+      let fromHeight = blockHeight - 200000;
+      if(fromHeight <= 0){
+        fromHeight = 1;
+      }
+      txnQueryParams.fromHeight = fromHeight;
       if(QueryParamsType.value!=undefined){
         txnQueryParams.type = QueryParamsType.value;
       }
