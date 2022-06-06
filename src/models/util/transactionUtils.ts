@@ -2991,6 +2991,16 @@ export class TransactionUtils {
                   .filter(nsName => nsName.namespaceId.toHex() === sdas[x].sendWithAlias.idHex)
                   .map(nsName => nsName.name)[0]
           }
+
+          if(sdas[x].currentAlias.length && AppState.registeredToken.find(rt => rt.fullNamespace === sdas[x].currentAlias[0].name)){
+            sdas[x].label = AppState.registeredToken.find(rt => rt.fullNamespace === sdas[x].currentAlias[0].name).label;
+          }
+          else if(sdas[x].currentAlias.length){
+            sdas[x].label = sdas[x].currentAlias[0].name; 
+          }
+          else{
+            sdas[x].label = sdas[x].id;
+          }
         }
     }
     txnDetails.sda = sdas;
@@ -3226,6 +3236,16 @@ export class TransactionUtils {
                 .filter(nsName => nsName.namespaceId.toHex() === sdas[x].sendWithAlias.idHex)
                 .map(nsName => nsName.name)[0]
             }
+
+            if(sdas[x].currentAlias.length && AppState.registeredToken.find(rt => rt.fullNamespace === sdas[x].currentAlias[0].name)){
+              sdas[x].label = AppState.registeredToken.find(rt => rt.fullNamespace === sdas[x].currentAlias[0].name).label;
+            }
+            else if(sdas[x].currentAlias.length){
+              sdas[x].label = sdas[x].currentAlias[0].name; 
+            }
+            else{
+              sdas[x].label = sdas[x].id;
+            }
           }
         }
       }
@@ -3362,6 +3382,16 @@ export class TransactionUtils {
                             .filter(nsName => nsName.namespaceId.toHex() === sdas[x].sendWithAlias.idHex)
                             .map(nsName => nsName.name)[0]
                     }
+
+                    if(sdas[x].currentAlias.length && AppState.registeredToken.find(rt => rt.fullNamespace === sdas[x].currentAlias[0].name)){
+                      sdas[x].label = AppState.registeredToken.find(rt => rt.fullNamespace === sdas[x].currentAlias[0].name).label;
+                    }
+                    else if(sdas[x].currentAlias.length){
+                      sdas[x].label = sdas[x].currentAlias[0].name; 
+                    }
+                    else{
+                      sdas[x].label = sdas[x].id;
+                    }
                 }
             }
         }
@@ -3496,6 +3526,16 @@ export class TransactionUtils {
                         sdas[x].sendWithAlias.name = namespacesNames
                             .filter(nsName => nsName.namespaceId.toHex() === sdas[x].sendWithAlias.idHex)
                             .map(nsName => nsName.name)[0]
+                    }
+
+                    if(sdas[x].currentAlias.length && AppState.registeredToken.find(rt => rt.fullNamespace === sdas[x].currentAlias[0].name)){
+                      sdas[x].label = AppState.registeredToken.find(rt => rt.fullNamespace === sdas[x].currentAlias[0].name).label;
+                    }
+                    else if(sdas[x].currentAlias.length){
+                      sdas[x].label = sdas[x].currentAlias[0].name; 
+                    }
+                    else{
+                      sdas[x].label = sdas[x].id;
                     }
                 }
             }
