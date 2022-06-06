@@ -96,15 +96,18 @@ export default {
     }
 
     const displayTokenName = (name) => {
+
+      if(name === ""){
+        return { name: name, registered: false };
+      }
+
       if(name==AppState.nativeToken.fullNamespace){
         return { name: AppState.nativeToken.label, registered: true };
       }else{
-        if(AppState.registeredToken.length > 0){
-          AppState.registeredToken.forEach(token => {
-            if(token.fullNamespace == name){
-              return { name: token.label, registered: true };
-            }
-          });
+        let foundToken = AppState.registeredToken.find(x => x.fullNamespace === name);
+        
+        if(foundToken){
+          return { name: foundToken.label, registered: true };
         }
         return { name: name, registered: false };
       }
