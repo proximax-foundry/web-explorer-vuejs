@@ -76,7 +76,7 @@
                 <span class="text-xxs">{{ formatCurrency(sda.amount)[1]?'.' + formatCurrency(sda.amount)[1]:'' }}</span>
               </div>
               <div v-if="sda.namespace" class="inline-block ml-2">
-                <img v-if="sda.namespace.toUpperCase()==nativeTokenNamespace" src="@/modules/account/img/proximax-logo.svg" class="inline-block h-7 w-7 mr-2 border-2 rounded-3xl">
+                <img v-if="sda.namespace==nativeTokenNamespace" src="@/modules/account/img/proximax-logo.svg" class="inline-block h-7 w-7 mr-2 border-2 rounded-3xl">
                 <img v-else-if="sda.namespace=='xarcade.xar'" src="@/modules/account/img/xarcade-logo.svg" class="inline-block h-7 w-7 mr-2 border-2 rounded-3xl">
                  <img v-else-if="sda.namespace=='prx.metx'" src="@/modules/account/img/metx-logo.svg" class="inline-block h-7 w-7 mr-2 border-2 rounded-3xl">
                 <img v-else src="@/modules/transaction/img/proximax-logo-gray.svg" class="inline-block h-7 w-7 mr-2 border-2 rounded-3xl">
@@ -114,7 +114,7 @@ export default {
   },
   setup(props) {
     const toast = useToast();
-    const nativeTokenNamespace = AppState.nativeToken.label;
+    const nativeTokenNamespace = AppState.nativeToken.fullNamespace;
     const copy = (id) =>{
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
