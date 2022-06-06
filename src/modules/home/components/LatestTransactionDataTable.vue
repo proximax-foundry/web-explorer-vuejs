@@ -145,7 +145,11 @@ export default{
       let txnQueryParams = new TransactionQueryParams();
       let trx = await HomeUtils.getDiagnosticStorage();
       txnQueryParams.pageSize = 10;
-      txnQueryParams.fromHeight = trx.numBlocks - 200000;
+      let fromHeight = trx.numBlocks - 200000;
+      if(fromHeight <= 0){
+        fromHeight = 1;
+      }
+      txnQueryParams.fromHeight = fromHeight;
       let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
       let txns = await TransactionUtils.searchTxns(TransactionGroupType.CONFIRMED,txnQueryParams);

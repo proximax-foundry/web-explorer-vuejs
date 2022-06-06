@@ -8,4 +8,5 @@ export interface SDA{
     divisibility: number;
     amountIsRaw: boolean;
     sendWithNamespace: boolean;
+    label?: string;
 }
