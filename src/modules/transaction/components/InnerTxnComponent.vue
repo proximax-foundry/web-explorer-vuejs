@@ -80,7 +80,7 @@
                 <img v-else-if="sda.namespace=='xarcade.xar'" src="@/modules/account/img/xarcade-logo.svg" class="inline-block h-7 w-7 mr-2 border-2 rounded-3xl">
                  <img v-else-if="sda.namespace=='prx.metx'" src="@/modules/account/img/metx-logo.svg" class="inline-block h-7 w-7 mr-2 border-2 rounded-3xl">
                 <img v-else src="@/modules/transaction/img/proximax-logo-gray.svg" class="inline-block h-7 w-7 mr-2 border-2 rounded-3xl">
-                <router-link :to="{ name: 'ViewAsset', params:{ id: sda.assetId }}" class="text-blue-600 hover:text-blue-primary hover:underline">{{ sda.namespace.toUpperCase()}}</router-link>
+                <router-link :to="{ name: 'ViewAsset', params:{ id: sda.assetId }}" class="text-blue-600 hover:text-blue-primary hover:underline">{{ sda.label }}</router-link>
               </div>
               <div v-else class="text-gray-400 hover:text-gray-700 duration-300 transition-all inline-block ml-2">
                 <router-link :to="{ name: 'ViewAsset', params: { id: sda.assetId }}" class="hover:text-blue-primary hover:underline">
@@ -147,7 +147,7 @@ export default {
       if(props.innerTxn.length > 0){
         let castedAggregateTxn = TxnUtils.castToAggregate(props.txn);
 
-        props.innerTxn.forEach(async(txn, item) => {
+        props.innerTxn.forEach(async(txn, index) => {
           allCosigners.push(castedAggregateTxn.signer.publicKey);
           cosignedSigner = castedAggregateTxn.cosignatures.map(cosigner=> cosigner.signer.publicKey);
           oriSignedSigners = cosignedSigner.concat([txn.signer.publicKey]);
@@ -158,7 +158,7 @@ export default {
             extractedData.infoGreenList = extractedData.infos.filter(info => !info.label && info.type === MsgType.GREEN);
             extractedData.infoRedList = extractedData.infos.filter(info => !info.label && info.type === MsgType.RED);
             extractedData.infoList = extractedData.infos.filter(info => info.type === MsgType.NONE);
-            innerTxnExtractedData.value[item] = extractedData;
+            innerTxnExtractedData.value[index] = extractedData;
 
           let innerSigner = txn.signer;
           if(txn.type === TransactionType.MODIFY_MULTISIG_ACCOUNT){

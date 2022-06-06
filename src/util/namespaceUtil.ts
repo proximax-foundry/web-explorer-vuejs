@@ -2,12 +2,9 @@ import { AppState } from "@/state/appState";
 import {
   UInt64,
   NamespaceId,
-  NamespaceInfo,
+  NamespaceInfo, 
+  Convert
 } from "tsjs-xpx-chain-sdk";
-import { ChainUtils } from "./chainUtils";
-import { TransactionUtils } from '@/models/util/transactionUtils';
-import { Helper } from "@/util/typeHelper";
-import { pushScopeId } from "vue";
 
 const namespaceIdFirstCharacterString = "89ABCDEF";
 
@@ -33,6 +30,12 @@ export interface namespaceInfoFormatted{
   name: string;
   active: boolean;
   type: boolean;
+}
+
+export interface namespaceValidInfo{
+  valid : boolean;
+  namespaceIdHex: string;
+  namespaceName: string;
 }
 
 export class NamespaceUtils{
@@ -98,8 +101,40 @@ export class NamespaceUtils{
     }
   }
 
-  static isNamespace(namespaceHex: string): boolean{
+  static isNamespaceHex(namespaceHex: string): boolean{
+
+    if(namespaceHex.length !== 16 || !Convert.isHexString(namespaceHex)){
+      return false;
+    }
     return Array.from(namespaceIdFirstCharacterString).includes(namespaceHex.toUpperCase().substring(0, 1));
+  }
+
+  static isValidNamespaceString(namespace: string): namespaceValidInfo{
+    let data: namespaceValidInfo = {
+      valid : false,
+      namespaceIdHex: "",
+      namespaceName: ""
+    };
+
+    let validNamespaceHex = NamespaceUtils.isNamespaceHex(namespace);
+
+    if(validNamespaceHex){
+      data.valid = true;
+      data.namespaceIdHex = namespace;
+    }
+    else{
+      try {
+        let namespaceId = new NamespaceId(namespace);
+
+        data.valid = true;
+        data.namespaceName = namespace;
+        data.namespaceIdHex = namespaceId.toHex();
+      } catch (error) {
+        // invalid namespace name format
+      }
+    }
+
+    return data;
   }
 
   static relativeTime = (timestamp:number) => {

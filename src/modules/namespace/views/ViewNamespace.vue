@@ -14,7 +14,7 @@
         <div class="txn-div">
           <div class="py-4 text-xs grid grid-cols-5 border-b border-gray-100">
             <div class="font-bold col-span-2">Namespace ID</div>
-            <div class="uppercase col-span-3">{{ namespaceParam }}</div>
+            <div class="uppercase col-span-3">{{ namespaceIdHex }}</div>
           </div>
           <div class="py-4 text-xs grid grid-cols-5 border-b border-gray-100" v-if="namespaceInfo.levels">
             <div class="font-bold col-span-2">Levels</div>
@@ -118,13 +118,27 @@ export default {
     const isShowInvalid = ref(false);
     const isFetching = ref(true);
     const namespaceInfo = ref({});
+    const namespaceIdHex = ref("");
 
     const fetchNamespaceDetail = async () => {
       if(!AppState.isReady){
         setTimeout(fetchNamespaceDetail, 1000);
+        return;
       }
+
+      let validNamespaceData = NamespaceUtils.isValidNamespaceString(props.namespaceParam);
     
-      let fetchInfo = await NamespaceUtils.fetchNamespaceInfo(props.namespaceParam);
+      if(!validNamespaceData.valid){
+        isShowInvalid.value = true;
+        return;
+      }
+
+      namespaceIdHex.value = validNamespaceData.namespaceIdHex;
+
+      let fetchInfo = await NamespaceUtils.fetchNamespaceInfo(validNamespaceData.namespaceIdHex);
+
+      isFetching.value = false;
+
       if(fetchInfo != false){
         namespaceInfo.value = fetchInfo;
         isShowInvalid.value = false;
@@ -132,7 +146,6 @@ export default {
         isShowInvalid.value = true;
         return;
       }
-      isFetching.value = false;
     }
     fetchNamespaceDetail();
 
@@ -150,7 +163,8 @@ export default {
       namespaceInfo,
       networkName,
       isFetching,
-      isShowInvalid
+      isShowInvalid,
+      namespaceIdHex
     }
   }
 }

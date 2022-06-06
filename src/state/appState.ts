@@ -42,7 +42,7 @@ export const AppState = reactive<appStateInterface>({
         fullNamespace: 'prx.metx'
     }, {
         label: 'XAR',
-        fullNamespace: 'xarcade.zar'
+        fullNamespace: 'xarcade.xar'
     }],
     chainAPI: null,
     networkType: NetworkType.TEST_NET, 

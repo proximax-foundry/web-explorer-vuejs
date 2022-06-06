@@ -79,6 +79,7 @@ import {
   MetadataEntry,
   AggregateTransactionInfo,
   TransactionInfo,
+  TransactionStatus,
 } from "tsjs-xpx-chain-sdk";
 // import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
 import { networkState } from "@/state/networkState";
@@ -549,7 +550,7 @@ export class TransactionUtils {
   static async getTransaction(hash: string) : Promise<any|boolean> {
     try {
       let txn:any = {};
-      let txnStatus:any = {};
+      let txnStatus:TransactionStatus;
       txnStatus = await AppState.chainAPI.transactionAPI.getTransactionStatus(hash);
       if(txnStatus.group == 'partial'){
         txn = await AppState.chainAPI.transactionAPI.getPartialTransaction(hash);
@@ -1677,7 +1678,8 @@ export class TransactionUtils {
           sdaObj = {
             amount: transferFormat.amountTransfer,
             assetId: AppState.nativeToken.assetId,
-            namespace: AppState.nativeToken.label
+            namespace: AppState.nativeToken.fullNamespace,
+            label: AppState.nativeToken.label
           }
           sdas.push(sdaObj);
         }
@@ -1688,14 +1690,16 @@ export class TransactionUtils {
             sdaObj = {
               amount: tempSDA.amount,
               assetId: tempSDA.id,
-              namespace: tempSDA.currentAlias[0].name
+              namespace: tempSDA.currentAlias[0].name,
+              label: tempSDA.label
             }
             // sdaString = (tempSDA.amount + ` ${tempSDA.id} ` + `(${tempSDA.currentAlias[0].name})`);
           }else{
             sdaObj = {
               amount: tempSDA.amount,
               assetId: tempSDA.id,
-              namespace: ''
+              namespace: '',
+              label: tempSDA.label
             }
             // sdaString = (tempSDA.amount + ' ' + tempSDA.id);
           }
@@ -3505,10 +3509,10 @@ export class TransactionUtils {
 
   static async formatTransferTransaction(transaction: Transaction, groupType: string): Promise<ConfirmedTransferTransaction|UnconfirmedTransferTransaction|PartialTransferTransaction>{
     let formattedTxn:any, txn:any
-    if(groupType == 'partial'){
+    if(groupType == TransactionGroupType.PARTIAL){
       formattedTxn = await TransactionUtils.formatPartialTransaction(transaction);
       txn = PartialTransaction.convertToSubClass(PartialTransferTransaction, formattedTxn) as PartialTransferTransaction;
-    }else if(groupType == 'unconfirmed'){
+    }else if(groupType == TransactionGroupType.UNCONFIRMED){
       formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(transaction);
       txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedTransferTransaction, formattedTxn) as UnconfirmedTransferTransaction;
     }else{
@@ -3558,8 +3562,22 @@ export class TransactionUtils {
           let rawAmount = transferTxn.mosaics[y].amount.compact();
           let actualAmount = rawAmount;
           let isSendWithNamespace = TransactionUtils.isNamespace(transferTxn.mosaics[y].id);
-          let assetId = await TransactionUtils.getResolvedAsset(transferTxn.mosaics[y].id, txn.block);
-          let assetIdHex = assetId.toHex();
+          let assetId:MosaicId;
+          let assetIdHex:string;
+          if(groupType === TransactionGroupType.CONFIRMED){
+            assetId = await TransactionUtils.getResolvedAsset(transferTxn.mosaics[y].id, txn.block);
+          }
+          else{
+            if(isSendWithNamespace){
+                let namespaceId = new NamespaceId(transferTxn.mosaics[y].id.toDTO().id);
+                assetId = await TransactionUtils.getAssetAlias(namespaceId);
+            }
+            else{
+                assetId = transferTxn.mosaics[y].id;
+            }
+          }
+
+          assetIdHex = assetId.toHex();
 
           if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
             txn.amountTransfer += TransactionUtils.convertToExactNativeAmount(actualAmount);
@@ -3616,6 +3634,16 @@ export class TransactionUtils {
               sdas[x].sendWithAlias.name = namespacesNames
                 .filter(nsName => nsName.namespaceId.toHex() === sdas[x].sendWithAlias.idHex)
                 .map(nsName => nsName.name)[0]
+            }
+
+            if(sdas[x].currentAlias.length && AppState.registeredToken.find(rt => rt.fullNamespace === sdas[x].currentAlias[0].name)){
+              sdas[x].label = AppState.registeredToken.find(rt => rt.fullNamespace === sdas[x].currentAlias[0].name).label;
+            }
+            else if(sdas[x].currentAlias.length){
+              sdas[x].label = sdas[x].currentAlias[0].name; 
+            }
+            else{
+              sdas[x].label = sdas[x].id;
             }
           }
         }

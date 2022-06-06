@@ -104,7 +104,7 @@
       <Column header="SDA" headerStyle="width:30px; text-align:center;width:40px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <div>
-            <img src="@/modules/transaction/img/icon-sda.svg" v-if="data.assetId" class="inline-block" v-tooltip.left="'<tiptitle>Sirius Digital Asset</tiptitle><tiptext>' + constructSDA(data.assetId, data.amount, data.namespaceName) + '</tiptext>'">
+            <img src="@/modules/transaction/img/proximax-logo-gray.svg" v-if="data.assetId" class="inline-block" v-tooltip.left="'<tiptitle>Sirius Digital Asset</tiptitle><tiptext>' + constructSDA(data.assetId, data.amount, data.namespaceName) + '</tiptext>'">
           </div>
         </template>
       </Column>
