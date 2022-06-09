@@ -12,7 +12,7 @@ export class ConfirmedAssetTransaction extends ConfirmedTransaction{
     levyRecipient?: string = null;
     levyAssetName?: string = null;
     supplyDelta?: number = null;
-    supplyDeltaIsRaw?: boolean = null;
+    supplyDirection?: number = null;
     divisibility?: number = null;
     transferable?: boolean = null;
     supplyMutable?: boolean = null;
