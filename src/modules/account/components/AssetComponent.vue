@@ -92,7 +92,6 @@ export default {
       }else{
         return { left: split[0], right: null }
       }
-      return balance;
     }
 
     const displayTokenName = (name) => {
