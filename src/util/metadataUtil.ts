@@ -1,6 +1,6 @@
 import { AppState } from "@/state/appState";
 import { Convert, MetadataQueryParams, MetadataType, MosaicId, NamespaceId, PublicAccount } from "tsjs-xpx-chain-sdk";
-
+import isValidUTF8 from 'utf-8-validate';
 export interface MetadataObj {
     scopedMetadataKeyUtf8: string;
     scopedMetadataKeyHex: string;
@@ -11,9 +11,6 @@ export interface MetadataObj {
 
 export class MetadataUtils {
 
-    static isASCII(string: string){
-        return /^[\x00-\x7F]*$/.test(string);
-    }
 
     static removeDoubleZero(string: string){
         let isZero = string.endsWith('00')
@@ -25,13 +22,12 @@ export class MetadataUtils {
     }
 
     static convertUtf8 (scopedMetadataKey: string):string{
-        scopedMetadataKey = this.removeDoubleZero(scopedMetadataKey);
-        let utf8 = Convert.decodeHexToUtf8(scopedMetadataKey);
-            
-        if (this.isASCII(utf8)) {
-            scopedMetadataKey = utf8;
+        scopedMetadataKey =  MetadataUtils.removeDoubleZero(scopedMetadataKey )
+        let bytes = Convert.hexToUint8(scopedMetadataKey );
+        if(isValidUTF8(bytes)){
+            scopedMetadataKey  = Convert.decodeHexToUtf8(scopedMetadataKey)
         }
-        return scopedMetadataKey;
+        return scopedMetadataKey
     }
     
     static async getAccountMetadata(publicKey: string): Promise<MetadataObj[]> {
