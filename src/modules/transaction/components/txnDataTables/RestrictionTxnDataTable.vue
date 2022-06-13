@@ -27,7 +27,7 @@
           <div>
             <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Block</div>
             <div class="flex items-center">
-              <div class="font-bold text-xs mr-2">{{data.block}}</div>
+               <router-link :to="{ name: 'ViewBlock', params: { blockHeight: data.block}}" class="text-blue-600 hover:text-blue-primary hover:underline text-xs">{{ data.block }}</router-link>
             </div>
           </div>
         </template>
@@ -74,7 +74,7 @@
       </Column>
       <Column field="block" header="Block" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:70px;text-transform:uppercase">
         <template #body="{data}">
-          <div class="text-xs">{{ data.block }}</div>
+           <router-link :to="{ name: 'ViewBlock', params: { blockHeight: data.block}}" class="text-blue-600 hover:text-blue-primary hover:underline text-xs">{{ data.block }}</router-link>
         </template>
       </Column>
       <Column header="Tx Fee" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:70px;text-transform:uppercase">
@@ -90,7 +90,7 @@
       <Column header="Modification" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <div v-bind:key="restrictMod.value" v-for="restrictMod in data.modification">
-            <div class="break-all inline-block bg-green-200 font-bold text-green-700 text-xs rounded py-1 px-2 my-1 mx-1" v-if="restrictMod.restrictionTypeOutput === 'Add'">
+            <div class="break-all inline-block bg-green-200 font-bold text-green-700 text-xs rounded py-1 px-2 my-1 mx-1" v-if="restrictMod.action === 'Add'">
               {{ restrictMod.name ? restrictMod.name : restrictMod.value }}
             </div>
             <div class="break-all inline-block bg-red-200 font-bold text-red-700 text-xs rounded py-1 px-2 my-1 mx-1" v-else>

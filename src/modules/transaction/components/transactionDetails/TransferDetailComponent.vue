@@ -12,12 +12,13 @@
     <div v-if="txnDetail.detail.amountTransfer">
       <div>Amount</div>
       <div class="relative">
-        <span class="font-bold">{{ Helper.toCurrencyFormat(transferAmount[0], nativeTokenDivisibility) }}</span>{{ transferAmount[1]>0?'.':'' }}<span class="text-xxs">{{ transferAmount[1] }}</span>
-        <span class="font-bold ml-1">{{ nativeTokenNamespace }}</span>
-        <img src="@/assets/img/icon-xpx.svg" class="ml-2 inline-block absolute" style="top: -1px; width:14px;" />
+        <span class="font-bold">{{ transferAmount[0] }}</span>{{ transferAmount[1]>0?'.':'' }}<span class="text-xxs">{{ transferAmount[1] }}</span>
+        <img src="@/assets/img/icon-xpx.svg" class="ml-2 inline-block" style="top: -1px; width:14px;" />
+        <span class="font-bold ml-2">{{ nativeTokenLabel }}</span>
+
       </div>
     </div>
-    <div v-if="txnDetail.detail.assetAmount">
+    <!-- <div v-if="txnDetail.detail.assetAmount">
       <div>Amount</div>
       <div class="relative">
         <span class="font-bold">{{ Helper.toCurrencyFormat(assetAmount[0], nativeTokenDivisibility) }}</span>{{ assetAmount[1]>0?'.':'' }}<span class="text-xxs">{{ assetAmount[1] }}</span>
@@ -27,19 +28,22 @@
           <router-link :to="{ name: 'ViewAsset', params: { id: txnDetail.assetId }}" class="hover:text-blue-primary hover:underline">{{ txnDetail.assetId }}</router-link>
         </div>
       </div>
-    </div>
-    <div v-if="txnDetail.detail.amount">
-      <div>SDA Amount</div>
+    </div> -->
+    <div v-if="txnDetail.detail.sda.length > 0">
+      <div>Amount</div>
       <div class="relative">
-        <div v-for="sda, item in txnDetail.detail.amount" :key="item">
-          <span class="font-bold">{{ sdaAmount[item][0] }}</span>{{ sdaAmount[item][1]>0?'.':'' }}<span class="text-xxs">{{ sdaAmount[item][1] }}</span>
-          <div class="inline-block text-gray-400 text-txs hover:text-gray-700 duration-300 transition-all ml-1">
-            <router-link v-if="sda.name" :to="{ name: 'ViewNamespace', params: { namespaceParam: sda.namespaceID }}" class="hover:text-blue-primary hover:underline">{{ sda.name }}</router-link>
-            {{ sda.name?' / ':'' }}
-            <router-link :to="{ name: 'ViewAsset', params: { id: sda.id }}" class="hover:text-blue-primary hover:underline">{{ sda.id }}</router-link>
+        <div v-for="sda, index in txnDetail.detail.sda" :key="index">
+          <span class="font-bold">{{ sdaAmount[index][0] }}</span>{{ sdaAmount[index][1]>0?'.':'' }}<span class="text-xxs">{{ sdaAmount[index][1] }}</span>
+            <img v-if="sda.currentAlias[0] && sda.currentAlias[0].name=='xarcade.xar'" src="@/modules/account/img/xarcade-logo.svg" class="inline-block h-7 w-7 mr-2 ml-2 border-2 rounded-3xl">
+            <img v-else-if="sda.currentAlias[0] && sda.currentAlias[0].name=='prx.metx'" src="@/modules/account/img/metx-logo.svg" class="inline-block h-7 w-7 mr-2 ml-2 border-2 rounded-3xl">
+            <img v-else src="@/modules/transaction/img/proximax-logo-gray.svg" class='inline-block h-6 w-6 mr-2 ml-2'>
+          <div class="inline-block text-gray-400 text-txs hover:text-gray-700 duration-300 transition-all">
+            <!-- <router-link v-if="sda.currentAlias[0]" :to="{ name: 'ViewAsset', params: { id: sda.id }}" class="hover:text-blue-primary hover:underline">{{ sda.label }}</router-link> -->
+            <!-- {{ sda.name?' / ':'' }} -->
+            <router-link :to="{ name: 'ViewAsset', params: { id: sda.id }}" class="hover:text-blue-primary hover:underline">{{ sda.label }}</router-link>
           </div>
         </div>
-        <div v-if="txnDetail.detail.amount.length == 0">-</div>
+        <!-- <div v-if="txnDetail.detail.amount.length == 0">-</div> -->
       </div>
     </div>
     <div v-if="txnDetail.detail.message">
@@ -63,11 +67,14 @@ export default {
   },
   setup(props) {
     const toast = useToast();
-    const nativeTokenNamespace = AppState.nativeToken.label;
+    const nativeTokenLabel = AppState.nativeToken.label;
+    const nativeTokenNamespace = AppState.nativeToken.fullNamespace;
     const nativeTokenDivisibility = AppState.nativeToken.divisibility;
     const transferAmount = computed(() => {
       return props.txnDetail.detail.amountTransfer.toString().split('.');
     });
+
+    console.log(props.txnDetail.detail);
 
     const copy = (id) =>{
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
@@ -76,18 +83,34 @@ export default {
       toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
     };
 
-    const assetAmount = computed(() => {
-      if(props.txnDetail.detail.assetAmount){
-        return props.txnDetail.detail.assetAmount.toString().split('.');
-      }else{
-        return '';
-      }
-    });
+    // const assetAmount = computed(() => {
+    //   if(props.txnDetail.detail.assetAmount){
+    //     return props.txnDetail.detail.assetAmount.toString().split('.');
+    //   }else{
+    //     return '';
+    //   }
+    // });
+
+    // const sdaAsset = computed(() => {
+    //   let formattedSDA = [];
+    //   if(props.txnDetail.detail.sda.length > 0){
+    //     props.txnDetail.detail.sda.forEach(sda => {
+    //     //  sda.currentAlias.forEach(test=>{
+    //         formattedSDA.push({
+    //           name:sda.currentAlias[0].name,
+    //           id: sda.currentAlias[0].idHex
+    //       })              
+    //   // });
+    //   });
+    //   }
+    //   console.log(formattedSDA[0].name);
+    //     return formattedSDA;
+    // });
 
     const sdaAmount = computed(() => {
       let formattedSDA = [];
-      if(props.txnDetail.detail.amount){
-        props.txnDetail.detail.amount.forEach(sda => {
+      if(props.txnDetail.detail.sda.length > 0){
+        props.txnDetail.detail.sda.forEach(sda => {
           formattedSDA.push(sda.amount.toString().split('.'));
         });
       }
@@ -96,11 +119,13 @@ export default {
 
     return {
       nativeTokenNamespace,
+      nativeTokenLabel,
       Helper,
       copy,
       transferAmount,
       sdaAmount,
-      assetAmount,
+      // sdaAsset,
+      // assetAmount,
       nativeTokenDivisibility
     }
   }

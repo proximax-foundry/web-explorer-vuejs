@@ -37,7 +37,7 @@
     </div>
     <div v-if="txnDetail.group=='confirmed'">
       <div>Tx Fee</div>
-      <div class="relative"><span class="font-bold">{{ maxFee[0] }}</span>{{ maxFee[1]>0?'.':'' }}<span class="text-xxs">{{ maxFee[1] }}</span> <span class="font-bold">{{ nativeTokenNamespace }}</span> <img src="@/assets/img/icon-xpx.svg" class="ml-2 inline-block absolute" style="top: -1px; width:14px;" /></div>
+      <div class="relative"><span class="font-bold">{{ maxFee[0] }}</span>{{ maxFee[1]>0?'.':'' }}<span class="text-xxs">{{ maxFee[1] }}</span> <img src="@/assets/img/icon-xpx.svg" class="ml-1 mr-2 inline-block" style="top: -1px; width:14px;" /><span class="font-bold">{{ nativeTokenNamespace }}</span> </div>
     </div>
     <div>
       <div>Signature</div>

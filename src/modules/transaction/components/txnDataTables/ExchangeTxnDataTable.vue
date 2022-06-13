@@ -27,7 +27,7 @@
           <div>
             <div class="text-xs text-gray-300 font-bold mb-1 mt-5">Block</div>
             <div class="flex items-center">
-              <div class="uppercase font-bold text-xs mr-2">{{data.block}}</div>
+               <router-link :to="{ name: 'ViewBlock', params: { blockHeight: data.block}}" class="text-blue-600 hover:text-blue-primary hover:underline text-xs">{{ data.block }}</router-link>
             </div>
           </div>
         </template>
@@ -81,8 +81,7 @@
       </Column>
       <Column field="block" header="Block" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
         <template #body="{data}">
-          <div class="text-xs">{{ data.block }}</div>
-        </template>
+          <router-link :to="{ name: 'ViewBlock', params: { blockHeight: data.block}}" class="text-blue-600 hover:text-blue-primary hover:underline text-xs">{{ data.block }}</router-link>        </template>
       </Column>
       <Column header="Tx Fee" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
         <template #body="{data}">

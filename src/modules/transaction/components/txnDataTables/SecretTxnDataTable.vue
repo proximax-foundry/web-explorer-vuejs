@@ -66,7 +66,7 @@
       </Column>
       <Column field="block" header="Block" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:70px;text-transform:uppercase">
         <template #body="{data}">
-          <div class="text-xs">{{ data.block }}</div>
+          <router-link :to="{ name: 'ViewBlock', params: { blockHeight: data.block}}" class="text-blue-600 hover:text-blue-primary hover:underline text-xs">{{ data.block }}</router-link>
         </template>
       </Column>
       <Column field="recipient" header="Recipient" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
@@ -104,7 +104,7 @@
       <Column header="SDA" headerStyle="width:30px; text-align:center;width:40px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <div>
-            <img src="@/modules/transaction/img/icon-sda.svg" v-if="data.assetId" class="inline-block" v-tooltip.left="'<tiptitle>Sirius Digital Asset</tiptitle><tiptext>' + constructSDA(data.assetId, data.amount, data.namespaceName) + '</tiptext>'">
+            <img src="@/modules/transaction/img/proximax-logo-gray.svg" v-if="data.assetId" class="inline-block w-4/6" v-tooltip.left="'<tiptitle>Sirius Digital Asset</tiptitle><tiptext>' + constructSDA(data.assetId, data.amount, data.namespaceName) + '</tiptext>'">
           </div>
         </template>
       </Column>

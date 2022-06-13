@@ -27,7 +27,7 @@
               <img v-if="displayTokenName(asset.name).name=='XPX'" src="@/modules/account/img/proximax-logo.svg" class="inline-block h-7 w-7 mr-2 border-2 rounded-3xl">
               <img v-else-if="displayTokenName(asset.name).name=='XAR'" src="@/modules/account/img/xarcade-logo.svg" class="inline-block h-7 w-7 mr-2 border-2 rounded-3xl">
               <img v-else-if="displayTokenName(asset.name).name=='METX'" src="@/modules/account/img/metx-logo.svg" class="inline-block h-7 w-7 mr-2 border-2 rounded-3xl">
-              <img v-else src="@/modules/transaction/img/icon-sda.svg" class='inline-block h-6 w-6 mr-2 '>
+              <img v-else src="@/modules/transaction/img/proximax-logo-gray.svg" class='inline-block h-6 w-6 mr-2 '>
             </div>
             <div v-if="asset.namespaceId">
               <router-link :to="{ name: 'ViewNamespace', params:{ namespaceParam: asset.namespaceId }}" class="text-blue-600 hover:text-blue-primary break-all hover:underline">{{ displayTokenName(asset.name).name }}</router-link>
@@ -47,7 +47,7 @@
             <img v-if="displayTokenName(asset.name).name=='XPX'" src="@/modules/account/img/proximax-logo.svg" class="inline-block h-7 w-7 mr-2 border-2 rounded-3xl">
             <img v-else-if="displayTokenName(asset.name).name=='XAR'" src="@/modules/account/img/xarcade-logo.svg" class="inline-block h-7 w-7 mr-2 border-2 rounded-3xl">
             <img v-else-if="displayTokenName(asset.name).name=='METX'" src="@/modules/account/img/metx-logo.svg" class="inline-block h-7 w-7 mr-2 border-2 rounded-3xl">
-            <img v-else src="@/modules/transaction/img/icon-sda.svg" class='inline-block h-6 w-6 mr-2 '>
+            <img v-else src="@/modules/transaction/img/proximax-logo-gray.svg" class='inline-block h-6 w-6 mr-2 '>
           </div>
           <div v-if="asset.namespaceId">
             <router-link :to="{ name: 'ViewNamespace', params:{ namespaceParam: asset.namespaceId }}" class="text-blue-600 hover:text-blue-primary hover:underline">{{ displayTokenName(asset.name).name }}</router-link>
@@ -92,19 +92,21 @@ export default {
       }else{
         return { left: split[0], right: null }
       }
-      return balance;
     }
 
     const displayTokenName = (name) => {
+
+      if(name === ""){
+        return { name: name, registered: false };
+      }
+
       if(name==AppState.nativeToken.fullNamespace){
         return { name: AppState.nativeToken.label, registered: true };
       }else{
-        if(AppState.registeredToken.length > 0){
-          AppState.registeredToken.forEach(token => {
-            if(token.fullNamespace == name){
-              return { name: token.label, registered: true };
-            }
-          });
+        let foundToken = AppState.registeredToken.find(x => x.fullNamespace === name);
+        
+        if(foundToken){
+          return { name: foundToken.label, registered: true };
         }
         return { name: name, registered: false };
       }

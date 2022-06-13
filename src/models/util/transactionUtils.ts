@@ -79,6 +79,7 @@ import {
   MetadataEntry,
   AggregateTransactionInfo,
   TransactionInfo,
+  TransactionStatus,
 } from "tsjs-xpx-chain-sdk";
 // import { mergeMap, timeout, filter, map, first, skip } from 'rxjs/operators';
 import { networkState } from "@/state/networkState";
@@ -549,7 +550,7 @@ export class TransactionUtils {
   static async getTransaction(hash: string) : Promise<any|boolean> {
     try {
       let txn:any = {};
-      let txnStatus:any = {};
+      let txnStatus:TransactionStatus;
       txnStatus = await AppState.chainAPI.transactionAPI.getTransactionStatus(hash);
       if(txnStatus.group == 'partial'){
         txn = await AppState.chainAPI.transactionAPI.getPartialTransaction(hash);
@@ -1330,21 +1331,26 @@ export class TransactionUtils {
 
         let assetDivisibilityInfo: TxnDetails = {
           type: MsgType.INFO,
-          value: `Divisibility: ${assetDefFormat.divisibility}`
+          label: "Divisibility",
+          value: `${assetDefFormat.divisibility}`
         };
 
         infos.push(assetDivisibilityInfo);
 
         let assetTransferableInfo: TxnDetails = {
-          type: assetDefFormat.transferable ? MsgType.GREEN : MsgType.RED,
-          value: `Transferable`
+          type: MsgType.INFO,
+          label: "Transferable",
+          value: assetDefFormat.transferable ? "Yes" :"No"
         };
 
         infos.push(assetTransferableInfo);
 
         let assetSupplyMutableInfo: TxnDetails = {
-          type: assetDefFormat.supplyMutable ? MsgType.GREEN : MsgType.RED,
-          value: `Supply Mutable`
+          // type: assetDefFormat.supplyMutable ? MsgType.GREEN : MsgType.RED,
+          // value: `Supply Mutable`
+          type: MsgType.INFO,
+          label: "Supply Mutable",
+          value: assetDefFormat.supplyMutable ? "Yes" : "No"
         };
 
         infos.push(assetSupplyMutableInfo);
@@ -1380,17 +1386,22 @@ export class TransactionUtils {
         let assetInfo: TxnDetails = {
           type: MsgType.NONE,
           label: "Asset",
-          value: assetSupplyFormat.assetId + assetSupplyFormat.namespaceName ? ` (${assetSupplyFormat.namespaceName})` : ''
+          value: assetSupplyFormat.assetId
         };
-
         infos.push(assetInfo);
-
+        
+        let supplyDirection: TxnDetails = {
+          type: MsgType.INFO,
+          label: "Supply Direction",
+          value: assetSupplyFormat.supplyDirection == 0 ? "Decrease: " : "Increase: "
+        };
+        infos.push(supplyDirection);
+        
         let assetSupplyInfo: TxnDetails = {
           type: MsgType.INFO,
-          label: "Asset",
-          value: assetSupplyFormat.supplyDelta > 0 ? `+${assetSupplyFormat.supplyDelta}` : assetSupplyFormat.supplyDelta
+          label:"Supply Delta",
+          value: assetSupplyFormat.supplyDelta > 0 ? assetSupplyFormat.supplyDelta :''
         };
-
         infos.push(assetSupplyInfo);
 
         transactionDetails = {
@@ -1677,7 +1688,8 @@ export class TransactionUtils {
           sdaObj = {
             amount: transferFormat.amountTransfer,
             assetId: AppState.nativeToken.assetId,
-            namespace: AppState.nativeToken.label
+            namespace: AppState.nativeToken.fullNamespace,
+            label: AppState.nativeToken.label
           }
           sdas.push(sdaObj);
         }
@@ -1688,14 +1700,16 @@ export class TransactionUtils {
             sdaObj = {
               amount: tempSDA.amount,
               assetId: tempSDA.id,
-              namespace: tempSDA.currentAlias[0].name
+              namespace: tempSDA.currentAlias[0].name,
+              label: tempSDA.label
             }
             // sdaString = (tempSDA.amount + ` ${tempSDA.id} ` + `(${tempSDA.currentAlias[0].name})`);
           }else{
             sdaObj = {
               amount: tempSDA.amount,
               assetId: tempSDA.id,
-              namespace: ''
+              namespace: '',
+              label: tempSDA.label
             }
             // sdaString = (tempSDA.amount + ' ' + tempSDA.id);
           }
@@ -2240,23 +2254,23 @@ export class TransactionUtils {
     txnDetails.signer = assetSupplyChangeTxn.signer.publicKey;
     txnDetails.signerAddress = assetSupplyChangeTxn.signer.address.plain();
     txnDetails.type = TransactionUtils.getTransactionTypeName(assetSupplyChangeTxn.type);
-
+    
     let assetId = assetSupplyChangeTxn.mosaicId.toHex();
-
     txnDetails.assetId = assetId;
     txnDetails.supplyDelta = assetSupplyChangeTxn.delta.compact();
-    txnDetails.supplyDeltaIsRaw = true;
+    txnDetails.supplyDirection = assetSupplyChangeTxn.direction;
+    // txnDetails.supplyDeltaIsRaw = true;
 
     if(assetSupplyChangeTxn.direction === MosaicSupplyType.Decrease){
       txnDetails.supplyDelta = -txnDetails.supplyDelta;
     }
-
+    
     try {
       let assetInfo = await TransactionUtils.getAssetInfo(assetId);
 
       txnDetails.supplyDelta = TransactionUtils.convertToExactAmount(txnDetails.supplyDelta, assetInfo.divisibility);
 
-      txnDetails.supplyDeltaIsRaw = false;
+    //   txnDetails.supplyDeltaIsRaw = false;
     } catch (error) {}
     return txnDetails;
   }
@@ -2994,6 +3008,16 @@ export class TransactionUtils {
                   .filter(nsName => nsName.namespaceId.toHex() === sdas[x].sendWithAlias.idHex)
                   .map(nsName => nsName.name)[0]
           }
+
+          if(sdas[x].currentAlias.length && AppState.registeredToken.find(rt => rt.fullNamespace === sdas[x].currentAlias[0].name)){
+            sdas[x].label = AppState.registeredToken.find(rt => rt.fullNamespace === sdas[x].currentAlias[0].name).label;
+          }
+          else if(sdas[x].currentAlias.length){
+            sdas[x].label = sdas[x].currentAlias[0].name; 
+          }
+          else{
+            sdas[x].label = sdas[x].id;
+          }
         }
     }
     txnDetails.sda = sdas;
@@ -3229,6 +3253,16 @@ export class TransactionUtils {
                 .filter(nsName => nsName.namespaceId.toHex() === sdas[x].sendWithAlias.idHex)
                 .map(nsName => nsName.name)[0]
             }
+
+            if(sdas[x].currentAlias.length && AppState.registeredToken.find(rt => rt.fullNamespace === sdas[x].currentAlias[0].name)){
+              sdas[x].label = AppState.registeredToken.find(rt => rt.fullNamespace === sdas[x].currentAlias[0].name).label;
+            }
+            else if(sdas[x].currentAlias.length){
+              sdas[x].label = sdas[x].currentAlias[0].name; 
+            }
+            else{
+              sdas[x].label = sdas[x].id;
+            }
           }
         }
       }
@@ -3365,6 +3399,16 @@ export class TransactionUtils {
                             .filter(nsName => nsName.namespaceId.toHex() === sdas[x].sendWithAlias.idHex)
                             .map(nsName => nsName.name)[0]
                     }
+
+                    if(sdas[x].currentAlias.length && AppState.registeredToken.find(rt => rt.fullNamespace === sdas[x].currentAlias[0].name)){
+                      sdas[x].label = AppState.registeredToken.find(rt => rt.fullNamespace === sdas[x].currentAlias[0].name).label;
+                    }
+                    else if(sdas[x].currentAlias.length){
+                      sdas[x].label = sdas[x].currentAlias[0].name; 
+                    }
+                    else{
+                      sdas[x].label = sdas[x].id;
+                    }
                 }
             }
         }
@@ -3500,6 +3544,16 @@ export class TransactionUtils {
                             .filter(nsName => nsName.namespaceId.toHex() === sdas[x].sendWithAlias.idHex)
                             .map(nsName => nsName.name)[0]
                     }
+
+                    if(sdas[x].currentAlias.length && AppState.registeredToken.find(rt => rt.fullNamespace === sdas[x].currentAlias[0].name)){
+                      sdas[x].label = AppState.registeredToken.find(rt => rt.fullNamespace === sdas[x].currentAlias[0].name).label;
+                    }
+                    else if(sdas[x].currentAlias.length){
+                      sdas[x].label = sdas[x].currentAlias[0].name; 
+                    }
+                    else{
+                      sdas[x].label = sdas[x].id;
+                    }
                 }
             }
         }
@@ -3512,10 +3566,10 @@ export class TransactionUtils {
 
   static async formatTransferTransaction(transaction: Transaction, groupType: string): Promise<ConfirmedTransferTransaction|UnconfirmedTransferTransaction|PartialTransferTransaction>{
     let formattedTxn:any, txn:any
-    if(groupType == 'partial'){
+    if(groupType == TransactionGroupType.PARTIAL){
       formattedTxn = await TransactionUtils.formatPartialTransaction(transaction);
       txn = PartialTransaction.convertToSubClass(PartialTransferTransaction, formattedTxn) as PartialTransferTransaction;
-    }else if(groupType == 'unconfirmed'){
+    }else if(groupType == TransactionGroupType.UNCONFIRMED){
       formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(transaction);
       txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedTransferTransaction, formattedTxn) as UnconfirmedTransferTransaction;
     }else{
@@ -3565,8 +3619,22 @@ export class TransactionUtils {
           let rawAmount = transferTxn.mosaics[y].amount.compact();
           let actualAmount = rawAmount;
           let isSendWithNamespace = TransactionUtils.isNamespace(transferTxn.mosaics[y].id);
-          let assetId = await TransactionUtils.getResolvedAsset(transferTxn.mosaics[y].id, txn.block);
-          let assetIdHex = assetId.toHex();
+          let assetId:MosaicId;
+          let assetIdHex:string;
+          if(groupType === TransactionGroupType.CONFIRMED){
+            assetId = await TransactionUtils.getResolvedAsset(transferTxn.mosaics[y].id, txn.block);
+          }
+          else{
+            if(isSendWithNamespace){
+                let namespaceId = new NamespaceId(transferTxn.mosaics[y].id.toDTO().id);
+                assetId = await TransactionUtils.getAssetAlias(namespaceId);
+            }
+            else{
+                assetId = transferTxn.mosaics[y].id;
+            }
+          }
+
+          assetIdHex = assetId.toHex();
 
           if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
             txn.amountTransfer += TransactionUtils.convertToExactNativeAmount(actualAmount);
@@ -3624,6 +3692,16 @@ export class TransactionUtils {
                 .filter(nsName => nsName.namespaceId.toHex() === sdas[x].sendWithAlias.idHex)
                 .map(nsName => nsName.name)[0]
             }
+
+            if(sdas[x].currentAlias.length && AppState.registeredToken.find(rt => rt.fullNamespace === sdas[x].currentAlias[0].name)){
+              sdas[x].label = AppState.registeredToken.find(rt => rt.fullNamespace === sdas[x].currentAlias[0].name).label;
+            }
+            else if(sdas[x].currentAlias.length){
+              sdas[x].label = sdas[x].currentAlias[0].name; 
+            }
+            else{
+              sdas[x].label = sdas[x].id;
+            }
           }
         }
     }
@@ -3662,7 +3740,8 @@ export class TransactionUtils {
 
       txn.assetId = assetId;
       txn.supplyDelta = assetSupplyChangeTxn.delta.compact();
-      txn.supplyDeltaIsRaw = true;
+      //txn.supplyDeltaIsRaw = true;
+      txn.supplyDirection = assetSupplyChangeTxn.direction;
 
       if(assetSupplyChangeTxn.direction === MosaicSupplyType.Decrease){
         txn.supplyDelta = -txn.supplyDelta;
@@ -3673,7 +3752,7 @@ export class TransactionUtils {
 
         txn.supplyDelta = TransactionUtils.convertToExactAmount(txn.supplyDelta, assetInfo.divisibility);
 
-        txn.supplyDeltaIsRaw = false;
+      //   txn.supplyDeltaIsRaw = false;
       } catch (error) {}
     }else if(transaction.type === TransactionType.MODIFY_MOSAIC_LEVY){
       let assetModifyLevyTxn = transaction as MosaicModifyLevyTransaction;
@@ -3750,8 +3829,8 @@ export class TransactionUtils {
 
         txn.assetId = assetId;
         txn.supplyDelta = assetSupplyChangeTxn.delta.compact();
-        txn.supplyDeltaIsRaw = true;
-
+        // txn.supplyDeltaIsRaw = true;
+        txn.supplyDirection = assetSupplyChangeTxn.direction;
         if(assetSupplyChangeTxn.direction === MosaicSupplyType.Decrease){
           txn.supplyDelta = -txn.supplyDelta;
         }
@@ -3761,7 +3840,7 @@ export class TransactionUtils {
 
           txn.supplyDelta = TransactionUtils.convertToExactAmount(txn.supplyDelta, assetInfo.divisibility);
 
-          txn.supplyDeltaIsRaw = false;
+        //   txn.supplyDeltaIsRaw = false;
         } catch (error) {}
       }else if(txns[i].type === TransactionType.MODIFY_MOSAIC_LEVY){
         let assetModifyLevyTxn = txns[i] as MosaicModifyLevyTransaction;
@@ -3839,7 +3918,7 @@ export class TransactionUtils {
 
         txn.assetId = assetId;
         txn.supplyDelta = assetSupplyChangeTxn.delta.compact();
-        txn.supplyDeltaIsRaw = true;
+        txn.supplyDirection = assetSupplyChangeTxn.direction;
 
         if(assetSupplyChangeTxn.direction === MosaicSupplyType.Decrease){
           txn.supplyDelta = -txn.supplyDelta;
@@ -3850,7 +3929,7 @@ export class TransactionUtils {
 
           txn.supplyDelta = TransactionUtils.convertToExactAmount(txn.supplyDelta, assetInfo.divisibility);
 
-          txn.supplyDeltaIsRaw = false;
+          //txn.supplyDeltaIsRaw = false;
         } catch (error) {}
       }
       else if(txns[i].type === TransactionType.MODIFY_MOSAIC_LEVY){
@@ -3929,7 +4008,7 @@ export class TransactionUtils {
 
         txn.assetId = assetId;
         txn.supplyDelta = assetSupplyChangeTxn.delta.compact();
-        txn.supplyDeltaIsRaw = true;
+        //txn.supplyDeltaIsRaw = true;
 
         if(assetSupplyChangeTxn.direction === MosaicSupplyType.Decrease){
           txn.supplyDelta = -txn.supplyDelta;
@@ -3940,7 +4019,7 @@ export class TransactionUtils {
 
           txn.supplyDelta = TransactionUtils.convertToExactAmount(txn.supplyDelta, assetInfo.divisibility);
 
-          txn.supplyDeltaIsRaw = false;
+        //   txn.supplyDeltaIsRaw = false;
         } catch (error) {}
       }else if(txns[i].type === TransactionType.MODIFY_MOSAIC_LEVY){
         let assetModifyLevyTxn = txns[i] as MosaicModifyLevyTransaction;

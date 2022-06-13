@@ -8,6 +8,7 @@ import {
   Mosaic,
   NamespaceId,
   NamespaceInfo,
+  Convert
 } from "tsjs-xpx-chain-sdk";
 import { networkState } from '@/state/networkState';
 import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
@@ -36,7 +37,7 @@ export class SearchService{
     try {
       switch(this.filter) {
         case 'all':
-          if(this.searchString.length == 64){ // Public key or Txn hash
+          if(this.searchString.length == 64 && Convert.isHexString(this.searchString)){ // Public key or Txn hash
             // verify if it is txn hash
             let transactionSearch = await this.searchTxn();
             if(transactionSearch.valid){
@@ -46,9 +47,9 @@ export class SearchService{
             }
           }else if(this.searchString.length == 40 || this.searchString.length == 46){ // address
             return this.searchAddress();
-          }else if(this.searchString.length == 16){ // asset and namespace
+          }else if(this.searchString.length == 16 && Convert.isHexString(this.searchString)){ // asset and namespace
             // search asset
-            if(NamespaceUtils.isNamespace(this.searchString)){
+            if(NamespaceUtils.isNamespaceHex(this.searchString)){
               return this.searchNamespace();
             }else{
               return this.searchAsset();
@@ -60,7 +61,7 @@ export class SearchService{
             return this.searchAlias();
           }
         case 'tx':
-          if(this.searchString.length == 64){
+          if(this.searchString.length == 64 && Convert.isHexString(this.searchString)){
             return this.searchTxn();
           }else{
             return {
@@ -85,13 +86,13 @@ export class SearchService{
             };
           }
         case 'assetID':
-          if(this.searchString.length == 16){
+          if(this.searchString.length == 16 && Convert.isHexString(this.searchString)){
             return this.searchAsset();
           }else{
             return this.searchAssetAlias();
           }
         case 'namespaceID':
-          if(this.searchString.length == 16){
+          if(this.searchString.length == 16 && Convert.isHexString(this.searchString)){
             return this.searchNamespace();
           }else{
             return this.searchAlias();
@@ -107,7 +108,7 @@ export class SearchService{
             };
           }
         case 'publicKey':
-          if(this.searchString.length == 64){
+          if(this.searchString.length == 64 && Convert.isHexString(this.searchString)){
             return this.searchPublicKey('PublicKey');
           }else{
             return {

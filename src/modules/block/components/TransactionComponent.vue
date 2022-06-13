@@ -83,9 +83,9 @@
         </Column>
         <Column field="signer" header="FROM" headerStyle="width:110px" v-if="wideScreen">
           <template #body="{data}">
-            <span v-if="data.sender === '' || data.sender === null"></span>
-            <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.sender }}" v-else v-tooltip.bottom="Helper.createAddress(data.sender).pretty()" class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-28"><span class="text-ellipsis overflow-hidden ">
-              {{ Helper.createAddress(data.sender).pretty() }}</span>...
+            <span v-if="data.signerAddress === '' || data.signerAddress === null"></span>
+            <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.signerAddress }}" v-else v-tooltip.bottom="Helper.createAddress(data.signerAddress).pretty()" class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-28"><span class="text-ellipsis overflow-hidden ">
+              {{ Helper.createAddress(data.signerAddress).pretty() }}</span>...
             </router-link>
           </template>
         </Column>
@@ -110,7 +110,7 @@
         <Column header="SDA" headerStyle="width:40px" v-if="wideScreen">
           <template #body="{data}">
             <div>
-              <img src="@/modules/transaction/img/icon-sda.svg" class="inline-block" v-if="checkOtherAsset(data.sda)" v-tooltip.left="'<tiptitle>Sirius Digital Asset</tiptitle><tiptext>' + displaySDAs(data.sda) + '</tiptext>'">
+              <img src="@/modules/transaction/img/proximax-logo-gray.svg" class="inline-block w-4/6" v-if="checkOtherAsset(data.sda)" v-tooltip.left="'<tiptitle>Sirius Digital Asset</tiptitle><tiptext>' + displaySDAs(data.sda) + '</tiptext>'">
               <span v-else>-</span>
             </div>
           </template>

@@ -34,11 +34,9 @@
   <div class="details" v-else-if="txnGroup == TransactionType.MOSAIC_SUPPLY_CHANGE">
     <div>
       <div>Supply Delta</div>
-      <div>{{ txnDetail.detail.supplyDelta }}</div>
-    </div>
-    <div>
-      <div>Raw Supply Delta</div>
-      <div>{{ txnDetail.detail.supplyDeltaIsRaw?'Yes':'No' }}</div>
+      <div>
+        {{ txnDetail.detail.supplyDirection == 0 ? "Decrease: " : "Increase: " + ": " }}
+        {{ txnDetail.detail.supplyDelta }}</div>
     </div>
   </div>
   <div class="details" v-else-if="txnGroup == TransactionType.MODIFY_MOSAIC_LEVY">
