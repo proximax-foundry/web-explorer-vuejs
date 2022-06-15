@@ -17,7 +17,7 @@
       <div class="mb-20" v-if="!isFetching">
         <AssetComponent :accountAssets="accountAssets" v-if="currentComponent=='asset'" />
         <NamespaceComponent :accountNamespaces="accountNamespaces" v-if="currentComponent=='namespace'" />
-        <MetadataComponent :accountAddress="strAddress" :accountNamespaces="accountNamespaces" :accountAssets="accountAssets" v-if="currentComponent=='metadata'" />
+        <MetadataComponent :accountMetadata="accountMetadata" v-if="currentComponent=='metadata'" />
         <MultisigComponent :cosignatories="accountNamespaces" :metadata="multisig.multisigAccounts" :address="strAddress" v-else-if="currentComponent=='multisig'" />
         <SchemeComponent v-else-if="currentComponent=='scheme'" :accountAddress="strAddress" :accountPublicKey="strPublicKey" />
         <TransactionComponent v-else-if="currentComponent=='txn'" :accountAddress="strAddress" :accountPublicKey="strPublicKey" />
@@ -39,7 +39,7 @@ import { networkState } from '@/state/networkState';
 import { AppState } from '@/state/appState';
 import { Helper } from "@/util/typeHelper";
 import { AccountUtils } from "@/util/accountUtil";
-import { TransactionUtils } from '@/models/util/transactionUtils';
+import { MetadataUtils } from '@/util/metadataUtil';
 import { Address } from "tsjs-xpx-chain-sdk";
 
 export default {
@@ -73,6 +73,9 @@ export default {
       multisigAccounts: []
     });
     const accountNamespaces = ref([]);
+    const accountMetadata = ref([]);
+   
+
     const matchedNamespace = ref([]);
     let account;
 
@@ -108,6 +111,8 @@ export default {
       }
 
       delegatePublicKey.value = account.linkedAccountKey;
+      let fetchAccountMetadata = await MetadataUtils.getAccountMetadata(strPublicKey.value);
+      accountMetadata.value = fetchAccountMetadata;
 
       let fetchedAccountNamespaces = await AccountUtils.getAccountNamespaces(strAddress.value);
       if(fetchedAccountNamespaces !== false){
@@ -152,6 +157,7 @@ export default {
       networkName,
       delegatePublicKey,
       matchedNamespace,
+      accountMetadata
     }
   }
 }
