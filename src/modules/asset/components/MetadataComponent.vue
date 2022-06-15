@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="!metadata" class="ml-5">
+    <div v-if="metadata.length==0" class="ml-10">
       No record found
     </div>
     <div v-else>

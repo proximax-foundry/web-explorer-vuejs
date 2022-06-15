@@ -56,7 +56,7 @@ export class MetadataUtils {
             let assetMetadataList: any = [];
             let metadataQueryParams = new MetadataQueryParams();
                 metadataQueryParams.metadataType = MetadataType.MOSAIC;
-            metadataQueryParams.targetId = new MosaicId(mosaic);
+                metadataQueryParams.targetId = new MosaicId(mosaic);
                 let fetchMetadata = await AppState.chainAPI.metadataAPI.searchMetadatas(metadataQueryParams);
                 fetchMetadata.metadataEntries.forEach(metadataEntry => {
                     assetMetadata = {

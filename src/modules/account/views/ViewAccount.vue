@@ -9,7 +9,7 @@
       <div class="flex text-xs font-semibold border-b-2 menu_title_div">
         <div class="w-18 text-center cursor-pointer pb-3" :class="`${ (currentComponent=='asset')?'border-yellow-500 border-b-2':'' }`" @click="setCurrentComponent('asset')">Assets</div>
         <div class="w-18 text-center cursor-pointer" :class="`${ (currentComponent=='namespace')?'border-yellow-500 border-b-2':'' }`" @click="setCurrentComponent('namespace')" v-if="accountNamespaces.length > 0">Namespaces</div>
-        <div class="w-18 text-center cursor-pointer" :class="`${ (currentComponent=='metadata')?'border-yellow-500 border-b-2':'' }`" @click="setCurrentComponent('metadata')" v-if="accountNamespaces.length > 0">Metadata</div>
+        <div class="w-18 text-center cursor-pointer" :class="`${ (currentComponent=='metadata')?'border-yellow-500 border-b-2':'' }`" @click="setCurrentComponent('metadata')" v-if="accountMetadata.length > 0">Metadata</div>
         <div class="w-18 text-center cursor-pointer" :class="`${ (currentComponent=='multisig')?'border-yellow-500 border-b-2':'' }`" @click="setCurrentComponent('multisig')" v-if="multisigLength > 0 || cosignatoriesLength > 0">Multisig</div>
         <div class="w-18 text-center cursor-pointer" :class="`${ (currentComponent=='scheme')?'border-yellow-500 border-b-2':'' }`" @click="setCurrentComponent('scheme')" v-if="cosignatoriesLength > 0">Scheme</div>
         <div class="w-18 text-center cursor-pointer" :class="`${ (currentComponent=='txn')?'border-yellow-500 border-b-2':'' }`" @click="setCurrentComponent('txn')">Transactions</div>
@@ -18,7 +18,7 @@
         <AssetComponent :accountAssets="accountAssets" v-if="currentComponent=='asset'" />
         <NamespaceComponent :accountNamespaces="accountNamespaces" v-if="currentComponent=='namespace'" />
         <MetadataComponent :accountMetadata="accountMetadata" v-if="currentComponent=='metadata'" />
-        <MultisigComponent :cosignatories="accountNamespaces" :metadata="multisig.multisigAccounts" :address="strAddress" v-else-if="currentComponent=='multisig'" />
+        <MultisigComponent :cosignatories="multisig.cosignatories" :multisig="multisig.multisigAccounts" :address="strAddress" v-else-if="currentComponent=='multisig'" />
         <SchemeComponent v-else-if="currentComponent=='scheme'" :accountAddress="strAddress" :accountPublicKey="strPublicKey" />
         <TransactionComponent v-else-if="currentComponent=='txn'" :accountAddress="strAddress" :accountPublicKey="strPublicKey" />
       </div>
@@ -111,6 +111,7 @@ export default {
       }
 
       delegatePublicKey.value = account.linkedAccountKey;
+      
       let fetchAccountMetadata = await MetadataUtils.getAccountMetadata(strPublicKey.value);
       accountMetadata.value = fetchAccountMetadata;
 

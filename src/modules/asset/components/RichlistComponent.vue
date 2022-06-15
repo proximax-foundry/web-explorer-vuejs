@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="transactions==false" class="ml-5">
+    <div v-if="transactions==false" class="ml-10">
       No record found
     </div>
     <div v-else>
