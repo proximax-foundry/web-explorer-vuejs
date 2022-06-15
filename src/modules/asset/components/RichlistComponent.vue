@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="transactions==false" class="ml-5">
+    <div v-if="transactions==false" class="ml-10">
       No record found
     </div>
     <div v-else>
@@ -34,11 +34,6 @@
             </div>
           </template>
         </Column>
-        <!-- <Column style="width: 250px" v-if="!wideScreen">
-          <template #body="{data}">
-           
-          </template> 
-        </Column>-->
         <Column style="width: 30px" v-if="wideScreen">
         </Column>
         <Column field="ADDRESS" header="ADDRESS" style="width:450px" v-if="wideScreen">
@@ -56,11 +51,6 @@
             <span class="uppercase font-bold text-xs">{{getPercentage(data.amount.compact())}}%</span>
           </template>
         </Column>
-        <!-- <Column field="NAMESPACE" header="NAMESPACE" style="`wideScreen?'min-width: 180px'?'width: 180px'`" v-if="wideScreen"> 
-         <template #body="{data}">
-            <span class="text-xs">{{getLinkedNamespace(data.address)&&linkednamespaceID==null?"No Linked Namespace":linkednamespaceID }}</span>
-          </template>
-        </Column> -->
       </DataTable>
     </div>
   </div>
