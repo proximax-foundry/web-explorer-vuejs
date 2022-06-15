@@ -128,15 +128,16 @@ export default {
     });
 
     const loadAsset = async() => {
-      if(!AppState.isReady){
+      if(!AppState.isReady && !networkName.value){
         setTimeout(loadAsset, 1000);
+        return;
       }
       const accountMetadata = await MetadataUtils.getAssetMetadata(props.id);
       metadata.value = accountMetadata;
       const asset = await AssetUtils.getAssetProperties(props.id);
       const richlist = await AssetUtils.getRichList(props.id);
      
-        if(asset!=false){
+        if(asset){
           isShowInvalid.value = false;
           assets.value = asset;
           richList.value = richlist;          
@@ -150,7 +151,7 @@ export default {
             if(namespaceInfo.alias.type == 1){
               const assetAlias = await AssetUtils.getAssetProperties(namespaceInfo.alias.id);
               const richlistAlias = await AssetUtils.getRichList(namespaceInfo.alias.id);
-              if(assetAlias!=null){
+              if(assetAlias){
                 assets.value = assetAlias;
                 richList.value = richlistAlias;
               }
