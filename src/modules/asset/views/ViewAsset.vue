@@ -83,7 +83,7 @@
       </div>
       <transition name="slide">
         <RichlistComponent v-if="currentComponent == 'rich'" :transactions="richList" :supply="assets.supply"  :divisibility="assets.divisibility" />
-        <!-- <InnerTxnComponent v-else-if="currentComponent == 'metadata'" /> -->
+        <MetadataComponent :metadata="metadata" v-else-if="currentComponent == 'metadata'" />
       </transition>
     </div>
   </div>
@@ -93,17 +93,20 @@
 <script>
 import { computed, getCurrentInstance, ref } from "vue";
 import RichlistComponent from '@/modules/asset/components/RichlistComponent.vue';
+import MetadataComponent from '@/modules/asset/components/MetadataComponent.vue';
 import { AppState } from '@/state/appState';
 import { AssetUtils } from '@/util/assetUtil';
 import { Helper } from '@/util/typeHelper';
 import { networkState } from '@/state/networkState';
 import { NamespaceId } from "tsjs-xpx-chain-sdk";
 import { NamespaceUtils } from "@/util/namespaceUtil";
+import { MetadataUtils } from '@/util/metadataUtil';
 
 export default {
   name: 'ViewAsset',
   components: {
-    RichlistComponent
+    RichlistComponent,
+    MetadataComponent
   },
   props: {
     id: String
@@ -114,6 +117,7 @@ export default {
     const currentComponent = ref('rich');
     const isShowInvalid = ref(null);
     const richList = ref([]);
+    const metadata = ref([]);
     const assets = ref([]);
     const setCurrentComponent = (page) => {
       currentComponent.value = page;
@@ -127,6 +131,8 @@ export default {
       if(!AppState.isReady){
         setTimeout(loadAsset, 1000);
       }
+      const accountMetadata = await MetadataUtils.getAssetMetadata(props.id);
+      metadata.value = accountMetadata;
       const asset = await AssetUtils.getAssetProperties(props.id);
       const richlist = await AssetUtils.getRichList(props.id);
      
@@ -138,13 +144,10 @@ export default {
         }else{
           let ns = new NamespaceId(props.id.toLowerCase());
           const namespaceInfo = await NamespaceUtils.fetchNamespaceInfo(ns.toHex());
-                        console.log(namespaceInfo);
 
           if(namespaceInfo!=false){
             isShowInvalid.value = false;
             if(namespaceInfo.alias.type == 1){
-              console.log(namespaceInfo.alias.id);
-              console.log(namespaceInfo.alias);
               const assetAlias = await AssetUtils.getAssetProperties(namespaceInfo.alias.id);
               const richlistAlias = await AssetUtils.getRichList(namespaceInfo.alias.id);
               if(assetAlias!=null){
@@ -180,6 +183,7 @@ return {
       setCurrentComponent,
       isShowInvalid,
       networkName,
+      metadata
     }
   }
 }
