@@ -24,7 +24,7 @@ export interface AssetObj {
 }
 
 export class AssetUtils {
-    static async getAssetName(assetId: string): Promise<MosaicNames | boolean> {
+    static async getAssetName(assetId: string): Promise<MosaicNames> {
         try {
             let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile?.httpPort));
 
@@ -32,11 +32,11 @@ export class AssetUtils {
             let assetNames = await chainRESTCall.assetAPI.getMosaicsNames([mosaicId]);
             return assetNames[0];
         } catch (error) {
-            return false;
+            console.error(error);
         }
     }
 
-    static async getAssetProperties(assetIdHex: string): Promise<AssetObj | boolean> {
+    static async getAssetProperties(assetIdHex: string): Promise<AssetObj> {
         try {
             let assetId = new MosaicId(assetIdHex);
             let assetName = null;
@@ -46,7 +46,7 @@ export class AssetUtils {
             let assetname = await this.getAssetName(assetIdHex);
             let namespaceId = await AccountUtils.getAccountNamespaces(asset.owner.address.plain().toString());
             let namespaceInfo = null;
-            if (assetname == false) {
+            if (!assetname) {
                 assetName = null;
             } else if(assetname instanceof MosaicNames){
                 if (assetname.names[0] != undefined) {
@@ -76,12 +76,12 @@ export class AssetUtils {
             }
             return assetInfo;
         } catch (error) {
-            return false;
+            console.error(error);
         }
        
     }
   
-    static async getRichList(assetIdHex: string, queryParams?: PageQueryParams): Promise<RichlistEntry[] | boolean> {
+    static async getRichList(assetIdHex: string, queryParams?: PageQueryParams): Promise<RichlistEntry[]> {
         try {
             let assetId = new MosaicId(assetIdHex);
 
@@ -91,7 +91,7 @@ export class AssetUtils {
 
             return richListInfo;
         } catch(error) {
-            return false;
+            console.error(error);
         }
     }
 

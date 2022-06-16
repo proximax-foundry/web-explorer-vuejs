@@ -78,12 +78,12 @@
     </div>
     <div class="filter shadow-xl border border-gray-50 p-5 mb-15">
       <div class="flex items-center mb-4 border-b border-gray-100 relative">
-        <div class="w-32 font-bold text-xs text-center p-2 relative" :class="`${ (currentComponent == 'rich')?'cursor-pointer':'' }`" @click="setCurrentComponent('rich')">Richlist<div v-if="currentComponent == 'rich'" class="absolute w-full border-b border-yellow-500 transition-all duration-200" style="bottom: -1px;"></div></div>
-        <div class="w-32 font-bold text-xs text-center p-2 relative" :class="`${ (currentComponent == 'metadata')?'cursor-pointer':'' }`" @click="setCurrentComponent('metadata')">Metadata<div v-if="currentComponent == 'metadata'" class="absolute w-full border-b border-yellow-500 transition-all duration-200" style="bottom: -1px;"></div></div>
+        <div class="w-32 font-bold text-xs text-center p-2 relative" :class="`${ (currentComponent == 'rich')?'':'cursor-pointer' }`" @click="setCurrentComponent('rich')">Richlist<div v-if="currentComponent == 'rich'" class="absolute w-full border-b border-yellow-500 transition-all duration-200" style="bottom: -1px;"></div></div>
+        <div class="w-32 font-bold text-xs text-center p-2 relative" :class="`${ (currentComponent == 'metadata')?'':'cursor-pointer' }`" @click="setCurrentComponent('metadata')">Metadata<div v-if="currentComponent == 'metadata'" class="absolute w-full border-b border-yellow-500 transition-all duration-200" style="bottom: -1px;"></div></div>
       </div>
       <transition name="slide">
         <RichlistComponent v-if="currentComponent == 'rich'" :transactions="richList" :supply="assets.supply"  :divisibility="assets.divisibility" />
-        <!-- <InnerTxnComponent v-else-if="currentComponent == 'metadata'" /> -->
+        <MetadataComponent :metadata="metadata" v-else-if="currentComponent == 'metadata'" />
       </transition>
     </div>
   </div>
@@ -93,17 +93,20 @@
 <script>
 import { computed, getCurrentInstance, ref } from "vue";
 import RichlistComponent from '@/modules/asset/components/RichlistComponent.vue';
+import MetadataComponent from '@/modules/asset/components/MetadataComponent.vue';
 import { AppState } from '@/state/appState';
 import { AssetUtils } from '@/util/assetUtil';
 import { Helper } from '@/util/typeHelper';
 import { networkState } from '@/state/networkState';
 import { NamespaceId } from "tsjs-xpx-chain-sdk";
 import { NamespaceUtils } from "@/util/namespaceUtil";
+import { MetadataUtils } from '@/util/metadataUtil';
 
 export default {
   name: 'ViewAsset',
   components: {
-    RichlistComponent
+    RichlistComponent,
+    MetadataComponent
   },
   props: {
     id: String
@@ -114,6 +117,7 @@ export default {
     const currentComponent = ref('rich');
     const isShowInvalid = ref(null);
     const richList = ref([]);
+    const metadata = ref([]);
     const assets = ref([]);
     const setCurrentComponent = (page) => {
       currentComponent.value = page;
@@ -124,13 +128,16 @@ export default {
     });
 
     const loadAsset = async() => {
-      if(!AppState.isReady){
+      if(!AppState.isReady && !networkName.value){
         setTimeout(loadAsset, 1000);
+        return;
       }
+      const accountMetadata = await MetadataUtils.getAssetMetadata(props.id);
+      metadata.value = accountMetadata;
       const asset = await AssetUtils.getAssetProperties(props.id);
       const richlist = await AssetUtils.getRichList(props.id);
      
-        if(asset!=false){
+        if(asset){
           isShowInvalid.value = false;
           assets.value = asset;
           richList.value = richlist;          
@@ -138,16 +145,13 @@ export default {
         }else{
           let ns = new NamespaceId(props.id.toLowerCase());
           const namespaceInfo = await NamespaceUtils.fetchNamespaceInfo(ns.toHex());
-                        console.log(namespaceInfo);
 
           if(namespaceInfo!=false){
             isShowInvalid.value = false;
             if(namespaceInfo.alias.type == 1){
-              console.log(namespaceInfo.alias.id);
-              console.log(namespaceInfo.alias);
               const assetAlias = await AssetUtils.getAssetProperties(namespaceInfo.alias.id);
               const richlistAlias = await AssetUtils.getRichList(namespaceInfo.alias.id);
-              if(assetAlias!=null){
+              if(assetAlias){
                 assets.value = assetAlias;
                 richList.value = richlistAlias;
               }
@@ -180,6 +184,7 @@ return {
       setCurrentComponent,
       isShowInvalid,
       networkName,
+      metadata
     }
   }
 }

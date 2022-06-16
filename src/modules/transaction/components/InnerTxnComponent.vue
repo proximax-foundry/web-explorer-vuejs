@@ -32,12 +32,12 @@
         <div v-for="(info, infoListindex) in innerTxnExtractedData[index].infoList" :key="infoListindex">
           <div>{{ info.label ? info.label : '' }}</div>
           <div v-if="info.label.toLowerCase()=='namespace'">
-            <router-link :to="{ name: 'ViewNamespace', params:{ namespaceParam: info.short ? info.short : info.value }}" class="text-blue-600 hover:text-blue-primary hover:underline">
+            <div><router-link :to="{ name: 'ViewNamespace', params:{ namespaceParam: info.short ? info.short : info.value }}" class="text-blue-600 hover:text-blue-primary hover:underline">
               {{ info.short ? info.short : info.value }}
-            </router-link>
+            </router-link></div>
           </div>
           <div v-else-if="info.label.toLowerCase()=='asset'">
-            <router-link :to="{ name: 'ViewAsset', params:{ id: info.short ? info.short : info.value }}" class="text-blue-600 hover:text-blue-primary hover:underline">
+          <router-link :to="{ name: 'ViewAsset', params:{ id: info.short ? info.short : info.value }}" class="text-blue-600 hover:text-blue-primary hover:underline">
               {{ info.short ? info.short : info.value }}
             </router-link>
           </div>
@@ -63,9 +63,24 @@
           <div v-else-if="innerTxnExtractedData[index].legendType === InnerTxnLegendType.ALLOW_BLOCK" >Block</div>
           <div>{{ innerTxnExtractedData[index].infoRedList.map(info => info.short ? info.short : info.value).join(", ") }}</div>
         </div>
-        <div v-if="innerTxnExtractedData[index].infoInfoList.length > 0">
-          <div>Info</div>
-          <div>{{ innerTxnExtractedData[index].infoInfoList.map(info => info.short ? info.short : info.value).join(", ") }}</div>
+        <div v-if="innerTxnExtractedData[index].infoInfoList.length > 0 && TransactionUtils.getTransactionTypeName(item.type)=='SDA Supply Change'">
+          <div>Supply Delta</div>
+          <div>
+            {{ innerTxnExtractedData[index].infoInfoList.map(info => info.label == "Supply Direction" ? info.value : '').join("")}}
+          {{innerTxnExtractedData[index].infoInfoList.map(info=>info.label == "Supply Delta" ? Helper.toCurrencyFormat(info.value,0) : '').join("") }} 
+          </div>
+        </div>
+        <div v-if="innerTxnExtractedData[index].infoInfoList.length > 0 && TransactionUtils.getTransactionTypeName(item.type)=='SDA Definition'">
+          <div>Transferable</div>
+          <div>{{ innerTxnExtractedData[index].infoInfoList.map(info => info.label == "Transferable"? info.value: '').join("") }}</div>
+        </div>
+        <div v-if="innerTxnExtractedData[index].infoInfoList.length > 0 && TransactionUtils.getTransactionTypeName(item.type)=='SDA Definition'">
+          <div>Supply Mutable</div>
+          <div>{{ innerTxnExtractedData[index].infoInfoList.map(info => info.label == "Supply Mutable"?info.value:'').join("") }}</div>
+        </div>
+        <div v-if="innerTxnExtractedData[index].infoInfoList.length > 0 && TransactionUtils.getTransactionTypeName(item.type)=='SDA Definition'">
+          <div>Divisibility</div>
+          <div>{{ innerTxnExtractedData[index].infoInfoList.map(info => info.label == "Divisibility"?info.value:'').join("") }}</div>
         </div>
         <div v-if="innerTxnExtractedData[index].sdas.length > 0">
           <div>SDAs</div>
@@ -147,19 +162,19 @@ export default {
       if(props.innerTxn.length > 0){
         let castedAggregateTxn = TxnUtils.castToAggregate(props.txn);
 
-        props.innerTxn.forEach(async(txn, index) => {
+        props.innerTxn.forEach(async (txn, index) => {
           allCosigners.push(castedAggregateTxn.signer.publicKey);
-          cosignedSigner = castedAggregateTxn.cosignatures.map(cosigner=> cosigner.signer.publicKey);
+          cosignedSigner = castedAggregateTxn.cosignatures.map(cosigner => cosigner.signer.publicKey);
           oriSignedSigners = cosignedSigner.concat([txn.signer.publicKey]);
           signedSigners = [...oriSignedSigners];
 
           let extractedData = await TransactionUtils.extractInnerTransaction(txn, props.txnGroup);
-            extractedData.infoInfoList = extractedData.infos.filter(info => !info.label && info.type === MsgType.INFO);
-            extractedData.infoGreenList = extractedData.infos.filter(info => !info.label && info.type === MsgType.GREEN);
-            extractedData.infoRedList = extractedData.infos.filter(info => !info.label && info.type === MsgType.RED);
-            extractedData.infoList = extractedData.infos.filter(info => info.type === MsgType.NONE);
-            innerTxnExtractedData.value[index] = extractedData;
+          extractedData.infoInfoList = extractedData.infos.filter(info => info.label && info.type === MsgType.INFO);
+          extractedData.infoGreenList = extractedData.infos.filter(info => !info.label && info.type === MsgType.GREEN);
+          extractedData.infoRedList = extractedData.infos.filter(info => !info.label && info.type === MsgType.RED);
+          extractedData.infoList = extractedData.infos.filter(info => info.type === MsgType.NONE);
 
+          innerTxnExtractedData.value[index] = extractedData;
           let innerSigner = txn.signer;
           if(txn.type === TransactionType.MODIFY_MULTISIG_ACCOUNT){
             let allDeepCosigners = await CosignUtils.getAllDeepModifyMultisigCosigners(txn);

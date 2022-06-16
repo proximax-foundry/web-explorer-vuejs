@@ -1331,21 +1331,26 @@ export class TransactionUtils {
 
         let assetDivisibilityInfo: TxnDetails = {
           type: MsgType.INFO,
-          value: `Divisibility: ${assetDefFormat.divisibility}`
+          label: "Divisibility",
+          value: `${assetDefFormat.divisibility}`
         };
 
         infos.push(assetDivisibilityInfo);
 
         let assetTransferableInfo: TxnDetails = {
-          type: assetDefFormat.transferable ? MsgType.GREEN : MsgType.RED,
-          value: `Transferable`
+          type: MsgType.INFO,
+          label: "Transferable",
+          value: assetDefFormat.transferable ? "Yes" :"No"
         };
 
         infos.push(assetTransferableInfo);
 
         let assetSupplyMutableInfo: TxnDetails = {
-          type: assetDefFormat.supplyMutable ? MsgType.GREEN : MsgType.RED,
-          value: `Supply Mutable`
+          // type: assetDefFormat.supplyMutable ? MsgType.GREEN : MsgType.RED,
+          // value: `Supply Mutable`
+          type: MsgType.INFO,
+          label: "Supply Mutable",
+          value: assetDefFormat.supplyMutable ? "Yes" : "No"
         };
 
         infos.push(assetSupplyMutableInfo);
@@ -1381,17 +1386,22 @@ export class TransactionUtils {
         let assetInfo: TxnDetails = {
           type: MsgType.NONE,
           label: "Asset",
-          value: assetSupplyFormat.assetId + assetSupplyFormat.namespaceName ? ` (${assetSupplyFormat.namespaceName})` : ''
+          value: assetSupplyFormat.assetId
         };
-
         infos.push(assetInfo);
-
+        
+        let supplyDirection: TxnDetails = {
+          type: MsgType.INFO,
+          label: "Supply Direction",
+          value: assetSupplyFormat.supplyDirection == 0 ? "Decrease: " : "Increase: "
+        };
+        infos.push(supplyDirection);
+        
         let assetSupplyInfo: TxnDetails = {
           type: MsgType.INFO,
-          label: "Asset",
-          value: assetSupplyFormat.supplyDelta > 0 ? `+${assetSupplyFormat.supplyDelta}` : assetSupplyFormat.supplyDelta
+          label:"Supply Delta",
+          value: assetSupplyFormat.supplyDelta > 0 ? assetSupplyFormat.supplyDelta :''
         };
-
         infos.push(assetSupplyInfo);
 
         transactionDetails = {
@@ -2244,23 +2254,23 @@ export class TransactionUtils {
     txnDetails.signer = assetSupplyChangeTxn.signer.publicKey;
     txnDetails.signerAddress = assetSupplyChangeTxn.signer.address.plain();
     txnDetails.type = TransactionUtils.getTransactionTypeName(assetSupplyChangeTxn.type);
-
+    
     let assetId = assetSupplyChangeTxn.mosaicId.toHex();
-
     txnDetails.assetId = assetId;
     txnDetails.supplyDelta = assetSupplyChangeTxn.delta.compact();
-    txnDetails.supplyDeltaIsRaw = true;
+    txnDetails.supplyDirection = assetSupplyChangeTxn.direction;
+    // txnDetails.supplyDeltaIsRaw = true;
 
     if(assetSupplyChangeTxn.direction === MosaicSupplyType.Decrease){
       txnDetails.supplyDelta = -txnDetails.supplyDelta;
     }
-
+    
     try {
       let assetInfo = await TransactionUtils.getAssetInfo(assetId);
 
       txnDetails.supplyDelta = TransactionUtils.convertToExactAmount(txnDetails.supplyDelta, assetInfo.divisibility);
 
-      txnDetails.supplyDeltaIsRaw = false;
+    //   txnDetails.supplyDeltaIsRaw = false;
     } catch (error) {}
     return txnDetails;
   }
@@ -2427,6 +2437,9 @@ export class TransactionUtils {
         txnDetails.oldValue = nsMetadataEntry.value;
         txnDetails.newValue = TransactionUtils.applyValueChange(txnDetails.oldValue, txnDetails.valueChange, txnDetails.sizeChanged);
       }
+      else {
+        txnDetails.newValue = TransactionUtils.applyValueChange("", txnDetails.valueChange, txnDetails.sizeChanged);
+      }
     } catch (error) {}
     return txnDetails;
   }
@@ -2503,6 +2516,8 @@ export class TransactionUtils {
       if(nsMetadataEntry){
         txnDetails.oldValue = nsMetadataEntry.value;
         txnDetails.newValue = TransactionUtils.applyValueChange(txnDetails.oldValue, txnDetails.valueChange, txnDetails.sizeChanged);
+      } else {
+        txnDetails.newValue = TransactionUtils.applyValueChange("", txnDetails.valueChange, txnDetails.sizeChanged);
       }
     } catch (error) {}
     return txnDetails;
@@ -2578,6 +2593,8 @@ export class TransactionUtils {
       if(assetMetadataEntry){
         txnDetails.oldValue = assetMetadataEntry.value;
         txnDetails.newValue = TransactionUtils.applyValueChange(txnDetails.oldValue, txnDetails.valueChange, txnDetails.sizeChanged);
+      } else {
+        txnDetails.newValue = TransactionUtils.applyValueChange("", txnDetails.valueChange, txnDetails.sizeChanged);
       }
     } catch (error) {}
     return txnDetails;
@@ -3723,7 +3740,8 @@ export class TransactionUtils {
 
       txn.assetId = assetId;
       txn.supplyDelta = assetSupplyChangeTxn.delta.compact();
-      txn.supplyDeltaIsRaw = true;
+      //txn.supplyDeltaIsRaw = true;
+      txn.supplyDirection = assetSupplyChangeTxn.direction;
 
       if(assetSupplyChangeTxn.direction === MosaicSupplyType.Decrease){
         txn.supplyDelta = -txn.supplyDelta;
@@ -3734,7 +3752,7 @@ export class TransactionUtils {
 
         txn.supplyDelta = TransactionUtils.convertToExactAmount(txn.supplyDelta, assetInfo.divisibility);
 
-        txn.supplyDeltaIsRaw = false;
+      //   txn.supplyDeltaIsRaw = false;
       } catch (error) {}
     }else if(transaction.type === TransactionType.MODIFY_MOSAIC_LEVY){
       let assetModifyLevyTxn = transaction as MosaicModifyLevyTransaction;
@@ -3811,8 +3829,8 @@ export class TransactionUtils {
 
         txn.assetId = assetId;
         txn.supplyDelta = assetSupplyChangeTxn.delta.compact();
-        txn.supplyDeltaIsRaw = true;
-
+        // txn.supplyDeltaIsRaw = true;
+        txn.supplyDirection = assetSupplyChangeTxn.direction;
         if(assetSupplyChangeTxn.direction === MosaicSupplyType.Decrease){
           txn.supplyDelta = -txn.supplyDelta;
         }
@@ -3822,7 +3840,7 @@ export class TransactionUtils {
 
           txn.supplyDelta = TransactionUtils.convertToExactAmount(txn.supplyDelta, assetInfo.divisibility);
 
-          txn.supplyDeltaIsRaw = false;
+        //   txn.supplyDeltaIsRaw = false;
         } catch (error) {}
       }else if(txns[i].type === TransactionType.MODIFY_MOSAIC_LEVY){
         let assetModifyLevyTxn = txns[i] as MosaicModifyLevyTransaction;
@@ -3900,7 +3918,7 @@ export class TransactionUtils {
 
         txn.assetId = assetId;
         txn.supplyDelta = assetSupplyChangeTxn.delta.compact();
-        txn.supplyDeltaIsRaw = true;
+        txn.supplyDirection = assetSupplyChangeTxn.direction;
 
         if(assetSupplyChangeTxn.direction === MosaicSupplyType.Decrease){
           txn.supplyDelta = -txn.supplyDelta;
@@ -3911,7 +3929,7 @@ export class TransactionUtils {
 
           txn.supplyDelta = TransactionUtils.convertToExactAmount(txn.supplyDelta, assetInfo.divisibility);
 
-          txn.supplyDeltaIsRaw = false;
+          //txn.supplyDeltaIsRaw = false;
         } catch (error) {}
       }
       else if(txns[i].type === TransactionType.MODIFY_MOSAIC_LEVY){
@@ -3990,7 +4008,7 @@ export class TransactionUtils {
 
         txn.assetId = assetId;
         txn.supplyDelta = assetSupplyChangeTxn.delta.compact();
-        txn.supplyDeltaIsRaw = true;
+        //txn.supplyDeltaIsRaw = true;
 
         if(assetSupplyChangeTxn.direction === MosaicSupplyType.Decrease){
           txn.supplyDelta = -txn.supplyDelta;
@@ -4001,7 +4019,7 @@ export class TransactionUtils {
 
           txn.supplyDelta = TransactionUtils.convertToExactAmount(txn.supplyDelta, assetInfo.divisibility);
 
-          txn.supplyDeltaIsRaw = false;
+        //   txn.supplyDeltaIsRaw = false;
         } catch (error) {}
       }else if(txns[i].type === TransactionType.MODIFY_MOSAIC_LEVY){
         let assetModifyLevyTxn = txns[i] as MosaicModifyLevyTransaction;
@@ -4404,6 +4422,8 @@ export class TransactionUtils {
         if(assetMetadataEntry){
           txn.oldValue = assetMetadataEntry.value;
           txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+        } else {
+          txn.newValue = TransactionUtils.applyValueChange("", txn.valueChange, txn.sizeChanged);
         }
       } catch (error) {}
     }else if(transaction.type === TransactionType.NAMESPACE_METADATA_V2){
@@ -4432,6 +4452,8 @@ export class TransactionUtils {
         if(nsMetadataEntry){
           txn.oldValue = nsMetadataEntry.value;
           txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+        } else {
+          txn.newValue = TransactionUtils.applyValueChange("", txn.valueChange, txn.sizeChanged);
         }
       } catch (error) {}
     }else if(transaction.type === TransactionType.ACCOUNT_METADATA_V2){
@@ -4452,6 +4474,8 @@ export class TransactionUtils {
         if(nsMetadataEntry){
           txn.oldValue = nsMetadataEntry.value;
           txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+        } else {
+          txn.newValue = TransactionUtils.applyValueChange("", txn.valueChange, txn.sizeChanged);
         }
       } catch (error) {}
     }
@@ -4489,8 +4513,10 @@ export class TransactionUtils {
 
           let assetMetadataEntry = await TransactionUtils.getAssetMetadata(assetMetadataTxn.targetMosaicId, assetMetadataTxn.scopedMetadataKey);
           if(assetMetadataEntry){
-              txn.oldValue = assetMetadataEntry.value;
-              txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+            txn.oldValue = assetMetadataEntry.value;
+            txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+          } else {
+            txn.newValue = TransactionUtils.applyValueChange("", txn.valueChange, txn.sizeChanged);
           }
         } catch (error) {}
       }else if(txns[i].type === TransactionType.NAMESPACE_METADATA_V2){
@@ -4517,6 +4543,8 @@ export class TransactionUtils {
           if(nsMetadataEntry){
             txn.oldValue = nsMetadataEntry.value;
             txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+          } else {
+            txn.newValue = TransactionUtils.applyValueChange("", txn.valueChange, txn.sizeChanged);
           }
         } catch (error) {}
       }else if(txns[i].type === TransactionType.ACCOUNT_METADATA_V2){
@@ -4533,8 +4561,10 @@ export class TransactionUtils {
         try {
             let nsMetadataEntry = await TransactionUtils.getAccountMetadata(accountMetadataTxn.targetPublicKey, accountMetadataTxn.scopedMetadataKey);
             if(nsMetadataEntry){
-                txn.oldValue = nsMetadataEntry.value;
-                txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+              txn.oldValue = nsMetadataEntry.value;
+              txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+            } else {
+              txn.newValue = TransactionUtils.applyValueChange("", txn.valueChange, txn.sizeChanged);
             }
         } catch (error) {}
       }
@@ -4633,8 +4663,10 @@ export class TransactionUtils {
               let assetMetadataEntry = await TransactionUtils.getAssetMetadata(assetMetadataTxn.targetMosaicId, assetMetadataTxn.scopedMetadataKey);
               
               if(assetMetadataEntry){
-                  txn.oldValue = assetMetadataEntry.value;
-                  txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+                txn.oldValue = assetMetadataEntry.value;
+                txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+              } else {
+                txn.newValue = TransactionUtils.applyValueChange("", txn.valueChange, txn.sizeChanged);
               }
               
           } catch (error) {
@@ -4663,8 +4695,10 @@ export class TransactionUtils {
               let nsMetadataEntry = await TransactionUtils.getNamespaceMetadata(namespaceMetadataTxn.targetNamespaceId, namespaceMetadataTxn.scopedMetadataKey);
               
               if(nsMetadataEntry){
-                  txn.oldValue = nsMetadataEntry.value;
-                  txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+                txn.oldValue = nsMetadataEntry.value;
+                txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+              } else {
+                txn.newValue = TransactionUtils.applyValueChange("", txn.valueChange, txn.sizeChanged);
               }
               
           } catch (error) {
@@ -4685,8 +4719,10 @@ export class TransactionUtils {
               let nsMetadataEntry = await TransactionUtils.getAccountMetadata(accountMetadataTxn.targetPublicKey, accountMetadataTxn.scopedMetadataKey);
               
               if(nsMetadataEntry){
-                  txn.oldValue = nsMetadataEntry.value;
-                  txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+                txn.oldValue = nsMetadataEntry.value;
+                txn.newValue = TransactionUtils.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
+              } else {
+                txn.newValue = TransactionUtils.applyValueChange("", txn.valueChange, txn.sizeChanged);
               }
           } catch (error) {
               

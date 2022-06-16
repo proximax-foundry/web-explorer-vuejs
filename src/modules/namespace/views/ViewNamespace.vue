@@ -56,47 +56,59 @@
         </div>
       </div>
     </div>
-    <div v-if="namespaceInfo.alias || namespaceInfo.levels" class="filter shadow-xl border border-gray-50 p-5 mb-10 md:mb-15">
-      <div v-if="namespaceInfo.alias">
-        <div class="text-sm font-bold mb-4">Alias</div>
-        <div class="py-3 text-xs">
-          <div class="py-3 grid grid-cols-2 font-bold border-b border-gray-100">
-            <div v-if="!namespaceInfo.alias.type==0">{{ (namespaceInfo.alias.type==1)?'Asset ID':'Address' }}</div>
-            <div v-else> Asset ID / Address</div>
-          <div>Type</div>
-          </div>
-          <div class="py-3 grid grid-cols-2">
-            <div>
-              <div v-if="namespaceInfo.alias.type==1">
-                <router-link  class="uppercase text-blue-600 hover:text-blue-primary hover:underline" :to="{ name: 'ViewAsset', params:{ id:namespaceInfo.alias.id }}" >
-                  {{ namespaceInfo.alias.id }}
-                </router-link>
+
+    <div class="filter shadow-xl border border-gray-50 p-5 mb-15">
+      <div class="flex items-center mb-4 border-b border-gray-100 relative">
+        <div class="w-32 font-bold text-xs text-center p-2 relative" :class="`${ (currentComponent == 'details')?'':'cursor-pointer' }`" @click="setCurrentComponent('details')">Alias/Levels<div v-if="currentComponent == 'details'" class="absolute w-full border-b border-yellow-500 transition-all duration-200" style="bottom: -1px;"></div></div>
+        <div class="w-32 font-bold text-xs text-center p-2 relative" :class="`${ (currentComponent == 'metadata')?'':'cursor-pointer' }`" @click="setCurrentComponent('metadata')">Metadata<div v-if="currentComponent == 'metadata'" class="absolute w-full border-b border-yellow-500 transition-all duration-200" style="bottom: -1px;"></div></div>
+      </div>
+      
+      <div v-if="currentComponent == 'details'" class="mt-10">
+        <div v-if="(namespaceInfo.alias || namespaceInfo.levels)" class="px-3">
+          <div v-if="namespaceInfo.alias">
+            <div class="text-sm font-bold mb-4">Alias</div>
+            <div class="py-3 text-xs">
+              <div class="py-3 grid grid-cols-2 font-bold border-b border-gray-100">
+                <div v-if="!namespaceInfo.alias.type==0">{{ (namespaceInfo.alias.type==1)?'Asset ID':'Address' }}</div>
+                <div v-else> Asset ID / Address</div>
+              <div>Type</div>
               </div>
-                <!-- {{ namespaceInfo.alias.id }} -->
-              <div v-else-if="namespaceInfo.alias.type==2">
-                <router-link  class="uppercase text-blue-600 hover:text-blue-primary hover:underline" :to="{ name: 'ViewAccount', params: { accountParam: namespaceInfo.alias.id }}">
-                  {{ namespaceInfo.alias.id }}
-                </router-link>
-              </div>
-              <div v-else> No linked Asset / Address
+              <div class="py-3 grid grid-cols-2">
+                <div>
+                  <div v-if="namespaceInfo.alias.type==1">
+                    <router-link  class="uppercase text-blue-600 hover:text-blue-primary hover:underline" :to="{ name: 'ViewAsset', params:{ id:namespaceInfo.alias.id }}" >
+                      {{ namespaceInfo.alias.id }}
+                    </router-link>
+                  </div>
+                    <!-- {{ namespaceInfo.alias.id }} -->
+                  <div v-else-if="namespaceInfo.alias.type==2">
+                    <router-link  class="uppercase text-blue-600 hover:text-blue-primary hover:underline" :to="{ name: 'ViewAccount', params: { accountParam: namespaceInfo.alias.id }}">
+                      {{ namespaceInfo.alias.id }}
+                    </router-link>
+                  </div>
+                  <div v-else> No linked Asset / Address
+                  </div>
+                </div>
+                <div v-if="!namespaceInfo.alias.type==0">{{ namespaceInfo.alias.type==1?"Asset":"Address" }}</div>
+                <div v-else> - </div>
               </div>
             </div>
-            <div v-if="!namespaceInfo.alias.type==0">{{ namespaceInfo.alias.type==1?"Asset":"Address" }}</div>
-            <div v-else> - </div>
+          </div>
+          <div v-if="namespaceInfo.levels" class="mt-5">
+            <div class="text-sm font-bold mb-4">Levels</div>
+            <div class="py-3 text-xs grid grid-cols-2 font-bold border-b border-gray-100">
+              <div>Namespace ID</div>
+              <div>Name</div>
+            </div>
+            <div v-for="level, index in namespaceInfo.levels" :key="index" class="py-3 text-xs grid grid-cols-2 uppercase" :class="`${ index<(namespaceInfo.levels.length-1)?'border-b border-gray-100':'' }`">
+              <div><router-link v-if="level.id" class="text-blue-600 hover:text-blue-primary hover:underline" :to="{ name: 'ViewNamespace', params: { namespaceParam: level.id } }">{{ level.id }}</router-link></div>
+              <div>{{ level.name }}</div>
+            </div>
           </div>
         </div>
       </div>
-      <div v-if="namespaceInfo.levels" class="mt-5">
-        <div class="text-sm font-bold mb-4">Levels</div>
-        <div class="py-3 text-xs grid grid-cols-2 font-bold border-b border-gray-100">
-          <div>Namespace ID</div>
-          <div>Name</div>
-        </div>
-        <div v-for="level, index in namespaceInfo.levels" :key="index" class="py-3 text-xs grid grid-cols-2 uppercase" :class="`${ index<(namespaceInfo.levels.length-1)?'border-b border-gray-100':'' }`">
-          <div><router-link v-if="level.id" class="text-blue-600 hover:text-blue-primary hover:underline" :to="{ name: 'ViewNamespace', params: { namespaceParam: level.id } }">{{ level.id }}</router-link></div>
-          <div>{{ level.name }}</div>
-        </div>
-      </div>
+      <MetadataComponent :metadata="metadata" v-else-if="currentComponent == 'metadata'" class="mt-1 px-3" />
+    
     </div>
   </div>
 </template>
@@ -107,18 +119,29 @@ import { networkState } from '@/state/networkState';
 import { AppState } from '@/state/appState';
 import { Helper } from "@/util/typeHelper";
 import { NamespaceUtils } from '@/util/namespaceUtil';
+import { MetadataUtils } from '@/util/metadataUtil';
+import MetadataComponent from '@/modules/namespace/components/MetadataComponent.vue';
+
 export default {
   name: 'ViewNamespace',
   props: {
     namespaceParam: String
+  },
+  components: {
+    MetadataComponent
   },
   setup(props){
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const isShowInvalid = ref(false);
     const isFetching = ref(true);
+    const metadata = ref([]);
     const namespaceInfo = ref({});
     const namespaceIdHex = ref("");
+    const currentComponent = ref('details');
+    const setCurrentComponent = (page) => {
+      currentComponent.value = page;
+    };
 
     const fetchNamespaceDetail = async () => {
       if(!AppState.isReady){
@@ -140,6 +163,8 @@ export default {
       isFetching.value = false;
 
       if(fetchInfo != false){
+        const namespaceMetadata = await MetadataUtils.getNamespaceMetadata(fetchInfo.name);
+        metadata.value = namespaceMetadata;
         namespaceInfo.value = fetchInfo;
         isShowInvalid.value = false;
       }else{
@@ -164,7 +189,10 @@ export default {
       networkName,
       isFetching,
       isShowInvalid,
-      namespaceIdHex
+      namespaceIdHex,
+      currentComponent,
+      setCurrentComponent,
+      metadata
     }
   }
 }

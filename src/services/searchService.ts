@@ -129,7 +129,7 @@ export class SearchService{
 
   async searchAsset():Promise<searchResult>{
     let asset = await AssetUtils.getAssetProperties(this.searchString);
-    if(asset != false){
+    if(asset){
       return {
         valid: true,
         searchType: 'Asset',
@@ -285,7 +285,7 @@ export class SearchService{
 
   async searchBlock(){
     const block = await BlockUtils.getBlockByHeight(parseInt(this.searchString));
-    if(block != false){
+    if(block){
       return {
         valid: true,
         searchType: 'Block',
