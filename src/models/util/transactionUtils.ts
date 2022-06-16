@@ -1029,23 +1029,28 @@ export class TransactionUtils {
         let chainUpgradeTx = innerTransaction as ChainUpgradeTransaction;
         tempData = TransactionUtils.extractChainUpgrade(chainUpgradeTx);
         let chainUpgradeFormat = tempData as InnerChainTransaction;
-
         let infos: TxnDetails[] = [];
 
         let versionInfo: TxnDetails = {
             type: MsgType.NONE,
             label: "New Version",
-            value: chainUpgradeFormat.newVersion
+            value: "v" + parseInt(chainUpgradeFormat.newVersion.toString().substring(0, 4), 16) + "." + parseInt(chainUpgradeFormat.newVersion.toString().substring(4, 8), 16) + "." + parseInt(chainUpgradeFormat.newVersion.toString().substring(8, 12), 16)
         };
         infos.push(versionInfo);
-
         let upgradePeriodInfo: TxnDetails = {
             type: MsgType.NONE,
             label: "Upgrade After Blocks",
-            value: chainUpgradeFormat.upgradePeriod
+          value: chainUpgradeFormat.upgradePeriod
         };
         infos.push(upgradePeriodInfo);
 
+        let effectiveHeightInfo: TxnDetails = {
+          type: MsgType.NONE,
+          label: "Effective Height",
+          value: chainUpgradeFormat.height + chainUpgradeFormat.upgradePeriod
+        };
+        infos.push(effectiveHeightInfo);
+        
         transactionDetails = {
             signer: chainUpgradeFormat.signer,
             signerAddressPlain: chainUpgradeFormat.signerAddress,
@@ -2050,7 +2055,8 @@ export class TransactionUtils {
     txnDetails.signerAddress = chainUpdateTxn.signer.address.plain();
     txnDetails.type = TransactionUtils.getTransactionTypeName(chainUpdateTxn.type);
     txnDetails.upgradePeriod = chainUpdateTxn.upgradePeriod.compact();
-    txnDetails.newVersion = chainUpdateTxn.newBlockchainVersion.toHex()
+    txnDetails.newVersion = chainUpdateTxn.newBlockchainVersion.toHex();
+    txnDetails.height = chainUpdateTxn.transactionInfo.height.compact();
     return txnDetails;
   }
   // --------------------------------------end------------------------------------------------------------------
