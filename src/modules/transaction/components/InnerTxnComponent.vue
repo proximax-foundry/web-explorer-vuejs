@@ -67,7 +67,7 @@
           <div>Supply Delta</div>
           <div>
             {{ innerTxnExtractedData[index].infoInfoList.map(info => info.label == "Supply Direction" ? info.value : '').join("")}}
-          {{innerTxnExtractedData[index].infoInfoList.map(info=>info.label == "Supply Delta" ? Helper.toCurrencyFormat(formatCurrency(info.value),0) : '').join("") }} 
+          {{innerTxnExtractedData[index].infoInfoList.map(info=>info.label == "Supply Delta" ? Helper.toCurrencyFormat(info.value,0) : '').join("") }} 
           </div>
         </div>
         <div v-if="innerTxnExtractedData[index].infoInfoList.length > 0 && TransactionUtils.getTransactionTypeName(item.type)=='SDA Definition'">
