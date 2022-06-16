@@ -233,7 +233,8 @@ export default {
       transactions,
       currencyDivisibility,
       nativeTokenName,
-      checkOtherAsset
+      checkOtherAsset,
+      displaySDAs
     }
   }
 }

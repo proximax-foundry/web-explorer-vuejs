@@ -18,7 +18,7 @@ export interface BlockObj {
 
 export class BlockUtils {
     
-    static async getBlockByHeight(blockHeight: number): Promise<BlockObj | boolean> {
+    static async getBlockByHeight(blockHeight: number): Promise<BlockObj> {
         try {
             let blockInfo: BlockObj;
             let block = await AppState.chainAPI.blockAPI.getBlockByHeight(blockHeight);
@@ -34,7 +34,7 @@ export class BlockUtils {
             }
             return blockInfo;
         } catch (error) {
-            return false;
+            console.error(error);
         }
     }
 

@@ -4,6 +4,12 @@
       <p class="text-gray-500 mb-5 text-sm font-bold">Block Details</p>
       <div class="p-3 bg-yellow-100 text-yellow-700">Block is not available in {{ networkName }}</div>
     </div>
+    <div v-if="isShowInvalid == false && blockInfo.length==0">
+      <div class="flex justify-center items-center border-gray-400 mt-10 mb-20">
+        <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-navy-primary mr-2"></div>
+        <span class="text-tsm">Fetching Block Details</span>
+      </div>
+    </div>
     <div v-else> 
     <div>
       <p class="text-gray-500 mb-5 text-sm font-bold">
@@ -22,12 +28,15 @@
           <div>
             <div>Validator</div>
             <div class="break-all flex items-center">  
-              {{blockInfo.validator}}
+             <router-link :to="{ name: 'ViewAccount', params:{ accountParam: blockInfo.validator }}" class="text-blue-600 hover:text-blue-primary hover:underline mr-2" id="validatorPublicKey" :copyValue="blockInfo.validator" copySubject="Validator Public Key">{{ blockInfo.validator }}</router-link>
+              <img src="@/assets/img/icon-copy.svg" @click="copy('validatorPublicKey')" class="cursor-pointer" />
             </div>
           </div>
           <div>
             <div>Hash</div>
-            <div class="break-all flex items-center">{{blockInfo.hash}}</div>
+            <div class="break-all flex items-center">
+              {{blockInfo.hash}}
+            </div>
           </div>
           <div>
             <div>Difficulty</div>
@@ -53,7 +62,7 @@
         Transactions
         </p>
         <div class="filter shadow-xl border border-gray-50 p-5 mb-15">
-          <TransactionComponent  :blockHeight="blockInfo.height" />
+          <TransactionComponent :blockHeight="blockInfo.height" />
         </div>
       </div>
     </div>
@@ -69,6 +78,8 @@ import { networkState } from '@/state/networkState';
 import TransactionComponent from '@/modules/block/components/TransactionComponent.vue';
 import { Helper } from "@/util/typeHelper";
 import { TransactionUtils } from '@/models/util/transactionUtils';
+import { copyToClipboard } from '@/util/functions';
+import { useToast } from "primevue/usetoast";
 
 export default {
   components: { TransactionComponent },
@@ -76,19 +87,27 @@ export default {
   props: {
     blockHeight: Number
   },
-  setup(p){
+  setup(p) {
+    const toast = useToast();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const blockInfo = ref([]);
     const isShowInvalid = ref(false);
     const nativeTokenNamespace = AppState.nativeToken.label;
+    const copy = (id) =>{ 
+      let stringToCopy = document.getElementById(id).getAttribute("copyValue");
+      let copySubject = document.getElementById(id).getAttribute("copySubject");
+      copyToClipboard(stringToCopy);
+      toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
+    };
     const loadBlock = async() =>{
       const block = await BlockUtils.getBlockByHeight(p.blockHeight);
         if(!AppState.isReady){
-            setTimeout(loadBlock, 1000);
+          setTimeout(loadBlock, 1000);
+          return;
         }
     
-        if(block!=false){
+        if(block){
           blockInfo.value = block; 
           isShowInvalid.value = false;
           return;
@@ -119,7 +138,8 @@ export default {
       nativeTokenNamespace,
       Helper,
       currencyDivisibility,
-      TransactionUtils
+      TransactionUtils,
+      copy
     }
   }
 }
