@@ -36,7 +36,7 @@
       <div>Supply Delta</div>
       <div>
         {{ txnDetail.detail.supplyDirection == 0 ? "Decrease: " : "Increase: " + ": " }}
-        {{ txnDetail.detail.supplyDelta }}</div>
+        {{ Helper.toCurrencyFormat(txnDetail.detail.supplyDelta,0) }}</div>
     </div>
   </div>
   <div class="details" v-else-if="txnGroup == TransactionType.MODIFY_MOSAIC_LEVY">
