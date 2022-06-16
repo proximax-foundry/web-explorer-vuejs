@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="metadata.length==0" class="ml-10 text-tsm">
+    <div v-if="metadata.length==0" class="text-tsm">
       No record found
     </div>
     <div v-else>
@@ -21,16 +21,16 @@
             <div class="mb-2">
                <div class="grid grid-cols-2"> 
               <div class="grid-cols-1">
-              <div class="uppercase text-xs text-gray-300 font-bold mb-2">Scoped Metadata Key</div>
+              <div class="uppercase text-xs text-gray-300 font-bold mb-4">Scoped Metadata Key</div>
                <div class="text-xs" v-if="data.scopedMetadataKeyHex">{{data.scopedMetadataKeyHex}}
-              <div class="inline-block ml-2 font-semibold text-gray-400">utf-8</div>
+              <div class="inline-block text-xs ml-2 text-gray-400">hex</div>
             </div>
              <div class="mt-1 text-xs" v-if="data.scopedMetadataKeyUtf8">{{data.scopedMetadataKeyUtf8}}
-              <div class="inline-block ml-2 font-semibold text-gray-400">utf-8</div>
+              <div class="inline-block text-xs ml-2 text-gray-400">utf-8</div>
             </div>
               </div>
               <div class="grid-cols-1">
-                <div class="uppercase text-xs text-gray-300 font-bold mb-2">Current Value</div>
+                <div class="uppercase text-xs text-gray-300 font-bold mb-4">Current Value</div>
                 <div class="text-xs mb-2">{{data.value}}</div> 
               </div>
             </div>

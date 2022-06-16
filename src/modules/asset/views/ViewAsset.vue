@@ -78,8 +78,8 @@
     </div>
     <div class="filter shadow-xl border border-gray-50 p-5 mb-15">
       <div class="flex items-center mb-4 border-b border-gray-100 relative">
-        <div class="w-32 font-bold text-xs text-center p-2 relative" :class="`${ (currentComponent == 'rich')?'cursor-pointer':'' }`" @click="setCurrentComponent('rich')">Richlist<div v-if="currentComponent == 'rich'" class="absolute w-full border-b border-yellow-500 transition-all duration-200" style="bottom: -1px;"></div></div>
-        <div class="w-32 font-bold text-xs text-center p-2 relative" :class="`${ (currentComponent == 'metadata')?'cursor-pointer':'' }`" @click="setCurrentComponent('metadata')">Metadata<div v-if="currentComponent == 'metadata'" class="absolute w-full border-b border-yellow-500 transition-all duration-200" style="bottom: -1px;"></div></div>
+        <div class="w-32 font-bold text-xs text-center p-2 relative" :class="`${ (currentComponent == 'rich')?'':'cursor-pointer' }`" @click="setCurrentComponent('rich')">Richlist<div v-if="currentComponent == 'rich'" class="absolute w-full border-b border-yellow-500 transition-all duration-200" style="bottom: -1px;"></div></div>
+        <div class="w-32 font-bold text-xs text-center p-2 relative" :class="`${ (currentComponent == 'metadata')?'':'cursor-pointer' }`" @click="setCurrentComponent('metadata')">Metadata<div v-if="currentComponent == 'metadata'" class="absolute w-full border-b border-yellow-500 transition-all duration-200" style="bottom: -1px;"></div></div>
       </div>
       <transition name="slide">
         <RichlistComponent v-if="currentComponent == 'rich'" :transactions="richList" :supply="assets.supply"  :divisibility="assets.divisibility" />
