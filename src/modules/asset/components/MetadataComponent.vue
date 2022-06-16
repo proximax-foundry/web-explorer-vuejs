@@ -23,15 +23,15 @@
               <div class="grid-cols-1">
               <div class="uppercase text-xs text-gray-300 font-bold mb-2">Scoped Metadata Key</div>
                <div class="text-xs" v-if="data.scopedMetadataKeyHex">{{data.scopedMetadataKeyHex}}
-              <div class="inline-block font-bold ml-2">hex</div>
+              <div class="inline-block ml-2 font-semibold text-gray-400">utf-8</div>
             </div>
              <div class="mt-1 text-xs" v-if="data.scopedMetadataKeyUtf8">{{data.scopedMetadataKeyUtf8}}
-              <div class="inline-block font-bold ml-2">utf-8</div>
+              <div class="inline-block ml-2 font-semibold text-gray-400">utf-8</div>
             </div>
               </div>
               <div class="grid-cols-1">
                 <div class="uppercase text-xs text-gray-300 font-bold mb-2">Current Value</div>
-                <div class="uppercase font-bold text-xs mb-2">{{data.value}}</div> 
+                <div class="text-xs mb-2">{{data.value}}</div> 
               </div>
             </div>
             </div>
@@ -42,10 +42,10 @@
         <Column field="SCOPED METADATA KEY" header="SCOPED METADATA KEY" style="width: 250px" v-if="wideScreen">
           <template #body="{data}">
             <div class="text-xs" v-if="data.scopedMetadataKeyHex">{{data.scopedMetadataKeyHex}}
-              <div class="inline-block font-bold ml-2">hex</div>
+              <div class="inline-block ml-2 font-semibold text-gray-400">hex</div>
             </div>
              <div class="mt-1 text-xs" v-if="data.scopedMetadataKeyUtf8">{{data.scopedMetadataKeyUtf8}}
-              <div class="inline-block font-bold ml-2">utf-8</div>
+              <div class="inline-block ml-2 font-semibold text-gray-400">utf-8</div>
             </div>
             <!-- <div class="uppercase text-xs pt-1" v-if="data.scopedMetadataKeyUtf8">{{data.scopedMetadataKeyUtf8 + "  (utf-8)"}}</div> -->
           </template>
