@@ -31,7 +31,10 @@
       <div class="table_div" v-if="innerTxnExtractedData[index]!=undefined">
         <div v-for="(info, infoListindex) in innerTxnExtractedData[index].infoList" :key="infoListindex">
           <div>{{ info.label ? info.label : '' }}</div>
-          <div v-if="info.label.toLowerCase()=='namespace'">
+          <div v-if="info.label.toLowerCase()=='effective height'">
+          <router-link :to="{ name: 'ViewBlock', params: { blockHeight: info.value }}" class="text-xs text-blue-600 hover:text-blue-primary hover:underline">{{info.value}}</router-link>
+          </div>
+          <div v-else-if="info.label.toLowerCase()=='namespace'">
             <div><router-link :to="{ name: 'ViewNamespace', params:{ namespaceParam: info.short ? info.short : info.value }}" class="text-blue-600 hover:text-blue-primary hover:underline">
               {{ info.short ? info.short : info.value }}
             </router-link></div>
