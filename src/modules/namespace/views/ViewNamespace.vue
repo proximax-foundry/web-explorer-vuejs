@@ -101,7 +101,10 @@
               <div>Name</div>
             </div>
             <div v-for="level, index in namespaceInfo.levels" :key="index" class="py-3 text-xs grid grid-cols-2 uppercase" :class="`${ index<(namespaceInfo.levels.length-1)?'border-b border-gray-100':'' }`">
-              <div><router-link v-if="level.id" class="text-blue-600 hover:text-blue-primary hover:underline" :to="{ name: 'ViewNamespace', params: { namespaceParam: level.id } }">{{ level.id }}</router-link></div>
+              <div v-if="level.name.toUpperCase() === namespaceInfo.name.toUpperCase()">
+               {{level.id}}
+              </div>
+              <div v-else><router-link v-if="level.id" class="text-blue-600 hover:text-blue-primary hover:underline" :to="{ name: 'ViewNamespace', params: { namespaceParam: level.id } }">{{ level.id }}</router-link></div>
               <div>{{ level.name }}</div>
             </div>
           </div>
@@ -166,6 +169,7 @@ export default {
         const namespaceMetadata = await MetadataUtils.getNamespaceMetadata(fetchInfo.name);
         metadata.value = namespaceMetadata;
         namespaceInfo.value = fetchInfo;
+        console.log(fetchInfo);
         isShowInvalid.value = false;
       }else{
         isShowInvalid.value = true;
