@@ -110,7 +110,6 @@ export default {
         }
     };  
     loadBlock();
-    console.log(isShowInvalid.value);
     const networkName = computed(() => {
       return networkState.chainNetworkName;
     });

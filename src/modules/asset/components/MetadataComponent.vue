@@ -94,8 +94,7 @@ export default {
     onUnmounted(() => {
       window.removeEventListener("resize", screenResizeHandler);
     });
-    console.log(p.metadata);
-    console.log("hallo");
+   
     return{
       wideScreen
     }

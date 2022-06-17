@@ -169,7 +169,6 @@ export default {
         const namespaceMetadata = await MetadataUtils.getNamespaceMetadata(fetchInfo.name);
         metadata.value = namespaceMetadata;
         namespaceInfo.value = fetchInfo;
-        console.log(fetchInfo);
         isShowInvalid.value = false;
       }else{
         isShowInvalid.value = true;

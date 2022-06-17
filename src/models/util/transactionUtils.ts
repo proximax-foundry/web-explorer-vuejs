@@ -588,7 +588,7 @@ export class TransactionUtils {
         try {
             txnBytes = txn.serialize().length / 2;
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
         deadline = txn.deadline.adjustedValue.compact();
       }
@@ -3121,7 +3121,7 @@ export class TransactionUtils {
         try {
             txnBytes = txn.serialize().length / 2;
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
         deadline = txn.deadline.adjustedValue.compact();
     }

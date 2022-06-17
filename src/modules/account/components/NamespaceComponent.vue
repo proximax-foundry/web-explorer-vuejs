@@ -53,9 +53,6 @@ export default {
   directives: {
     'tooltip': Tooltip
   },
-  setup(p){
-    console.log(p.accountNamespaces);
-  }
 }
 </script>
 
