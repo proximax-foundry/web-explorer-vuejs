@@ -23,6 +23,7 @@
               <a href="https://www.proximax.ltd/en/terms-of-use" target=_new>Terms & Condition</a> |
               <a href="https://www.proximax.ltd/en/privacy" target=_new>Privacy Policy</a>
             </div>
+            <div class="text-xs text-gray-500 mt-2">Version {{ versioning }}</div>
           </div>
         </div>
         <div class="sm:col-span-1 p-3 sm:p-5 md:px-2 md:my-5 mx-1 md:mx-5">
@@ -49,6 +50,8 @@
 </template>
 
 <script>
+import { ref } from 'vue';
+import packageData from '../../package.json';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faFacebookF, faTelegramPlane, faTwitter, faGithub, faMediumM, faInstagram, faRedditAlien, faYoutube, faLinkedinIn } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
@@ -60,6 +63,10 @@ export default {
     'font-awesome-icon' : FontAwesomeIcon
   },
   setup(){
+    const versioning = ref('0.0.1');
+
+    versioning.value = packageData.version;
+
     return {
       faFacebookF,
       faTelegramPlane,
@@ -69,7 +76,8 @@ export default {
       faInstagram,
       faRedditAlien,
       faYoutube,
-      faLinkedinIn
+      faLinkedinIn,
+      versioning,
     }
   }
 }
