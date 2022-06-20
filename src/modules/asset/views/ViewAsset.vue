@@ -12,7 +12,7 @@
     <div v-if="isShowInvalid">
       <div class="p-3 bg-yellow-100 text-yellow-700">Asset is not available in {{ networkName }}</div>
     </div>
-    <div v-else-if="assets.length == 0 && !isShowInvalid">
+    <div v-else-if="assets.length == 0 && isShowInvalid==false">
       <div class="flex justify-center items-center border-gray-400 mt-10 mb-20">
         <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-navy-primary mr-2"></div>
         <span class="text-tsm">Fetching Asset Details</span>
@@ -115,7 +115,7 @@ export default {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const currentComponent = ref('rich');
-    const isShowInvalid = ref(null);
+    const isShowInvalid = ref(false);
     const richList = ref([]);
     const metadata = ref([]);
     const assets = ref([]);

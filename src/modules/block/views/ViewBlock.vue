@@ -4,7 +4,7 @@
     <div v-if="isShowInvalid">
       <div class="p-3 bg-yellow-100 text-yellow-700">Block is not available in {{ networkName }}</div>
     </div>
-    <div v-else-if="isShowInvalid == false && blockInfo.length==0">
+    <div v-else-if="!isShowInvalid && blockInfo.length==0">
       <div class="flex justify-center items-center border-gray-400 mt-10 mb-20">
         <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-navy-primary mr-2"></div>
         <span class="text-tsm">Fetching Block Details</span>
@@ -87,7 +87,7 @@ export default {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const blockInfo = ref([]);
-    const isShowInvalid = ref(false);
+    const isShowInvalid = ref(null);
     const nativeTokenNamespace = AppState.nativeToken.label;
     const copy = (id) =>{ 
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
