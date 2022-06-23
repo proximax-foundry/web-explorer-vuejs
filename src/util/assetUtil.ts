@@ -24,13 +24,14 @@ export interface AssetObj {
 }
 
 export class AssetUtils {
-    static async getAssetName(assetId: string): Promise<MosaicNames> {
+    static async getAssetName(assetId: string): Promise<MosaicNames[]> {
         try {
             let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile?.httpPort));
 
             let mosaicId = new MosaicId(assetId);
             let assetNames = await chainRESTCall.assetAPI.getMosaicsNames([mosaicId]);
-            return assetNames[0];
+            console.log(assetNames);
+            return assetNames;
         } catch (error) {
             console.error(error);
         }
@@ -39,27 +40,22 @@ export class AssetUtils {
     static async getAssetProperties(assetIdHex: string): Promise<AssetObj> {
         try {
             let assetId = new MosaicId(assetIdHex);
-            let assetName = null;
+            let assetName :any=[];
             let chainRESTCall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile?.httpPort));
             let assetInfo: AssetObj;
             let asset = await chainRESTCall.assetAPI.getMosaic(assetId);
             let assetname = await this.getAssetName(assetIdHex);
-            let namespaceId = await AccountUtils.getAccountNamespaces(asset.owner.address.plain().toString());
-            let namespaceInfo = null;
-            if (!assetname) {
+            let namespaceInfo: any = [];
+            
+            if (assetname) {
+                assetname.forEach(namespaceId => {
+                    namespaceId.names.forEach(namespaceId => {
+                        assetName.push(namespaceId.name);
+                        namespaceInfo.push(namespaceId);
+                    })                    
+                });
+            } else {
                 assetName = null;
-            } else if(assetname instanceof MosaicNames){
-                if (assetname.names[0] != undefined) {
-                    assetName = assetname.names[0].name.toString();
-                    if (Array.isArray(namespaceId)) {
-                        let getNamespace = namespaceId.find(name => name.name === assetName);
-                        namespaceInfo = getNamespace.id;
-                    } else {
-                        namespaceInfo = null;
-                    }
-                } else {
-                    assetName = null;
-                }
             }
             
             assetInfo = {
@@ -71,7 +67,7 @@ export class AssetUtils {
                 divisibility: asset.divisibility,
                 supplyMutable: asset.isSupplyMutable(),
                 transferable: asset.isTransferable(),
-                name: assetName,
+                name: assetName[0],
                 namespaceId: namespaceInfo
             }
             return assetInfo;

@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="text-gray-500 mb-5 font-bold" v-if="assets.name">
-      <div class="text-blue-primary text-md font-bold uppercase">{{ assets.name }}</div>
+      <div class="text-blue-primary text-md font-bold uppercase" >{{  assets.name }}</div>
       <div class="text-txs text-gray-400 font-normal mt-1">Asset</div>
     </div>
     <div v-else>
@@ -28,13 +28,16 @@
               <div class="font-bold uppercase">{{assets.assetId}}</div>
             </div>
             <div class="py-4 text-xs grid grid-cols-5 border-b border-gray-100">
-              <div class="font-bold col-span-2">Namespace ID</div>
-              <div class="font-bold uppercase" v-if="assets.namespaceId">
-                <router-link :to="{ name: 'ViewNamespace', params:{ namespaceParam: assets.namespaceId }}" class="text-xs font-semibold mt-1 text-blue-600 col-span-3 hover:text-blue-primary hover:underline">
-                  {{ assets.namespaceId }}
-                </router-link>
+              <div class="font-bold col-span-2">Alias</div>
+              <div class="font-bold uppercase" v-if="assets.namespaceId.length>0">
+                <div v-for='(item, index) in assets.namespaceId' :key="index" class="inline-block ">
+                  <router-link :to="{ name: 'ViewNamespace', params:{ namespaceParam: item.name }}" class="text-xs font-semibold text-blue-600  col-span-3 hover:text-blue-primary uppercase hover:underline">{{ item.name }}
+                  </router-link>
+                  <span v-if="assets.namespaceId.length > 1 && index != assets.namespaceId.length -1 " class="text-black mr-1 ml-1">{{ "/" }}</span> 
+                  <span v-else class="text-black mr-1 ml-1">{{ "" }}</span> 
+                </div>
               </div>
-               <div class="font-bold col-span-2" v-else>
+              <div class="font-bold col-span-2" v-else>
                 -
               </div>
             </div>
@@ -150,6 +153,7 @@ export default {
             isShowInvalid.value = false;
             if(namespaceInfo.alias.type == 1){
               const assetAlias = await AssetUtils.getAssetProperties(namespaceInfo.alias.id);
+              console.log(assetAlias);
               const richlistAlias = await AssetUtils.getRichList(namespaceInfo.alias.id);
               if(assetAlias){
                 assets.value = assetAlias;
