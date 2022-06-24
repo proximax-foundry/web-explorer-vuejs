@@ -23,6 +23,10 @@
             <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Type</div>
             <div class="flex items-center">
               <div class="uppercase font-bold text-xs mr-2">{{data.type}}</div>
+                <div class="ml-2" v-if="accountAddress">
+                  <img src="@/modules/transaction/img/icon-txn-out.svg" class="inline-block" v-if="Helper.createAddress(data.sender).plain() === Helper.createAddress(accountAddress).plain()">
+                  <img src="@/modules/transaction/img/icon-txn-in.svg" class="inline-block" v-else>
+                </div>
             </div>
           </div>
           <div>            
@@ -54,9 +58,17 @@
           </div>
         </template>
       </Column>
-      <Column field="hash" header="TX HASH" headerStyle="width:100px" v-if="wideScreen">
+       <Column field="In/Out" header="IN/OUT" headerStyle="width:100px" v-if="wideScreen && accountAddress">
         <template #body="{data}">
-          <router-link :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}" class="text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex" v-tooltip.bottom="data.hash"><span class="text-ellipsis overflow-hidden w-20">{{data.hash }}</span>...</router-link>
+          <div class="ml-2">
+            <img src="@/modules/transaction/img/icon-txn-out.svg" class="inline-block" v-if="Helper.createAddress(data.sender).plain() === Helper.createAddress(accountAddress).plain()">
+            <img src="@/modules/transaction/img/icon-txn-in.svg" class="inline-block" v-else>
+          </div>
+        </template>
+      </Column>
+      <Column field="hash" header="TX HASH" headerStyle="width:50px" v-if="wideScreen">
+        <template #body="{data}">
+          <router-link :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}" class="text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex" v-tooltip.bottom="data.hash"><span class="text-ellipsis overflow-hidden w-20">{{data.hash }}</span>... </router-link>
         </template>
       </Column>
       <Column field="timestamp" v-if="wideScreen" header="TIMESTAMP" headerStyle="width:130px">
@@ -142,12 +154,15 @@ export default {
   name: 'TransferTxnDataTable',
   props: {
     transactions: Array,
+    accountAddress: String,
     pages: Number
   },
   directives: {
     'tooltip': Tooltip
   },
-  setup(p){
+  setup(p) {
+    console.log(p.accountAddress);
+    console.log(p.transactions);
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const wideScreen = ref(false);
