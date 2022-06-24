@@ -24,7 +24,7 @@
             <div class="flex items-center">
               <div class="uppercase font-bold text-xs mr-2">{{data.type}}</div>
                 <div class="ml-2" v-if="accountAddress">
-                  <img src="@/modules/transaction/img/icon-txn-out.svg" class="inline-block" v-if="Helper.createAddress(data.sender).plain() === Helper.createAddress(accountAddress).plain()">
+                  <img src="@/modules/transaction/img/icon-txn-out.svg" class="inline-block" v-if="data.sender === Helper.createAddress(accountAddress).plain()">
                   <img src="@/modules/transaction/img/icon-txn-in.svg" class="inline-block" v-else>
                 </div>
             </div>
@@ -141,7 +141,6 @@
 import { getCurrentInstance, ref, computed, watch, onMounted, onUnmounted } from "vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import { networkState } from "@/state/networkState";
 import Tooltip from 'primevue/tooltip';
 import { Helper } from "@/util/typeHelper";
 import { AppState } from '@/state/appState';
@@ -161,8 +160,6 @@ export default {
     'tooltip': Tooltip
   },
   setup(p) {
-    console.log(p.accountAddress);
-    console.log(p.transactions);
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const wideScreen = ref(false);
