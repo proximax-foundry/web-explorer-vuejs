@@ -22,6 +22,10 @@
             <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Type</div>
             <div class="flex items-center">
               <div class="uppercase font-bold text-xs mr-2">{{data.type}}</div>
+                <div class="ml-2" v-if="accountAddress">
+                  <img src="@/modules/transaction/img/icon-txn-out.svg" class="inline-block" v-if="Helper.createAddress(data.sender).plain() === Helper.createAddress(accountAddress).plain()">
+                  <img src="@/modules/transaction/img/icon-txn-in.svg" class="inline-block" v-else>
+                </div>
             </div>
           </div>
         </template>
@@ -37,6 +41,14 @@
             <div class="inline-block bg-blue-200 text-blue-700 rounded py-1 text-xs font-bold px-1 my-1" v-if="data.applyHeightDelta">Apply Height Delta: {{data.applyHeightDelta}}</div>
             <div class="inline-block bg-blue-200 text-blue-700 rounded py-1 text-xs font-bold px-1 my-1" v-if="data.newVersion">New Version: {{data.newVersion}}</div>
             <div class="inline-block bg-blue-200 text-blue-700 rounded py-1 text-xs font-bold px-1 my-1" v-if="data.upgradePeriod">Upgrade Period: {{data.upgradePeriod}}</div>
+          </div>
+        </template>
+      </Column>
+      <Column field="In/Out" header="IN/OUT" headerStyle="width:100px" v-if="wideScreen && accountAddress">
+        <template #body="{data}">
+          <div class="ml-2">
+            <img src="@/modules/transaction/img/icon-txn-out.svg" class="inline-block" v-if="Helper.createAddress(data.sender).plain() === Helper.createAddress(accountAddress).plain()">
+            <img src="@/modules/transaction/img/icon-txn-in.svg" class="inline-block" v-else>
           </div>
         </template>
       </Column>
@@ -102,6 +114,7 @@ export default defineComponent({
   name: 'ChainTxnDataTable',
   props: {
     transactions: Array,
+    accountAddress: String,
     pages: Number,
     selectedGroupType: String,
   },
@@ -141,6 +154,7 @@ export default defineComponent({
       convertLocalTime,
       transactionGroupType,
       wideScreen,
+      Helper
     }
   }
 })

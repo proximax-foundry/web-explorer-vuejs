@@ -22,6 +22,10 @@
             <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Type</div>
             <div class="flex items-center">
               <div class="uppercase font-bold text-xs mr-2">{{data.type}}</div>
+                <div class="ml-2" v-if="accountAddress">
+                  <img src="@/modules/transaction/img/icon-txn-out.svg" class="inline-block" v-if="data.sender === Helper.createAddress(accountAddress).plain()">
+                  <img src="@/modules/transaction/img/icon-txn-in.svg" class="inline-block" v-else>
+                </div>
             </div>
           </div>
           <div v-if="data.recipient != '' && data.recipient != null">
@@ -46,6 +50,14 @@
             <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Info</div>
             <span class="inline-block bg-blue-200 text-blue-700 rounded py-1 px-2 my-1 text-xs font-bold" v-if="data.duration">{{ `Duration: ${data.duration} blocks` }}</span>
             <span v-else>-</span>
+          </div>
+        </template>
+      </Column>
+      <Column field="In/Out" header="IN/OUT" headerStyle="width:100px" v-if="wideScreen && accountAddress">
+        <template #body="{data}">
+          <div class="ml-2">
+            <img src="@/modules/transaction/img/icon-txn-out.svg" class="inline-block" v-if="data.sender === Helper.createAddress(accountAddress).plain()">
+            <img src="@/modules/transaction/img/icon-txn-in.svg" class="inline-block" v-else>
           </div>
         </template>
       </Column>
@@ -144,6 +156,7 @@ export default defineComponent({
   name: 'SecretTxnDataTable',
   props: {
     transactions: Array,
+    accountAddress: String,
     pages: Number,
     selectedGroupType: String,
   },
