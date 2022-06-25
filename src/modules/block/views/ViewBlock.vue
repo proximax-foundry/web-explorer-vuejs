@@ -1,20 +1,16 @@
 <template> 
-  <div>       
+  <div>    
+    <p class="text-gray-500 mb-5 text-sm font-bold">Block Details</p>   
     <div v-if="isShowInvalid">
-      <p class="text-gray-500 mb-5 text-sm font-bold">Block Details</p>
       <div class="p-3 bg-yellow-100 text-yellow-700">Block is not available in {{ networkName }}</div>
     </div>
-    <div v-if="isShowInvalid == false && blockInfo.length==0">
+    <div v-else-if="!isShowInvalid && blockInfo.length==0">
       <div class="flex justify-center items-center border-gray-400 mt-10 mb-20">
         <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-navy-primary mr-2"></div>
         <span class="text-tsm">Fetching Block Details</span>
       </div>
     </div>
-    <div v-else> 
-    <div>
-      <p class="text-gray-500 mb-5 text-sm font-bold">
-        Block Details
-      </p>   
+    <div v-else>   
       <div class="filter shadow-xl border border-gray-50 p-5 mb-15">
         <div class="txn-div">
           <div>
@@ -67,7 +63,6 @@
       </div>
     </div>
   </div>
-  </div>
 </template>
 
 <script>
@@ -92,7 +87,7 @@ export default {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const blockInfo = ref([]);
-    const isShowInvalid = ref(false);
+    const isShowInvalid = ref(null);
     const nativeTokenNamespace = AppState.nativeToken.label;
     const copy = (id) =>{ 
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
@@ -110,13 +105,11 @@ export default {
         if(block){
           blockInfo.value = block; 
           isShowInvalid.value = false;
-          return;
         }else{
           isShowInvalid.value = true;
         }
     };  
     loadBlock();
-
     const networkName = computed(() => {
       return networkState.chainNetworkName;
     });

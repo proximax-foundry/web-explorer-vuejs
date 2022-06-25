@@ -56,7 +56,6 @@ export default {
       let offer_rows;
       if(offer.length > 0){
        offer.forEach(exchangeOffer=>{
-           console.log(exchangeOffer);
          offer_rows = exchangeOffer.type + "-";
          offer_rows += (exchangeOffer.amount > 0)?" Amount: "+exchangeOffer.amount:'';
          offer_rows += (exchangeOffer.assetNamespace ?  " Asset Namespace: "+exchangeOffer.assetNamespace : " Asset: "+ exchangeOffer.assetId);

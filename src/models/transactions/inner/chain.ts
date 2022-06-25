@@ -7,7 +7,8 @@ export class InnerChainTransaction extends InnerTransaction{
   supportedEntityVersions: string = null; // not assigning for dashboard
   newVersion: string = null;
   upgradePeriod: number = null;
-
+  height: number = null;
+  
   constructor(){
     super();
   }

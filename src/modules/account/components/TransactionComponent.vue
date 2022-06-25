@@ -18,8 +18,8 @@
     </div>
   </div>
   <div v-else>
-    <MixedTxnDataTable :transactions="transactions" :pages="pages" v-if="selectedTxnType == 'all'" />
-      <TransferTxnDataTable :transactions="transactions" :pages="pages" v-else-if="selectedTxnType === TransactionFilterType.TRANSFER" />
+      <MixedTxnDataTable :accountAddress="accountAddress" :transactions="transactions" :pages="pages" v-if="selectedTxnType == 'all'" />
+      <TransferTxnDataTable :accountAddress="accountAddress" :transactions="transactions" :pages="pages" v-else-if="selectedTxnType === TransactionFilterType.TRANSFER" />
       <AccountTxnDataTable :transactions="transactions" :pages="pages" v-else-if="selectedTxnType === TransactionFilterType.ACCOUNT" />
       <AggregateTxnDataTable :transactions="transactions" :pages="pages" :selectedGroupType="transactionGroupType.CONFIRMED" v-else-if="selectedTxnType === TransactionFilterType.AGGREGATE" />
       <AliasTxnDataTable :transactions="transactions" :pages="pages" :selectedGroupType="transactionGroupType.CONFIRMED" v-else-if="selectedTxnType === TransactionFilterType.ALIAS" />
@@ -30,8 +30,8 @@
       <LockTxnDataTable :transactions="transactions" :pages="pages" :selectedGroupType="transactionGroupType.CONFIRMED" v-else-if="selectedTxnType === TransactionFilterType.LOCK" />
       <LinkTxnDataTable :transactions="transactions" :pages="pages" :selectedGroupType="transactionGroupType.CONFIRMED" v-else-if="selectedTxnType === TransactionFilterType.LINK" />
       <RestrictionTxnDataTable :transactions="transactions" :pages="pages" :selectedGroupType="transactionGroupType.CONFIRMED" v-else-if="selectedTxnType === TransactionFilterType.RESTRICTION" />
-      <SecretTxnDataTable :transactions="transactions" :pages="pages" :selectedGroupType="transactionGroupType.CONFIRMED" v-else-if="selectedTxnType === TransactionFilterType.SECRET" />
-      <ChainTxnDataTable :transactions="transactions" :pages="pages" :selectedGroupType="transactionGroupType.CONFIRMED" v-else-if="selectedTxnType === TransactionFilterType.CHAIN" />
+      <SecretTxnDataTable :accountAddress="accountAddress" :transactions="transactions" :pages="pages" :selectedGroupType="transactionGroupType.CONFIRMED" v-else-if="selectedTxnType === TransactionFilterType.SECRET" />
+      <ChainTxnDataTable :accountAddress="accountAddress" :transactions="transactions" :pages="pages" :selectedGroupType="transactionGroupType.CONFIRMED" v-else-if="selectedTxnType === TransactionFilterType.CHAIN" />
     <div class="sm:flex sm:justify-between my-5 mb-15" v-if="totalPages > 1">
       <div class="text-xs text-gray-700 mb-3 sm:mb-0 text-center sm:text-left">Show
         <select v-model="pages" class="border border-gray-300 rounded-md p-1" @change="changeRows">
@@ -270,7 +270,8 @@ export default {
     let transactionGroupType = Helper.getTransactionGroupType();
     let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
 
-    let loadAccountTransactions = async() =>{
+    let loadAccountTransactions = async () => {
+
       isFetching.value = true;
       let txnQueryParams = Helper.createTransactionQueryParams();
       txnQueryParams.pageSize = pages.value;

@@ -11,6 +11,14 @@
       currentPageReportTemplate=""
       :globalFilterFields="['recipient','sender', 'signerAddress', 'type']"
       >
+      <Column field="In/Out" header="IN/OUT" headerStyle="width:100px" v-if="wideScreen && accountAddress">
+        <template #body="{data}">
+          <div class="ml-2">
+            <img src="@/modules/transaction/img/icon-txn-out.svg" class="inline-block" v-if="data.sender === Helper.createAddress(accountAddress).plain()">
+            <img src="@/modules/transaction/img/icon-txn-in.svg" class="inline-block" v-else>
+          </div>
+        </template>
+      </Column>
       <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
           <div>
@@ -23,6 +31,10 @@
             <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Type</div>
             <div class="flex items-center">
               <div class="uppercase font-bold text-xs mr-2">{{data.type}}</div>
+              <div class="ml-2" v-if="accountAddress">
+                <img src="@/modules/transaction/img/icon-txn-out.svg" class="inline-block" v-if="Helper.createAddress(data.sender).plain() === Helper.createAddress(accountAddress).plain()">
+                <img src="@/modules/transaction/img/icon-txn-in.svg" class="inline-block" v-else>
+              </div>
             </div>
           </div>
           <div>
@@ -126,10 +138,9 @@
 </template>
 
 <script>
-import { getCurrentInstance, ref, computed, watch, onMounted, onUnmounted } from "vue";
+import { getCurrentInstance, ref, computed, onMounted, onUnmounted } from "vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import { networkState } from "@/state/networkState";
 import Tooltip from 'primevue/tooltip';
 import { Helper } from "@/util/typeHelper";
 import { AppState } from '@/state/appState';
@@ -142,6 +153,7 @@ export default {
   name: 'MixedTxnDataTable',
   props: {
     transactions: Array,
+    accountAddress: String,
     pages: Number
   },
   directives: {
