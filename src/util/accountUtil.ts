@@ -43,7 +43,6 @@ export interface NamespaceObj{
 }
 
 export interface MatchedNamespace{
-  id: string;
   name: string;
 }
 
@@ -109,20 +108,21 @@ export class AccountUtils {
     }
   }
 
-  static fetchLinkedAccountNamespace(namespace: NamespaceObj[], address: string): MatchedNamespace[] {
+  static async fetchLinkedAccountNamespace(address: string): Promise<MatchedNamespace[]> {
     let matchedNs: MatchedNamespace[] = [];
+    let addressobj = Address.createFromRawAddress(address);
+    let namespace = await AppState.chainAPI.accountAPI.getAccountsNames([addressobj]);
+
     if (namespace.length > 0) {
       namespace.forEach(ns => {
-        if (ns.type == 2) { // match linked address type
-          if (ns.linkedId == address) {
-            matchedNs.push({
-              name: ns.name,
-              id: ns.id
-            });
-          }
-        }
-      });
+        ns.names.forEach(name => {
+          matchedNs.push({
+            name: name.name
+          });
+        })
+      })
     }
+ 
     return matchedNs;
   }
 
