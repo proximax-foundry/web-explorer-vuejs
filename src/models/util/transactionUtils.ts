@@ -85,7 +85,7 @@ import {
 import { networkState } from "@/state/networkState";
 import { ChainUtils } from "@/util/chainUtils";
 import { ChainAPICall } from "@/models/REST/chainAPICall";
-import { Helper } from "./typeHelper";
+import { Helper } from "@/util/typeHelper";
 import { Duration } from "js-joda";
 import { AppState } from '@/state/appState';
 import { SDA } from '@/models/transactions/sda';
@@ -600,7 +600,7 @@ export class TransactionUtils {
       }else{
         let blockInfo = await AppState.chainAPI.blockAPI.getBlockByHeight(blockHeight);
         txn.fee = txnBytes * blockInfo.feeMultiplier;
-        txn.timestamp = Helper.convertDisplayDateTimeFormat(new Date(blockInfo.timestamp.compact() + Deadline.timestampNemesisBlock * 1000).toISOString());
+        txn.timestamp = Helper.convertDisplayDateTimeFormat24(new Date(blockInfo.timestamp.compact() + Deadline.timestampNemesisBlock * 1000).toISOString());
       }
 
       // extra transaction details for various transaction type

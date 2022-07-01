@@ -32,7 +32,7 @@
             <div class="flex items-center">
               <div class="uppercase font-bold text-xs mr-2">{{data.type}}</div>
               <div class="ml-2" v-if="accountAddress">
-                <img src="@/modules/transaction/img/icon-txn-out.svg" class="inline-block" v-if="Helper.createAddress(data.sender).plain() === Helper.createAddress(accountAddress).plain()">
+                <img src="@/modules/transaction/img/icon-txn-out.svg" class="inline-block" v-if="data.sender=== Helper.createAddress(accountAddress).plain()">
                 <img src="@/modules/transaction/img/icon-txn-in.svg" class="inline-block" v-else>
               </div>
             </div>

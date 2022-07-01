@@ -23,13 +23,13 @@
         <Column style="width: 200px" v-if="!wideScreen">
           <template #body="{data}">
             <div>
-              <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-1 break-all">Height</div>
+              <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-1 break-all">Block</div>
                 <router-link :to="{ name: 'ViewBlock', params: { blockHeight: data.height.compact()}}" class="text-xs text-blue-600 hover:text-blue-primary  font-bold hover:underline">{{data.height.compact()}}</router-link>
             </div>
              <div>
               <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Validator</div>
               <div class="uppercase font-bold text-xs">
-                <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.signer.address.plain() }}" class="truncate text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex w-40"><span class="text-ellipsis overflow-hidden">{{data.signer.address.pretty()}}</span>...</router-link>
+                <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.signer.publicKey }}" class="truncate text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex w-40"><span class="text-ellipsis overflow-hidden">{{data.signer.publicKey}}</span>...</router-link>
               </div>
             </div>
             <div>
@@ -47,7 +47,7 @@
               <div class="uppercase font-bold text-xs">{{ BlockUtils.fmtTime(data.timestamp.compact()) }}</div>
             </div>
             <div>
-              <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Fee</div>
+              <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">TX Fee</div>
               <div class="text-xs uppercase font-bold" >{{ TransactionUtils.convertToExactNativeAmount(data.totalFee.compact()) + " " + nativeTokenNamespace}}</div>
             </div>
             <div>
@@ -56,19 +56,19 @@
             </div>
           </template>
         </Column>
-        <Column field="timestamp" v-if="wideScreen" header="HEIGHT" headerStyle="width:100px">
+        <Column field="timestamp" v-if="wideScreen" header="BLOCK" headerStyle="width:100px">
           <template #body="{data}">
             <router-link :to="{ name: 'ViewBlock', params: { blockHeight: data.height.compact()}}" class="text-xs text-blue-600 hover:text-blue-primary hover:underline">{{data.height.compact()}}</router-link>
           </template>
         </Column>
         <Column field="timestamp" v-if="wideScreen" header="TIMESTAMP" headerStyle="width:150px">
           <template #body="{data}">
-            <span class="text-xs">{{ BlockUtils.fmtTime(data.timestamp.compact()) }}</span>
+            <span class="text-xs">{{ Helper.convertDisplayDateTimeFormat24(data.timestamp.compact()) }}</span>
           </template>
         </Column>
-         <Column field="signer" header="SIGNER" headerStyle="width:150px" v-if="wideScreen">
+         <Column field="signer" header="VALIDATOR" headerStyle="width:150px" v-if="wideScreen">
           <template #body="{data}">
-            <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.signer.address.plain() }}" class="truncate text-xs text-blue-600 hover:text-blue-primary hover:underline">{{ data.signer.address.pretty()}}</router-link>
+            <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.signer.publicKey }}" class="truncate text-xs text-blue-600 hover:text-blue-primary hover:underline">{{ data.signer.publicKey}}</router-link>
           </template>
         </Column>
         <Column field="type" header="NO. OF TRANSACTIONS" headerStyle="width:150px" v-if="wideScreen">
@@ -76,7 +76,7 @@
             <span class="text-xs">{{ data.numTransactions }}</span>
           </template>
         </Column>
-        <Column field="block" v-if="wideScreen" header="FEE" headerStyle="width:120px">
+        <Column field="block" v-if="wideScreen" header="TX FEE" headerStyle="width:120px">
           <template #body="{data}">
             <span class="text-xs">{{ TransactionUtils.convertToExactNativeAmount(data.totalFee.compact()) + " " +nativeTokenNamespace}}</span>
           </template>
@@ -89,6 +89,25 @@
         </template>
       </DataTable>
       <div class="mb-12"></div>
+    </div>
+    <div class="sm:flex sm:justify-between my-5 mb-15" v-if="totalPages > 1">
+      <div class="text-xs text-gray-700 mb-3 sm:mb-0 text-center sm:text-left">Show
+        <select v-model="pages" class="border border-gray-300 rounded-md p-1" @change="changeRows">
+          <option value=10>10</option>
+          <option value=20>20</option>
+          <option value=30>30</option>
+          <option value=40>40</option>
+          <option value=50>50</option>
+        </select>
+        Records
+      </div>
+      <div class="sm:flex sm:items-center text-center sm:text-right">
+        <div v-if="enableFirstPage" @click="naviFirst" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">First</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1">First</div>
+        <div v-if="enablePreviousPage" @click="naviPrevious" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">Previous</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1">Previous</div>
+        <div class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs">Page {{ currentPage }} of {{ totalPages }}</div>
+        <div v-if="enableNextPage" @click="naviNext" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">Next</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1">Next</div>
+        <div v-if="enableLastPage" @click="naviLast" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs ml-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">Last</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1">Last</div>
+      </div>
     </div>
   </div>
 </template>

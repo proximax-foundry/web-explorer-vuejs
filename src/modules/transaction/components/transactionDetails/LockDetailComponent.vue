@@ -2,7 +2,7 @@
   <div class="details">
     <div>
       <div>Lock Hash</div>
-      <div>{{ txnDetail.detail.lockHash }}</div>
+      <div class="break-all">{{ txnDetail.detail.lockHash }}</div>
     </div>
     <div>
       <div>Duration</div>

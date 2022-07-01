@@ -40,7 +40,7 @@
         <Column style="width: 100px" v-if="!wideScreen">
           <template #body="{data}">
             <div>
-              <div class="uppercase text-xs text-gray-300 font-bold -mt-2 ml-1">fee</div>
+              <div class="uppercase text-xs text-gray-300 font-bold -mt-2 ml-1">Tx Fee</div>
               <div class="uppercase font-bold text-xs mt-1 ml-1">{{ TransactionUtils.convertToExactNativeAmount(data.totalFee.compact()) + " " + nativeTokenNamespace}}</div>
               <div class="mb-7"></div>    
             </div>
@@ -63,7 +63,7 @@
           </div>
         </template> 
       </Column>
-      <Column style="width: 110px; padding-bottom: 0rem; padding-top: 0rem; padding-right: 1rem;" field="Fee" header="FEE" v-if="wideScreen"> 
+      <Column style="width: 110px; padding-bottom: 0rem; padding-top: 0rem; padding-right: 1rem;" field="Fee" header="TX FEE" v-if="wideScreen"> 
         <template #body="{data}" > 
           <div>
             <div class="text-xs pt-2.5">{{ TransactionUtils.convertToExactNativeAmount(data.totalFee.compact())+" "+nativeTokenNamespace}}</div>

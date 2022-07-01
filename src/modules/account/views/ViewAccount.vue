@@ -119,7 +119,7 @@ export default {
       if(fetchedAccountNamespaces !== false){
         accountNamespaces.value = fetchedAccountNamespaces;
       }
-      let linkedNamespaceToAccount = AccountUtils.fetchLinkedAccountNamespace(fetchedAccountNamespaces, strAddress.value);
+      let linkedNamespaceToAccount = await AccountUtils.fetchLinkedAccountNamespace(strAddress.value);
       matchedNamespace.value = linkedNamespaceToAccount;
 
       multisig.value = await AccountUtils.getMultisig(strAddress.value);

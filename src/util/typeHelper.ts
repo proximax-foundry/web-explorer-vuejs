@@ -9,7 +9,6 @@ import {
     Address,
     MosaicSupplyType,
     MosaicNonce,
-    // WalletAlgorithm,
     AliasActionType,
     QueryParams,
     CosignatureTransaction,
@@ -26,7 +25,7 @@ import {
     Order_v2
 } from "tsjs-xpx-chain-sdk";
 import Base64 from 'crypto-js/enc-base64';
-// import { WalletAcountType } from "../models/const/otherAccountType";
+import { DateTime } from 'luxon';
 
 export class Helper{
 
@@ -143,13 +142,8 @@ export class Helper{
         return TransactionGroupType;
     }
 
-    // static getWalletAlgorithm(): typeof WalletAlgorithm{
-    //     return WalletAlgorithm;
-    // }
-
-    // static getOtherWalletAccountType(): typeof WalletAcountType{
-    //     return WalletAcountType;
-    // }
+  
+   
 
     static getAliasActionType(): typeof AliasActionType{
         return AliasActionType;
@@ -169,39 +163,16 @@ export class Helper{
           minimumFractionDigits: d
         });
       }
-    
-      static convertDisplayDateTimeFormat(dateTimeJSON: string): string {
-        const date = new Date(dateTimeJSON);
-    
-        return new Intl.DateTimeFormat('default', {
-            year: 'numeric', month: 'numeric', day: 'numeric',
-            hour: 'numeric', minute: 'numeric', second: 'numeric'
-          }).format(date);
-      }
 
       static convertDisplayDateTimeFormat24(dateTimeJSON: string): string {
-        const date = new Date(dateTimeJSON);
-    
-        return new Intl.DateTimeFormat('default', {
-            year: 'numeric', month: 'numeric', day: 'numeric',
-            hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false,
-          }).format(date);
+          const date = new Date(dateTimeJSON).toISOString().replace('Z', ''); //solve the issue of wrong timestamp catch with iso format with 'Z'
+          return DateTime.fromISO(date).toFormat('yyyy-LLL-dd, TT') + " +UTC";
       }
 
       static formatDeadline(timestamp: number) :string{
         return Helper.convertDisplayDateTimeFormat24(new Date(timestamp + Deadline.timestampNemesisBlock * 1000).toISOString());
       }
     
-      static formatFixedDateTime(dateTimeJSON: string): string  {
-    
-        const newDate = new Date(dateTimeJSON);
-    
-        return new Intl.DateTimeFormat('en-GB',
-          {
-            year: 'numeric', month: 'numeric', day: 'numeric',
-            hour: 'numeric', minute: 'numeric', second: 'numeric'
-          }).format(newDate);
-      }
     
       static numberToJSONDate(dateNumber: number): string {
         const newDate = new Date(dateNumber);

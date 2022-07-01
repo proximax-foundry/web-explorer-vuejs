@@ -49,7 +49,7 @@
         <Column style="width:130px" v-if="!wideScreen">
           <template #body="{data}">
             <div>
-              <div class="uppercase text-xs text-gray-300 font-bold mb-2">Fee</div>
+              <div class="uppercase text-xs text-gray-300 font-bold mb-2">Tx Fee</div>
               <div class="uppercase font-bold text-xs">{{data.fee+ " " + nativeTokenNamespace}}</div>
               <div class="mb-7"></div>
             </div>
@@ -75,7 +75,7 @@
           </div>
         </template> 
       </Column>
-      <Column style="width: 120px; padding-bottom: 0rem; padding-top: 0rem; padding-right: 1rem; " field="Fee" header="FEE" v-if="wideScreen"> 
+      <Column style="width: 120px; padding-bottom: 0rem; padding-top: 0rem; padding-right: 1rem; " field="Fee" header="Tx FEE" v-if="wideScreen"> 
         <template #body="{data}"> 
           <div>
             <div class="text-xs pt-2.5">{{data.fee + " " + nativeTokenNamespace}}</div>
