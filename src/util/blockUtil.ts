@@ -30,7 +30,7 @@ export class BlockUtils {
                 feeMultiplier:block.feeMultiplier,
                 totalFee: block.totalFee.compact(),
                 numTransactions: block.numTransactions,
-                timestamp: this.fmtTime(block.timestamp.compact())
+                timestamp: new Date(block.timestamp.compact() + Deadline.timestampNemesisBlock * 1000).toISOString()
             }
             return blockInfo;
         } catch (error) {
@@ -59,16 +59,4 @@ export class BlockUtils {
         return blockInfo;
     }
     
-    private static fmtTime(timestamp:number): string {
-        let dateFormat = new Date(timestamp+ Deadline.timestampNemesisBlock * 1000)
-        let date = new Date(dateFormat);
-        let day = (date.getDate() < 10) ? "0" + date.getDate() : date.getDate();
-        let month = ((date.getMonth() + 1) < 10) ? "0" + (date.getMonth() + 1) : (date.getMonth() + 1);
-        let hours = (date.getHours() < 10) ? "0" + date.getHours() : date.getHours();
-        let minutes = (date.getMinutes() < 10) ? "0" + date.getMinutes() : date.getMinutes();
-        let seconds = (date.getSeconds() < 10) ? "0" + date.getSeconds() : date.getSeconds();
-        let final = date.getFullYear() + "-" + month + "-" + day + " " + hours + ":" + minutes + ":" + seconds;
-
-        return final;
-    }
 }

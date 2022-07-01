@@ -63,7 +63,7 @@
         </Column>
         <Column field="timestamp" v-if="wideScreen" header="TIMESTAMP" headerStyle="width:150px">
           <template #body="{data}">
-            <span class="text-xs">{{ BlockUtils.fmtTime(data.timestamp.compact()) }}</span>
+            <span class="text-xs">{{ Helper.convertDisplayDateTimeFormat24(data.timestamp.compact()) }}</span>
           </template>
         </Column>
          <Column field="signer" header="VALIDATOR" headerStyle="width:150px" v-if="wideScreen">
@@ -89,6 +89,25 @@
         </template>
       </DataTable>
       <div class="mb-12"></div>
+    </div>
+    <div class="sm:flex sm:justify-between my-5 mb-15" v-if="totalPages > 1">
+      <div class="text-xs text-gray-700 mb-3 sm:mb-0 text-center sm:text-left">Show
+        <select v-model="pages" class="border border-gray-300 rounded-md p-1" @change="changeRows">
+          <option value=10>10</option>
+          <option value=20>20</option>
+          <option value=30>30</option>
+          <option value=40>40</option>
+          <option value=50>50</option>
+        </select>
+        Records
+      </div>
+      <div class="sm:flex sm:items-center text-center sm:text-right">
+        <div v-if="enableFirstPage" @click="naviFirst" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">First</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1">First</div>
+        <div v-if="enablePreviousPage" @click="naviPrevious" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">Previous</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1">Previous</div>
+        <div class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs">Page {{ currentPage }} of {{ totalPages }}</div>
+        <div v-if="enableNextPage" @click="naviNext" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">Next</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1">Next</div>
+        <div v-if="enableLastPage" @click="naviLast" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs ml-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">Last</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1">Last</div>
+      </div>
     </div>
   </div>
 </template>

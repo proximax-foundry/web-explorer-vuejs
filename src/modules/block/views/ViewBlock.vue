@@ -19,7 +19,7 @@
           </div>
           <div>
             <div>Timestamp</div>
-            <div>{{blockInfo.timestamp}}</div>
+            <div>{{Helper.convertDisplayDateTimeFormat24(blockInfo.timestamp)}}</div>
           </div>
           <div>
             <div>Validator</div>
