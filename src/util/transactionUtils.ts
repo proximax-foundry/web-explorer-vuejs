@@ -67,7 +67,6 @@ import { ChainUtils } from "../util/chainUtils";
 import { ChainAPICall } from "../models/REST/chainAPICall";
 import { BuildTransactions } from "../util/buildTransactions";
 import { AppState } from '@/state/appState';
-import { Helper } from "./typeHelper";
 import { Duration } from "js-joda";
 import { faBreadSlice } from "@fortawesome/free-solid-svg-icons";
 

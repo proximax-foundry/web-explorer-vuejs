@@ -66,7 +66,6 @@ export default {
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.init();
     const svgString = ref(toSvg(props.address, 70, themeConfig.jdenticonConfig));
-    console.log(props.namespace);
     // const linkedNamespace = ref([]);
 
     // (async() => {
