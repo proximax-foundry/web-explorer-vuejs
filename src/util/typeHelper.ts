@@ -167,11 +167,6 @@ export class Helper{
       static convertDisplayDateTimeFormat24(dateTimeJSON: string): string {
           const date = new Date(dateTimeJSON).toISOString().replace('Z', ''); //solve the issue of wrong timestamp catch with iso format with 'Z'
           return DateTime.fromISO(date).toFormat('yyyy-LLL-dd, TT') + " +UTC";
-
-        //   return new Intl.DateTimeFormat('en-US', {
-        //       year: 'numeric', month: 'short', day: 'numeric',
-        //       hour: '2-digit', minute: 'numeric', second: 'numeric', timeZone: 'UTC', hour12: false,
-        //   }).format(date);
       }
 
       static formatDeadline(timestamp: number) :string{
