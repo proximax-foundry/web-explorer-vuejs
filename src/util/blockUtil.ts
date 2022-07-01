@@ -4,7 +4,7 @@ import {
     LimitType,
 } from "tsjs-xpx-chain-sdk";
 import { AppState } from "@/state/appState";
-
+import { Helper } from "@/util/typeHelper";
 export interface BlockObj {
     height: number,
     validator: string,
@@ -30,7 +30,7 @@ export class BlockUtils {
                 feeMultiplier:block.feeMultiplier,
                 totalFee: block.totalFee.compact(),
                 numTransactions: block.numTransactions,
-                timestamp: new Date(block.timestamp.compact() + Deadline.timestampNemesisBlock * 1000).toISOString()
+                timestamp: Helper.formatDeadline(block.timestamp.compact())
             }
             return blockInfo;
         } catch (error) {
