@@ -164,6 +164,7 @@ export default {
     let loadRecentBlock = async() =>{
       if(!AppState.isReady){
         setTimeout(loadRecentBlock, 1000);
+        return;
       }
       let block = await BlockUtils.getBlocksList(p.blockHeight);
       transactions.value = block;

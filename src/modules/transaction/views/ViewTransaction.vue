@@ -54,6 +54,7 @@ export default {
     const loadTxn = async () => {
       if(!AppState.isReady){
         setTimeout(loadTxn, 1000);
+        return;
       }
 
       let transaction = await TransactionUtils.getTransaction(props.hash);
