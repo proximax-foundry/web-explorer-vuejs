@@ -22,7 +22,8 @@ import {
     Order,
     TransactionSortingField,
     TransactionFieldOrder,
-    Order_v2
+    Order_v2,
+    MosaicQueryParams
 } from "tsjs-xpx-chain-sdk";
 import Base64 from 'crypto-js/enc-base64';
 import { DateTime } from 'luxon';
@@ -118,12 +119,16 @@ export class Helper{
         return new TransactionQueryParams();
     }
 
+    static createMosaicQueryParams(): MosaicQueryParams {
+        return new MosaicQueryParams();
+    }
+
     static createMetadataQueryParams(): MetadataQueryParams{
         return new MetadataQueryParams();
     }
 
-    static createTransactionFieldOrder(order: Order_v2, sortingField: TransactionSortingField): TransactionFieldOrder{
-        return new TransactionFieldOrder(order, sortingField);
+    static createTransactionFieldOrder(sortingField: TransactionSortingField, order: Order_v2): TransactionFieldOrder{
+        return new TransactionFieldOrder(sortingField,order);
     }
 
     static getQueryParamOrder(): typeof Order{
