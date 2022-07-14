@@ -123,7 +123,7 @@
           </div>
           <div v-if="checkOtherAsset">
             <span v-for="(sdaName, index) in displaySDAs(data.sda)" :key="index">
-              <router-link :to="{ name: 'ViewAsset', params:{ id: sdaName.name }}" class="text-blue-600 hover:text-blue-primary hover:underline">{{ sdaName.name }}</router-link>
+              <router-link :to="{ name: 'ViewAsset', params:{ id: sdaName.name }}" class="text-blue-600 hover:text-blue-primary flex hover:underline">{{ sdaName.name }}</router-link>
               {{sdaName.length}}
             </span>
           </div>
