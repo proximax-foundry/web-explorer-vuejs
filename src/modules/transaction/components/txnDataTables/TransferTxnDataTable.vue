@@ -123,7 +123,7 @@
           </div>
           <div v-if="checkOtherAsset">
             <span v-for="(sdaName, index) in displaySDAs(data.sda)" :key="index">
-              <router-link :to="{ name: 'ViewNamespace', params:{ namespaceParam: sdaName.name }}" class="text-blue-600 hover:text-blue-primary hover:underline">{{ sdaName.name }}</router-link>
+              <router-link :to="{ name: 'ViewAsset', params:{ id: sdaName.name }}" class="text-blue-600 hover:text-blue-primary hover:underline">{{ sdaName.name }}</router-link>
               {{sdaName.length}}
             </span>
           </div>
@@ -195,7 +195,6 @@ export default {
       let sda_rows = [];
       if(sdas.length > 0){
         for (const sda of sdas) {
-          //sda_rows.push({ name: 'ViewAsset', params: { id: searchResult.param } });
           if(sda.currentAlias && sda.currentAlias.length){
             sda_rows.push({ amount: sda.amount, name: sda.currentAlias[0].name });
           }
