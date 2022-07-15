@@ -96,8 +96,6 @@
             <option value=25>25</option>
             <option value=50>50</option>
             <option value=75>75</option>
-            <!-- <option value=100>100</option> -->
-
           </select>
           Records
         </div>
@@ -220,7 +218,6 @@ export default {
       }
       
       let block = await BlockUtils.getBlocksList(p.blockHeight);
-      console.log(block);
       transactions.value = pagination(block);
       totalPages.value = Math.ceil(100 / pages.value);
       isFetching.value = false;
