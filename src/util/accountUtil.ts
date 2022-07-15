@@ -20,13 +20,11 @@ import { networkState } from '@/state/networkState';
 import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
 import { TransactionUtils } from '@/models/util/transactionUtils';
 import { Helper } from "@/util/typeHelper";
-import { NamespaceUtils } from "@/util/namespaceUtil";
 
 export interface AssetObj {
   id: string;
-  name: string;
+  name: [];
   balance: string;
-  namespaceId: string;
   isActive: boolean;
   isOwner: boolean;
 }
@@ -150,15 +148,19 @@ export class AccountUtils {
   static async formatAccountAsset(assets: Mosaic[], namespace: NamespaceObj[], publicKey: string): Promise<AssetObj[]> {
     let formattedAsset: any = [];
     if (assets.length > 0) {
+      let mosaicQueryParams = Helper.createMosaicQueryParams();
+      mosaicQueryParams.ownerPubKey = publicKey;
+      let mosaicSearch = await AppState.chainAPI.assetAPI.searchMosaics(mosaicQueryParams); //Search 0 balance asset
       let currentBlock = await AppState.chainAPI.chainAPI.getBlockchainHeight();
       let objAsset: AssetObj;
-      let assetName: string;
+      let assetName: any=[];
       let namespaceId: string;
       let isOwner: boolean = false;
+      let isActive: boolean = false;
+
       let assetDetails;
       for (let key in assets) {
         assetDetails = await AppState.chainAPI.assetAPI.getMosaic(assets[key].id);
-        let isActive: boolean = false;
         if ((assetDetails.height.compact() + assetDetails.duration.compact()) > currentBlock) {
           isActive = true;
         } else if (assetDetails.height.compact() == 1) {
@@ -171,8 +173,7 @@ export class AccountUtils {
 
         let assetsNames = await TransactionUtils.getAssetsName([assets[key].id]);
         if (assetsNames[0].names.length) {
-          assetName = assetsNames[0].names[0].name;
-          namespaceId = assetsNames[0].names[0].namespaceId.id.toHex();
+          assetName = assetsNames[0].names;
         } else {
           assetName = '';
           namespaceId = '';
@@ -181,39 +182,33 @@ export class AccountUtils {
           id: assets[key].id.id.toHex(),
           balance: Helper.convertToCurrency(assets[key].amount.compact(), assetDetails.divisibility),
           name: assetName,
-          namespaceId,
+          isOwner,
+          isActive,
+        }
+        formattedAsset.push(objAsset);  
+      }
+
+      let get0balanceAsset = mosaicSearch.mosaicsInfo.filter(id => !assets.find(o => o.id.toHex() == id.mosaicId.id.toHex()));
+      
+      for (let key in get0balanceAsset) {
+        isOwner = true;
+        isActive = true;
+        let assetsNames = await TransactionUtils.getAssetsName([get0balanceAsset[key].mosaicId]);
+        if (assetsNames[0].names.length) {
+          assetName = assetsNames[0].names;
+        } else {
+          assetName = '';
+          namespaceId = '';
+        }
+        objAsset = {
+          id: get0balanceAsset[key].mosaicId.toHex(),
+          balance: "0",
+          name: assetName,
           isOwner,
           isActive,
         }
         formattedAsset.push(objAsset);
-      }
-      for (let i = 0; i < namespace.length; i++) {
-        if (namespace[i].type == 1) {
-          let getAssetwithZeroBalance = assets.filter(getDuplicateAssetId => getDuplicateAssetId.id.toHex() == namespace[i].linkedId);
-          if (getAssetwithZeroBalance.length == 0){
-          assetName = namespace[i].name;
-          namespaceId = namespace[i].id;
-          isOwner = true;
-          let assetId = new MosaicId(namespace[i].linkedId);
-          assetDetails = await AppState.chainAPI.assetAPI.getMosaic(assetId);
-          let isActive: boolean = false;
-          if ((assetDetails.height.compact() + assetDetails.duration.compact()) > currentBlock) {
-            isActive = true;
-          } else if (assetDetails.height.compact() == 1) {
-            isActive = true;
-          }
-          objAsset = {
-            id: namespace[i].linkedId,
-            balance: "0",
-            name: assetName,
-            namespaceId,
-            isOwner,
-            isActive,
-          }
-          formattedAsset.push(objAsset);
-          }
-        }
-      }
+      }      
     }
     return formattedAsset;
   }

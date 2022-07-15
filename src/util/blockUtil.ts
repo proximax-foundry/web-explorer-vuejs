@@ -40,22 +40,16 @@ export class BlockUtils {
 
     static async getBlocksList(blockHeight?:number): Promise<BlockInfo[]> {
         let blockInfo: BlockInfo[] = [];
+        // let limitType: LimitType;
         if (blockHeight == null) {
             let height = await AppState.chainAPI.diagnosticAPI.getDiagnosticStorage();
             blockHeight = height.numBlocks;
         }
         
-        let blockInfoByHeight = await AppState.chainAPI.blockAPI.getBlocksByHeightWithLimit(blockHeight, LimitType.N_100);
+        let blockInfoByHeight = await AppState.chainAPI.blockAPI.getBlocksByHeightWithLimit(blockHeight,100);
         if (blockInfoByHeight.length < 100) {
-            let getPreviousBlockByHeight = await AppState.chainAPI.blockAPI.getBlocksByHeightWithLimit(blockHeight - blockInfoByHeight.length);
-            let totalHeight: number = 100 - blockInfoByHeight.length;
-            let getSlicedBlock: BlockInfo[] = getPreviousBlockByHeight.slice(0, totalHeight);
-            blockInfo = blockInfoByHeight.concat(getSlicedBlock);            
-        }
-        else {
-            blockInfo = blockInfoByHeight;
-        }
-        
+            blockInfo = await AppState.chainAPI.blockAPI.getBlocksByHeightWithLimit(blockHeight - 1000,100);
+        }  
         return blockInfo;
     }
     

@@ -71,7 +71,8 @@ export default defineComponent({
       NetworkStateUtils.setAPINodeInit();
       node.value = currentChainProfile.apiNodes[0];
       if(!AppState.isReady){
-         setTimeout(init, 1000);
+        setTimeout(init, 1000);
+        return; 
       }
     }
     init();

@@ -12,10 +12,10 @@
     <div v-else>
       <DataTable
         :value="transactions"
-        :paginator="true"
-        :rows="10"
+        :paginator="false"
+        :rows="Number(pages)"
         scrollDirection="horizontal"
-        :alwaysShowPaginator="true"
+        :alwaysShowPaginator="false"
         responsiveLayout="scroll"
         paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink"
         currentPageReportTemplate=""
@@ -44,7 +44,7 @@
           <template #body="{data}">
             <div>
               <div class="uppercase text-xs text-gray-300 font-bold mb-1 -mt-7">Timestamp</div>
-              <div class="uppercase font-bold text-xs">{{ BlockUtils.fmtTime(data.timestamp.compact()) }}</div>
+              <div class="uppercase font-bold text-xs">{{ Helper.convertDisplayDateTimeFormat24(data.timestamp.compact()) }}</div>
             </div>
             <div>
               <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">TX Fee</div>
@@ -61,7 +61,7 @@
             <router-link :to="{ name: 'ViewBlock', params: { blockHeight: data.height.compact()}}" class="text-xs text-blue-600 hover:text-blue-primary hover:underline">{{data.height.compact()}}</router-link>
           </template>
         </Column>
-        <Column field="timestamp" v-if="wideScreen" header="TIMESTAMP" headerStyle="width:150px">
+        <Column field="timestamp" v-if="wideScreen" header="TIMESTAMP" headerStyle="width:200px">
           <template #body="{data}">
             <span class="text-xs">{{ Helper.convertDisplayDateTimeFormat24(data.timestamp.compact()) }}</span>
           </template>
@@ -90,25 +90,23 @@
       </DataTable>
       <div class="mb-12"></div>
     </div>
-    <div class="sm:flex sm:justify-between my-5 mb-15" v-if="totalPages > 1">
-      <div class="text-xs text-gray-700 mb-3 sm:mb-0 text-center sm:text-left">Show
-        <select v-model="pages" class="border border-gray-300 rounded-md p-1" @change="changeRows">
-          <option value=10>10</option>
-          <option value=20>20</option>
-          <option value=30>30</option>
-          <option value=40>40</option>
-          <option value=50>50</option>
-        </select>
-        Records
+    <div class="sm:flex sm:justify-between my-5 mb-15" v-if="transactions.length > 1">
+        <div class="text-xs text-gray-700 mb-3 sm:mb-0 text-center sm:text-left">Show
+          <select v-model="pages" class="border border-gray-300 rounded-md p-1" @change="changeRows">
+            <option value=25>25</option>
+            <option value=50>50</option>
+            <option value=75>75</option>
+          </select>
+          Records
+        </div>
+        <div class="sm:flex sm:items-center text-center sm:text-right">
+          <div v-if="enableFirstPage" @click="naviFirst" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">First</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1">First</div>
+          <div v-if="enablePreviousPage" @click="naviPrevious" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">Previous</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1">Previous</div>
+          <div class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs">Page {{ currentPage }} of {{ totalPages }}</div>
+          <div v-if="enableNextPage" @click="naviNext" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">Next</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1">Next</div>
+          <div v-if="enableLastPage" @click="naviLast" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs ml-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">Last</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1">Last</div>
+        </div>
       </div>
-      <div class="sm:flex sm:items-center text-center sm:text-right">
-        <div v-if="enableFirstPage" @click="naviFirst" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">First</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1">First</div>
-        <div v-if="enablePreviousPage" @click="naviPrevious" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">Previous</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1">Previous</div>
-        <div class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs">Page {{ currentPage }} of {{ totalPages }}</div>
-        <div v-if="enableNextPage" @click="naviNext" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">Next</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1">Next</div>
-        <div v-if="enableLastPage" @click="naviLast" class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs ml-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all">Last</div><div v-else class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1">Last</div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -158,20 +156,79 @@ export default {
       window.addEventListener("resize", screenResizeHandler);
     });
 
+
+    const pages = ref(25);
+    const currentPage = ref(1)
+    const totalPages = ref(100/25);
+    
+    
+    const enableFirstPage = computed(() => {
+      return currentPage.value > 1;
+    });
+
+    const enablePreviousPage = computed(() => {
+      return currentPage.value > 1;
+    });
+
+    const enableNextPage = computed(() => {
+      return (totalPages.value - currentPage.value) > 0;
+    });
+
+    const enableLastPage = computed(() => {
+      return currentPage.value < totalPages.value;
+    });
+
+    const naviFirst = () => {
+      currentPage.value = 1;
+      isFetching.value = true;
+      loadRecentBlock();
+    }
+
+    const naviPrevious = () => {
+      --currentPage.value;
+      isFetching.value = true;
+      loadRecentBlock();
+    }
+
+    const naviNext = () => {
+      ++currentPage.value;
+      isFetching.value = true;
+      loadRecentBlock();
+    }
+
+    const naviLast = () => {
+      currentPage.value = totalPages.value;
+      isFetching.value = true;
+      loadRecentBlock();
+    }
+
+    const changeRows = () => {
+      currentPage.value = 1;
+      isFetching.value = true;
+      loadRecentBlock();
+    }
+
     const nativeTokenName = computed(()=> AppState.nativeToken.label);
     
     const transactions = ref([]);
     let loadRecentBlock = async() =>{
       if(!AppState.isReady){
         setTimeout(loadRecentBlock, 1000);
+        return;
       }
+      
       let block = await BlockUtils.getBlocksList(p.blockHeight);
-      transactions.value = block;
+      transactions.value = pagination(block);
+      totalPages.value = Math.ceil(100 / pages.value);
       isFetching.value = false;
-      return;
     };
     loadRecentBlock();
-    
+
+    let pagination = (blocks)=>{
+      let blockValue = blocks.slice((currentPage.value-1) * pages.value, currentPage.value * pages.value);
+      return blockValue;
+    }
+
     emitter.on('CHANGE_NETWORK', payload => {
       isFetching.value = true;
       if(payload){
@@ -187,7 +244,19 @@ export default {
       Helper,
       BlockUtils,
       TransactionUtils,
-      nativeTokenNamespace
+      nativeTokenNamespace,
+      pages,
+      currentPage,
+      totalPages,
+      enableFirstPage,
+      enablePreviousPage,
+      enableNextPage,
+      enableLastPage,
+      naviFirst,
+      naviPrevious,
+      naviNext,
+      naviLast,
+      changeRows
     }
   }
 }

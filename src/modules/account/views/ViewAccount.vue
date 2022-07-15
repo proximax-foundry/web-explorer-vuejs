@@ -86,6 +86,7 @@ export default {
     const loadAccountInfo = async() => {
       if(!AppState.isReady){
         setTimeout(loadAccountInfo, 1000);
+        return; 
       }
 
       if(props.accountParam.length == 64){
