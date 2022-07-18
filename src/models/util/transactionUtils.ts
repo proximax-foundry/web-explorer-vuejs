@@ -1430,15 +1430,14 @@ export class TransactionUtils {
         let assetInfo: TxnDetails = {
           type: MsgType.NONE,
           label: "Asset",
-          value: assetLevyFormat.assetId + assetLevyFormat.namespaceName ? ` (${assetLevyFormat.namespaceName})` : ''
+          value: assetLevyFormat.namespaceName ? assetLevyFormat.namespaceName : assetLevyFormat.levyAssetId
         };
-
         infos.push(assetInfo);
 
         let levyAssetInfo: TxnDetails = {
           type: MsgType.NONE,
           label: "Levy Asset",
-          value: assetLevyFormat.levyAssetAmount + ' ' + assetLevyFormat.levyAssetId + assetLevyFormat.levyAssetName ? ` (${assetLevyFormat.levyAssetName})` : ''
+          value: assetLevyFormat.levyAssetAmount ? assetLevyFormat.levyAssetAmount : ''
         };
 
         infos.push(levyAssetInfo);
@@ -2293,6 +2292,8 @@ export class TransactionUtils {
     let assetId = assetModifyLevyTxn.mosaicId.toHex();
     let levyAssetId = assetModifyLevyTxn.mosaicLevy.mosaicId.toHex();
     let levyAmount = assetModifyLevyTxn.mosaicLevy.fee.compact();
+    console.log(levyAssetId);
+    console.log(levyAmount);
 
     txnDetails.assetId = assetId;
     txnDetails.levyAssetId = levyAssetId;
