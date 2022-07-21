@@ -146,6 +146,7 @@ export default {
     const generateGraph = async(strAddress) => {
       if(!AppState.isReady){
         setTimeout(generateGraph, 1000);
+        return; 
       }
       let address = Address.createFromRawAddress(strAddress);
       let graphInfo = await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(address);

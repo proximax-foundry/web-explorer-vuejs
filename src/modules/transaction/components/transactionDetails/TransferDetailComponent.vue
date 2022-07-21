@@ -74,8 +74,6 @@ export default {
       return props.txnDetail.detail.amountTransfer.toString().split('.');
     });
 
-    console.log(props.txnDetail.detail);
-
     const copy = (id) =>{
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");

@@ -26,7 +26,9 @@
         <div class="text-xxs font-semibold text-gray-400 mt-4 mb-1" v-if="namespace.length > 0">Linked namespace{{ (namespace.length>1)?'s':'' }}</div>
         <div class="flex items-center" v-if="namespace.length > 0">
           <div v-for="(item, index) in namespace" :key="index" :class="`${index > 0 }?'mt-2':''`">
-            <router-link :to="{ name: 'ViewNamespace', params:{ namespaceParam: item.id }}" class="text-xs font-semibold mt-1 break-all text-blue-600 hover:text-blue-primary hover:underline">{{ item.name }}</router-link>
+            <router-link :to="{ name: 'ViewNamespace', params:{ namespaceParam: item.name }}" class="text-xs font-semibold mt-1 break-all text-blue-600 hover:text-blue-primary hover:underline">{{ item.name }}</router-link>
+            <span v-if="namespace.length > 1 && index != namespace.length -1 " class="text-black mr-1 ml-1">{{ "/" }}</span> 
+            <span v-else class="text-black mr-1 ml-1">{{ "" }}</span> 
           </div>
         </div>
         <div class="flex gap-2">
@@ -64,7 +66,6 @@ export default {
     let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
     themeConfig.init();
     const svgString = ref(toSvg(props.address, 70, themeConfig.jdenticonConfig));
-
     // const linkedNamespace = ref([]);
 
     // (async() => {

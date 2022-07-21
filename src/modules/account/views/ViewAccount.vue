@@ -86,6 +86,7 @@ export default {
     const loadAccountInfo = async() => {
       if(!AppState.isReady){
         setTimeout(loadAccountInfo, 1000);
+        return; 
       }
 
       if(props.accountParam.length == 64){
@@ -119,7 +120,7 @@ export default {
       if(fetchedAccountNamespaces !== false){
         accountNamespaces.value = fetchedAccountNamespaces;
       }
-      let linkedNamespaceToAccount = AccountUtils.fetchLinkedAccountNamespace(fetchedAccountNamespaces, strAddress.value);
+      let linkedNamespaceToAccount = await AccountUtils.fetchLinkedAccountNamespace(strAddress.value);
       matchedNamespace.value = linkedNamespaceToAccount;
 
       multisig.value = await AccountUtils.getMultisig(strAddress.value);

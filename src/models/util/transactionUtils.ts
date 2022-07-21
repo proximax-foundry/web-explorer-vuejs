@@ -85,7 +85,7 @@ import {
 import { networkState } from "@/state/networkState";
 import { ChainUtils } from "@/util/chainUtils";
 import { ChainAPICall } from "@/models/REST/chainAPICall";
-import { Helper } from "./typeHelper";
+import { Helper } from "@/util/typeHelper";
 import { Duration } from "js-joda";
 import { AppState } from '@/state/appState';
 import { SDA } from '@/models/transactions/sda';
@@ -600,7 +600,7 @@ export class TransactionUtils {
       }else{
         let blockInfo = await AppState.chainAPI.blockAPI.getBlockByHeight(blockHeight);
         txn.fee = txnBytes * blockInfo.feeMultiplier;
-        txn.timestamp = Helper.convertDisplayDateTimeFormat(new Date(blockInfo.timestamp.compact() + Deadline.timestampNemesisBlock * 1000).toISOString());
+        txn.timestamp = Helper.convertDisplayDateTimeFormat24(new Date(blockInfo.timestamp.compact() + Deadline.timestampNemesisBlock * 1000).toISOString());
       }
 
       // extra transaction details for various transaction type
@@ -1430,15 +1430,14 @@ export class TransactionUtils {
         let assetInfo: TxnDetails = {
           type: MsgType.NONE,
           label: "Asset",
-          value: assetLevyFormat.assetId + assetLevyFormat.namespaceName ? ` (${assetLevyFormat.namespaceName})` : ''
+          value: assetLevyFormat.namespaceName ? assetLevyFormat.namespaceName : assetLevyFormat.levyAssetId
         };
-
         infos.push(assetInfo);
 
         let levyAssetInfo: TxnDetails = {
           type: MsgType.NONE,
           label: "Levy Asset",
-          value: assetLevyFormat.levyAssetAmount + ' ' + assetLevyFormat.levyAssetId + assetLevyFormat.levyAssetName ? ` (${assetLevyFormat.levyAssetName})` : ''
+          value: assetLevyFormat.levyAssetAmount ? assetLevyFormat.levyAssetAmount : ''
         };
 
         infos.push(levyAssetInfo);
@@ -2293,6 +2292,8 @@ export class TransactionUtils {
     let assetId = assetModifyLevyTxn.mosaicId.toHex();
     let levyAssetId = assetModifyLevyTxn.mosaicLevy.mosaicId.toHex();
     let levyAmount = assetModifyLevyTxn.mosaicLevy.fee.compact();
+    console.log(levyAssetId);
+    console.log(levyAmount);
 
     txnDetails.assetId = assetId;
     txnDetails.levyAssetId = levyAssetId;

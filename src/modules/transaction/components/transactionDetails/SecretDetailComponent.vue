@@ -15,7 +15,7 @@
     </div>
     <div>
       <div>Secret</div>
-      <div>{{ txnDetail.detail.secret }}</div>
+      <div class="break-all">{{ txnDetail.detail.secret }}</div>
     </div>
     <div v-if="txnDetail.detail.duration">
       <div>Duration</div>
@@ -23,7 +23,7 @@
     </div>
     <div v-if="txnDetail.detail.proof">
       <div>Proof</div>
-      <div>{{ txnDetail.detail.proof }}</div>
+      <div class="break-all">{{ txnDetail.detail.proof }}</div>
     </div>
     <div v-if="txnDetail.detail.amount">
       <div>Amount</div>
