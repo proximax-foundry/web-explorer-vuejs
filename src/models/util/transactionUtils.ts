@@ -1433,22 +1433,19 @@ export class TransactionUtils {
           value: assetLevyFormat.namespaceName ? assetLevyFormat.namespaceName : assetLevyFormat.levyAssetId
         };
         infos.push(assetInfo);
-
         let levyAssetInfo: TxnDetails = {
           type: MsgType.NONE,
           label: "Levy Asset",
           value: assetLevyFormat.levyAssetAmount ? assetLevyFormat.levyAssetAmount : ''
         };
-
         infos.push(levyAssetInfo);
-
+ 
         let levyAssetRecipientInfo: TxnDetails = {
           type: MsgType.NONE,
           label: "Levy Recipient",
           value: assetLevyFormat.levyRecipient,
           short: Helper.createAddress(assetLevyFormat.levyRecipient).pretty()
         };
-
         infos.push(levyAssetRecipientInfo);
 
         transactionDetails = {
@@ -2292,9 +2289,6 @@ export class TransactionUtils {
     let assetId = assetModifyLevyTxn.mosaicId.toHex();
     let levyAssetId = assetModifyLevyTxn.mosaicLevy.mosaicId.toHex();
     let levyAmount = assetModifyLevyTxn.mosaicLevy.fee.compact();
-    console.log(levyAssetId);
-    console.log(levyAmount);
-
     txnDetails.assetId = assetId;
     txnDetails.levyAssetId = levyAssetId;
     txnDetails.levyAssetAmount = levyAmount;
@@ -2311,8 +2305,8 @@ export class TransactionUtils {
 
       let levyAssetInfo = await TransactionUtils.getAssetInfo(levyAssetId);
 
-      txnDetails.levyAssetAmount = TransactionUtils.convertToExactAmount(levyAmount, levyAssetInfo.divisibility);
-
+      // txnDetails.levyAssetAmount = TransactionUtils.convertToExactAmount(levyAmount, levyAssetInfo.divisibility);
+      txnDetails.levyAssetAmount = levyAmount;
       txnDetails.levyAssetAmountIsRaw = false;
 
       let levyAssetName = await TransactionUtils.getAssetName(levyAssetId);
