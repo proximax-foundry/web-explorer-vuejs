@@ -44,7 +44,7 @@
           <template #body="{data}">
             <div>
               <div class="uppercase text-xs text-gray-300 font-bold mb-1 -mt-7">Timestamp</div>
-              <div class="uppercase font-bold text-xs">{{ Helper.convertDisplayDateTimeFormat24(data.timestamp.compact()) }}</div>
+              <div class="uppercase font-bold text-xs">{{ Helper.formatDeadline(data.timestamp.compact()) }}</div>
             </div>
             <div>
               <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">TX Fee</div>
@@ -63,7 +63,7 @@
         </Column>
         <Column field="timestamp" v-if="wideScreen" header="TIMESTAMP" headerStyle="width:200px">
           <template #body="{data}">
-            <span class="text-xs">{{ Helper.convertDisplayDateTimeFormat24(data.timestamp.compact()) }}</span>
+            <span class="text-xs">{{ Helper.formatDeadline(data.timestamp.compact()) }}</span>
           </template>
         </Column>
          <Column field="signer" header="VALIDATOR" headerStyle="width:150px" v-if="wideScreen">
