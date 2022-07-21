@@ -65,7 +65,7 @@
          <router-link :to="{ name: 'ViewBlock', params: { blockHeight: data.block}}" class="text-blue-600 hover:text-blue-primary hover:underline text-xs">{{ data.block }}</router-link>
         </template>
       </Column>
-      <Column header="Tx Fee" headerStyle="width:40px;text-transform:uppercase" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" >
+      <Column header="TX FEE" headerStyle="width:40px;text-transform:uppercase" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" >
         <template #body="{data}">
           <div class="text-xs">{{ data.fee }} <b v-if="data.fee == 0 || data.fee>0">{{ nativeTokenName }}</b></div>
         </template>

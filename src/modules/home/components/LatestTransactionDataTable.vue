@@ -24,7 +24,7 @@
       <Column style="width: 20px" v-if="!wideScreen">
           <template #body="{data}">
             <div class="mb-2 px-4">
-              <div class="uppercase text-xs text-gray-300 font-bold mt-1 mb-2">TX Hash</div>
+              <div class="uppercase text-xs text-gray-300 font-bold mt-1 mb-2">TX HASH</div>
               <router-link :to="{ name: 'ViewTransaction', params: {hash: data.hash}}" class="uppercase font-bold text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex w-20"><span class="text-ellipsis overflow-hidden"> {{data.hash}}</span>...</router-link>
               <div class="text-xs text-gray-500 mb-4 mt-1">{{ countDuration(data.timestamp)}} ago</div>
             </div>
@@ -49,13 +49,13 @@
         <Column style="width:130px" v-if="!wideScreen">
           <template #body="{data}">
             <div>
-              <div class="uppercase text-xs text-gray-300 font-bold mb-2">Tx Fee</div>
+              <div class="uppercase text-xs text-gray-300 font-bold mb-2">TX FEE</div>
               <div class="uppercase font-bold text-xs">{{data.fee+ " " + nativeTokenNamespace}}</div>
               <div class="mb-7"></div>
             </div>
           </template>
         </Column>
-      <Column style="width: 80px; padding-bottom: 0rem; padding-top: 0rem;padding-left: 1rem;" field="TX Hash" header="TX HASH" class="ml-4" v-if="wideScreen"> 
+      <Column style="width: 80px; padding-bottom: 0rem; padding-top: 0rem;padding-left: 1rem;" field="TX HASH" header="TX HASH" class="ml-4" v-if="wideScreen"> 
         <template #body="{data}">                
           <div>
             <router-link :to="{ name: 'ViewTransaction', params: {hash: data.hash}}" class="uppercase text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex w-14 pt-3 "><span class="text-ellipsis overflow-hidden text-xs" v-tooltip.bottom="data.hash">{{data.hash}} </span>...</router-link>
@@ -75,7 +75,7 @@
           </div>
         </template> 
       </Column>
-      <Column style="width: 120px; padding-bottom: 0rem; padding-top: 0rem; padding-right: 1rem; " field="Fee" header="Tx FEE" v-if="wideScreen"> 
+      <Column style="width: 120px; padding-bottom: 0rem; padding-top: 0rem; padding-right: 1rem; " field="Fee" header="TX FEE" v-if="wideScreen"> 
         <template #body="{data}"> 
           <div>
             <div class="text-xs pt-2.5">{{data.fee + " " + nativeTokenNamespace}}</div>
