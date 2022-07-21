@@ -102,19 +102,30 @@
             <div class="text-xs">{{ data.fee }} <b v-if="data.fee==0 || data.fee> 0">{{ nativeTokenName }}</b></div>
           </template>
         </Column>
-        <Column header="AMOUNT" headerStyle="width:110px" v-if="wideScreen">
-          <template #body="{data}">
-            <div class="text-xs" >{{ data.amountTransfer ? Helper.toCurrencyFormat(data.amountTransfer, currencyDivisibility):'-' }} <b v-if="data.amountTransfer">{{ nativeTokenName }}</b></div>
-          </template>
-        </Column>
-        <Column header="SDA" headerStyle="width:40px" v-if="wideScreen">
-          <template #body="{data}">
-            <div>
-              <img src="@/modules/transaction/img/proximax-logo-gray.svg" class="inline-block w-4/6" v-if="checkOtherAsset(data.sda)" v-tooltip.left="'<tiptitle>Sirius Digital Asset</tiptitle><tiptext>' + displaySDAs(data.sda) + '</tiptext>'">
-              <span v-else>-</span>
+         <Column header="AMOUNT" headerStyle="width:110px" v-if="wideScreen">
+        <template #body="{data}">
+          <div class="text-xs" v-if="data.amountTransfer">{{ Helper.toCurrencyFormat(data.amountTransfer, currencyDivisibility)}}</div>
+          <div v-if="checkOtherAsset">
+            <div v-for="(sdaName, index) in displaySDAs(data.sda)" :key="index">{{sdaName.amount}}     
             </div>
-          </template>
-        </Column>
+          </div>
+        </template>
+      </Column>
+      <Column header="SDA" headerStyle="width:40px" v-if="wideScreen">
+        <template #body="{data}">
+         <div v-if="data.amountTransfer">
+            <span v-if="data.amountTransfer">
+              <router-link :to="{ name: 'ViewNamespace', params:{ namespaceParam: AppState.nativeToken.fullNamespace}}" class="text-blue-600 hover:text-blue-primary hover:underline">{{ nativeTokenName }}</router-link>
+            </span>
+          </div>
+          <div v-if="checkOtherAsset">
+            <span v-for="(sdaName, index) in displaySDAs(data.sda)" :key="index">
+              <router-link :to="{ name: 'ViewNamespace', params:{ namespaceParam: sdaName.name }}" class="text-blue-600 hover:text-blue-primary hover:underline">{{ sdaName.name }}</router-link>
+              {{sdaName.length}}
+            </span>
+          </div>
+        </template>
+      </Column>
         <Column header="MESSAGE" headerStyle="width:40px" v-if="wideScreen">
           <template #body="{data}">
             <div>
@@ -178,11 +189,17 @@ export default {
     const displaySDAs = (sdas) => {
       let sda_rows = [];
       if(sdas.length > 0){
-        for(const sda of sdas){
-          let asset_div = displayAssetDiv(sda);
-          sda_rows.push(asset_div);
+        for (const sda of sdas) {
+          //sda_rows.push({ name: 'ViewAsset', params: { id: searchResult.param } });
+          if(sda.currentAlias && sda.currentAlias.length){
+            sda_rows.push({ amount: sda.amount, name: sda.currentAlias[0].name });
+          }
+          else {
+            sda_rows.push({ amount: sda.amount, name:sda.id });
+          }
         }
-        return sda_rows.join("<br>");
+        console.log(sda_rows);
+        return sda_rows;
       }
     }
 
@@ -195,19 +212,6 @@ export default {
       return false;
     }
 
-    const displayAssetDiv = (sda) => {
-      let asset_div;
-      let assetArray = []
-      assetArray.push(sda.id);
-
-      if(sda.currentAlias && sda.currentAlias.length){
-        asset_div = (sda.amount + ' ' + sda.currentAlias[0].name);
-      }
-      else{
-        asset_div = (sda.amount + ' - ' + sda.id);
-      }
-      return asset_div;
-    }
     const getTransactions = async() =>{
       if(p.blockHeight != null){
         let txnQueryParams = new TransactionQueryParams();
