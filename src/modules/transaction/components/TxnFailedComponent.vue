@@ -1,7 +1,7 @@
 <template>
   <div class="txn-div">
     <div>
-      <div>Tx Hash</div>
+      <div>TX HASH</div>
       <div class="break-all">{{ hash }}</div>
     </div>
     <div>

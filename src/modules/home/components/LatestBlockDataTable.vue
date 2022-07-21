@@ -40,7 +40,7 @@
         <Column style="width: 100px" v-if="!wideScreen">
           <template #body="{data}">
             <div>
-              <div class="uppercase text-xs text-gray-300 font-bold -mt-2 ml-1">Tx Fee</div>
+              <div class="uppercase text-xs text-gray-300 font-bold -mt-2 ml-1">TX FEE</div>
               <div class="uppercase font-bold text-xs mt-1 ml-1">{{ TransactionUtils.convertToExactNativeAmount(data.totalFee.compact()) + " " + nativeTokenNamespace}}</div>
               <div class="mb-7"></div>    
             </div>

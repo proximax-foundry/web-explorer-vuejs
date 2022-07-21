@@ -1,7 +1,7 @@
 <template>
   <div class="txn-div">
     <div>
-      <div>Tx Hash</div>
+      <div>TX HASH</div>
       <div class="flex items-center break-all"><div class="mr-2" id="hash" :copyValue="txnDetail.hash" copySubject="Transaction hash">{{ txnDetail.hash }}</div><img src="@/assets/img/icon-copy.svg" @click="copy('hash')" class="cursor-pointer" /></div>
     </div>
     <div>
@@ -36,7 +36,7 @@
       <div>{{ txnDetail.type }} <span class="text-xxs text-gray-500">(Version: {{ txnDetail.version }})</span></div>
     </div>
     <div v-if="txnDetail.group=='confirmed'">
-      <div>Tx Fee</div>
+      <div>TX FEE</div>
       <div class="relative"><span class="font-bold">{{ maxFee[0] }}</span>{{ maxFee[1]>0?'.':'' }}<span class="text-xxs">{{ maxFee[1] }}</span> <img src="@/assets/img/icon-xpx.svg" class="ml-1 mr-2 inline-block" style="top: -1px; width:14px;" /><span class="font-bold">{{ nativeTokenNamespace }}</span> </div>
     </div>
     <div>
