@@ -28,7 +28,7 @@
       <div>{{ txnDetail.timestamp }}</div>
     </div>
     <div v-if="txnDetail.group=='confirmed'">
-      <div>Height</div>
+      <div>Block</div>
       <div><router-link :to="{ name: 'ViewBlock', params: { blockHeight: txnDetail.height}}" class="text-blue-600 hover:text-blue-primary hover:underline">{{ txnDetail.height }}</router-link></div>
     </div>
     <div>
