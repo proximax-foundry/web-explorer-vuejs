@@ -46,11 +46,11 @@
             <div class="break-all uppercase col-span-3"><router-link v-if="namespaceInfo.ownerPublicKey" class="text-blue-600 hover:text-blue-primary hover:underline" :to="{ name: 'ViewAccount', params: { accountParam: namespaceInfo.ownerPublicKey } }">{{ namespaceInfo.ownerPublicKey }}</router-link></div>
           </div>
           <div class="py-4 text-xs grid grid-cols-5 border-b border-gray-100">
-            <div class="font-bold col-span-2">Start height</div>
+            <div class="font-bold col-span-2">Start Block</div>
             <div class="uppercase col-span-3">{{ namespaceInfo.start }}</div>
           </div>
           <div class="py-4 text-xs grid grid-cols-5">
-            <div class="font-bold col-span-2">End height</div>
+            <div class="font-bold col-span-2">End Block</div>
             <div class="uppercase col-span-3">{{ namespaceInfo.end }}</div>
           </div>
         </div>

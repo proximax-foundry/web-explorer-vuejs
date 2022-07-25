@@ -268,7 +268,7 @@ export default {
     
     const transactions = ref([]);
     let transactionGroupType = Helper.getTransactionGroupType();
-    let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
+    let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getTransactionSortField().BLOCK,Helper.getQueryParamOrder_v2().DESC);
 
     let loadAccountTransactions = async () => {
 

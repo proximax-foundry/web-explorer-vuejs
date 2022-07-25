@@ -47,7 +47,7 @@
               <div class="uppercase font-bold text-xs">{{ Helper.formatDeadline(data.timestamp.compact()) }}</div>
             </div>
             <div>
-              <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">TX Fee</div>
+              <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">TX FEE</div>
               <div class="text-xs uppercase font-bold" >{{ TransactionUtils.convertToExactNativeAmount(data.totalFee.compact()) + " " + nativeTokenNamespace}}</div>
             </div>
             <div>
