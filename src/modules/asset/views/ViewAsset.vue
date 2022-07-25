@@ -61,7 +61,7 @@
             </div>
           </div> 
           <div class="py-4 text-xs grid grid-cols-5 border-b border-gray-100">
-            <div class="font-bold col-span-2">Height</div>
+            <div class="font-bold col-span-2">Block</div>
               <div class="col-span-3">
                 <router-link :to="{ name: 'ViewBlock', params: { blockHeight: assets.height}}" class="truncate inline-block break-all text-blue-600 hover:text-blue-primary hover:underline">{{assets.height}}</router-link>
               </div>

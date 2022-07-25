@@ -22,7 +22,7 @@
       <Column style="width: 100px" v-if="!wideScreen">
         <template #body="{data}">
           <div class="mb-2 px-4">
-            <div class="uppercase text-xs text-gray-300 font-bold">Height</div>
+            <div class="uppercase text-xs text-gray-300 font-bold">Block</div>
             <div class="uppercase font-bold text-xs inline-flex mt-2"><router-link :to="{ name: 'ViewBlock', params: { blockHeight: data.height.compact()}}" class="uppercase text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex">{{data.height.compact() }}</router-link></div>
             <div class="text-xs text-gray-500 mb-4 mt-1">{{ countDuration(data.timestamp.compact()+ Deadline.timestampNemesisBlock * 1000)}} ago</div>
           </div>
@@ -46,7 +46,7 @@
             </div>
           </template>
         </Column>
-      <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem; padding-left: 1rem;" field="Height" header="HEIGHT" v-if="wideScreen"> 
+      <Column style="width: 50px; padding-bottom: 0rem; padding-top: 0rem; padding-left: 1rem;" field="Block" header="BLOCK" v-if="wideScreen"> 
         <template #body="{data}"> 
           <div> 
             <div class="uppercase text-xs pt-3">

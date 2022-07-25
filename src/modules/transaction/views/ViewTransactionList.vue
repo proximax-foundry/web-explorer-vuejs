@@ -155,7 +155,7 @@ export default {
     const transactions = ref([]);
     const QueryParamsType = ref('');
     let transactionGroupType = Helper.getTransactionGroupType();
-    let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
+    let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getTransactionSortField().BLOCK, Helper.getQueryParamOrder_v2().DESC);
 
     let loadRecentTransactions = async() =>{
       isFetching.value = true;
