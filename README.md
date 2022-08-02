@@ -1,4 +1,4 @@
-# explorer
+# Proximax web explorer
 
 ## Project setup
 ```
