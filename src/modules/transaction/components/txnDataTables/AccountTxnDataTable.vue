@@ -13,7 +13,7 @@
       <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
           <div>
-            <div class="uppercase text-xs text-gray-300 font-bold mb-1">Hash</div>
+            <div class="uppercase text-xs text-gray-300 font-bold mb-1">TX Hash</div>
             <router-link class="uppercase font-bold text-xs block text-blue-600 hover:text-blue-primary hover:underline" :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}">
               <span class="text-xs truncate inline-flex  hover:underline hover:text-blue-primary text-ellipsis overflow-hidden w-44" v-tooltip.right="data.hash">{{data.hash }}</span>...</router-link>
           </div>
@@ -62,7 +62,7 @@
           </div>
         </template>
       </Column>
-      <Column field="hash" header="Hash" headerStyle="width:70px;text-transform:uppercase"  v-if="wideScreen">
+      <Column field="hash" header="TX Hash" headerStyle="width:70px;text-transform:uppercase"  v-if="wideScreen">
         <template #body="{data}">
           <router-link :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}" class="text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex" v-tooltip.bottom="data.hash"><span class="text-ellipsis overflow-hidden w-44">{{data.hash}}</span>...</router-link>
         </template>

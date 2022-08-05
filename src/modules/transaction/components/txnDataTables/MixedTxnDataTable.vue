@@ -71,7 +71,7 @@
           <router-link :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}" class="text-xs text-blue-600 hover:text-blue-primary inline-flex hover:underline " v-tooltip.bottom="data.hash"><span class="text-ellipsis overflow-hidden w-44">{{data.hash }}</span>...</router-link>
         </template>
       </Column>
-      <Column field="timestamp" v-if="wideScreen" header="TIMESTAMP" headerStyle="width:130px">
+      <Column field="timestamp" v-if="wideScreen" header="TIMESTAMP" headerStyle="width:200px">
         <template #body="{data}">
           <span class="text-xs">{{ Helper.convertDisplayDateTimeFormat24(data.timestamp) }}</span>
         </template>
