@@ -17,6 +17,12 @@
         <TxnFailedComponent :hash="hash" :status="failedStatus" />
       </div>
     </div>
+     <div v-if="isFetching">
+      <div class="flex justify-center items-center border-gray-400 mt-10">
+        <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-navy-primary mr-2"></div>
+        <span class="text-tsm">Fetching Transaction Details</span>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -117,7 +123,6 @@ export default {
           }
         }
       }
-
       isFetching.value = false;
     };
     loadTxn();
@@ -129,6 +134,7 @@ export default {
     emitter.on('CHANGE_NETWORK', payload => {
       if(payload){
         loadTxn();
+        isFetching.value = true;
       }
     });
 
