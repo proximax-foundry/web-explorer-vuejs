@@ -15,7 +15,7 @@
         <div class="w-18 text-center" :class="`${ (currentComponent=='txn')?'border-yellow-500 border-b-2':'cursor-pointer' }`" @click="setCurrentComponent('txn')">Transactions</div>
       </div>
       <div class="mb-20" v-if="!isFetching">
-        <AssetComponent :accountAssets="accountAssets" v-if="currentComponent=='asset'" />
+        <AssetComponent :accountAsset="accountAssets"  :accountPublicKey="strPublicKey" v-if="currentComponent=='asset'" />
         <NamespaceComponent :accountNamespaces="accountNamespaces" v-if="currentComponent=='namespace'" />
         <MetadataComponent :accountMetadata="accountMetadata" v-if="currentComponent=='metadata'" />
         <MultisigComponent :cosignatories="multisig.cosignatories" :multisig="multisig.multisigAccounts" :address="strAddress" v-else-if="currentComponent=='multisig'" />
@@ -126,9 +126,9 @@ export default {
       multisig.value = await AccountUtils.getMultisig(strAddress.value);
       cosignatoriesLength.value = multisig.value.cosignatories?multisig.value.cosignatories.length:0;
       multisigLength.value = multisig.value.multisigAccounts?multisig.value.multisigAccounts.length:0;
-
-      let fetchedAccountAssets = await AccountUtils.formatAccountAsset(account.mosaics, accountNamespaces.value, strPublicKey.value);
-      accountAssets.value = fetchedAccountAssets;
+      accountAssets.value = account.mosaics;
+    //  let fetchedAccountAssets = await AccountUtils.formatAccountAsset(account.mosaics, strPublicKey.value);
+      //accountAssets.value = fetchedAccountAssets;
       isFetching.value = false;
       isShowInvalid.value = false;
     };
