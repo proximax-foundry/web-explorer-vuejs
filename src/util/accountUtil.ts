@@ -145,7 +145,7 @@ export class AccountUtils {
     }
   }
 
-  static async formatAccountAsset(assets: Mosaic[], namespace: NamespaceObj[], publicKey: string): Promise<AssetObj[]> {
+  static async formatAccountAsset(assets: Mosaic[],publicKey: string): Promise<AssetObj[]> {
     let formattedAsset: any = [];
     if (assets.length > 0) {
       let mosaicQueryParams = Helper.createMosaicQueryParams();
@@ -188,27 +188,27 @@ export class AccountUtils {
         formattedAsset.push(objAsset);  
       }
 
-      let get0balanceAsset = mosaicSearch.mosaicsInfo.filter(id => !assets.find(o => o.id.toHex() == id.mosaicId.id.toHex()));
+      // let get0balanceAsset = mosaicSearch.mosaicsInfo.filter(id => !assets.find(o => o.id.toHex() == id.mosaicId.id.toHex()));
       
-      for (let key in get0balanceAsset) {
-        isOwner = true;
-        isActive = true;
-        let assetsNames = await TransactionUtils.getAssetsName([get0balanceAsset[key].mosaicId]);
-        if (assetsNames[0].names.length) {
-          assetName = assetsNames[0].names;
-        } else {
-          assetName = '';
-          namespaceId = '';
-        }
-        objAsset = {
-          id: get0balanceAsset[key].mosaicId.toHex(),
-          balance: "0",
-          name: assetName,
-          isOwner,
-          isActive,
-        }
-        formattedAsset.push(objAsset);
-      }      
+      // for (let key in get0balanceAsset) {
+      //   isOwner = true;
+      //   isActive = true;
+      //   let assetsNames = await TransactionUtils.getAssetsName([get0balanceAsset[key].mosaicId]);
+      //   if (assetsNames[0].names.length) {
+      //     assetName = assetsNames[0].names;
+      //   } else {
+      //     assetName = '';
+      //     namespaceId = '';
+      //   }
+      //   objAsset = {
+      //     id: get0balanceAsset[key].mosaicId.toHex(),
+      //     balance: "0",
+      //     name: assetName,
+      //     isOwner,
+      //     isActive,
+      //   }
+      //   formattedAsset.push(objAsset);
+      // }      
     }
     return formattedAsset;
   }
