@@ -13,7 +13,7 @@
       <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
           <div>
-            <div class="uppercase text-xs text-gray-300 font-bold mb-1">Hash</div>
+            <div class="uppercase text-xs text-gray-300 font-bold mb-1">TX Hash</div>
             <router-link class="uppercase font-bold text-xs block text-blue-600 hover:text-blue-primary hover:underline" :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}">
               <span class="text-xs hover:underline hover:text-blue-primary truncate inline-flex text-ellipsis overflow-hidden w-44 break-all" v-tooltip.right="data.hash">{{data.hash }}</span>...
             </router-link>
@@ -61,12 +61,12 @@
           </div>
         </template>
       </Column>
-      <Column field="hash" header="TX HASH" headerStyle="width:100px;text-transform:uppercase" v-if="wideScreen">
+      <Column field="hash" header="TX HASH" headerStyle="width:120px;text-transform:uppercase" v-if="wideScreen">
         <template #body="{data}">
           <router-link :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}" class="text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex w-32" v-tooltip.bottom="data.hash"><span class="text-ellipsis overflow-hidden">{{data.hash }}</span>...</router-link>
         </template>
       </Column>
-      <Column field="timestamp" header="Timestamp" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:110px;text-transform:uppercase">
+      <Column field="timestamp" header="Timestamp" v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:200px;text-transform:uppercase">
         <template #body="{data}">
           <span class="text-xs">{{ convertLocalTime(data.timestamp) }}</span>
         </template>

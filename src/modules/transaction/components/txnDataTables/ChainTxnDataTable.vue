@@ -13,7 +13,7 @@
       <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
           <div>
-            <div class="uppercase text-xs text-gray-300 font-bold mb-1">Hash</div>
+            <div class="uppercase text-xs text-gray-300 font-bold mb-1">TX Hash</div>
             <router-link class="uppercase font-bold text-xs block text-blue-600 hover:text-blue-primary hover:underline" :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}">
               <span class="text-xs truncate inline-flex break-all text-ellipsis overflow-hidden w-44 hover:underline hover:text-blue-primary" v-tooltip.right="data.hash">{{data.hash }}</span>...
             </router-link>
