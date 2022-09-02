@@ -48,8 +48,14 @@ export class BlockUtils {
         
         let blockInfoByHeight = await AppState.chainAPI.blockAPI.getBlocksByHeightWithLimit(blockHeight,100);
         if (blockInfoByHeight.length < 100) {
-            blockInfo = await AppState.chainAPI.blockAPI.getBlocksByHeightWithLimit(blockHeight - 1000,100);
+            let getPreviousBlockByHeight = await AppState.chainAPI.blockAPI.getBlocksByHeightWithLimit(blockHeight - blockInfoByHeight.length);
+            let totalHeight: number = 100 - blockInfoByHeight.length;
+            let getSlicedBlock: BlockInfo[] = getPreviousBlockByHeight.slice(0, totalHeight);
+            blockInfo = blockInfoByHeight.concat(getSlicedBlock);
         }  
+        else {
+            blockInfo = blockInfoByHeight;
+        }
         return blockInfo;
     }
     
