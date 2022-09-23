@@ -109,7 +109,7 @@
         <template #body="{data}">
           <div class="text-xs" v-if="data.amountTransfer">{{ Helper.toCurrencyFormat(data.amountTransfer, currencyDivisibility)}}</div>
           <div v-if="checkOtherAsset">
-            <div v-for="(sdaName, index) in displaySDAs(data.sda)" :key="index">{{sdaName.amount}}     
+            <div v-for="(sdaName, index) in displaySDAs(data.sda)" :key="index">{{Helper.toCurrencyFormat(sdaName.amount)}}     
             </div>
           </div>
         </template>
