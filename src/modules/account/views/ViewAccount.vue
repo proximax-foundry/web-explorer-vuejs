@@ -30,7 +30,7 @@ import AccountComponent from "@/modules/account/components/AccountComponent.vue"
 import AssetComponent from "@/modules/account/components/AssetComponent.vue";
 import NamespaceComponent from "@/modules/account/components/NamespaceComponent.vue";
 import MetadataComponent from "@/modules/account/components/MetadataComponent.vue";
-import MultisigComponent from "../components/MultisigComponent.vue";
+import MultisigComponent from "@/modules/account/components/MultisigComponent.vue";
 import TransactionComponent from "@/modules/account/components/TransactionComponent.vue";
 import { networkState } from '@/state/networkState';
 import { AppState } from '@/state/appState';

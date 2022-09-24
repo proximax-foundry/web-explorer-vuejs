@@ -118,13 +118,11 @@ export default {
     }, {deep: true} )
 
     const strPublicKey = computed(()=>{
-      let strPublicKey = props.PublicKey;
-      return  strPublicKey
+      return  props.strPublicKey
     })
 
     const strAddress = computed(()=>{
-      let strAddress = props.address;
-      return strAddress
+      return props.address
     })
 
     const copy = (id) =>{
