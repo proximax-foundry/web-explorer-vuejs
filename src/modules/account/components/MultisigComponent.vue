@@ -117,14 +117,6 @@ export default {
       return cosignerAccountsList
     }, {deep: true} )
 
-    const strPublicKey = computed(()=>{
-      return  props.strPublicKey
-    })
-
-    const strAddress = computed(()=>{
-      return props.address
-    })
-
     const copy = (id) =>{
       let stringToCopy = document.getElementById(id).getAttribute("copyValue");
       let copySubject = document.getElementById(id).getAttribute("copySubject");
@@ -135,6 +127,10 @@ export default {
     const setCurrentComponent = (page) => {
       currentComponent.value = page;
     }
+
+    const strPublicKey = ref(props.PublicKey)
+
+    const strAddress =  ref(props.address)
 
     return{
       cosignerLength,
