@@ -58,7 +58,7 @@
       </div>
     </div>
     </div>
-  <SchemeComponent v-else-if="currentComponent=='scheme'" :accountAddress="strAddress" :accountPublicKey="strPublicKey" />
+  <SchemeComponent v-else-if="currentComponent=='scheme'" :accountAddress="address" :accountPublicKey="PublicKey" />
 </div>
 </div>
 </template>
@@ -128,10 +128,6 @@ export default {
       currentComponent.value = page;
     }
 
-    const strPublicKey = ref(props.PublicKey)
-
-    const strAddress =  ref(props.address)
-
     return{
       cosignerLength,
       multisigLength,
@@ -141,8 +137,6 @@ export default {
       prettyAddress,
       setCurrentComponent,
       currentComponent,
-      strPublicKey,
-      strAddress,
     }
   }
 }
