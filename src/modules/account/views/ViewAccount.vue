@@ -11,15 +11,13 @@
         <div class="w-18 text-center" :class="`${ (currentComponent=='namespace')?'border-yellow-500 border-b-2':'cursor-pointer' }`" @click="setCurrentComponent('namespace')" v-if="accountNamespaces.length > 0">Namespaces</div>
         <div class="w-18 text-center" :class="`${ (currentComponent=='metadata')?'border-yellow-500 border-b-2':'cursor-pointer' }`" @click="setCurrentComponent('metadata')" v-if="accountMetadata.length > 0">Metadata</div>
         <div class="w-18 text-center" :class="`${ (currentComponent=='multisig')?'border-yellow-500 border-b-2':'cursor-pointer' }`" @click="setCurrentComponent('multisig')" v-if="multisigLength > 0 || cosignatoriesLength > 0">Multisig</div>
-        <div class="w-18 text-center" :class="`${ (currentComponent=='scheme')?'border-yellow-500 border-b-2':'cursor-pointer' }`" @click="setCurrentComponent('scheme')" v-if="cosignatoriesLength > 0">Scheme</div>
         <div class="w-18 text-center" :class="`${ (currentComponent=='txn')?'border-yellow-500 border-b-2':'cursor-pointer' }`" @click="setCurrentComponent('txn')">Transactions</div>
       </div>
       <div class="mb-20" v-if="!isFetching">
         <AssetComponent :accountAsset="accountAssets"  :accountPublicKey="strPublicKey" v-if="currentComponent=='asset'" />
         <NamespaceComponent :accountNamespaces="accountNamespaces" v-if="currentComponent=='namespace'" />
         <MetadataComponent :accountMetadata="accountMetadata" v-if="currentComponent=='metadata'" />
-        <MultisigComponent :cosignatories="multisig.cosignatories" :multisig="multisig.multisigAccounts" :address="strAddress" v-else-if="currentComponent=='multisig'" />
-        <SchemeComponent v-else-if="currentComponent=='scheme'" :accountAddress="strAddress" :accountPublicKey="strPublicKey" />
+        <MultisigComponent :cosignatories="multisig.cosignatories" :multisig="multisig.multisigAccounts" :address="strAddress" :accountPublicKey="strPublicKey" v-else-if="currentComponent=='multisig'" />
         <TransactionComponent v-else-if="currentComponent=='txn'" :accountAddress="strAddress" :accountPublicKey="strPublicKey" />
       </div>
     </div>
@@ -33,7 +31,6 @@ import AssetComponent from "@/modules/account/components/AssetComponent.vue";
 import NamespaceComponent from "@/modules/account/components/NamespaceComponent.vue";
 import MetadataComponent from "@/modules/account/components/MetadataComponent.vue";
 import MultisigComponent from "@/modules/account/components/MultisigComponent.vue";
-import SchemeComponent from "@/modules/account/components/SchemeComponent.vue";
 import TransactionComponent from "@/modules/account/components/TransactionComponent.vue";
 import { networkState } from '@/state/networkState';
 import { AppState } from '@/state/appState';
@@ -50,7 +47,6 @@ export default {
     NamespaceComponent,
     MetadataComponent,
     MultisigComponent,
-    SchemeComponent,
     TransactionComponent,
   },
   props: {
