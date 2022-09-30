@@ -19,7 +19,7 @@
         </div>
       </div>
     </div>
-    <div v-if="txnDetail.group=='partial'">
+    <div v-if="txnDetail.group=='partial' || txnDetail.group=='unconfirmed'">
       <div>Deadline</div>
       <div>{{ txnDetail.timestamp }}</div>
     </div>

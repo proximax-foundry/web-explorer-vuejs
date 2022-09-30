@@ -552,7 +552,10 @@ export class TransactionUtils {
       let txn:any = {};
       let txnStatus:TransactionStatus;
       txnStatus = await AppState.chainAPI.transactionAPI.getTransactionStatus(hash);
-      if(txnStatus.group == 'partial'){
+      if(txnStatus.group == 'unconfirmed'){
+        txn = await AppState.chainAPI.transactionAPI.getUnconfirmedTransaction(hash);
+      }
+      else if(txnStatus.group == 'partial'){
         txn = await AppState.chainAPI.transactionAPI.getPartialTransaction(hash);
       }else if(txnStatus.group == 'failed'){
         return {txn: {}, txnStatus, isFound: true};
@@ -593,7 +596,7 @@ export class TransactionUtils {
         deadline = txn.deadline.adjustedValue.compact();
       }
 
-      if(txnStatus.group == 'partial'){
+      if(txnStatus.group == 'partial' || txnStatus.group == 'unconfirmed'){
         // txn.deadline = deadline;
         txn.timestamp = Helper.formatDeadline(deadline);
         txn.fee = '-';
