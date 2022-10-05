@@ -14,6 +14,7 @@ import {
   NamespaceId,
   NamespaceInfo,
   MosaicId,
+  MosaicCreatorFilters
 } from "tsjs-xpx-chain-sdk";
 import { ChainUtils } from "./chainUtils";
 import { networkState } from '@/state/networkState';
@@ -149,8 +150,10 @@ export class AccountUtils {
     let formattedAsset: any = [];
     if (assets.length > 0) {
       let mosaicQueryParams = Helper.createMosaicQueryParams();
-      mosaicQueryParams.ownerPubKey = publicKey;
-      let mosaicSearch = await AppState.chainAPI.assetAPI.searchMosaics(mosaicQueryParams); //Search 0 balance asset
+      let mosaicCreatorFilters = new MosaicCreatorFilters(publicKey);
+      mosaicCreatorFilters.holding = false;
+      mosaicQueryParams.ownerFilters = mosaicCreatorFilters;
+      let notHoldingMosaicSearch = await AppState.chainAPI.assetAPI.searchMosaics(mosaicQueryParams); //Search 0 balance asset
       let currentBlock = await AppState.chainAPI.chainAPI.getBlockchainHeight();
       let objAsset: AssetObj;
       let assetName: any=[];
