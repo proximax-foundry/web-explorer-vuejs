@@ -4,20 +4,7 @@
     <div class="p-3 bg-yellow-100 text-yellow-700">{{ searchType }} is not found in {{ networkName }}</div>
     <div class="txn-div">
       <div>
-        <div>TX HASH</div>
-        <div id="hash" class="flex items-center break-all"></div>
-      </div>
-      <div>
-        <div>Signer</div>
-        <div id="signer" class="break-all"></div>
-      </div>
-      <div>
-        <div>Tx Type</div>
-        <div id="type"></div>
-      </div>
-      <div>
-        <div>TX FEE</div>
-        <div id="fee" class="relative"></div>
+        <div id="raw"></div>
       </div>
     </div>
   </div>
@@ -76,24 +63,36 @@ async function fetchToDo(BASE_URL){
 }
 
 function displayValue(data){
-  const hash=data.meta.hash
-  const signer =data.transaction.signer
-  const type =data.transaction.type
-  const fee =data.transaction.maxFee
+  let rawData = '',
+    f = {
+            brace: 0
+        };
+  rawData=data.replace(/({|}[,]*|[^{}:]+:[^{}:,]*[,{]*)/g, function (m, p1) {
+    var rtnFn = function() {
+            return '<div style="text-indent: ' + (f['brace'] * 20) + 'px;">' + p1 + '</div>';
+        },
+        rtnStr = 0;
+    if (p1.lastIndexOf('{') === (p1.length - 1)) {
+        rtnStr = rtnFn();
+        f['brace'] += 1;
+    } else if (p1.indexOf('}') === 0) {
+        f['brace'] -= 1;
+        rtnStr = rtnFn();
+    } else {
+        rtnStr = rtnFn();
+    }
+    return rtnStr;
+});
 
-  const hashDiv=document.getElementById("hash")
-  const signerDiv=document.getElementById("signer")
-  const typeDiv=document.getElementById("type")
-  const feeDiv=document.getElementById("fee")
+  const rawDiv=document.getElementById("raw")
 
-  hashDiv.innerHTML=hash
-  signerDiv.innerHTML=signer
-  typeDiv.innerHTML=type
-  feeDiv.innerHTML=fee
+  rawDiv.innerHTML=rawData
+
 }
 
 fetchToDo(BASE_URL).then((value) => {
-    displayValue(value)
+  const data = JSON.stringify(value)
+    displayValue(data)
   });
 
     return {
