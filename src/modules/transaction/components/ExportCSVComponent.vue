@@ -80,7 +80,7 @@ export default {
       let str = '';
       let csvData = '';
       let header = [];
-        for (let i = 0; i < array.length; i++) {
+        for (let i = array.length-1; i >= 0; i--) {
           let line = '';
             for (const index in array[i]) { 
               header.push(index);
