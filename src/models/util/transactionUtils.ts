@@ -552,7 +552,10 @@ export class TransactionUtils {
       let txn:any = {};
       let txnStatus:TransactionStatus;
       txnStatus = await AppState.chainAPI.transactionAPI.getTransactionStatus(hash);
-      if(txnStatus.group == 'partial'){
+      if(txnStatus.group == 'unconfirmed'){
+        txn = await AppState.chainAPI.transactionAPI.getUnconfirmedTransaction(hash);
+      }
+      else if(txnStatus.group == 'partial'){
         txn = await AppState.chainAPI.transactionAPI.getPartialTransaction(hash);
       }else if(txnStatus.group == 'failed'){
         return {txn: {}, txnStatus, isFound: true};
@@ -579,7 +582,7 @@ export class TransactionUtils {
 
         let aggregateTxn = await TransactionUtils.autoFindAggregateTransaction(txnHash);
         blockHeight = aggregateTxn.transactionInfo.height.compact();
-        txnBytes = aggregateTxn.serialize().length / 2;
+        txnBytes = aggregateTxn.size;
         deadline = aggregateTxn.deadline.adjustedValue.compact();
       }
       else{
@@ -593,7 +596,7 @@ export class TransactionUtils {
         deadline = txn.deadline.adjustedValue.compact();
       }
 
-      if(txnStatus.group == 'partial'){
+      if(txnStatus.group == 'partial' || txnStatus.group == 'unconfirmed'){
         // txn.deadline = deadline;
         txn.timestamp = Helper.formatDeadline(deadline);
         txn.fee = '-';
@@ -3106,7 +3109,7 @@ export class TransactionUtils {
     else if(txn.type === TransactionType.AGGREGATE_BONDED || txn.type === TransactionType.AGGREGATE_COMPLETE){
         let aggregateTxn = await TransactionUtils.autoFindAggregateTransaction(txnHash);
         blockHeight = aggregateTxn.transactionInfo.height.compact();
-        txnBytes = aggregateTxn.serialize().length / 2;
+        txnBytes = aggregateTxn.size;
         deadline = aggregateTxn.deadline.adjustedValue.compact();
     }
     else{
@@ -6408,66 +6411,6 @@ export class TransactionUtils {
 
     return formattedTxn;
   }
-
-  // static async formatConfirmedTransaction(txn: Transaction): Promise<ConfirmedTransaction>{
-
-  //   let transactionInfo: TransactionInfo | AggregateTransactionInfo = txn.transactionInfo;
-  //   let txnHash = transactionInfo instanceof AggregateTransactionInfo ? 
-  //       transactionInfo.aggregateHash : transactionInfo.hash;
-
-  //   let blockHeight: number = 0;
-  //   let txnBytes: number = 0;
-  //   let deadline = null;
-
-  //   if(transactionInfo instanceof AggregateTransactionInfo){
-  //       //let aggregateTxn = await TransactionUtils.autoFindAggregateTransaction(txnHash);
-  //       blockHeight = transactionInfo.height.compact();
-  //       //txnBytes = aggregateTxn.serialize().length / 2;
-  //       //deadline = aggregateTxn.deadline.adjustedValue.compact();
-  //   }
-  //   else if(txn.type === TransactionType.AGGREGATE_BONDED || txn.type === TransactionType.AGGREGATE_COMPLETE){
-  //       let aggregateTxn = await TransactionUtils.autoFindAggregateTransaction(txnHash);
-  //       blockHeight = aggregateTxn.transactionInfo.height.compact();
-  //       txnBytes = aggregateTxn.serialize().length / 2;
-  //       deadline = aggregateTxn.deadline.adjustedValue.compact();
-  //   }
-  //   else{
-  //       blockHeight = transactionInfo.height.compact();
-
-  //       // wait SDK to fix
-  //       try {
-  //           txnBytes = txn.serialize().length / 2;
-  //       } catch (error) {
-  //           console.log(error);
-  //       }
-        
-  //       deadline = txn.deadline.adjustedValue.compact();
-  //   }
-
-  //   let blockInfo = await AppState.chainAPI.blockAPI.getBlockByHeight(blockHeight);
-
-  //   let fee = txnBytes * blockInfo.feeMultiplier;
-
-  //   let formattedTxn: ConfirmedTransaction = new ConfirmedTransaction(txnHash);
-  //   formattedTxn.block = blockHeight;
-  //   formattedTxn.deadline = deadline;
-  //   formattedTxn.type = TransactionUtils.getTransactionTypeName(txn.type);
-  //   formattedTxn.maxFee = transactionInfo instanceof AggregateTransactionInfo ? 
-  //       null : TransactionUtils.convertToExactNativeAmount(txn.maxFee.compact());
-
-  //   formattedTxn.signer = txn.signer.publicKey;
-  //   formattedTxn.signerAddress = txn.signer.address.plain();
-
-  //   formattedTxn.fee = TransactionUtils.convertToExactNativeAmount(fee);
-
-  //   if(transactionInfo instanceof AggregateTransactionInfo){
-  //       formattedTxn.fee = null;
-  //   }
-
-  //   formattedTxn.timestamp = new Date(blockInfo.timestamp.compact() + Deadline.timestampNemesisBlock * 1000).toISOString()
-
-  //   return formattedTxn;
-  // }
 }
 
 
