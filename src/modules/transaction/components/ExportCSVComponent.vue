@@ -1,21 +1,47 @@
 <template>
-      <button class="mr-10 w-32 blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="downloadCSV">Export CSV</button>
+      <button class="mr-10 w-32 blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" :disabled="isFetch" @click="showDate=!showDate">Export CSV</button>
+    <div v-if="!showDate">
+      <div class="overlay">
+        <div class="modal">
+          <button class="close" @click="showDate = true">X</button>
+          <h3>Export starting from</h3>
+          <Datepicker v-model="date" range :enableTimePicker="false"/>
+          <div class="download">
+            <button class="mr-10 w-32 blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="downloadCSV(date)">Download CSV</button>
+          </div>
+        </div>
+      </div>
+    </div>
 </template>
 
 <script>
 import { AppState } from '@/state/appState';
 import { Helper } from "@/util/typeHelper";
-import { computed } from "vue";
-
+import { computed,ref } from "vue";
+import Datepicker from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css'
 
 
 export default {
   name: 'ExportCSVComponent',
+  data(){
+    return{
+      showDate:true,
+    }
+  },
+  components:{
+    Datepicker
+  },
   props: {
     selectedTxnType: String,
-    transactions: Array
+    transactions: Array,
+    isFetch: Boolean
   },
   setup(props) {
+    const date = ref();
+    const startDate = new Date();
+    const endDate = new Date();
+        date.value = [startDate, endDate];
     
     const nativeTokenName = computed(() => AppState.nativeToken.label);
 
@@ -74,21 +100,33 @@ export default {
       }
       return modification_rows.join("  ");
     }
-    const downloadCSV = () => {
+
+    const downloadCSV = (date) => {
       let objArray = exportValue();
       const array = typeof objArray !== 'object' ? JSON.parse(objArray) : objArray;
       let str = '';
       let csvData = '';
       let header = [];
-        for (let i = 0; i < array.length; i++) {
-          let line = '';
-            for (const index in array[i]) { 
+      const container = [];
+      let strStartDate=(date[0].toString().slice(4,15))
+      let convertStartDate= new Date(strStartDate)
+      let strEndDate=(date[1].toString().slice(4,15))
+      let convertEndDate= new Date(strEndDate)
+        for (let i = array.length-1; i >=0; i--) {
+          let newDate = new Date(array[i].Timestamp.slice(0,11))
+          if(newDate >= convertStartDate && newDate <= convertEndDate){
+            container.push(array[i])
+        }
+      }
+      for(let j = 0; j<container.length;j++){
+        let line = '';
+        for (const index in container[j]) { 
               header.push(index);
               if (line !== '') line += ',';
-              line += array[i][index];
+              line += container[j][index];
             }
             str += line + '\r\n'; 
-        }
+        }    
       let uniqueChars = [...new Set(header)];
         csvData += uniqueChars.join(",") + '\r\n';
         csvData += str;
@@ -284,8 +322,40 @@ export default {
     };
 
      return {
-     downloadCSV
+      downloadCSV,
+      date
      }
   }
 }
 </script>
+
+<style scoped lang="scss">
+.overlay {
+  position: fixed;
+  z-index: 9998;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, .5);
+}
+.modal {
+  position: relative;
+  width: 500px;
+  z-index: 9999;
+  margin: 0 auto;
+  padding: 20px 30px;
+  background-color: #fff;
+}
+
+.close{
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+.download{
+  position: relative;
+  text-align: center;  
+  padding-top: 100px;   
+}
+</style>

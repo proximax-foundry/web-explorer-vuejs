@@ -3,7 +3,7 @@
     <div class="grid grid-cols-3">
       <div class="col-span-2"></div>
       <div class="col-span-1">
-      <ExportCSVComponent :selectedTxnType="selectedTxnType" :transactions="transactions" :disabled="isFetching||transactions.length==0"/>
+      <ExportCSVComponent :selectedTxnType="selectedTxnType" :transactions="allTransactions" :isFetch="isFetch" :disabled="isFetching||transactions.length==0"/>
       <select v-model="selectedTxnType" @change="changeSearchTxnType" class="border border-gray-200 px-2 py-1 focus:outline-none">
         <option value="all" class="text-sm">All</option>
         <option v-bind:key="txnType.value" v-for="txnType in txnTypeList" :value="txnType.value" class="text-sm">{{ txnType.label}}</option>
@@ -116,6 +116,7 @@ export default {
     let selectedTxnType = ref("all");
     let txnTypeList = Object.entries(TransactionFilterType).map(([label, value])=>({label, value}));
     const isFetching = ref(true);
+    const isFetch = ref(true);
     const wideScreen = ref(false);
     const QueryParamsType = ref('');
     const screenResizeHandler = () => {
@@ -213,11 +214,15 @@ export default {
 
     const changeRows = () => {
       currentPage.value = 1;
+      allTransactions.value = []
       loadAccountTransactions();
+      loadAllAccountTransactions();
     }
     const changeSearchTxnType = () =>{
       isFetching.value = true;
+      isFetch.value = true;
       transactions.value = [];
+      allTransactions.value = [];
       let txnFilterGroup = selectedTxnType.value;
       switch (txnFilterGroup) {
         case TransactionFilterType.TRANSFER:
@@ -264,6 +269,7 @@ export default {
           break;
       }
       loadAccountTransactions();
+      loadAllAccountTransactions();
     }
     
     const transactions = ref([]);
@@ -300,6 +306,54 @@ export default {
       isFetching.value = false;
     };
     loadAccountTransactions();
+
+    const allTransactions = ref([]);
+
+    let loadAllAccountTransactions = async() =>{
+      isFetch.value = true;
+      if(!AppState.isReady){
+        setTimeout(loadAllAccountTransactions, 1000);
+        return;
+      }
+      let txnQueryParams = Helper.createTransactionQueryParams();
+      txnQueryParams.pageSize = pages.value;
+      if(props.accountPublicKey == invalidPublicKey){
+        txnQueryParams.address = Helper.createAddress(props.accountAddress).plain();
+      }else{
+        txnQueryParams.publicKey = props.accountPublicKey;
+      }
+      txnQueryParams.pageNumber = currentPage.value;
+      if(selectedTxnType.value == undefined || selectedTxnType.value == 'all' || selectedTxnType.value == TransactionFilterType.ASSET){
+        txnQueryParams.embedded = false;
+      }else{
+        txnQueryParams.embedded = true;
+      }      if(QueryParamsType.value!=undefined){
+        txnQueryParams.type = QueryParamsType.value;
+      }
+      txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
+      let transactionSearchResult = await TransactionUtils.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams);
+      if(transactionSearchResult.transactions.length > 0){
+        totalPages.value = transactionSearchResult.pagination.totalPages;
+        if(totalPages.value >= 1){
+          for(let i = 1; i<=totalPages.value;i++){
+            txnQueryParams.pageNumber = i;
+            let transactionSearchAllResult = await TransactionUtils.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams);
+          if(transactionSearchAllResult.transactions.length > 0){
+            let formattedAllTxns = await formatConfirmedTransaction(transactionSearchAllResult.transactions);
+            for(let j = 0; j<pages.value;j++){
+              if(formattedAllTxns[j] != undefined){
+                allTransactions.value.push(formattedAllTxns[j])
+              }
+            }
+          }
+        }
+        }
+      }else{
+        allTransactions.value = []
+      }
+      isFetch.value = false;
+    };
+    loadAllAccountTransactions();
    
     const formatConfirmedTransaction = async(transactions)=>{
       let formattedTxns = [];
@@ -366,7 +420,9 @@ export default {
     emitter.on('CHANGE_NETWORK', payload => {
       isFetching.value = true;
       if(payload){
+        allTransactions.value = []
         loadAccountTransactions();
+        loadAllAccountTransactions();
       }
     });
 
@@ -376,8 +432,10 @@ export default {
 
     return{
       isFetching,
+      isFetch,
       wideScreen,
       transactions,
+      allTransactions,
       nativeTokenName,
       checkOtherAsset,
       displaySDAs,

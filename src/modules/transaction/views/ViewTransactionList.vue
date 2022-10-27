@@ -5,7 +5,7 @@
       Transactions
       </p>
       <div class="bg-gray-50">
-        <ExportCSVComponent :selectedTxnType="selectedTxnType" :transactions="transactions" :disabled="isFetching||transactions.length==0"/>
+        <ExportCSVComponent :selectedTxnType="selectedTxnType" :transactions="allTransactions" :isFetch="isFetch" :disabled="isFetching||transactions.length==0"/>
         <select v-model="selectedTxnType" @change="changeSearchTxnType" class="border border-gray-200 px-2 py-1 focus:outline-none">
           <option value="all" class="text-sm">All</option>
           <option v-bind:key="txnType.value" v-for="txnType in txnTypeList" :value="txnType.value" class="text-sm">{{ txnType.label}}</option>
@@ -57,7 +57,7 @@
 </template>
 
 <script>
-import { getCurrentInstance, computed, ref, watch } from "vue";
+import { getCurrentInstance, computed, ref, watch, onBeforeMount, onMounted } from "vue";
 import { TransactionFilterType, TransactionFilterTypes } from '@/models/transactions/transaction';
 import { AppState } from '@/state/appState';
 import { Helper } from "@/util/typeHelper";
@@ -104,6 +104,7 @@ export default {
 
     let selectedTxnType = ref("all");
     const isFetching = ref(true);
+    const isFetch = ref(true);
 
     let txnTypeList = Object.entries(TransactionFilterType).map(([label, value])=>({label, value}));
 
@@ -150,9 +151,12 @@ export default {
 
     const changeRows = () => {
       currentPage.value = 1;
+      allTransactions.value = []
       loadRecentTransactions();
+      loadAllTransactions();
     }
     const transactions = ref([]);
+    const allTransactions = ref([]);
     const QueryParamsType = ref('');
     let transactionGroupType = Helper.getTransactionGroupType();
     let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getTransactionSortField().BLOCK, Helper.getQueryParamOrder_v2().DESC);
@@ -192,10 +196,60 @@ export default {
       isFetching.value = false;
     };
     loadRecentTransactions();
+
+    let loadAllTransactions = async() =>{
+      isFetch.value = true;
+      if(!AppState.isReady){
+        setTimeout(loadAllTransactions, 1000);
+        return;
+      }
+      let txnQueryParams = Helper.createTransactionQueryParams();
+      let blockHeight = await AppState.chainAPI.chainAPI.getBlockchainHeight();
+      txnQueryParams.pageSize = pages.value;
+      txnQueryParams.pageNumber = currentPage.value;
+      if(selectedTxnType.value == undefined || selectedTxnType.value == 'all' || selectedTxnType.value == TransactionFilterType.ASSET){
+        txnQueryParams.embedded = false;
+      }else{
+        txnQueryParams.embedded = true;
+      }
+      let fromHeight = blockHeight - 200000;
+      if(fromHeight <= 0){
+        fromHeight = 1;
+      }
+      txnQueryParams.fromHeight = fromHeight;
+      if(QueryParamsType.value!=undefined){
+        txnQueryParams.type = QueryParamsType.value;
+      }
+      txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
+      let transactionSearchResult = await TransactionUtils.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams);
+      if(transactionSearchResult.transactions.length > 0){
+        totalPages.value = transactionSearchResult.pagination.totalPages;
+        if(totalPages.value >= 1){
+          for(let i = 1; i<=totalPages.value;i++){
+            txnQueryParams.pageNumber = i;
+            let transactionSearchAllResult = await TransactionUtils.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams);
+          if(transactionSearchAllResult.transactions.length > 0){
+            let formattedAllTxns = await formatConfirmedTransaction(transactionSearchAllResult.transactions);
+            for(let j = 0; j<pages.value;j++){
+              if(formattedAllTxns[j] != undefined){
+                allTransactions.value.push(formattedAllTxns[j])
+              }
+            }
+          }
+        }
+        }
+      }else{
+        allTransactions.value = []
+      }
+      isFetch.value = false;
+    };
+    loadAllTransactions();
  
     const changeSearchTxnType = () =>{
       isFetching.value = true;
+      isFetch.value = true;
       transactions.value = [];
+      allTransactions.value = [];
       let txnFilterGroup = selectedTxnType.value;
       switch (txnFilterGroup) {
         case TransactionFilterType.TRANSFER:
@@ -243,6 +297,7 @@ export default {
       }
 
       loadRecentTransactions();
+      loadAllTransactions();
     }
 
     const formatConfirmedTransaction = async(transactions)=>{
@@ -300,14 +355,18 @@ export default {
     emitter.on('CHANGE_NETWORK', payload => {
       isFetching.value = true;
       if(payload){
+        allTransactions.value = []
         loadRecentTransactions();
+        loadAllTransactions();
       }
     });
 
     return {
       isFetching,
+      isFetch,
       TransactionFilterType,
       transactions,
+      allTransactions,
       Helper,
       pages,
       currentPage,
