@@ -4,7 +4,7 @@
       <div class="container mx-auto py-2">
         <div class="md:flex md:justify-between">
           <div class="flex items-center justify-center mb-3 md:mb-0">
-            <router-link :to="{name: 'Home'}"><img src="@/assets/img/proximax-logo.svg" class="w-40 mr-7"></router-link>
+            <router-link :to="{name: 'Home'}"><img src="@/assets/img/sirius-explorer-logo-whitetext.png" class="w-40 mr-7"></router-link>
           </div>
           <div class="mx-3 md:mx-0">
             <div class="border border-gray-300 my-1 searchbar flex bg-white">
