@@ -29,18 +29,21 @@
           </div>
           <div>
             <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Type</div>
-            <div class="flex items-center">
+            <div v-if="data.type" class="flex items-center">
               <div class="uppercase font-bold text-xs mr-2">{{data.type}}</div>
               <div class="ml-2" v-if="accountAddress">
                 <img src="@/modules/transaction/img/icon-txn-out.svg" class="inline-block" v-if="data.sender=== Helper.createAddress(accountAddress).plain()">
                 <img src="@/modules/transaction/img/icon-txn-in.svg" class="inline-block" v-else>
               </div>
             </div>
+            <div v-else>
+              <div class="uppercase font-bold text-xs mr-2">Unknown</div>
+            </div>
           </div>
           <div>
           <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Recipient</div>
             <div class="uppercase font-bold text-xs">
-              <span v-if="data.recipient === '' || data.recipient === null">-</span>
+              <span v-if="data.recipient === '' || data.recipient === null || !data.recipient">-</span>
               <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.recipient }}" v-tooltip.right="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-40"><span class="text-ellipsis overflow-hidden">{{ Helper.createAddress(data.recipient).pretty() }}</span>...</router-link>
             </div>
           </div>
@@ -48,54 +51,66 @@
       </Column>
       <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{data}">
-          <div>
+          <div v-if="data.timestamp">
             <div class="uppercase text-xs text-gray-300 font-bold mb-1">Timestamp</div>
             <div class="uppercase font-bold text-xs">{{ Helper.convertDisplayDateTimeFormat24(data.timestamp) }}</div>
+          </div>
+          <div v-else>
+            <div class="uppercase text-xs text-gray-300 font-bold mb-1">Timestamp</div>
+            <div class="uppercase font-bold text-xs">Unknown</div>
           </div>
           <div>
             <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">From</div>
             <div class="uppercase font-bold text-xs">
-              <span v-if="data.signerAddress === '' || data.signerAddress === null">-</span>
+              <span v-if="data.signerAddress === '' || data.signerAddress === null || !data.signerAddress">-</span>
               <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.signerAddress }}" v-else v-tooltip.bottom="Helper.createAddress(data.signerAddress).pretty()" class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-40"><span class="text-ellipsis overflow-hidden">{{ Helper.createAddress(data.signerAddress).pretty() }}
               </span>...</router-link>
             </div>
           </div>
-          <div>
+          <div v-if="data.amountTransfer">
             <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Tx Amount</div>
             <div class="text-xs uppercase font-bold" >{{ data.amountTransfer ? Helper.toCurrencyFormat(data.amountTransfer, currencyDivisibility):'-' }} <b v-if="data.amountTransfer">{{ nativeTokenName }}</b></div>
+          </div>
+          <div v-else>
+            <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Tx Amount</div>
+            <div class="text-xs uppercase font-bold" >Unknown</div>
           </div>
         </template>
       </Column>
       <Column field="hash" header="TX HASH" headerStyle="width:90px" v-if="wideScreen">
         <template #body="{data}">
-          <router-link :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}" class="text-xs text-blue-600 hover:text-blue-primary inline-flex hover:underline " v-tooltip.bottom="data.hash"><span class="text-ellipsis overflow-hidden w-44">{{data.hash }}</span>...</router-link>
+          <router-link :to="{ name: 'ViewTransaction', params:{ hash: data.hash }}" v-if="data.hash" class="text-xs text-blue-600 hover:text-blue-primary inline-flex hover:underline " v-tooltip.bottom="data.hash"><span class="text-ellipsis overflow-hidden w-44">{{data.hash }}</span>...</router-link>
+          <span v-else class="text-ellipsis overflow-hidden w-44">Unknown</span>
         </template>
       </Column>
       <Column field="timestamp" v-if="wideScreen" header="TIMESTAMP" headerStyle="width:200px">
         <template #body="{data}">
-          <span class="text-xs">{{ Helper.convertDisplayDateTimeFormat24(data.timestamp) }}</span>
+          <span v-if="data.timestamp" class="text-xs">{{ Helper.convertDisplayDateTimeFormat24(data.timestamp) }}</span>
+          <span v-else class="text-xs">Unknown</span>
         </template>
       </Column>
       <Column field="type" header="TYPE" headerStyle="width:120px" v-if="wideScreen">
         <template #body="{data}">
-          <span class="text-xs">{{data.type}}</span>
+          <span v-if="data.type" class="text-xs">{{data.type}}</span>
+          <span v-else class="text-xs">Unknown</span>
         </template>
       </Column>
       <Column field="block" v-if="wideScreen" header="BLOCK" headerStyle="width:60px">
         <template #body="{data}">
-          <router-link :to="{ name: 'ViewBlock', params: { blockHeight: data.block}}" class="text-blue-600 hover:text-blue-primary hover:underline text-xs">{{ data.block }}</router-link>
+          <router-link :to="{ name: 'ViewBlock', params: { blockHeight: data.block}}" v-if="data.block" class="text-blue-600 hover:text-blue-primary hover:underline text-xs">{{ data.block }}</router-link>
+          <span v-else class="text-xs">Unknown</span>
         </template>
       </Column>
       <Column field="signer" header="FROM" headerStyle="width:120px" v-if="wideScreen">
         <template #body="{data}">
-          <span v-if="data.signerAddress === '' || data.signerAddress === null"></span>
+          <span v-if="data.signerAddress === '' || data.signerAddress === null || !data.signerAddress"></span>
           <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.signerAddress }}" v-else v-tooltip.bottom="Helper.createAddress(data.signerAddress).pretty()" class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-32"><span class="text-ellipsis overflow-hidden">
             {{ Helper.createAddress(data.signerAddress).pretty() }}</span>...</router-link>
         </template>
       </Column>
       <Column field="recipient" header="RECIPIENT" headerStyle="width:120px" v-if="wideScreen">
         <template #body="{data}">
-          <span v-if="data.recipient === '' || data.recipient === null"></span>
+          <span v-if="data.recipient === '' || data.recipient === null || !data.recipient"></span>
           <router-link :to="{ name: 'ViewAccount', params:{ accountParam: data.recipient }}" v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()" v-else class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-32"><span class="text-ellipsis overflow-hidden">
             {{ Helper.createAddress(data.recipient).pretty() }}</span>...
           </router-link>
@@ -103,7 +118,8 @@
       </Column>
       <Column header="TX FEE" v-if="wideScreen" headerStyle="width:110px">
         <template #body="{data}">
-          <div class="text-xs">{{ data.fee }} <b v-if="data.fee==0 || data.fee> 0">{{ nativeTokenName }}</b></div>
+          <div v-if="data.fee==undefined" class="text-xs">Unknown</div>
+          <div v-else class="text-xs">{{ data.fee }} <b v-if="data.fee==0 || data.fee> 0">{{ nativeTokenName }}</b></div>
         </template>
       </Column>
       <Column header="AMOUNT" headerStyle="width:110px" v-if="wideScreen">
@@ -113,6 +129,7 @@
             <div v-for="(sdaName, index) in displaySDAs(data.sda)" :key="index">{{sdaName.amount}}     
             </div>
           </div>
+          <div v-else class="text-xs">Unknown</div>
         </template>
       </Column>
       <Column header="SDA" headerStyle="width:40px" v-if="wideScreen">
@@ -128,6 +145,7 @@
               {{sdaName.length}}
             </span>
           </div>
+          <div v-else class="text-xs">Unknown</div>
         </template>
       </Column>
       <Column header="MESSAGE" headerStyle="width:40px" v-if="wideScreen">
@@ -195,7 +213,10 @@ export default {
 
     const displaySDAs = (sdas) => {
       let sda_rows = [];
-      if(sdas.length > 0){
+      if(!sdas){
+        return undefined
+      }
+      else if(sdas.length > 0){
         for (const sda of sdas) {
           //sda_rows.push({ name: 'ViewAsset', params: { id: searchResult.param } });
           if(sda.currentAlias && sda.currentAlias.length){

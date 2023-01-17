@@ -3091,8 +3091,8 @@ export class TransactionUtils {
   }
 
   static async formatConfirmedTransaction(txn: Transaction): Promise<ConfirmedTransaction>{
-
     let transactionInfo: TransactionInfo | AggregateTransactionInfo = txn.transactionInfo;
+    if(transactionInfo!==undefined){
     let txnHash = transactionInfo instanceof AggregateTransactionInfo ?
         transactionInfo.aggregateHash : transactionInfo.hash;
 
@@ -3145,16 +3145,16 @@ export class TransactionUtils {
     }
 
     formattedTxn.timestamp = new Date(blockInfo.timestamp.compact() + Deadline.timestampNemesisBlock * 1000).toISOString()
-
     return formattedTxn;
+  }   
   }
 
   static async formatConfirmedMixedTxns(txns: Transaction[]): Promise<ConfirmedTransferTransaction[]>{
 
     let formatedTxns : ConfirmedTransferTransaction[] = [];
-
     for(let i=0; i < txns.length; ++i){
       let formattedTxn = await TransactionUtils.formatConfirmedTransaction(txns[i]);
+      if(formattedTxn!==undefined){
       let txn = ConfirmedTransaction.convertToSubClass(ConfirmedTransferTransaction, formattedTxn) as ConfirmedTransferTransaction;
      
       let sdas: SDA[] = [];
@@ -3273,7 +3273,10 @@ export class TransactionUtils {
       txn.sda = sdas;
       formatedTxns.push(txn);
     }
-
+    else{
+      formatedTxns.push(undefined)
+    }
+  }
     return formatedTxns;
   }
 

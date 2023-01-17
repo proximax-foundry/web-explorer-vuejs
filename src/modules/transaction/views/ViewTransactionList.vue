@@ -189,6 +189,14 @@ export default {
       }else{
         transactions.value = []
       }
+      for(let i=0; i < transactions.value.length; i++){
+        if(transactions.value[i]===undefined){
+          let a={}
+          a.hash=JSON.stringify(transactionSearchResult.transactions[i].meta.hash).replace(/['"]+/g, '')
+          a.fee=undefined
+          transactions.value[i]=a
+        }
+      }
       isFetching.value = false;
     };
     loadRecentTransactions();
@@ -236,6 +244,9 @@ export default {
           break;
         case TransactionFilterType.RESTRICTION:
           QueryParamsType.value = TransactionFilterTypes.getRestrictionTypes();
+          break;
+        case TransactionFilterType.Harvester:
+          QueryParamsType.value = TransactionFilterTypes.getRemoveHarvester();
           break;
         default:
           QueryParamsType.value = undefined;
