@@ -245,9 +245,6 @@ export default {
         case TransactionFilterType.RESTRICTION:
           QueryParamsType.value = TransactionFilterTypes.getRestrictionTypes();
           break;
-        case TransactionFilterType.Harvester:
-          QueryParamsType.value = TransactionFilterTypes.getRemoveHarvester();
-          break;
         default:
           QueryParamsType.value = undefined;
           break;
