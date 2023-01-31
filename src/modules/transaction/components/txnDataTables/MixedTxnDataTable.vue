@@ -15,6 +15,8 @@
         <template #body="{data}">
           <div class="ml-2">
             <img src="@/modules/transaction/img/icon-txn-out.svg" class="inline-block" v-if="data.sender === Helper.createAddress(accountAddress).plain()">
+            <img src="@/modules/transaction/img/icon-txn-out.svg" class="inline-block" v-else-if="data.signerAddress === Helper.createAddress(accountAddress).plain() && (data.type === 'Aggregate Bonded')">
+            <img src="@/modules/transaction/img/icon-txn-out.svg" class="inline-block" v-else-if="data.signerAddress === Helper.createAddress(accountAddress).plain() && (data.type === 'LockFund')">
             <img src="@/modules/transaction/img/icon-txn-in.svg" class="inline-block" v-else>
           </div>
         </template>
@@ -222,6 +224,8 @@ export default {
     const currencyDivisibility = computed(() => {
       return AppState.nativeToken.divisibility;
     })
+
+    console.log(p.transactions)
 
     return {
       wideScreen,
