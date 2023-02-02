@@ -3,7 +3,7 @@
     <div class="bg-blue-theme">
       <div class="md:container mx-auto sm:grid-cols-2 lg:grid-cols-4 grid">
         <div class="flex py-10 sm:col-span-2">
-          <div class="mx-3 sm:mx-7"><img src="@/assets/img/proximax-logo-footer.svg" class="w-7"></div>
+          <div class="mx-3 sm:mx-7"><img src="@/assets/img/sirius-icon.svg" class="w-7"></div>
           <div>
             <div class="text-xxs sm:text-xs text-white mb-5">Copyright 2022 ProximaX. All rights reserved.</div>
             <div>
