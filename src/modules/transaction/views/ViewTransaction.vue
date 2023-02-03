@@ -80,7 +80,7 @@ export default {
               status: transaction.txnStatus.status?transaction.txnStatus.status:'',
               timestamp: transaction.txn.timestamp,
               height: transaction.txn.transactionInfo.height.compact(),
-              type: TransactionUtils.getTransactionTypeName(transaction.txn.type),
+              type: TransactionUtils.getTransactionTypeName(transaction.txn.type)? TransactionUtils.getTransactionTypeName(transaction.txn.type): "UNKNOWN",
               fee: Helper.convertToExact(transaction.txn.fee, AppState.nativeToken.divisibility),
               signature: transaction.txn.signature,
               signer: transaction.txn.signer.address.address,
