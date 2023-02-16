@@ -160,10 +160,13 @@ export class AccountUtils {
       let namespaceId: string;
       let isOwner: boolean = false;
       let isActive: boolean = false;
+      let assetsHex = assets.map(x => x.id.toHex());
 
-      let assetDetails;
+      let assetsDetails = await AppState.chainAPI.assetAPI.getMosaics(assets.map(x => x.id));
+      let assetsNames = await TransactionUtils.getAssetsName(assets.map(x => x.id));
+
       for (let key in assets) {
-        assetDetails = await AppState.chainAPI.assetAPI.getMosaic(assets[key].id);
+        let assetDetails = assetsDetails.find(x => x.mosaicId.toHex() === assetsHex[key])
         if ((assetDetails.height.compact() + assetDetails.duration.compact()) > currentBlock) {
           isActive = true;
         } else if (assetDetails.height.compact() == 1) {
@@ -174,15 +177,16 @@ export class AccountUtils {
           isOwner = true;
         }
 
-        let assetsNames = await TransactionUtils.getAssetsName([assets[key].id]);
-        if (assetsNames[0].names.length) {
-          assetName = assetsNames[0].names;
+        let assetNames = assetsNames[key];
+        if (assetNames.names.length) {
+          assetName = assetNames.names;
         } else {
           assetName = '';
           namespaceId = '';
         }
+        const assetIdHex = assetDetails.mosaicId.toHex();
         objAsset = {
-          id: assets[key].id.id.toHex(),
+          id: assetIdHex,
           balance: Helper.convertToCurrency(assets[key].amount.compact(), assetDetails.divisibility),
           name: assetName,
           isOwner,

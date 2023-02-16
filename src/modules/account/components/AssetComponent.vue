@@ -76,7 +76,7 @@
       </div>
         <div v-if="isPagination" class="ml-5 mr-5 sm:flex sm:justify-between my-5">
         <div class="text-xs text-gray-700 mb-3 sm:mb-0 text-center sm:text-left">Show
-          <select v-model="pages" class="border border-gray-300 rounded-md p-1" @change="changeRows">
+          <select v-model="pageSize" class="border border-gray-300 rounded-md p-1" @change="changeRows">
             <option value=10>10</option>
             <option value=20>20</option>
             <option value=30>30</option>
@@ -112,7 +112,7 @@ export default {
 
   },
   setup(prop){
-    const pages = ref(10);
+    const pageSize = ref(10);
     const currentPage = ref(1)
     const totalPages = ref(0);
     const isFetching = ref(true);
@@ -123,7 +123,7 @@ export default {
 
 
     // let pagination = (blocks)=>{
-    //   let blockValue = blocks.slice((currentPage.value-1) * pages.value, currentPage.value * pages.value);
+    //   let blockValue = blocks.slice((currentPage.value-1) * pageSize.value, currentPage.value * pageSize.value);
     //   return blockValue;
     // }
    //   console.log(accountAssets.value);
@@ -194,22 +194,22 @@ export default {
       let mosaics_list = [];
       if(prop.accountAsset.length > 10){
         isPagination.value = true;
-        mosaics_list = prop.accountAsset.slice((currentPage.value-1) * pages.value, currentPage.value * pages.value);
+        mosaics_list = prop.accountAsset.slice((currentPage.value-1) * pageSize.value, currentPage.value * pageSize.value);
       }else{
         mosaics_list = prop.accountAsset;
       }
-      console.log(mosaics_list);
+      // console.log(mosaics_list);
 
       let AssetList =  await AccountUtils.formatAccountAsset(mosaics_list, prop.accountPublicKey);
       accountAssets.value = AssetList;
-            console.log(pages.value);
+            // console.log(pageSize.value);
 
-            console.log(currentPage.value);
+            // console.log(currentPage.value);
 
-      totalPages.value = Math.ceil(prop.accountAsset.length / pages.value); 
+      totalPages.value = Math.ceil(prop.accountAsset.length / pageSize.value); 
       isFetching.value = false;
-      console.log(totalPages.value);
-      console.log(prop.accountAsset.length);
+      // console.log(totalPages.value);
+      // console.log(prop.accountAsset.length);
 
     }
     loadAsset();
@@ -235,7 +235,7 @@ export default {
     return{
       splitBalance,
       displayTokenName,
-      pages,
+      pageSize,
       currentPage,
       totalPages,
       enableFirstPage,
