@@ -14,8 +14,8 @@
       <Column field="In/Out" header="IN/OUT" headerStyle="width:100px" v-if="wideScreen && accountAddress">
         <template #body="{data}">
           <div class="ml-2">
-            <img src="@/modules/transaction/img/icon-txn-out.svg" class="inline-block" v-if="data.sender === Helper.createAddress(accountAddress).plain()">
-            <img src="@/modules/transaction/img/icon-txn-in.svg" class="inline-block" v-else>
+            <img src="@/modules/transaction/img/icon-txn-out.svg" class="inline-block" v-if="data.sender === Helper.createAddress(accountAddress).plain() && data.type === 'Transfer'">
+            <img src="@/modules/transaction/img/icon-txn-in.svg" class="inline-block" v-else-if="data.sender != Helper.createAddress(accountAddress).plain() && data.type === 'Transfer'">
           </div>
         </template>
       </Column>
