@@ -43,6 +43,7 @@ app.component('ConfirmDialog', ConfirmDialog);
 app.component('Toast', Toast);
 
 const loadThemeConfig = async() => {
+  AppStateUtils.addNewReadyStates('theme');
   try {
     let config = await fetch('./themeConfig.json', {
       headers: {
@@ -62,6 +63,7 @@ const loadThemeConfig = async() => {
 loadThemeConfig();
 
 const chainProfileIntegration = async () => {
+  AppStateUtils.addNewReadyStates('chainProfile');
   try {
       let networksInfo = await fetch('./chainProfile.json', {
       headers: {
