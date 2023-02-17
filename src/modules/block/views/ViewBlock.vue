@@ -118,19 +118,21 @@ export default {
     };
 
     const loadBlock = async() =>{
+      
+      if(!AppState.isReady){
+        setTimeout(loadBlock, 1000);
+        return;
+      }
+
       const block = await BlockUtils.getBlockByHeight(p.blockHeight);
-        if(!AppState.isReady){
-          setTimeout(loadBlock, 1000);
-          return;
-        }
-    
-        if(block){
-          blockInfo.value = block; 
-          isShowInvalid.value = false;
-        }else{
-          isShowInvalid.value = true;
-        }
-        getTransactions();
+  
+      if(block){
+        blockInfo.value = block; 
+        isShowInvalid.value = false;
+      }else{
+        isShowInvalid.value = true;
+      }
+      getTransactions();
 
     };  
     loadBlock();

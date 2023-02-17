@@ -3131,7 +3131,14 @@ export class TransactionUtils {
     let formattedTxn: ConfirmedTransaction = new ConfirmedTransaction(txnHash);
     formattedTxn.block = blockHeight;
     formattedTxn.deadline = deadline;
-    formattedTxn.type = TransactionUtils.getTransactionTypeName(txn.type);
+
+    if(txn.transactionName==="UNKNOWN"){
+      formattedTxn.type = "UNKNOWN";
+    }
+    else{
+      formattedTxn.type = TransactionUtils.getTransactionTypeName(txn.type);
+    }
+    
     formattedTxn.maxFee = transactionInfo instanceof AggregateTransactionInfo ? 
         null : TransactionUtils.convertToExactNativeAmount(txn.maxFee.compact());
 
@@ -3145,7 +3152,6 @@ export class TransactionUtils {
     }
 
     formattedTxn.timestamp = new Date(blockInfo.timestamp.compact() + Deadline.timestampNemesisBlock * 1000).toISOString()
-
     return formattedTxn;
   }
 

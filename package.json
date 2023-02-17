@@ -1,6 +1,6 @@
 {
   "name": "explorer",
-  "version": "1.1.7",
+  "version": "1.1.8",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -30,8 +30,8 @@
     "js-sha3": "^0.8.0",
     "jsonwebtoken": "^8.5.1",
     "jspdf": "^2.3.1",
-    "jszip": "^3.7.1",
-    "luxon": "^2.4.0",
+    "jszip": "^3.10.1",
+    "luxon": "^2.5.2",
     "maska": "^1.4.1",
     "mathjs": "^10.0.2",
     "mitt": "^2.1.0",
@@ -45,7 +45,7 @@
     "sass": "^1.46.0",
     "sass-loader": "^7.3.1",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.3",
-    "tsjs-xpx-chain-sdk": "^0.9.16",
+    "tsjs-xpx-chain-sdk": "^0.9.18",
     "tslib": "^2.3.1",
     "utf-8-validate": "^5.0.9",
     "v-tooltip": "^4.0.0-alpha.1",
