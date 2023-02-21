@@ -3,7 +3,7 @@
     <div class="bg-blue-theme">
       <div class="container mx-auto py-2">
         <div class="md:flex md:justify-between">
-          <div class="flex items-center justify-center mb-3 md:mb-0">
+          <div class="flex items-center justify-center mb-3 w-40 h-16 mt-2 md:mb-0">
             <router-link :to="{name: 'Home'}"><img src="@/assets/img/sirius-explorer-logo-whitetext.svg" class="w-40 mr-7"></router-link>
           </div>
           <div class="mx-3 md:mx-0">
