@@ -41,28 +41,18 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { AppState } from '@/state/appState';
 import { Helper } from "@/util/typeHelper";
-export default {
-  name: 'ExchangeDetailComponent',
-  props: {
-    txnDetail: Object
-  },
-  setup(props) {
-    const nativeTokenNamespace = AppState.nativeToken.label;
 
-    const formatCurrency = (cost) => {
-      return cost.toString().split('.');
-    };
+defineProps({
+  txnDetail: Object,
+})
+const nativeTokenNamespace = AppState.nativeToken.label;
 
-    return {
-      Helper,
-      nativeTokenNamespace,
-      formatCurrency,
-    }
-  }
-}
+const formatCurrency = (cost) => {
+  return cost.toString().split('.');
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

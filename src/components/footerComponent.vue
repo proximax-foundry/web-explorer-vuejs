@@ -49,7 +49,7 @@
   </footer>
 </template>
 
-<script>
+<script setup lang="ts">
 import { ref } from 'vue';
 import packageData from '../../package.json';
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -57,30 +57,12 @@ import { faFacebookF, faTelegramPlane, faTwitter, faGithub, faMediumM, faInstagr
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 library.add(faFacebookF, faTelegramPlane, faTwitter, faGithub, faMediumM, faInstagram, faRedditAlien, faYoutube, faLinkedinIn);
 
-export default {
-  name: 'footerComponent',
-  components:{
-    'font-awesome-icon' : FontAwesomeIcon
-  },
-  setup(){
+
     const versioning = ref('0.0.1');
 
     versioning.value = packageData.version;
 
-    return {
-      faFacebookF,
-      faTelegramPlane,
-      faTwitter,
-      faGithub,
-      faMediumM,
-      faInstagram,
-      faRedditAlien,
-      faYoutube,
-      faLinkedinIn,
-      versioning,
-    }
-  }
-}
+   
 </script>
 
 <style lang="scss" scoped>

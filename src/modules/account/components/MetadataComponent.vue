@@ -39,17 +39,17 @@
 </div>
 </template>
 
-<script>
+<script setup lang="ts">
 
-import Tooltip from 'primevue/tooltip';
-
-export default {
-  name:"MetadataComponent",
-  props:{
-    accountMetadata: Array,
-  },
-  directives: {
-    'tooltip': Tooltip
+defineProps({
+  accountMetadata: {
+    type:Array<{
+      scopedMetadataKeyUtf8: string | null;
+      scopedMetadataKeyHex: string;
+      value: string;
+    }>,
+    required:true
   }
-}
+})
+
 </script>

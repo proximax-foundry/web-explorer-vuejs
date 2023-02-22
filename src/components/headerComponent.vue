@@ -35,21 +35,15 @@
   </header>
 </template>
 
-<script>
+<script lang="ts" setup>
 import selectNetwork from '@/components/selectNetwork.vue';
 import selectFilter from '@/components/selectFilter.vue';
 import { SearchService } from '@/services/searchService';
 import { useRouter } from "vue-router";
-import { defineComponent, getCurrentInstance, inject, ref, computed } from "vue";
-export default {
-  components: {
-    selectNetwork,
-    selectFilter
-  },
+import { ref, computed } from "vue";
 
-  name: 'headerComponent',
 
-  setup(){
+
     const router = useRouter();
     const searchFilter = ref('all');
     const isSearching = ref(false);
@@ -90,7 +84,7 @@ export default {
       }
     }
 
-    const updateFilter = (e) => {
+    const updateFilter = (e :string) => {
       searchFilter.value = e;
     }
 
@@ -105,20 +99,11 @@ export default {
     ]
 
     const searchPlaceHolder = computed(() => {
-      return placeHolderString.find(type => type.label == searchFilter.value).placeHolder;
+      const findPlaceholder = placeHolderString.find(type => type.label == searchFilter.value)
+      return findPlaceholder?findPlaceholder.placeHolder:""
     });
 
-    return {
-      searchFilter,
-      search,
-      updateFilter,
-      searchPlaceHolder,
-      isSearching,
-      searchText,
-    }
-  }
 
-}
 </script>
 
 <style lang="scss">

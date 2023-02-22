@@ -27,17 +27,12 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'NamespaceDetailComponent',
-  props: {
-    txnDetail: Object
-  },
-  setup(props) {
-    return {
-    }
-  }
-}
+<script setup>
+
+defineProps({
+  txnDetail: Object,
+})
+
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

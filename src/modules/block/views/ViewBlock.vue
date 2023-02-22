@@ -1,10 +1,10 @@
 <template> 
-  <div>    
+  <div v-if="blockInfo">    
     <p class="text-gray-500 mb-5 text-sm font-bold">Block Details</p>   
     <div v-if="isShowInvalid">
       <div class="p-3 bg-yellow-100 text-yellow-700">Block is not available in {{ networkName }}</div>
     </div>
-    <div v-else-if="!isShowInvalid && blockInfo.length==0">
+    <div v-else-if="!isShowInvalid ">
       <div class="flex justify-center items-center border-gray-400 mt-10 mb-20">
         <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-navy-primary mr-2"></div>
         <span class="text-tsm">Fetching Block Details</span>
@@ -83,56 +83,58 @@
   </div>
 </template>
 
-<script>
-import { computed, getCurrentInstance, ref, watch } from "vue";
-import { BlockUtils } from "@/util/blockUtil"
+<script setup lang="ts">
+import { computed, getCurrentInstance, ref} from "vue";
+import { BlockUtils, type BlockObj } from "@/util/blockUtil"
 import { AppState } from '@/state/appState';
 import { networkState } from '@/state/networkState';
-import MixedTxnDataTable from '@/modules/transaction/components/txnDataTables/MixedTxnDataTable';
-// import TransactionComponent from '@/modules/block/components/TransactionComponent.vue';
-import { Helper } from "@/util/typeHelper";
-import { TransactionUtils } from '@/models/util/transactionUtils';
-import { TransactionGroupType,TransactionQueryParams } from 'tsjs-xpx-chain-sdk';
+import MixedTxnDataTable from '@/modules/transaction/components/txnDataTables/MixedTxnDataTable.vue';
+import { TransactionUtils } from '@/util/transactionUtils';
+import {TransactionGroupType,TransactionQueryParams } from 'tsjs-xpx-chain-sdk';
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
+import type { ConfirmedTransferTransaction } from "@/models/transactions/transaction";
 
-export default {
-  components: { MixedTxnDataTable },
-  name: 'ViewBlock',
-  props: {
-    blockHeight: Number
-  },
-  setup(p) {
+
+    const p = defineProps({
+      blockHeight:Number
+    })
     const toast = useToast();
     const internalInstance = getCurrentInstance();
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const blockInfo = ref([]);
-    const transactions = ref([]);
-    const isShowInvalid = ref(null);
+    const emitter = internalInstance?.appContext.config.globalProperties.emitter;
+    const blockInfo = ref<BlockObj | null>(null);
+    const transactions = ref<ConfirmedTransferTransaction[]>([]);
+    const isShowInvalid = ref(false);
     const nativeTokenNamespace = AppState.nativeToken.label;
-    const copy = (id) =>{ 
-      let stringToCopy = document.getElementById(id).getAttribute("copyValue");
-      let copySubject = document.getElementById(id).getAttribute("copySubject");
-      copyToClipboard(stringToCopy);
-      toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
+    const copy = (id :string) =>{ 
+      let element = document.getElementById(id)
+      if(element){
+        let stringToCopy = element.getAttribute("copyValue");
+        let copySubject = element.getAttribute("copySubject");
+        if(stringToCopy){
+          copyToClipboard(stringToCopy);
+          toast.add({severity:'info', detail: copySubject + ' copied', group: 'br', life: 3000});
+        }
+      }
     };
 
     const loadBlock = async() =>{
-      
-      if(!AppState.isReady){
-        setTimeout(loadBlock, 1000);
-        return;
+      if(!p.blockHeight){
+        return
       }
-
       const block = await BlockUtils.getBlockByHeight(p.blockHeight);
-  
-      if(block){
-        blockInfo.value = block; 
-        isShowInvalid.value = false;
-      }else{
-        isShowInvalid.value = true;
-      }
-      getTransactions();
+        if(!AppState.isReady){
+          setTimeout(loadBlock, 1000);
+          return;
+        }
+    
+        if(block){
+          blockInfo.value = block; 
+          isShowInvalid.value = false;
+        }else{
+          isShowInvalid.value = true;
+        }
+        getTransactions();
 
     };  
     loadBlock();
@@ -187,7 +189,7 @@ export default {
       return networkState.chainNetworkName;
     });
 
-    emitter.on('CHANGE_NETWORK', payload => {
+    emitter.on('CHANGE_NETWORK', (payload  :boolean)=> {
       if(payload){
         loadBlock();
       }
@@ -203,40 +205,14 @@ export default {
         if(txns.transactions.length > 0){
           let transactionSearchResult = await TransactionUtils.formatConfirmedMixedTxns(txns.transactions);
           transactions.value = transactionSearchResult;
-          totalPages.value = transactionSearchResult.pagination.totalPages;
+          totalPages.value = txns.pagination.totalPages;
         }
       }
     }
     getTransactions();
-    const currencyDivisibility = computed(() => {
-      return AppState.nativeToken.divisibility;
-    })
 
-    return {
-      blockInfo,
-      networkName,
-      isShowInvalid,
-      nativeTokenNamespace,
-      Helper,
-      currencyDivisibility,
-      TransactionUtils,
-      copy,
-      transactions,
-      pages,
-      currentPage,
-      totalPages,
-      enableFirstPage,
-      enablePreviousPage,
-      enableNextPage,
-      enableLastPage,
-      naviFirst,
-      naviPrevious,
-      naviNext,
-      naviLast,
-      changeRows
-    }
-  }
-}
+
+  
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

@@ -1,20 +1,20 @@
-import { 
-    ChainHttp, BlockchainScore, 
-} from "tsjs-xpx-chain-sdk";
+import { ChainHttp, BlockchainScore } from "tsjs-xpx-chain-sdk";
 
 export class ChainAPI {
+  chainHttp: ChainHttp;
 
-    chainHttp: ChainHttp;
+  constructor(endpoint: string) {
+    this.chainHttp = new ChainHttp(endpoint);
+  }
 
-    constructor(endpoint: string){
-        this.chainHttp = new ChainHttp(endpoint);
-    }
+  getBlockchainHeight(): Promise<number> {
+    return this.chainHttp
+      .getBlockchainHeight()
+      .toPromise()
+      .then((blockNum) => blockNum.compact());
+  }
 
-    getBlockchainHeight(): Promise<number>{
-        return this.chainHttp.getBlockchainHeight().toPromise().then((blockNum)=> blockNum.compact());
-    }
-
-    getBlockchainScore(): Promise<BlockchainScore>{
-        return this.chainHttp.getBlockchainScore().toPromise();
-    }
+  getBlockchainScore(): Promise<BlockchainScore> {
+    return this.chainHttp.getBlockchainScore().toPromise();
+  }
 }

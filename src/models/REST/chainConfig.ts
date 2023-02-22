@@ -1,17 +1,13 @@
-import { 
-    ChainConfigHttp, ChainConfig
-} from "tsjs-xpx-chain-sdk";
+import { ChainConfigHttp, ChainConfig } from "tsjs-xpx-chain-sdk";
 
 export class ChainConfigAPI {
+  chainConfigHttp: ChainConfigHttp;
 
-    chainConfigHttp: ChainConfigHttp;
+  constructor(endpoint: string) {
+    this.chainConfigHttp = new ChainConfigHttp(endpoint);
+  }
 
-    constructor(endpoint: string){
-        this.chainConfigHttp = new ChainConfigHttp(endpoint);
-    }
-
-    getChainConfig(height: number): Promise<ChainConfig>{
-        return this.chainConfigHttp.getChainConfig(height).toPromise();
-    }
-
+  getChainConfig(height: number): Promise<ChainConfig> {
+    return this.chainConfigHttp.getChainConfig(height).toPromise();
+  }
 }

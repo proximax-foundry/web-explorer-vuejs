@@ -76,29 +76,22 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { AppState } from '@/state/appState';
-import { ref, onMounted, onUnmounted, watch, getCurrentInstance } from 'vue';
-import { Deadline, LimitType } from 'tsjs-xpx-chain-sdk';
-import Tooltip from 'primevue/tooltip';
+import { ref, onMounted, onUnmounted,  getCurrentInstance } from 'vue';
+import { BlockInfo, Deadline } from 'tsjs-xpx-chain-sdk';
 import { HomeUtils } from "@/util/homeUtil"
-import { TransactionUtils } from '@/models/util/transactionUtils';
+import { TransactionUtils } from '@/util/transactionUtils';
 
-export default{
-  components: { DataTable, Column },
-  name: 'LatestBlockDataTable',
-  directives: {
-    'tooltip': Tooltip
-  },
-  setup(){
+
     const internalInstance = getCurrentInstance();
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    const emitter = internalInstance?.appContext.config.globalProperties.emitter;
     const nativeTokenNamespace = AppState.nativeToken.label;
     const wideScreen = ref(false);
     const isFetching = ref(true);
-    const blockDataTable =  ref([]);
+    const blockDataTable =  ref<BlockInfo[]>([]);
     const screenResizeHandler = () => {
       if(window.innerWidth < 1024){
         wideScreen.value = false;
@@ -122,35 +115,30 @@ export default{
         return;
       }
       let trx = await HomeUtils.getDiagnosticStorage();
-      let blockData = await HomeUtils.getBlocksByHeightWithLimit(trx.numBlocks);
-      blockDataTable.value = blockData;
-      isFetching.value = false;
+      if(trx){
+        let blockData = await HomeUtils.getBlocksByHeightWithLimit(trx.numBlocks);
+        if(blockData){
+          blockDataTable.value = blockData;
+          isFetching.value = false;
+        }
+        
+      }
+      
     };
     
-    const countDuration = (timestamp) =>{
+    const countDuration = (timestamp :number) =>{
       let trxDuration = HomeUtils.countDuration(timestamp);
       return trxDuration;
     };
     getBlockDataTable();
     //setInterval(generateDatatable, 15000);
 
-    emitter.on('CHANGE_NETWORK', payload => {
+    emitter.on('CHANGE_NETWORK', (payload:boolean)=> {
       isFetching.value = true;
       if(payload){
         getBlockDataTable();
       }
     });
 
-    return {
-      countDuration,
-      wideScreen,
-      isFetching,
-      Deadline,
-      Tooltip,
-      blockDataTable,
-      nativeTokenNamespace,
-      TransactionUtils
-    }
-  }
-}
+  
 </script>

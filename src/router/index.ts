@@ -1,6 +1,45 @@
-import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router";
 
-const routes: RouteRecordRaw[] = [
+const redirectionRoutes :RouteRecordRaw[] = [
+  {
+    path: '/result/blockHeight/:blockNum',
+    redirect: to => {
+      return { name: 'ViewBlock', query: {  blockHeight: to.params.blockNum } }
+    },
+  },
+  {
+    path: '/result/publicKey/:publicKey',
+    redirect: to => {
+      return { name: 'ViewAccount', params: { accountParam: to.params.publicKey }}
+    },
+  },
+  {
+    path: '/result/address/:address',
+    redirect: to => {
+      return  { name: 'ViewAccount', params: { accountParam: to.params.address }}
+    },
+  },
+  {
+    path: '/result/hash/:hash',
+    redirect: to => {
+      return { name: 'ViewTransaction', params: { hash: to.params.hash }}
+    },
+  },
+  {
+    path: '/result/namespaceInfo/:namespaceId',
+    redirect: to => {
+      return { name: 'ViewNamespace', params: { namespaceParam: to.params.namespaceId }}
+    },
+  },
+  {
+    path: '/result/assetInfo/:assetId',
+    redirect: to => {
+      return { name: 'ViewAsset', params: { id: to.params.assetId }}
+    },
+  },
+]
+
+const routes :RouteRecordRaw[] = [
   {
     path: '/',
     name: 'Home',
@@ -88,89 +127,14 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: "View Invalid Search",
     }
-  }
-];
-
-let redirectionRoutes: RouteRecordRaw[] = [
-  {
-    path: '/result/blockHeight/:blockNum',
-    props: false,
-    redirect: to => {
-      return { name: 'ViewBlock', params: { blockHeight: to.params.blockNum }}
-    },
-    name: "BlockSearchRedirect",
-    meta: {
-      title: "Block Search Redirect",
-    },
-    component: null
   },
-  {
-    path: '/result/publicKey/:publicKey',
-    props: false,
-    redirect: to => {
-      return { name: 'ViewAccount', params: { accountParam: to.params.publicKey }}
-    },
-    name: "PublicKeySearchRedirect",
-    meta: {
-      title: "PublicKey Search Redirect",
-    },
-    component: null
-  },
-  {
-    path: '/result/address/:address',
-    props: false,
-    redirect: to => {
-      return { name: 'ViewAccount', params: { accountParam: to.params.address }}
-    },
-    name: "AddressSearchRedirect",
-    meta: {
-      title: "Address Search Redirect",
-    },
-    component: null
-  },
-  {
-    path: '/result/hash/:hash',
-    props: false,
-    redirect: to => {
-      return { name: 'ViewTransaction', params: { hash: to.params.hash }}
-    },
-    name: "TxHashSearchRedirect",
-    meta: {
-      title: "Transaction Search Redirect",
-    },
-    component: null
-  },
-  {
-    path: '/result/namespaceInfo/:namespaceId',
-    props: false,
-    redirect: to => {
-      return { name: 'ViewNamespace', params: { namespaceParam: to.params.namespaceId }}
-    },
-    name: "NamespaceSearchRedirect",
-    meta: {
-      title: "Namespace Search Redirect",
-    },
-    component: null
-  },
-  {
-    path: '/result/assetInfo/:assetId',
-    props: false,
-    redirect: to => {
-      return { name: 'ViewAsset', params: { id: to.params.assetId }}
-    },
-    name: "AssetSearchRedirect",
-    meta: {
-      title: "Asset Search Redirect",
-    },
-    component: null
-  }
-];
-
-let allRoutes: RouteRecordRaw[] = routes.concat(redirectionRoutes);
+]
 
 const router = createRouter({
-  history: createWebHashHistory(process.env.BASE_URL),
-  routes: allRoutes
-})
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes: routes.concat(redirectionRoutes)
+});
 
-export default router
+
+
+export default router;

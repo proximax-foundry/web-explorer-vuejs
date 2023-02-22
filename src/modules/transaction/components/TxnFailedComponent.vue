@@ -8,7 +8,8 @@
       <div>Status</div>
       <div>
         <div class="inline-block">
-          <div class="flex items-center px-2 py-1 rounded-sm border border-red-100 bg-red-100 text-red-700 text-xs"><span class="material-icons md-16">close</span>&nbsp;Failed</div>
+          <div class="flex items-center px-2 py-1 rounded-sm border border-red-100 bg-red-100 text-red-700 text-xs"><span
+              class="material-icons md-16">close</span>&nbsp;Failed</div>
         </div>
       </div>
     </div>
@@ -19,41 +20,36 @@
   </div>
 </template>
 
-<script>
-import { computed, defineComponent, getCurrentInstance, inject, ref, watch } from "vue";
-import { useToast } from "primevue/usetoast";
-import { AppState } from '@/state/appState';
-import { Helper } from "@/util/typeHelper";
-import { copyToClipboard } from '@/util/functions';
-export default {
-  name: 'TxnFailedComponent',
-  props: {
-    hash: String,
-    status: String,
-  },
-}
+<script setup lang="ts">
+
+defineProps({
+  hash: String,
+  status: String,
+})
+
 </script>
 
 <style scoped lang="scss">
-.txn-div{
+.txn-div {
   @apply text-gray-800 text-xs;
-  > div{
+
+  >div {
     @apply flex items-center border-b border-gray-100 py-4;
 
-    > div:first-child{
+    >div:first-child {
       @apply w-40 text-xs pl-4;
     }
 
-    > div:nth-child(2){
+    >div:nth-child(2) {
       @apply text-xs w-full;
     }
 
-    > div:last-child{
+    >div:last-child {
       @apply border-none;
     }
   }
-  > div:last-child{
+
+  >div:last-child {
     @apply border-none;
   }
-}
-</style>
+}</style>

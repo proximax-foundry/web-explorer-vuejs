@@ -99,25 +99,14 @@
   </div>
 </template>
 
-<script>
-import { AppState } from '@/state/appState';
-import { Helper } from "@/util/typeHelper";
+<script setup>
 import { TransactionType } from 'tsjs-xpx-chain-sdk';
-import { TransactionUtils } from '@/models/util/transactionUtils';
-export default {
-  name: 'MetadataDetailComponent',
-  props: {
-    txnDetail: Object,
-    txnGroup: Number
-  },
-  setup(props) {
-    return {
-      TransactionType,
-      Helper,
-      TransactionUtils
-    }
-  }
-}
+
+defineProps({
+  txnDetail: Object,
+  txnGroup : Number
+})
+
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

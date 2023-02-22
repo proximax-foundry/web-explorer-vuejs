@@ -19,19 +19,16 @@
   </div>
 </template>
 
-<script>
-import { string } from 'mathjs';
-import { computed, defineComponent, ref } from 'vue';
+<script lang="ts" setup>
+import { computed, ref } from 'vue';
 
-export default defineComponent({
-  name: 'selectFilter',
-  props:[
-    'selected'
-  ],
-  emits:[
-    'selected-filter',
-  ],
-  setup(props, {emit}){
+
+    const props = defineProps([
+      'selected'
+    ])
+    const emit = defineEmits([
+      'selected-filter'
+    ])
     const toggleSelection = ref(false);
 
     const filterOptions = ref([
@@ -47,22 +44,16 @@ export default defineComponent({
     const selectedFilter = ref(props.selected);
 
     const selectedFilterTerm = computed(() => {
-      return filterOptions.value.find(filter => filter.val == props.selected).label;
+      const findOption = filterOptions.value.find(filter => filter.val == props.selected)
+      return findOption?findOption.label: "All Filters"
     });
 
-    const selectFilter = (filterValue) => {
+    const selectFilter = (filterValue :string) => {
       selectedFilter.value = filterValue;
       emit('selected-filter', filterValue)
       toggleSelection.value = false;
     }
 
-    return {
-      filterOptions,
-      toggleSelection,
-      selectFilter,
-      selectedFilterTerm
-    };
-  }
-})
+   
 </script>
 

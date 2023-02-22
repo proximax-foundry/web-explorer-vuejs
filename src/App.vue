@@ -25,33 +25,16 @@
     <footerComponent class=" flex-grow-0" />
   </div>
 </template>
-<script>
+<script setup lang="ts">
 import { computed } from "vue";
 import Toast from 'primevue/toast';
-import headerComponent from '@/components/headerComponent.vue';
-import footerComponent from '@/components/footerComponent.vue';
+import headerComponent from './components/headerComponent.vue';
+import footerComponent from './components/footerComponent.vue';
 import { AppState } from '@/state/appState';
 import Loading from 'vue-loading-overlay';
-import 'vue-loading-overlay/dist/vue-loading.css';
+import 'vue-loading-overlay/dist/css/index.css';
 
-export default {
-  name: 'App',
-  components: {
-    headerComponent,
-    footerComponent,
-    Loading,
-    Toast,
-  },
-
-  setup() {
-    const isLoading = computed(()=>{ return !AppState.isReady});
-    return{
-      isLoading
-    }
-  }
-}
+  const isLoading = computed(()=>{ return !AppState.isReady});
+    
 </script>
 
-<style>
-
-</style>

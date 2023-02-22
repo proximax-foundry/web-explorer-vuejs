@@ -15,18 +15,12 @@
   </div>
 </template>
 
-<script>
-import { AppState } from '@/state/appState';
-import { Helper } from "@/util/typeHelper";
-export default {
-  name: 'ChainDetailComponent',
-  props: {
-    txnDetail: Object
-  },
-  setup(props) {
-    return {}
-  }
-}
+<script setup>
+
+defineProps({
+  txnDetail: Object,
+})
+
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

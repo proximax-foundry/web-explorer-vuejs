@@ -54,7 +54,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts" setup>
 import { watch, ref, computed, getCurrentInstance, onMounted ,onUnmounted  } from "vue";
 import { useToast } from "primevue/usetoast";
 import { copyToClipboard } from '@/util/functions';
@@ -63,61 +63,45 @@ import { AccountUtils } from "@/util/accountUtil";
 import { AppState } from '@/state/appState';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import { TransactionUtils } from '@/models/util/transactionUtils';
+import { TransactionUtils } from '@/util/transactionUtils';
 import Tooltip from 'primevue/tooltip';
-import ExportCSVComponent from '@/modules/transaction/components/ExportCSVComponent';
-import MixedTxnDataTable from '@/modules/transaction/components/txnDataTables/MixedTxnDataTable';
-import TransferTxnDataTable from '@/modules/transaction/components/txnDataTables/TransferTxnDataTable';
-import AccountTxnDataTable from '@/modules/transaction/components/txnDataTables/AccountTxnDataTable';
-import AggregateTxnDataTable from '@/modules/transaction/components/txnDataTables/AggregateTxnDataTable';
-import AliasTxnDataTable from '@/modules/transaction/components/txnDataTables/AliasTxnDataTable';
-import AssetTxnDataTable from '@/modules/transaction/components/txnDataTables/AssetTxnDataTable';
-import NamespaceTxnDataTable from '@/modules/transaction/components/txnDataTables/NamespaceTxnDataTable';
-import MetadataTxnDataTable from '@/modules/transaction/components/txnDataTables/MetadataTxnDataTable';
-import ExchangeTxnDataTable from '@/modules/transaction/components/txnDataTables/ExchangeTxnDataTable';
-import LockTxnDataTable from '@/modules/transaction/components/txnDataTables/LockTxnDataTable';
-import LinkTxnDataTable from '@/modules/transaction/components/txnDataTables/LinkTxnDataTable';
-import RestrictionTxnDataTable from '@/modules/transaction/components/txnDataTables/RestrictionTxnDataTable';
-import SecretTxnDataTable from '@/modules/transaction/components/txnDataTables/SecretTxnDataTable';
-import ChainTxnDataTable from '@/modules/transaction/components/txnDataTables/ChainTxnDataTable';
+import ExportCSVComponent from '@/modules/transaction/components/ExportCSVComponent.vue';
+import MixedTxnDataTable from '@/modules/transaction/components/txnDataTables/MixedTxnDataTable.vue';
+import TransferTxnDataTable from '@/modules/transaction/components/txnDataTables/TransferTxnDataTable.vue';
+import AccountTxnDataTable from '@/modules/transaction/components/txnDataTables/AccountTxnDataTable.vue';
+import AggregateTxnDataTable from '@/modules/transaction/components/txnDataTables/AggregateTxnDataTable.vue';
+import AliasTxnDataTable from '@/modules/transaction/components/txnDataTables/AliasTxnDataTable.vue';
+import AssetTxnDataTable from '@/modules/transaction/components/txnDataTables/AssetTxnDataTable.vue';
+import NamespaceTxnDataTable from '@/modules/transaction/components/txnDataTables/NamespaceTxnDataTable.vue';
+import MetadataTxnDataTable from '@/modules/transaction/components/txnDataTables/MetadataTxnDataTable.vue';
+import ExchangeTxnDataTable from '@/modules/transaction/components/txnDataTables/ExchangeTxnDataTable.vue';
+import LockTxnDataTable from '@/modules/transaction/components/txnDataTables/LockTxnDataTable.vue';
+import LinkTxnDataTable from '@/modules/transaction/components/txnDataTables/LinkTxnDataTable.vue';
+import RestrictionTxnDataTable from '@/modules/transaction/components/txnDataTables/RestrictionTxnDataTable.vue';
+import SecretTxnDataTable from '@/modules/transaction/components/txnDataTables/SecretTxnDataTable.vue';
+import ChainTxnDataTable from '@/modules/transaction/components/txnDataTables/ChainTxnDataTable.vue';
 import { TransactionFilterType, TransactionFilterTypes } from '@/models/transactions/transaction';
+import type { Transaction } from "tsjs-xpx-chain-sdk";
 
 
-export default {
-  name:"TransactionComponent",
-  props:{
-    accountAddress: String,
-    accountPublicKey: String,
-  },
-  components: {
-    ExportCSVComponent,
-    MixedTxnDataTable,
-    TransferTxnDataTable,
-    AccountTxnDataTable,
-    AggregateTxnDataTable,
-    AliasTxnDataTable,
-    AssetTxnDataTable,
-    NamespaceTxnDataTable,
-    MetadataTxnDataTable,
-    ExchangeTxnDataTable,
-    LockTxnDataTable,
-    LinkTxnDataTable,
-    RestrictionTxnDataTable,
-    SecretTxnDataTable,
-    ChainTxnDataTable,
-  },
-  directives: {
-    'tooltip': Tooltip
-  },
-  setup(props){
+    const props = defineProps({
+      accountAddress: {
+        type: String,
+        required: true
+      },
+      accountPublicKey:{
+        type: String,
+        required: true
+      }
+    })
     const internalInstance = getCurrentInstance();
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    const emitter = internalInstance?.appContext.config.globalProperties.emitter;
     const invalidPublicKey = '0000000000000000000000000000000000000000000000000000000000000000';
     let selectedTxnType = ref("all");
     let txnTypeList = Object.entries(TransactionFilterType).map(([label, value])=>({label, value}));
     const isFetching = ref(true);
     const wideScreen = ref(false);
-    const QueryParamsType = ref('');
+    const QueryParamsType = ref<number[] | undefined>(undefined);
     const screenResizeHandler = () => {
       if(window.innerWidth < 1024){
         wideScreen.value = false;
@@ -134,42 +118,6 @@ export default {
     onMounted(() => {
       window.addEventListener("resize", screenResizeHandler);
     });
-
-    const nativeTokenName = computed(()=> AppState.nativeToken.label);
-
-    const displaySDAs = (sdas) => {
-      let sda_rows = [];
-      if(sdas.length > 0){
-        for(const sda of sdas){
-          let asset_div = displayAssetDiv(sda);
-          sda_rows.push(asset_div);
-        }
-        return sda_rows.join("<br>");
-      }
-    }
-
-    const checkOtherAsset = (assets) => {
-      if(assets){
-        if(assets.length > 0){
-          return true;
-        }
-      }
-      return false;
-    }
-
-    const displayAssetDiv = (sda) => {
-      let asset_div;
-      let assetArray = []
-      assetArray.push(sda.id);
-
-      if(sda.currentAlias && sda.currentAlias.length){
-        asset_div = (sda.amount + ' ' + sda.currentAlias[0].name);
-      }
-      else{
-        asset_div = (sda.amount + ' - ' + sda.id);
-      }
-      return asset_div;
-    }
 
     const pages = ref(20);
     const currentPage = ref(1)
@@ -266,7 +214,7 @@ export default {
       loadAccountTransactions();
     }
     
-    const transactions = ref([]);
+    const transactions = ref<any[]>([]);
     let transactionGroupType = Helper.getTransactionGroupType();
     let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getTransactionSortField().BLOCK,Helper.getQueryParamOrder_v2().DESC);
 
@@ -285,7 +233,7 @@ export default {
         txnQueryParams.embedded = false;
       }else{
         txnQueryParams.embedded = true;
-      }      if(QueryParamsType.value!=undefined){
+      }if(QueryParamsType.value!=undefined){
         txnQueryParams.type = QueryParamsType.value;
       }
       txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
@@ -301,7 +249,7 @@ export default {
     };
     loadAccountTransactions();
    
-    const formatConfirmedTransaction = async(transactions)=>{
+    const formatConfirmedTransaction = async(transactions :Transaction[])=>{
       let formattedTxns = [];
 
       switch(selectedTxnType.value){
@@ -357,13 +305,13 @@ export default {
     else{
       let readyWatcher = watch(AppState, (value) => {
         if(value.isReady){
-          init();
+          loadAccountTransactions()
           readyWatcher();
         }
       });
     }
 
-    emitter.on('CHANGE_NETWORK', payload => {
+    emitter.on('CHANGE_NETWORK', (payload :boolean) => {
       isFetching.value = true;
       if(payload){
         loadAccountTransactions();
@@ -374,35 +322,6 @@ export default {
       return AppState.nativeToken.divisibility;
     })
 
-    return{
-      isFetching,
-      wideScreen,
-      transactions,
-      nativeTokenName,
-      checkOtherAsset,
-      displaySDAs,
-      Helper,
-      pages,
-      currentPage,
-      totalPages,
-      enableFirstPage,
-      enablePreviousPage,
-      enableNextPage,
-      enableLastPage,
-      naviFirst,
-      naviPrevious,
-      naviNext,
-      naviLast,
-      changeRows,
-      currencyDivisibility,
-      changeSearchTxnType,
-      txnTypeList,
-      selectedTxnType,
-      TransactionFilterType,
-      transactionGroupType  
-    }
-  }
-}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

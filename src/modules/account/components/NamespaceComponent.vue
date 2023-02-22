@@ -42,18 +42,16 @@
   </div>
 </template>
 
-<script>
+<script setup lang=ts>
+import type { NamespaceObj } from '@/util/accountUtil';
 
-import Tooltip from 'primevue/tooltip';
-export default {
-  name:"NamespaceComponent",
-  props:{
-    accountNamespaces: Array,
-  },
-  directives: {
-    'tooltip': Tooltip
-  },
-}
+defineProps({
+  accountNamespaces: {
+    type: Array<NamespaceObj>,
+    required:true
+  }
+})
+
 </script>
 
 <style>

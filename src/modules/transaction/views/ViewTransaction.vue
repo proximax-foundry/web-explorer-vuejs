@@ -26,35 +26,29 @@
   </div>
 </template>
 
-<script>
-import { computed, defineComponent, getCurrentInstance, inject, ref, watch } from "vue";
+<script setup lang="ts">
+import { computed, getCurrentInstance, ref } from "vue";
 import { networkState } from '@/state/networkState';
 import TxnDetailComponent from '@/modules/transaction/components/TxnDetailComponent.vue';
 import InnerTxnComponent from '@/modules/transaction/components/InnerTxnComponent.vue';
 import TxnFailedComponent from '@/modules/transaction/components/TxnFailedComponent.vue';
 import { AppState } from '@/state/appState';
 import { Helper } from "@/util/typeHelper";
-import { TransactionUtils } from '@/models/util/transactionUtils';
-export default {
-  name: 'ViewTransaction',
-  components: {
-    TxnDetailComponent,
-    InnerTxnComponent,
-    TxnFailedComponent
-  },
-  props: {
-    hash: String
-  },
-  setup(props){
+import { TransactionUtils } from '@/util/transactionUtils';
+
+
+    const props = defineProps({
+      hash: String
+    })
     const internalInstance = getCurrentInstance();
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    const emitter = internalInstance?.appContext.config.globalProperties.emitter;
     const currentPage = ref('detail');
-    const txnType = ref('');
+    const txnType = ref(0);
     const isFetching = ref(true);
     const isTxnFailed = ref(false);
     const failedStatus = ref('');''
     const txn = ref({});
-    const formattedTransaction = ref({});
+    const formattedTransaction = ref<any>({});
     const innerTransaction = ref({});
 
     const loadTxn = async () => {
@@ -62,7 +56,9 @@ export default {
         setTimeout(loadTxn, 1000);
         return;
       }
-
+      if(!props.hash){
+        return
+      }
       let transaction = await TransactionUtils.getTransaction(props.hash);
       if(transaction.isFound == 'error'){
         formattedTransaction.value = transaction;
@@ -131,25 +127,12 @@ export default {
       return networkState.chainNetworkName;
     });
 
-    emitter.on('CHANGE_NETWORK', payload => {
+    emitter.on('CHANGE_NETWORK',( payload :boolean) => {
       if(payload){
         loadTxn();
         isFetching.value = true;
       }
     });
 
-    return {
-      currentPage,
-      isTxnFailed,
-      failedStatus,
-      AppState,
-      formattedTransaction,
-      innerTransaction,
-      isFetching,
-      txn,
-      networkName,
-      txnType,
-    }
-  }
-}
+
 </script>

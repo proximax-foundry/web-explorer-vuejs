@@ -110,31 +110,22 @@
   </div>
 </template>
 
-<script>
-import { computed, defineComponent, getCurrentInstance, inject, ref, watch, onMounted, onUnmounted } from "vue";
+<script setup lang="ts">
+import { computed, getCurrentInstance, ref, onMounted, onUnmounted } from "vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { AppState } from '@/state/appState';
 import { Helper } from "@/util/typeHelper";
 import { BlockUtils } from "@/util/blockUtil";
-import { TransactionUtils } from "@/models/util/transactionUtils";
-import Tooltip from 'primevue/tooltip';
-
-export default {
-  name: 'ViewBlockList',
-  components: {
-    DataTable,
-    Column
-  },
-  directives: {
-    'tooltip': Tooltip
-  },
-  props: {
-    blockHeight: Array
-  },
-  setup(p){
+import { TransactionUtils } from "@/util/transactionUtils";
+import type { BlockInfo } from "tsjs-xpx-chain-sdk";
+ 
+  const p = defineProps({
+    blockHeight :Number
+  })
+ 
     const internalInstance = getCurrentInstance();
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    const emitter = internalInstance?.appContext.config.globalProperties.emitter;
     const isFetching = ref(true);
     const wideScreen = ref(false);
     const nativeTokenNamespace = AppState.nativeToken.label;
@@ -208,9 +199,8 @@ export default {
       loadRecentBlock();
     }
 
-    const nativeTokenName = computed(()=> AppState.nativeToken.label);
     
-    const transactions = ref([]);
+    const transactions = ref<BlockInfo[]>([]);
     let loadRecentBlock = async() =>{
       if(!AppState.isReady){
         setTimeout(loadRecentBlock, 1000);
@@ -224,42 +214,19 @@ export default {
     };
     loadRecentBlock();
 
-    let pagination = (blocks)=>{
+    let pagination = (blocks :BlockInfo[])=>{
       let blockValue = blocks.slice((currentPage.value-1) * pages.value, currentPage.value * pages.value);
       return blockValue;
     }
 
-    emitter.on('CHANGE_NETWORK', payload => {
+    emitter.on('CHANGE_NETWORK', (payload :boolean )=> {
       isFetching.value = true;
       if(payload){
         loadRecentBlock();
       }
     });
 
-    return {
-      isFetching,
-      wideScreen,
-      transactions,
-      nativeTokenName,
-      Helper,
-      BlockUtils,
-      TransactionUtils,
-      nativeTokenNamespace,
-      pages,
-      currentPage,
-      totalPages,
-      enableFirstPage,
-      enablePreviousPage,
-      enableNextPage,
-      enableLastPage,
-      naviFirst,
-      naviPrevious,
-      naviNext,
-      naviLast,
-      changeRows
-    }
-  }
-}
+
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
@@ -276,7 +243,7 @@ export default {
     > div:nth-child(2){
       @apply text-xs;
     }
-
+P
     > div:nth-child(3){
       @apply ml-7 w-36 text-xs pl-4 font-bold;
     }

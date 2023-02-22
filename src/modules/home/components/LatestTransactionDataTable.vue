@@ -88,30 +88,23 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { Helper } from '@/util/typeHelper';
 import { AppState } from "@/state/appState";
 import { ref, onMounted, onUnmounted, getCurrentInstance } from 'vue';
-import { TransactionUtils } from '@/models/util/transactionUtils';
+import { TransactionUtils } from '@/util/transactionUtils';
 import { TransactionGroupType,TransactionQueryParams } from 'tsjs-xpx-chain-sdk';
-import Tooltip from 'primevue/tooltip';
 import { HomeUtils } from '@/util/homeUtil';
+import type { ConfirmedTransferTransaction } from '@/models/transactions/transaction';
 
-export default{
-  components: { DataTable, Column },
-  name: 'LatestTransactionDataTable',
-  directives: {
-    'tooltip': Tooltip
-  },
-  setup(){
     const internalInstance = getCurrentInstance();
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    const emitter = internalInstance?.appContext.config.globalProperties.emitter;
     const wideScreen = ref(false);
     const isFetching = ref(true);
-    const transactions = ref([]);
+    const transactions = ref<ConfirmedTransferTransaction[]>([]);
     const nativeTokenNamespace = AppState.nativeToken.label;
 
     const screenResizeHandler = () => {
@@ -131,7 +124,7 @@ export default{
       window.removeEventListener("resize", screenResizeHandler);
     });
 
-     const countDuration = (timestamp) =>{
+     const countDuration = (timestamp :number) =>{
       let trxDuration = HomeUtils.countDuration(timestamp);
       return trxDuration;
     };
@@ -144,6 +137,9 @@ export default{
       }
       let txnQueryParams = new TransactionQueryParams();
       let trx = await HomeUtils.getDiagnosticStorage();
+      if(!trx){
+        return
+      }
       txnQueryParams.pageSize = 10;
       let fromHeight = trx.numBlocks - 200000;
       if(fromHeight <= 0){
@@ -163,23 +159,12 @@ export default{
     //setInterval(generateDatatable, 15000);
     generateDatatable();
 
-    emitter.on('CHANGE_NETWORK', payload => {
+    emitter.on('CHANGE_NETWORK', (payload :boolean) => {
       isFetching.value = true;
       if(payload){
         generateDatatable();
       }
     });
 
-    return {
-      transactions,
-      countDuration,
-      AppState,
-      Helper,
-      wideScreen,
-      isFetching,
-      Tooltip,
-      nativeTokenNamespace
-    }
-  }
-}
+  
 </script>

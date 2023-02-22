@@ -56,51 +56,32 @@
   </div>
 </template>
 
-<script>
-import { getCurrentInstance, computed, ref, watch } from "vue";
+<script setup lang="ts">
+import { getCurrentInstance, computed, ref} from "vue";
 import { TransactionFilterType, TransactionFilterTypes } from '@/models/transactions/transaction';
 import { AppState } from '@/state/appState';
 import { Helper } from "@/util/typeHelper";
-import { TransactionUtils } from '@/models/util/transactionUtils';
-import MixedTxnDataTable from '@/modules/transaction/components/txnDataTables/MixedTxnDataTable';
-import TransferTxnDataTable from '@/modules/transaction/components/txnDataTables/TransferTxnDataTable';
-import AccountTxnDataTable from '@/modules/transaction/components/txnDataTables/AccountTxnDataTable';
-import AggregateTxnDataTable from '@/modules/transaction/components/txnDataTables/AggregateTxnDataTable';
-import AliasTxnDataTable from '@/modules/transaction/components/txnDataTables/AliasTxnDataTable';
-import AssetTxnDataTable from '@/modules/transaction/components/txnDataTables/AssetTxnDataTable';
-import NamespaceTxnDataTable from '@/modules/transaction/components/txnDataTables/NamespaceTxnDataTable';
-import MetadataTxnDataTable from '@/modules/transaction/components/txnDataTables/MetadataTxnDataTable';
-import ExchangeTxnDataTable from '@/modules/transaction/components/txnDataTables/ExchangeTxnDataTable';
-import LockTxnDataTable from '@/modules/transaction/components/txnDataTables/LockTxnDataTable';
-import LinkTxnDataTable from '@/modules/transaction/components/txnDataTables/LinkTxnDataTable';
-import RestrictionTxnDataTable from '@/modules/transaction/components/txnDataTables/RestrictionTxnDataTable';
-import SecretTxnDataTable from '@/modules/transaction/components/txnDataTables/SecretTxnDataTable';
-import ChainTxnDataTable from '@/modules/transaction/components/txnDataTables/ChainTxnDataTable';
-import ExportCSVComponent from '@/modules/transaction/components/ExportCSVComponent';
+import { TransactionUtils } from '@/util/transactionUtils';
+import MixedTxnDataTable from '@/modules/transaction/components/txnDataTables/MixedTxnDataTable.vue';
+import TransferTxnDataTable from '@/modules/transaction/components/txnDataTables/TransferTxnDataTable.vue';
+import AccountTxnDataTable from '@/modules/transaction/components/txnDataTables/AccountTxnDataTable.vue';
+import AggregateTxnDataTable from '@/modules/transaction/components/txnDataTables/AggregateTxnDataTable.vue';
+import AliasTxnDataTable from '@/modules/transaction/components/txnDataTables/AliasTxnDataTable.vue';
+import AssetTxnDataTable from '@/modules/transaction/components/txnDataTables/AssetTxnDataTable.vue';
+import NamespaceTxnDataTable from '@/modules/transaction/components/txnDataTables/NamespaceTxnDataTable.vue';
+import MetadataTxnDataTable from '@/modules/transaction/components/txnDataTables/MetadataTxnDataTable.vue';
+import ExchangeTxnDataTable from '@/modules/transaction/components/txnDataTables/ExchangeTxnDataTable.vue';
+import LockTxnDataTable from '@/modules/transaction/components/txnDataTables/LockTxnDataTable.vue';
+import LinkTxnDataTable from '@/modules/transaction/components/txnDataTables/LinkTxnDataTable.vue';
+import RestrictionTxnDataTable from '@/modules/transaction/components/txnDataTables/RestrictionTxnDataTable.vue';
+import SecretTxnDataTable from '@/modules/transaction/components/txnDataTables/SecretTxnDataTable.vue';
+import ChainTxnDataTable from '@/modules/transaction/components/txnDataTables/ChainTxnDataTable.vue';
+import ExportCSVComponent from '@/modules/transaction/components/ExportCSVComponent.vue';
+import type { Transaction } from "tsjs-xpx-chain-sdk";
 
 
-export default {
-  name: 'ViewTransactionList',
-  components: {
-    MixedTxnDataTable,
-    TransferTxnDataTable,
-    AccountTxnDataTable,
-    AggregateTxnDataTable,
-    AliasTxnDataTable,
-    AssetTxnDataTable,
-    NamespaceTxnDataTable,
-    MetadataTxnDataTable,
-    ExchangeTxnDataTable,
-    LockTxnDataTable,
-    LinkTxnDataTable,
-    RestrictionTxnDataTable,
-    SecretTxnDataTable,
-    ChainTxnDataTable,
-    ExportCSVComponent
-  },
-  setup(){
     const internalInstance = getCurrentInstance();
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    const emitter = internalInstance?.appContext.config.globalProperties.emitter;
 
     let selectedTxnType = ref("all");
     const isFetching = ref(true);
@@ -152,8 +133,8 @@ export default {
       currentPage.value = 1;
       loadRecentTransactions();
     }
-    const transactions = ref([]);
-    const QueryParamsType = ref('');
+    const transactions = ref<any[]>([]);
+    const QueryParamsType = ref<number[] |undefined>(undefined);
     let transactionGroupType = Helper.getTransactionGroupType();
     let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getTransactionSortField().BLOCK, Helper.getQueryParamOrder_v2().DESC);
 
@@ -162,6 +143,9 @@ export default {
       if(!AppState.isReady){
         setTimeout(loadRecentTransactions, 1000);
         return;
+      }
+      if(!AppState.chainAPI){
+        return
       }
       let txnQueryParams = Helper.createTransactionQueryParams();
       let blockHeight = await AppState.chainAPI.chainAPI.getBlockchainHeight();
@@ -245,7 +229,7 @@ export default {
       loadRecentTransactions();
     }
 
-    const formatConfirmedTransaction = async(transactions)=>{
+    const formatConfirmedTransaction = async(transactions :Transaction[])=>{
 
       let formattedTxns = [];
 
@@ -297,38 +281,13 @@ export default {
       return formattedTxns;
     }
 
-    emitter.on('CHANGE_NETWORK', payload => {
+    emitter.on('CHANGE_NETWORK', (payload :boolean) => {
       isFetching.value = true;
       if(payload){
         loadRecentTransactions();
       }
     });
 
-    return {
-      isFetching,
-      TransactionFilterType,
-      transactions,
-      Helper,
-      pages,
-      currentPage,
-      totalPages,
-      enableFirstPage,
-      enablePreviousPage,
-      enableNextPage,
-      enableLastPage,
-      naviFirst,
-      naviPrevious,
-      naviNext,
-      naviLast,
-      changeRows,
-      txnTypeList,
-      selectedTxnType,
-      changeSearchTxnType,
-      QueryParamsType,
-      transactionGroupType
-    }
-  }
-}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

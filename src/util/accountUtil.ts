@@ -1,36 +1,27 @@
-import { computed } from "vue";
 import { AppState } from "@/state/appState";
 import {
-  Account,
   Address,
-  AggregateTransaction,
   PublicAccount,
-  MultisigCosignatoryModification,
-  MultisigCosignatoryModificationType,
   AccountInfo,
-  MultisigAccountGraphInfo,
   MultisigAccountInfo,
   Mosaic,
-  NamespaceId,
-  NamespaceInfo,
-  MosaicId,
-  MosaicCreatorFilters
+  type NamespaceName
 } from "tsjs-xpx-chain-sdk";
 import { ChainUtils } from "./chainUtils";
-import { networkState } from '@/state/networkState';
+import { networkState } from "@/state/networkState";
 import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
-import { TransactionUtils } from '@/models/util/transactionUtils';
-import { Helper } from "@/util/typeHelper";
+import { TransactionUtils } from "@/util/transactionUtils";
+import { Helper } from "@//util/typeHelper";
 
 export interface AssetObj {
   id: string;
-  name: [];
+  name: NamespaceName[] 
   balance: string;
   isActive: boolean;
   isOwner: boolean;
 }
 
-export interface NamespaceObj{
+export interface NamespaceObj {
   id: string;
   name: string;
   active: boolean;
@@ -41,15 +32,17 @@ export interface NamespaceObj{
   expiringRelativeTime: string;
 }
 
-export interface MatchedNamespace{
+export interface MatchedNamespace {
   name: string;
 }
 
 export class AccountUtils {
-  static async getAccountFromAddress(address: string): Promise<AccountInfo | boolean> {
+  static async getAccountFromAddress(
+    address: string
+  ): Promise<AccountInfo | false> {
     try {
-      let addressobj = Address.createFromRawAddress(address);
-      let account = await ChainUtils.getAccountInfo(addressobj);
+      const addressobj = Address.createFromRawAddress(address);
+      const account = await ChainUtils.getAccountInfo(addressobj);
       return account;
     } catch (error) {
       // console.log(error)
@@ -57,22 +50,55 @@ export class AccountUtils {
     }
   }
 
-  static async getAccountNamespaces(address: string): Promise<NamespaceObj[] | boolean> {
-    let namespaceObj: NamespaceObj[] = [];
-    let month = ['Jan', 'Feb', 'Mac', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    let day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  static async getAccountNamespaces(
+    address: string
+  ): Promise<NamespaceObj[] | false> {
+    if (!AppState.chainAPI) {
+      throw new Error("Service Unavailable");
+    }
+    const namespaceObj: NamespaceObj[] = [];
+    const month = [
+      "Jan",
+      "Feb",
+      "Mac",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    const day = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     try {
-      let chainConfig = new ChainProfileConfig(networkState.chainNetworkName);
+      const chainConfig = new ChainProfileConfig(networkState.chainNetworkName);
       chainConfig.init();
-      let blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
+      const blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
 
-      let addressobj = Address.createFromRawAddress(address);
-      let namespaceInfo = await AppState.chainAPI.namespaceAPI.getNamespacesFromAccount(addressobj);
-      let currentBlock = await AppState.chainAPI.chainAPI.getBlockchainHeight();
+      const addressobj = Address.createFromRawAddress(address);
+      const namespaceInfo =
+        await AppState.chainAPI.namespaceAPI.getNamespacesFromAccount(
+          addressobj
+        );
+      const currentBlock =
+        await AppState.chainAPI.chainAPI.getBlockchainHeight();
 
       for (let i = 0; i < namespaceInfo.length; ++i) {
-        let ns: any = {};
-        let nsName = await AppState.chainAPI.namespaceAPI.getNamespacesName([namespaceInfo[i].id]);
+        const ns: NamespaceObj = {
+          id: "",
+          name: "",
+          active: false,
+          type: 0,
+          linkedId: "",
+          depth: 0,
+          endHeight: 0,
+          expiringRelativeTime: "",
+        };
+        const nsName = await AppState.chainAPI.namespaceAPI.getNamespacesName([
+          namespaceInfo[i].id,
+        ]);
         ns.name = nsName[0].name;
         ns.active = namespaceInfo[i].active;
         ns.id = namespaceInfo[i].id.toHex();
@@ -81,17 +107,28 @@ export class AccountUtils {
         ns.endHeight = namespaceInfo[i].endHeight.compact();
 
         // calculate expiration
-        let remainingBlockHeight = ns.endHeight - currentBlock;
-        let timestamp = (Math.floor(Date.now()) + (remainingBlockHeight * blockTargetTime * 1000));
-        let date = new Date(timestamp);
-        ns.expiringRelativeTime = day[date.getDay()] + ' ' + date.getDate() + ' ' + month[date.getMonth()] + ' ' + date.getFullYear();
+        const remainingBlockHeight = ns.endHeight - currentBlock;
+        const timestamp =
+          Math.floor(Date.now()) +
+          remainingBlockHeight * blockTargetTime * 1000;
+        const date = new Date(timestamp);
+        ns.expiringRelativeTime =
+          day[date.getDay()] +
+          " " +
+          date.getDate() +
+          " " +
+          month[date.getMonth()] +
+          " " +
+          date.getFullYear();
 
         if (ns.type == 1) {
-          ns.linkedId = namespaceInfo[i].alias.mosaicId.id.toHex();
+          const mosaicId = namespaceInfo[i].alias.mosaicId;
+          ns.linkedId = mosaicId ? mosaicId.id.toHex() : "";
         } else if (ns.type == 2) {
-          ns.linkedId = namespaceInfo[i].alias.address.pretty();
+          const address = namespaceInfo[i].alias.address;
+          ns.linkedId = address ? address.pretty() : "";
         } else {
-          ns.linkedId = '';
+          ns.linkedId = "";
         }
         namespaceObj.push(ns);
       }
@@ -102,32 +139,41 @@ export class AccountUtils {
       });
       return namespaceObj;
     } catch (error) {
-      console.log(error);
       return false;
     }
   }
 
-  static async fetchLinkedAccountNamespace(address: string): Promise<MatchedNamespace[]> {
-    let matchedNs: MatchedNamespace[] = [];
-    let addressobj = Address.createFromRawAddress(address);
-    let namespace = await AppState.chainAPI.accountAPI.getAccountsNames([addressobj]);
+  static async fetchLinkedAccountNamespace(
+    address: string
+  ): Promise<MatchedNamespace[]> {
+    if (!AppState.chainAPI) {
+      throw new Error("Service Unavailable");
+    }
+    const matchedNs: MatchedNamespace[] = [];
+    const addressobj = Address.createFromRawAddress(address);
+    const namespace = await AppState.chainAPI.accountAPI.getAccountsNames([
+      addressobj,
+    ]);
 
     if (namespace.length > 0) {
-      namespace.forEach(ns => {
-        ns.names.forEach(name => {
+      namespace.forEach((ns) => {
+        ns.names.forEach((name) => {
           matchedNs.push({
-            name: name.name
+            name: name.name,
           });
-        })
-      })
+        });
+      });
     }
- 
+
     return matchedNs;
   }
 
-  static getAddressFromPublicKey(publicKey: string): string | boolean {
+  static getAddressFromPublicKey(publicKey: string): string | false {
     try {
-      let address = PublicAccount.createFromPublicKey(publicKey, AppState.networkType)
+      const address = PublicAccount.createFromPublicKey(
+        publicKey,
+        AppState.networkType
+      );
       return address.address.plain();
     } catch (error) {
       console.warn(error);
@@ -135,68 +181,91 @@ export class AccountUtils {
     }
   }
 
-  static async getMultisig(strAddress: string): Promise<MultisigAccountInfo | boolean> {
+  static async getMultisig(
+    strAddress: string
+  ): Promise<MultisigAccountInfo | false> {
+    if (!AppState.chainAPI) {
+      return false;
+    }
     try {
-      let address = Address.createFromRawAddress(strAddress);
-      let multisig = await AppState.chainAPI.accountAPI.getMultisigAccountInfo(address);
+      const address = Address.createFromRawAddress(strAddress);
+      const multisig =
+        await AppState.chainAPI.accountAPI.getMultisigAccountInfo(address);
       return multisig;
     } catch (error) {
-      console.warn(error);
       return false;
     }
   }
 
-  static async formatAccountAsset(assets: Mosaic[],publicKey: string): Promise<AssetObj[]> {
-    let formattedAsset: any = [];
+  static async formatAccountAsset(
+    assets: Mosaic[],
+    publicKey: string
+  ): Promise<AssetObj[]> {
+    if (!AppState.chainAPI) {
+      throw new Error("Service Unavailable");
+    }
+    const formattedAsset: any = [];
     if (assets.length > 0) {
-      let mosaicQueryParams = Helper.createMosaicQueryParams();
+      /* let mosaicQueryParams = Helper.createMosaicQueryParams();
       let mosaicCreatorFilters = new MosaicCreatorFilters(publicKey);
       mosaicCreatorFilters.holding = false;
       mosaicQueryParams.ownerFilters = mosaicCreatorFilters;
-      let notHoldingMosaicSearch = await AppState.chainAPI.assetAPI.searchMosaics(mosaicQueryParams); //Search 0 balance asset
-      let currentBlock = await AppState.chainAPI.chainAPI.getBlockchainHeight();
+      let notHoldingMosaicSearch = await AppState.chainAPI.assetAPI.searchMosaics(mosaicQueryParams); //Search 0 balance asset */
+      const currentBlock =
+        await AppState.chainAPI.chainAPI.getBlockchainHeight();
       let objAsset: AssetObj;
-      let assetName: any=[];
-      let namespaceId: string;
+      let assetName: NamespaceName[]  = [];
       let isOwner: boolean = false;
       let isActive: boolean = false;
-      let assetsHex = assets.map(x => x.id.toHex());
+      const assetsHex = assets.map((x) => x.id.toHex());
 
-      let assetsDetails = await AppState.chainAPI.assetAPI.getMosaics(assets.map(x => x.id));
-      let assetsNames = await TransactionUtils.getAssetsName(assets.map(x => x.id));
+      const mosaicInfos = await AppState.chainAPI.assetAPI.getMosaics(
+        assets.map((x) => x.id)
+      );
+      const assetsNames = await TransactionUtils.getAssetsName(
+        assets.map((x) => x.id)
+      );
 
-      for (let key in assets) {
-        let assetDetails = assetsDetails.find(x => x.mosaicId.toHex() === assetsHex[key])
-        if ((assetDetails.height.compact() + assetDetails.duration.compact()) > currentBlock) {
+      for (const key in assets) {
+        const assetDetails = mosaicInfos.find(
+          (x) => x.mosaicId.toHex() === assetsHex[key]
+        );
+        if (!assetDetails) {
+          throw new Error("Service Unavailable");
+        }
+        const { owner, height, duration } = assetDetails;
+        if (duration == undefined) {
           isActive = true;
-        } else if (assetDetails.height.compact() == 1) {
+        } else if (height.compact() + duration.compact() > currentBlock) {
+          isActive = true;
+        } else if (height.compact() == 1) {
           isActive = true;
         }
 
-        if (assetDetails.owner.publicKey == publicKey) {
+        if (owner.publicKey == publicKey) {
           isOwner = true;
         }
 
-        let assetNames = assetsNames[key];
+        const assetNames = assetsNames[key];
         if (assetNames.names.length) {
           assetName = assetNames.names;
-        } else {
-          assetName = '';
-          namespaceId = '';
-        }
+        } 
         const assetIdHex = assetDetails.mosaicId.toHex();
         objAsset = {
           id: assetIdHex,
-          balance: Helper.convertToCurrency(assets[key].amount.compact(), assetDetails.divisibility),
+          balance: Helper.convertToCurrency(
+            assets[key].amount.compact(),
+            assetDetails.divisibility
+          ),
           name: assetName,
           isOwner,
           isActive,
-        }
-        formattedAsset.push(objAsset);  
+        };
+        formattedAsset.push(objAsset);
       }
 
       // let get0balanceAsset = mosaicSearch.mosaicsInfo.filter(id => !assets.find(o => o.id.toHex() == id.mosaicId.id.toHex()));
-      
+
       // for (let key in get0balanceAsset) {
       //   isOwner = true;
       //   isActive = true;
@@ -215,9 +284,8 @@ export class AccountUtils {
       //     isActive,
       //   }
       //   formattedAsset.push(objAsset);
-      // }      
+      // }
     }
     return formattedAsset;
   }
 }
-

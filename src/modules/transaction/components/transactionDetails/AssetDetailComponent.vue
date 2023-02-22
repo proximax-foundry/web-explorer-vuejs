@@ -81,25 +81,14 @@
   </div>
 </template>
 
-<script>
-import { AppState } from '@/state/appState';
+<script setup>
 import { Helper } from "@/util/typeHelper";
 import { TransactionType } from 'tsjs-xpx-chain-sdk';
-import { TransactionUtils } from '@/models/util/transactionUtils';
-export default {
-  name: 'AssetDetailComponent',
-  props: {
-    txnDetail: Object,
-    txnGroup: Number
-  },
-  setup(props) {
-    return {
-      TransactionType,
-      Helper,
-      TransactionUtils
-    }
-  }
-}
+
+defineProps({
+  txnDetail: Object,
+  txnGroup: Number
+})
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

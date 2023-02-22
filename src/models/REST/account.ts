@@ -1,77 +1,101 @@
-import { 
-    AccountHttp, NetworkHttp,
-    Address, PublicAccount, QueryParams,
-    MultisigAccountGraphInfo, MultisigAccountInfo,
-    AccountInfo,
-    AggregateTransaction, Transaction, 
-    AccountRestrictionsInfo, AccountNames, TransactionQueryParams
+import {
+  AccountHttp,
+  NetworkHttp,
+  Address,
+  PublicAccount,
+  MultisigAccountGraphInfo,
+  MultisigAccountInfo,
+  AccountInfo,
+  AggregateTransaction,
+  Transaction,
+  AccountRestrictionsInfo,
+  AccountNames,
+  TransactionQueryParams,
 } from "tsjs-xpx-chain-sdk";
 
 export class AccountAPI {
+  accountHttp: AccountHttp;
 
-    accountHttp: AccountHttp;
+  constructor(endpoint: string, networkHttp?: NetworkHttp) {
+    this.accountHttp = new AccountHttp(endpoint, networkHttp);
+  }
 
-    constructor(endpoint: string, networkHttp?: NetworkHttp){
-        this.accountHttp = new AccountHttp(endpoint, networkHttp);
-    }
+  getAccountInfo(address: Address): Promise<AccountInfo> {
+    return this.accountHttp.getAccountInfo(address).toPromise();
+  }
 
-    getAccountInfo(address: Address): Promise<AccountInfo>{
-        return this.accountHttp.getAccountInfo(address).toPromise();
-    }
+  aggregateBondedTransactions(
+    publicAccount: PublicAccount,
+    queryParams?: TransactionQueryParams
+  ): Promise<AggregateTransaction[]> {
+    return this.accountHttp
+      .aggregateBondedTransactions(publicAccount, queryParams)
+      .toPromise();
+  }
 
-    aggregateBondedTransactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<AggregateTransaction[]>{
+  getAccountRestrictions(address: Address): Promise<AccountRestrictionsInfo> {
+    return this.accountHttp.getAccountRestrictions(address).toPromise();
+  }
 
-        return this.accountHttp.aggregateBondedTransactions(publicAccount, queryParams).toPromise();
-    }
+  getAccountRestrictionsFromAccounts(
+    addresses: Address[]
+  ): Promise<AccountRestrictionsInfo[]> {
+    return this.accountHttp
+      .getAccountRestrictionsFromAccounts(addresses)
+      .toPromise();
+  }
 
-    getAccountRestrictions(address: Address): Promise<AccountRestrictionsInfo>{
+  getAccountsInfo(addresses: Address[]): Promise<AccountInfo[]> {
+    return this.accountHttp.getAccountsInfo(addresses).toPromise();
+  }
 
-        return this.accountHttp.getAccountRestrictions(address).toPromise();
-    }
+  getAccountsNames(addresses: Address[]): Promise<AccountNames[]> {
+    return this.accountHttp.getAccountsNames(addresses).toPromise();
+  }
 
-    getAccountRestrictionsFromAccounts(addresses: Address[]): Promise<AccountRestrictionsInfo[]>{
+  getMultisigAccountGraphInfo(
+    address: Address
+  ): Promise<MultisigAccountGraphInfo> {
+    return this.accountHttp.getMultisigAccountGraphInfo(address).toPromise();
+  }
 
-        return this.accountHttp.getAccountRestrictionsFromAccounts(addresses).toPromise();
-    }
+  getMultisigAccountInfo(address: Address): Promise<MultisigAccountInfo> {
+    return this.accountHttp.getMultisigAccountInfo(address).toPromise();
+  }
 
-    getAccountsInfo(addresses: Address[]): Promise<AccountInfo[]>{
+  transactions(
+    publicAccount: PublicAccount,
+    queryParams?: TransactionQueryParams
+  ): Promise<Transaction[]> {
+    return this.accountHttp
+      .transactions(publicAccount, queryParams)
+      .toPromise();
+  }
 
-        return this.accountHttp.getAccountsInfo(addresses).toPromise();
-    }
-    
-    getAccountsNames(addresses: Address[]): Promise<AccountNames[]>{
+  incomingTransactions(
+    accountId: Address | PublicAccount,
+    queryParams?: TransactionQueryParams
+  ): Promise<Transaction[]> {
+    return this.accountHttp
+      .incomingTransactions(accountId, queryParams)
+      .toPromise();
+  }
 
-        return this.accountHttp.getAccountsNames(addresses).toPromise();
-    }
+  outgoingTransactions(
+    publicAccount: PublicAccount,
+    queryParams?: TransactionQueryParams
+  ): Promise<Transaction[]> {
+    return this.accountHttp
+      .outgoingTransactions(publicAccount, queryParams)
+      .toPromise();
+  }
 
-    getMultisigAccountGraphInfo(address: Address): Promise<MultisigAccountGraphInfo>{
-
-        return this.accountHttp.getMultisigAccountGraphInfo(address).toPromise();
-    }
-
-    getMultisigAccountInfo(address: Address): Promise<MultisigAccountInfo>{
-
-        return this.accountHttp.getMultisigAccountInfo(address).toPromise();
-    }
-
-    transactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]>{
-
-        return this.accountHttp.transactions(publicAccount, queryParams).toPromise();
-    }
-
-    incomingTransactions(accountId: Address | PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]>{
-
-        return this.accountHttp.incomingTransactions(accountId, queryParams).toPromise();
-    }
-
-    outgoingTransactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]>{
-
-        return this.accountHttp.outgoingTransactions(publicAccount, queryParams).toPromise();
-    }
-
-    unconfirmedTransactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]>{
-
-        return this.accountHttp.unconfirmedTransactions(publicAccount, queryParams).toPromise();
-    }
+  unconfirmedTransactions(
+    publicAccount: PublicAccount,
+    queryParams?: TransactionQueryParams
+  ): Promise<Transaction[]> {
+    return this.accountHttp
+      .unconfirmedTransactions(publicAccount, queryParams)
+      .toPromise();
+  }
 }
-
