@@ -1,24 +1,40 @@
 <template>
   <div>
-    <DataTable :value="transactions" :paginator="false" :rows="Number(pages)" scrollDirection="horizontal"
-      :alwaysShowPaginator="false" responsiveLayout="scroll"
+    <DataTable
+      :value="transactions"
+      :paginator="false"
+      :rows="Number(pages)"
+      scrollDirection="horizontal"
+      :alwaysShowPaginator="false"
+      responsiveLayout="scroll"
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-      currentPageReportTemplate="">
+      currentPageReportTemplate=""
+    >
       <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{ data }">
           <div>
-            <div class="uppercase text-xs text-gray-300 font-bold mb-1">TX Hash</div>
-            <router-link class="uppercase font-bold text-xs block text-blue-600 hover:text-blue-primary hover:underline"
-              :to="{ name: 'ViewTransaction', params: { hash: data.hash } }">
+            <div class="uppercase text-xs text-gray-300 font-bold mb-1">
+              TX Hash
+            </div>
+            <router-link
+              class="uppercase font-bold text-xs block text-blue-600 hover:text-blue-primary hover:underline"
+              :to="{ name: 'ViewTransaction', params: { hash: data.hash } }"
+            >
               <span
-                class="text-xs truncate inline-flex text-ellipsis overflow-hidden w-44 break-all hover:underline hover:text-blue-primary "
-                v-tooltip.right="data.hash">{{ data.hash }}</span>...
+                class="text-xs truncate inline-flex text-ellipsis overflow-hidden w-44 break-all hover:underline hover:text-blue-primary"
+                v-tooltip.right="data.hash"
+                >{{ data.hash }}</span
+              >...
             </router-link>
           </div>
           <div>
-            <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Type</div>
+            <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">
+              Type
+            </div>
             <div class="flex items-center">
-              <div class="uppercase font-bold text-xs mr-2">{{ data.type }}</div>
+              <div class="uppercase font-bold text-xs mr-2">
+                {{ data.type }}
+              </div>
             </div>
           </div>
         </template>
@@ -26,14 +42,22 @@
       <Column style="width: 200px" v-if="!wideScreen">
         <template #body="{ data }">
           <div v-if="selectedGroupType === transactionGroupType.CONFIRMED">
-            <div class="uppercase text-xs text-gray-300 font-bold mb-1 pt-4">Timestamp</div>
-            <div class="uppercase font-bold text-xs">{{ convertLocalTime(data.timestamp) }}</div>
+            <div class="uppercase text-xs text-gray-300 font-bold mb-1 pt-4">
+              Timestamp
+            </div>
+            <div class="uppercase font-bold text-xs">
+              {{ convertLocalTime(data.timestamp) }}
+            </div>
           </div>
           <div>
-            <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">Transactions</div>
+            <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">
+              Transactions
+            </div>
             <div class="flex items-center">
               <span v-bind:key="index" v-for="(txn, index) in data.txnList">
-                <span class="inline-block bg-blue-100 text-blue-700 font-bold text-xs py-1 px-2 my-1 mx-1 rounded">
+                <span
+                  class="inline-block bg-blue-100 text-blue-700 font-bold text-xs py-1 px-2 my-1 mx-1 rounded"
+                >
                   {{ txn.name }}&nbsp;({{ txn.total }})
                 </span>
               </span>
@@ -41,68 +65,107 @@
           </div>
         </template>
       </Column>
-      <Column field="hash" header="TX Hash" headerStyle="width:80px;text-transform:uppercase" v-if="wideScreen">
+      <Column
+        field="hash"
+        header="TX Hash"
+        headerStyle="width:80px;text-transform:uppercase"
+        v-if="wideScreen"
+      >
         <template #body="{ data }">
-          <router-link :to="{ name: 'ViewTransaction', params: { hash: data.hash } }"
+          <router-link
+            :to="{ name: 'ViewTransaction', params: { hash: data.hash } }"
             class="text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex w-44"
-            v-tooltip.bottom="data.hash"><span class="text-ellipsis overflow-hidden">{{ data.hash }}</span>...</router-link>
+            v-tooltip.bottom="data.hash"
+            ><span class="text-ellipsis overflow-hidden">{{ data.hash }}</span
+            >...</router-link
+          >
         </template>
       </Column>
-      <Column field="timestamp" header="Timestamp" headerStyle="width:130px;text-transform:uppercase"
-        v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen">
+      <Column
+        field="timestamp"
+        header="Timestamp"
+        headerStyle="width:130px;text-transform:uppercase"
+        v-if="
+          selectedGroupType === transactionGroupType.CONFIRMED && wideScreen
+        "
+      >
         <template #body="{ data }">
           <span class="text-xs">{{ convertLocalTime(data.timestamp) }}</span>
         </template>
       </Column>
-      <Column field="typeName" header="Type" headerStyle="width:110px;text-transform:uppercase" v-if="wideScreen">
+      <Column
+        field="typeName"
+        header="Type"
+        headerStyle="width:110px;text-transform:uppercase"
+        v-if="wideScreen"
+      >
         <template #body="{ data }">
           <span class="text-xs">{{ data.type }}</span>
         </template>
       </Column>
-      <Column field="block" header="Block" headerStyle="width:110px;text-transform:uppercase"
-        v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen">
+      <Column
+        field="block"
+        header="Block"
+        headerStyle="width:110px;text-transform:uppercase"
+        v-if="
+          selectedGroupType === transactionGroupType.CONFIRMED && wideScreen
+        "
+      >
         <template #body="{ data }">
-          <router-link :to="{ name: 'ViewBlock', params: { blockHeight: data.block } }"
-            class="text-blue-600 hover:text-blue-primary hover:underline text-xs">{{ data.block }}</router-link>
+          <router-link
+            :to="{ name: 'ViewBlock', params: { blockHeight: data.block } }"
+            class="text-blue-600 hover:text-blue-primary hover:underline text-xs"
+            >{{ data.block }}</router-link
+          >
         </template>
       </Column>
-      <Column header="TX FEE" headerStyle="width:110px;text-transform:uppercase"
-        v-if="selectedGroupType === transactionGroupType.CONFIRMED && wideScreen">
+      <Column
+        header="TX FEE"
+        headerStyle="width:110px;text-transform:uppercase"
+        v-if="
+          selectedGroupType === transactionGroupType.CONFIRMED && wideScreen
+        "
+      >
         <template #body="{ data }">
-          <div class="text-xs">{{ data.fee }} <b v-if="data.fee == 0 || data.fee > 0">{{ nativeTokenName }}</b></div>
+          <div class="text-xs">
+            {{ data.fee }}
+            <b v-if="data.fee == 0 || data.fee > 0">{{ nativeTokenName }}</b>
+          </div>
         </template>
       </Column>
-      <Column header="Transactions" headerStyle="width:40px;text-transform:uppercase" v-if="wideScreen">
+      <Column
+        header="Transactions"
+        headerStyle="width:40px;text-transform:uppercase"
+        v-if="wideScreen"
+      >
         <template #body="{ data }">
           <div v-bind:key="index" v-for="(txn, index) in data.txnList">
-            <span class="inline-block bg-blue-100 text-blue-700 font-bold text-xs py-1 px-2 my-1 mx-1 rounded">
+            <span
+              class="inline-block bg-blue-100 text-blue-700 font-bold text-xs py-1 px-2 my-1 mx-1 rounded"
+            >
               {{ txn.name }}&nbsp;({{ txn.total }})
             </span>
           </div>
         </template>
       </Column>
-      <template #empty>
-        No transaction found
-      </template>
-      <template #loading>
-        Fetching transactions
-      </template>
+      <template #empty> No transaction found </template>
+      <template #loading> Fetching transactions </template>
     </DataTable>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from "vue";
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
 import { Helper } from "@/util/typeHelper";
-import { AppState } from '@/state/appState';
+import { AppState } from "@/state/appState";
 
 defineProps({
   transactions: Array,
   pages: Number,
   selectedGroupType: String,
-})
+});
 
 const wideScreen = ref(false);
 const screenResizeHandler = () => {
@@ -128,6 +191,4 @@ const nativeTokenName = computed(() => AppState.nativeToken.label);
 const convertLocalTime = (dateTimeInJSON: string) => {
   return Helper.convertDisplayDateTimeFormat24(dateTimeInJSON);
 };
-
 </script>
-

@@ -5,7 +5,7 @@ import {
   AccountInfo,
   MultisigAccountInfo,
   Mosaic,
-  type NamespaceName
+  type NamespaceName,
 } from "tsjs-xpx-chain-sdk";
 import { ChainUtils } from "./chainUtils";
 import { networkState } from "@/state/networkState";
@@ -15,7 +15,7 @@ import { Helper } from "@//util/typeHelper";
 
 export interface AssetObj {
   id: string;
-  name: NamespaceName[] 
+  name: NamespaceName[];
   balance: string;
   isActive: boolean;
   isOwner: boolean;
@@ -214,7 +214,7 @@ export class AccountUtils {
       const currentBlock =
         await AppState.chainAPI.chainAPI.getBlockchainHeight();
       let objAsset: AssetObj;
-      let assetName: NamespaceName[]  = [];
+      let assetName: NamespaceName[] = [];
       let isOwner: boolean = false;
       let isActive: boolean = false;
       const assetsHex = assets.map((x) => x.id.toHex());
@@ -249,7 +249,7 @@ export class AccountUtils {
         const assetNames = assetsNames[key];
         if (assetNames.names.length) {
           assetName = assetNames.names;
-        } 
+        }
         const assetIdHex = assetDetails.mosaicId.toHex();
         objAsset = {
           id: assetIdHex,

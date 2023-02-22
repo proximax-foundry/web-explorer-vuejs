@@ -23,7 +23,15 @@
     <div>
       <div>Target Id</div>
       <div>
-        <router-link :to="{ name: 'ViewAsset', params:{ id: txnDetail.detail.targetId }}" class="text-blue-600 hover:text-blue-primary hover:underline">{{ txnDetail.detail.targetIdName?txnDetail.detail.targetIdName:txnDetail.detail.targetId }}</router-link>
+        <router-link
+          :to="{ name: 'ViewAsset', params: { id: txnDetail.detail.targetId } }"
+          class="text-blue-600 hover:text-blue-primary hover:underline"
+          >{{
+            txnDetail.detail.targetIdName
+              ? txnDetail.detail.targetIdName
+              : txnDetail.detail.targetId
+          }}</router-link
+        >
       </div>
     </div>
     <div>
@@ -51,7 +59,18 @@
     <div>
       <div>Target Id</div>
       <div>
-        <router-link :to="{ name: 'ViewNamespace', params:{ namespaceParam: txnDetail.detail.targetId }}" class="text-blue-600 hover:text-blue-primary hover:underline">{{ txnDetail.detail.targetIdName?txnDetail.detail.targetIdName:txnDetail.detail.targetId }}</router-link>
+        <router-link
+          :to="{
+            name: 'ViewNamespace',
+            params: { namespaceParam: txnDetail.detail.targetId },
+          }"
+          class="text-blue-600 hover:text-blue-primary hover:underline"
+          >{{
+            txnDetail.detail.targetIdName
+              ? txnDetail.detail.targetIdName
+              : txnDetail.detail.targetId
+          }}</router-link
+        >
       </div>
     </div>
     <div>
@@ -75,7 +94,10 @@
       <div>{{ txnDetail.detail.newValue }}</div>
     </div>
   </div>
-  <div class="details" v-else-if="txnGroup == TransactionType.ACCOUNT_METADATA_V2">
+  <div
+    class="details"
+    v-else-if="txnGroup == TransactionType.ACCOUNT_METADATA_V2"
+  >
     <div>
       <div>Target Public Key</div>
       <div>{{ txnDetail.detail.targetPublicKey }}</div>
@@ -100,32 +122,31 @@
 </template>
 
 <script setup>
-import { TransactionType } from 'tsjs-xpx-chain-sdk';
+import { TransactionType } from "tsjs-xpx-chain-sdk";
 
 defineProps({
   txnDetail: Object,
-  txnGroup : Number
-})
-
+  txnGroup: Number,
+});
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-.details{
+.details {
   @apply text-gray-800 text-xs;
-  > div{
+  > div {
     @apply flex items-center border-b border-gray-100 py-4;
 
-    > div:first-child{
+    > div:first-child {
       @apply w-40 text-xs pl-4;
     }
 
-    > div:nth-child(2){
+    > div:nth-child(2) {
       @apply text-xs w-full;
     }
   }
 
-  > div:last-child{
+  > div:last-child {
     @apply border-none;
   }
 }
