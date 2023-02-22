@@ -64,6 +64,7 @@ import {
   MetadataEntry,
   AggregateTransactionInfo,
   TransactionInfo,
+  TransactionStatus,
 } from "tsjs-xpx-chain-sdk";
 import type { InnerTransaction } from "tsjs-xpx-chain-sdk";
 import { networkState } from "@/state/networkState";
@@ -627,8 +628,10 @@ export class TransactionUtils {
     }
     try {
       let txn: any = {};
-      const txnStatus =
-        await AppState.chainAPI.transactionAPI.getTransactionStatus(hash);
+      let txnStatus: TransactionStatus;
+      txnStatus = await AppState.chainAPI.transactionAPI.getTransactionStatus(
+        hash
+      );
       if (txnStatus.group == "unconfirmed") {
         txn = await AppState.chainAPI.transactionAPI.getUnconfirmedTransaction(
           hash
@@ -1029,9 +1032,7 @@ export class TransactionUtils {
           }
         }
       }
-    } catch (error) {
-      throw error;
-    }
+    } catch (error) {}
     return newType;
   }
 
@@ -2435,9 +2436,7 @@ export class TransactionUtils {
       const nsName = await TransactionUtils.getNamespacesName([nsId]);
 
       txnDetails.aliasName = nsName[0].name;
-    } catch (error) {
-      throw error;
-    }
+    } catch (error) {}
     return txnDetails;
   }
   // --------------------------------------end------------------------------------------------------------------
@@ -2466,9 +2465,7 @@ export class TransactionUtils {
       const nsName = await TransactionUtils.getNamespacesName([nsId]);
 
       txnDetails.aliasName = nsName[0].name;
-    } catch (error) {
-      throw error;
-    }
+    } catch (error) {}
     return txnDetails;
   }
   // --------------------------------------end------------------------------------------------------------------
@@ -2520,9 +2517,7 @@ export class TransactionUtils {
         if (assetName.names.length) {
           newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
         }
-      } catch (error) {
-        throw error;
-      }
+      } catch (error) {}
 
       txnDetails.exchangeOffers.push(newTxnExchangeOffer);
     }
@@ -2573,9 +2568,7 @@ export class TransactionUtils {
         if (assetName.names.length) {
           newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
         }
-      } catch (error) {
-        throw error;
-      }
+      } catch (error) {}
       txnDetails.exchangeOffers.push(newTxnExchangeOffer);
     }
 
@@ -2678,9 +2671,7 @@ export class TransactionUtils {
         if (assetName.names.length) {
           newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
         }
-      } catch (error) {
-        throw error;
-      }
+      } catch (error) {}
       txnDetails.exchangeOffers.push(newTxnExchangeOffer);
     }
 
@@ -2798,9 +2789,7 @@ export class TransactionUtils {
             newRestrictionModification.name = assetName.names[0].name;
           }
         }
-      } catch (error) {
-        throw error;
-      }
+      } catch (error) {}
       txnDetails.modification.push(newRestrictionModification);
     }
 
@@ -2941,9 +2930,7 @@ export class TransactionUtils {
       );
 
       //   txnDetails.supplyDeltaIsRaw = false;
-    } catch (error) {
-      throw error;
-    }
+    } catch (error) {}
     return txnDetails;
   }
   // --------------------------------------end------------------------------------------------------------------
@@ -2978,6 +2965,8 @@ export class TransactionUtils {
         txnDetails.namespaceName = assetName.names[0].name;
       }
 
+      const levyAssetInfo = await TransactionUtils.getAssetInfo(levyAssetId);
+
       // txnDetails.levyAssetAmount = TransactionUtils.convertToExactAmount(levyAmount, levyAssetInfo.divisibility);
       txnDetails.levyAssetAmount = levyAmount;
       txnDetails.levyAssetAmountIsRaw = false;
@@ -2987,9 +2976,7 @@ export class TransactionUtils {
       if (levyAssetName.names.length) {
         txnDetails.levyAssetName = levyAssetName.names[0].name;
       }
-    } catch (error) {
-      throw error;
-    }
+    } catch (error) {}
 
     return txnDetails;
   }
@@ -3014,9 +3001,7 @@ export class TransactionUtils {
       if (assetName.names.length) {
         txnDetails.namespaceName = assetName.names[0].name;
       }
-    } catch (error) {
-      throw error;
-    }
+    } catch (error) {}
     return txnDetails;
   }
   // --------------------------------------end------------------------------------------------------------------
@@ -3051,9 +3036,7 @@ export class TransactionUtils {
           registerNSTxn.namespaceId
         );
         txnDetails.isExtend = true;
-      } catch (error) {
-        throw error;
-      }
+      } catch (error) {}
     } else {
       if (!registerNSTxn.parentId) {
         throw new Error("Service Unavailable");
@@ -3175,9 +3158,7 @@ export class TransactionUtils {
           txnDetails.sizeChanged
         );
       }
-    } catch (error) {
-      throw error;
-    }
+    } catch (error) {}
     return txnDetails;
   }
 
@@ -3232,9 +3213,7 @@ export class TransactionUtils {
       if (nsName.length) {
         txnDetails.targetIdName = nsName[0].name;
       }
-    } catch (error) {
-      throw error;
-    }
+    } catch (error) {}
     return txnDetails;
   }
 
@@ -3296,9 +3275,7 @@ export class TransactionUtils {
           txnDetails.sizeChanged
         );
       }
-    } catch (error) {
-      throw error;
-    }
+    } catch (error) {}
     return txnDetails;
   }
 
@@ -3351,9 +3328,7 @@ export class TransactionUtils {
       if (assetName.names.length) {
         txnDetails.targetIdName = assetName.names[0].name;
       }
-    } catch (error) {
-      throw error;
-    }
+    } catch (error) {}
     return txnDetails;
   }
 
@@ -3411,9 +3386,7 @@ export class TransactionUtils {
           txnDetails.sizeChanged
         );
       }
-    } catch (error) {
-      throw error;
-    }
+    } catch (error) {}
     return txnDetails;
   }
 
@@ -3709,9 +3682,7 @@ export class TransactionUtils {
         );
       }
       txnDetails.amountIsRaw = false;
-    } catch (error) {
-      throw error;
-    }
+    } catch (error) {}
     return txnDetails;
   }
 
@@ -3780,9 +3751,7 @@ export class TransactionUtils {
         );
       }
       txnDetails.amountIsRaw = false;
-    } catch (error) {
-      throw error;
-    }
+    } catch (error) {}
 
     return txnDetails;
   }
@@ -4035,9 +4004,7 @@ export class TransactionUtils {
                 await AppState.chainAPI.transactionAPI.getUnconfirmedTransaction(
                   hash
                 );
-            } catch (error) {
-              throw error;
-            }
+            } catch (error) {}
             break;
           case TransactionGroupType.PARTIAL:
             try {
@@ -4045,9 +4012,7 @@ export class TransactionUtils {
                 await AppState.chainAPI.transactionAPI.getPartialTransaction(
                   hash
                 );
-            } catch (error) {
-              throw error;
-            }
+            } catch (error) {}
             break;
           default:
             statusGroup = "error";
@@ -4107,10 +4072,11 @@ export class TransactionUtils {
     if (!AppState.chainAPI) {
       throw new Error("Service unavailable");
     }
+    let transactionInfo: TransactionInfo | AggregateTransactionInfo;
     if (!txn.transactionInfo) {
       throw new Error("Service unavailable");
     }
-    const transactionInfo : TransactionInfo | AggregateTransactionInfo = txn.transactionInfo;
+    transactionInfo = txn.transactionInfo;
     const txnHash =
       transactionInfo instanceof AggregateTransactionInfo
         ? transactionInfo.aggregateHash
@@ -4421,6 +4387,8 @@ export class TransactionUtils {
             txn.messageTypeTitle = "Hexadecimal Message";
             break;
         }
+        const recipientIsNamespace =
+          transferTxn.recipient instanceof NamespaceId ? true : false;
 
         let recipient;
 
@@ -4624,6 +4592,8 @@ export class TransactionUtils {
             txn.messageTypeTitle = "Hexadecimal Message";
             break;
         }
+        const recipientIsNamespace =
+          transferTxn.recipient instanceof NamespaceId ? true : false;
 
         let recipient;
 
@@ -4847,6 +4817,8 @@ export class TransactionUtils {
           txn.messageTypeTitle = "Hexadecimal Message";
           break;
       }
+      const recipientIsNamespace =
+        transferTxn.recipient instanceof NamespaceId ? true : false;
 
       if (transferTxn.recipient instanceof NamespaceId) {
         txn.recipientNamespaceId = transferTxn.recipient.toHex();
@@ -4874,7 +4846,7 @@ export class TransactionUtils {
           transferTxn.mosaics[y].id
         );
         let assetId: MosaicId;
-
+        let assetIdHex: string;
         if (groupType === TransactionGroupType.CONFIRMED) {
           assetId = await TransactionUtils.getResolvedAsset(
             transferTxn.mosaics[y].id,
@@ -4891,7 +4863,7 @@ export class TransactionUtils {
           }
         }
 
-        const assetIdHex = assetId.toHex();
+        assetIdHex = assetId.toHex();
 
         if (
           [AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(
@@ -5073,9 +5045,7 @@ export class TransactionUtils {
         );
 
         //   txn.supplyDeltaIsRaw = false;
-      } catch (error) {
-        throw error;
-      }
+      } catch (error) {}
     } else if (transaction.type === TransactionType.MODIFY_MOSAIC_LEVY) {
       const assetModifyLevyTxn = transaction as MosaicModifyLevyTransaction;
 
@@ -5111,9 +5081,7 @@ export class TransactionUtils {
         if (levyAssetName.names.length) {
           txn.levyAssetName = levyAssetName.names[0].name;
         }
-      } catch (error) {
-        throw error;
-      }
+      } catch (error) {}
     } else if (transaction.type === TransactionType.REMOVE_MOSAIC_LEVY) {
       const assetRemoveLevyTxn = transaction as MosaicRemoveLevyTransaction;
 
@@ -5126,9 +5094,7 @@ export class TransactionUtils {
         if (assetName.names.length) {
           txn.namespaceName = assetName.names[0].name;
         }
-      } catch (error) {
-        throw error;
-      }
+      } catch (error) {}
     }
     return txn;
   }
@@ -5180,9 +5146,7 @@ export class TransactionUtils {
           );
 
           //   txn.supplyDeltaIsRaw = false;
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
       } else if (txns[i].type === TransactionType.MODIFY_MOSAIC_LEVY) {
         const assetModifyLevyTxn = txns[i] as MosaicModifyLevyTransaction;
 
@@ -5222,9 +5186,7 @@ export class TransactionUtils {
           if (levyAssetName.names.length) {
             txn.levyAssetName = levyAssetName.names[0].name;
           }
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
       } else if (txns[i].type === TransactionType.REMOVE_MOSAIC_LEVY) {
         const assetRemoveLevyTxn = txns[i] as MosaicRemoveLevyTransaction;
 
@@ -5237,9 +5199,7 @@ export class TransactionUtils {
           if (assetName.names.length) {
             txn.namespaceName = assetName.names[0].name;
           }
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
       }
       formatedTxns.push(txn);
     }
@@ -5292,9 +5252,7 @@ export class TransactionUtils {
           );
 
           //txn.supplyDeltaIsRaw = false;
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
       } else if (txns[i].type === TransactionType.MODIFY_MOSAIC_LEVY) {
         const assetModifyLevyTxn = txns[i] as MosaicModifyLevyTransaction;
 
@@ -5334,9 +5292,7 @@ export class TransactionUtils {
           if (levyAssetName.names.length) {
             txn.levyAssetName = levyAssetName.names[0].name;
           }
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
       } else if (txns[i].type === TransactionType.REMOVE_MOSAIC_LEVY) {
         const assetRemoveLevyTxn = txns[i] as MosaicRemoveLevyTransaction;
 
@@ -5349,9 +5305,7 @@ export class TransactionUtils {
           if (assetName.names.length) {
             txn.namespaceName = assetName.names[0].name;
           }
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
       }
       formatedTxns.push(txn);
     }
@@ -5404,9 +5358,7 @@ export class TransactionUtils {
           );
 
           //   txn.supplyDeltaIsRaw = false;
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
       } else if (txns[i].type === TransactionType.MODIFY_MOSAIC_LEVY) {
         const assetModifyLevyTxn = txns[i] as MosaicModifyLevyTransaction;
 
@@ -5446,9 +5398,7 @@ export class TransactionUtils {
           if (levyAssetName.names.length) {
             txn.levyAssetName = levyAssetName.names[0].name;
           }
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
       } else if (txns[i].type === TransactionType.REMOVE_MOSAIC_LEVY) {
         const assetRemoveLevyTxn = txns[i] as MosaicRemoveLevyTransaction;
 
@@ -5461,9 +5411,7 @@ export class TransactionUtils {
           if (assetName.names.length) {
             txn.namespaceName = assetName.names[0].name;
           }
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
       }
       formatedTxns.push(txn);
     }
@@ -5725,9 +5673,7 @@ export class TransactionUtils {
         const nsName = await TransactionUtils.getNamespacesName([nsId]);
 
         txn.aliasName = nsName[0].name;
-      } catch (error) {
-        throw error;
-      }
+      } catch (error) {}
     } else if (transaction.type === TransactionType.MOSAIC_ALIAS) {
       const assetAliasTxn = transaction as MosaicAliasTransaction;
 
@@ -5742,9 +5688,7 @@ export class TransactionUtils {
         const nsName = await TransactionUtils.getNamespacesName([nsId]);
 
         txn.aliasName = nsName[0].name;
-      } catch (error) {
-        throw error;
-      }
+      } catch (error) {}
     }
     return txn;
   }
@@ -5778,9 +5722,7 @@ export class TransactionUtils {
           const nsName = await TransactionUtils.getNamespacesName([nsId]);
 
           txn.aliasName = nsName[0].name;
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
       } else if (txns[i].type === TransactionType.MOSAIC_ALIAS) {
         const assetAliasTxn = txns[i] as MosaicAliasTransaction;
 
@@ -5794,9 +5736,7 @@ export class TransactionUtils {
           const nsName = await TransactionUtils.getNamespacesName([nsId]);
 
           txn.aliasName = nsName[0].name;
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
       }
       formatedTxns.push(txn);
     }
@@ -5831,9 +5771,7 @@ export class TransactionUtils {
         try {
           const nsName = await TransactionUtils.getNamespacesName([nsId]);
           txn.aliasName = nsName[0].name;
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
       } else if (txns[i].type === TransactionType.MOSAIC_ALIAS) {
         const assetAliasTxn = txns[i] as MosaicAliasTransaction;
 
@@ -5848,9 +5786,7 @@ export class TransactionUtils {
           const nsName = await TransactionUtils.getNamespacesName([nsId]);
 
           txn.aliasName = nsName[0].name;
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
       }
       formatedTxns.push(txn);
     }
@@ -5885,9 +5821,7 @@ export class TransactionUtils {
           const nsName = await TransactionUtils.getNamespacesName([nsId]);
 
           txn.aliasName = nsName[0].name;
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
       } else if (txns[i].type === TransactionType.MOSAIC_ALIAS) {
         const assetAliasTxn = txns[i] as MosaicAliasTransaction;
 
@@ -5901,9 +5835,7 @@ export class TransactionUtils {
         try {
           const nsName = await TransactionUtils.getNamespacesName([nsId]);
           txn.aliasName = nsName[0].name;
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
       }
       formatedTxns.push(txn);
     }
@@ -5986,9 +5918,7 @@ export class TransactionUtils {
             txn.sizeChanged
           );
         }
-      } catch (error) {
-        throw error;
-      }
+      } catch (error) {}
     } else if (transaction.type === TransactionType.NAMESPACE_METADATA_V2) {
       const namespaceMetadataTxn = transaction as NamespaceMetadataTransaction;
 
@@ -6033,9 +5963,7 @@ export class TransactionUtils {
             txn.sizeChanged
           );
         }
-      } catch (error) {
-        throw error;
-      }
+      } catch (error) {}
     } else if (transaction.type === TransactionType.ACCOUNT_METADATA_V2) {
       const accountMetadataTxn = transaction as AccountMetadataTransaction;
 
@@ -6070,9 +5998,7 @@ export class TransactionUtils {
             txn.sizeChanged
           );
         }
-      } catch (error) {
-        throw error;
-      }
+      } catch (error) {}
     }
 
     return txn;
@@ -6130,9 +6056,7 @@ export class TransactionUtils {
               txn.sizeChanged
             );
           }
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
       } else if (txns[i].type === TransactionType.NAMESPACE_METADATA_V2) {
         const namespaceMetadataTxn = txns[i] as NamespaceMetadataTransaction;
 
@@ -6175,9 +6099,7 @@ export class TransactionUtils {
               txn.sizeChanged
             );
           }
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
       } else if (txns[i].type === TransactionType.ACCOUNT_METADATA_V2) {
         const accountMetadataTxn = txns[i] as AccountMetadataTransaction;
 
@@ -6210,9 +6132,7 @@ export class TransactionUtils {
               txn.sizeChanged
             );
           }
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
       }
       formatedTxns.push(txn);
     }
@@ -6251,9 +6171,7 @@ export class TransactionUtils {
           if (assetName.names.length) {
             txn.targetIdName = assetName.names[0].name;
           }
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
       } else if (txns[i].type === TransactionType.NAMESPACE_METADATA_V2) {
         const namespaceMetadataTxn = txns[i] as NamespaceMetadataTransaction;
 
@@ -6274,9 +6192,7 @@ export class TransactionUtils {
           if (nsName.length) {
             txn.targetIdName = nsName[0].name;
           }
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
       } else if (txns[i].type === TransactionType.ACCOUNT_METADATA_V2) {
         const accountMetadataTxn = txns[i] as AccountMetadataTransaction;
 
@@ -6344,9 +6260,7 @@ export class TransactionUtils {
               txn.sizeChanged
             );
           }
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
       } else if (txns[i].type === TransactionType.NAMESPACE_METADATA_V2) {
         const namespaceMetadataTxn = txns[i] as NamespaceMetadataTransaction;
 
@@ -6390,9 +6304,7 @@ export class TransactionUtils {
               txn.sizeChanged
             );
           }
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
       } else if (txns[i].type === TransactionType.ACCOUNT_METADATA_V2) {
         const accountMetadataTxn = txns[i] as AccountMetadataTransaction;
 
@@ -6426,9 +6338,7 @@ export class TransactionUtils {
               txn.sizeChanged
             );
           }
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
       }
 
       formatedTxns.push(txn);
@@ -6865,9 +6775,7 @@ export class TransactionUtils {
           if (assetName.names.length) {
             newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
           }
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
         txn.exchangeOffers.push(newTxnExchangeOffer);
       }
     } else if (transaction.type === TransactionType.ADD_EXCHANGE_OFFER) {
@@ -6906,9 +6814,7 @@ export class TransactionUtils {
           if (assetName.names.length) {
             newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
           }
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
         txn.exchangeOffers.push(newTxnExchangeOffer);
       }
     } else if (transaction.type === TransactionType.REMOVE_EXCHANGE_OFFER) {
@@ -6934,9 +6840,7 @@ export class TransactionUtils {
           if (assetName.names.length) {
             newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
           }
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
         txn.exchangeOffers.push(newTxnExchangeOffer);
       }
     }
@@ -7001,9 +6905,7 @@ export class TransactionUtils {
             if (assetName.names.length) {
               newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
             }
-          } catch (error) {
-            throw error;
-          }
+          } catch (error) {}
           txn.exchangeOffers.push(newTxnExchangeOffer);
         }
       } else if (txns[i].type === TransactionType.ADD_EXCHANGE_OFFER) {
@@ -7043,9 +6945,7 @@ export class TransactionUtils {
             if (assetName.names.length) {
               newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
             }
-          } catch (error) {
-            throw error;
-          }
+          } catch (error) {}
 
           txn.exchangeOffers.push(newTxnExchangeOffer);
         }
@@ -7073,9 +6973,7 @@ export class TransactionUtils {
             if (assetName.names.length) {
               newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
             }
-          } catch (error) {
-            throw error;
-          }
+          } catch (error) {}
           txn.exchangeOffers.push(newTxnExchangeOffer);
         }
       }
@@ -7144,9 +7042,7 @@ export class TransactionUtils {
             if (assetName.names.length) {
               newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
             }
-          } catch (error) {
-            throw error;
-          }
+          } catch (error) {}
           txn.exchangeOffers.push(newTxnExchangeOffer);
         }
       } else if (txns[i].type === TransactionType.ADD_EXCHANGE_OFFER) {
@@ -7186,9 +7082,7 @@ export class TransactionUtils {
             if (assetName.names.length) {
               newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
             }
-          } catch (error) {
-            throw error;
-          }
+          } catch (error) {}
           txn.exchangeOffers.push(newTxnExchangeOffer);
         }
       } else if (txns[i].type === TransactionType.REMOVE_EXCHANGE_OFFER) {
@@ -7215,9 +7109,7 @@ export class TransactionUtils {
             if (assetName.names.length) {
               newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
             }
-          } catch (error) {
-            throw error;
-          }
+          } catch (error) {}
 
           txn.exchangeOffers.push(newTxnExchangeOffer);
         }
@@ -7286,9 +7178,7 @@ export class TransactionUtils {
             if (assetName.names.length) {
               newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
             }
-          } catch (error) {
-            throw error;
-          }
+          } catch (error) {}
           txn.exchangeOffers.push(newTxnExchangeOffer);
         }
       } else if (txns[i].type === TransactionType.ADD_EXCHANGE_OFFER) {
@@ -7328,9 +7218,7 @@ export class TransactionUtils {
             if (assetName.names.length) {
               newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
             }
-          } catch (error) {
-            throw error;
-          }
+          } catch (error) {}
           txn.exchangeOffers.push(newTxnExchangeOffer);
         }
       } else if (txns[i].type === TransactionType.REMOVE_EXCHANGE_OFFER) {
@@ -7357,9 +7245,7 @@ export class TransactionUtils {
             if (assetName.names.length) {
               newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
             }
-          } catch (error) {
-            throw error;
-          }
+          } catch (error) {}
 
           txn.exchangeOffers.push(newTxnExchangeOffer);
         }
@@ -7955,9 +7841,7 @@ export class TransactionUtils {
               newRestrictionModification.name = assetName.names[0].name;
             }
           }
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
         txn.modification.push(newRestrictionModification);
       }
     } else if (
@@ -8074,9 +7958,7 @@ export class TransactionUtils {
                 newRestrictionModification.name = assetName.names[0].name;
               }
             }
-          } catch (error) {
-            throw error;
-          }
+          } catch (error) {}
           txn.modification.push(newRestrictionModification);
         }
       } else if (
@@ -8195,9 +8077,7 @@ export class TransactionUtils {
                 newRestrictionModification.name = assetName.names[0].name;
               }
             }
-          } catch (error) {
-            throw error;
-          }
+          } catch (error) {}
           txn.modification.push(newRestrictionModification);
         }
       } else if (
@@ -8317,9 +8197,7 @@ export class TransactionUtils {
                 newRestrictionModification.name = assetName.names[0].name;
               }
             }
-          } catch (error) {
-            throw error;
-          }
+          } catch (error) {}
           txn.modification.push(newRestrictionModification);
         }
       } else if (
@@ -8467,9 +8345,7 @@ export class TransactionUtils {
           );
         }
         txn.amountIsRaw = false;
-      } catch (error) {
-        throw error;
-      }
+      } catch (error) {}
     } else if (transaction.type === TransactionType.SECRET_PROOF) {
       const secretProofTxn = transaction as SecretProofTransaction;
       txn.secret = secretProofTxn.secret;
@@ -8551,9 +8427,7 @@ export class TransactionUtils {
             );
           }
           txn.amountIsRaw = false;
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
       } else if (txns[i].type === TransactionType.SECRET_PROOF) {
         const secretProofTxn = txns[i] as SecretProofTransaction;
         txn.secret = secretProofTxn.secret;
@@ -8635,9 +8509,7 @@ export class TransactionUtils {
             );
           }
           txn.amountIsRaw = false;
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
       } else if (txns[i].type === TransactionType.SECRET_PROOF) {
         const secretProofTxn = txns[i] as SecretProofTransaction;
         txn.secret = secretProofTxn.secret;
@@ -8721,9 +8593,7 @@ export class TransactionUtils {
             );
           }
           txn.amountIsRaw = false;
-        } catch (error) {
-          throw error;
-        }
+        } catch (error) {}
       } else if (txns[i].type === TransactionType.SECRET_PROOF) {
         const secretProofTxn = txns[i] as SecretProofTransaction;
         txn.secret = secretProofTxn.secret;
@@ -8772,9 +8642,7 @@ export class TransactionUtils {
         if (aggregateTxn) {
           deadline = aggregateTxn.deadline.adjustedValue.compact();
         }
-      } catch (error) {
-        throw error;
-      }
+      } catch (error) {}
     } else {
       deadline = txn.deadline.adjustedValue.compact();
     }
@@ -8830,9 +8698,7 @@ export class TransactionUtils {
         if (aggregateTxn) {
           deadline = aggregateTxn.deadline.adjustedValue.compact();
         }
-      } catch (error) {
-        throw error;
-      }
+      } catch (error) {}
     } else {
       deadline = txn.deadline.adjustedValue.compact();
     }
