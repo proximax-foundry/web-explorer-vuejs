@@ -10,7 +10,7 @@ export interface aliasObj {
 
 export interface levelObj {
   id: string;
-  type: string;
+  name: string;
 }
 
 export interface namespaceInfoFormatted {
