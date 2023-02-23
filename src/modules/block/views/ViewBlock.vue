@@ -6,7 +6,7 @@
         Block is not available in {{ networkName }}
       </div>
     </div>
-    <div v-else-if="!isShowInvalid">
+    <div v-else-if="!isShowInvalid && !blockInfo">
       <div class="flex justify-center items-center border-gray-400 mt-10 mb-20">
         <div
           class="animate-spin rounded-full h-5 w-5 border-b-2 border-navy-primary mr-2"
