@@ -8,7 +8,8 @@ import {
   Mosaic,
   NamespaceId,
   NamespaceInfo,
-  Convert
+  Convert,
+  AliasType
 } from "tsjs-xpx-chain-sdk";
 import { networkState } from '@/state/networkState';
 import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
@@ -265,22 +266,19 @@ export class SearchService{
 
   async searchAssetAlias(){
     let ns = new NamespaceId(this.searchString.toLowerCase());
+    let returnData = {
+      valid: false,
+      searchType: 'Asset',
+      param: this.searchString
+    };
     let formattedNs:namespaceInfoFormatted|boolean = await NamespaceUtils.fetchNamespaceInfo(ns.toHex());
-    if(typeof formattedNs === 'boolean'){
-      return {
-        valid: false,
-        searchType: 'Asset',
-        param: this.searchString,
-      };
-    }else{
-      if(formattedNs.alias.type == 1){
-        return {
-          valid: true,
-          searchType: 'Asset',
-          param: formattedNs.alias.id,
-        };
+    if(typeof formattedNs !== 'boolean'){
+      if(formattedNs.alias.type == AliasType.Mosaic){
+        returnData.valid = true;
+        returnData.param = formattedNs.alias.id;
       }
     }
+    return returnData;
   }
 
   async searchBlock(){

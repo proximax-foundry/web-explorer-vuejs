@@ -3,12 +3,13 @@ import { ChainConfigHttp, Convert,
   NamespaceId,
   MosaicId, Address, PublicAccount, CosignatureSignedTransaction, Statement,
   AccountInfo, Transaction, TransactionQueryParams, SignedTransaction, TransactionType, NamespaceName, MosaicInfo,
-  NamespaceInfo, TransactionGroupType, TransactionSearch
+  NamespaceInfo, TransactionGroupType, TransactionSearch, ChainConfig
 } from "tsjs-xpx-chain-sdk";
 import { NetworkConfig } from "../models/stores/chainProfileConfig";
 import { ChainAPICall } from "../models/REST/chainAPICall";
 import { networkState } from "../state/networkState";
 import { computed } from "vue";
+import { LooseObject } from "./typeHelper";
 
 const currentEndPoint = computed(() => networkState.selectedAPIEndpoint);
 const connectionPort = computed(() => networkState.currentNetworkProfile.httpPort);
@@ -34,16 +35,16 @@ export class ChainUtils{
 
     static async getChainConfig(chainHeight: number, chainConfigHttp: ChainConfigHttp): Promise<NetworkConfig | string>{
         return new Promise((resolve, reject)=>{
-          chainConfigHttp.getChainConfig(chainHeight).subscribe((configString)=>{
+          chainConfigHttp.getChainConfig(chainHeight).subscribe((chainConfigData: ChainConfig)=>{
             const regex = /[^=\n{1}]+=\s*(.*)/g;
-            const configs = configString.networkConfig.match(regex);
+            const configs: string[] = chainConfigData.networkConfig.match(regex);
 
-            if(configs){
-              const networkConfig = configs.reduce((result, data)=>{
+            if(configs.length){
+              const networkConfig: LooseObject = {}; 
+              configs.forEach((data)=>{
                 const [config, value] = data.split("=");
-                result[config.trim()] = value.trim();
-                return result;
-              }, {});
+                networkConfig[config.trim()] = value.trim();
+              });
               const chainConfig = <NetworkConfig>
               {
                 chainHeight: chainHeight,
