@@ -40,7 +40,7 @@ app.mount("#app");
 const loadThemeConfig = async () => {
   AppStateUtils.addNewReadyStates("theme");
   try {
-    const config = await fetch("/themeConfig.json", {
+    const config = await fetch("./themeConfig.json", {
       headers: {
         "Cache-Control": "no-store",
         Pragma: "no-cache",
