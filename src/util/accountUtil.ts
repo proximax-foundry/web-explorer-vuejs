@@ -5,7 +5,7 @@ import {
   AccountInfo,
   MultisigAccountInfo,
   Mosaic,
-  type NamespaceName,
+  MosaicCreatorFilters,
 } from "tsjs-xpx-chain-sdk";
 import { ChainUtils } from "./chainUtils";
 import { networkState } from "@/state/networkState";
@@ -15,7 +15,7 @@ import { Helper } from "@//util/typeHelper";
 
 export interface AssetObj {
   id: string;
-  name: NamespaceName[];
+  name: any[] | "";
   balance: string;
   isActive: boolean;
   isOwner: boolean;
@@ -197,75 +197,63 @@ export class AccountUtils {
     }
   }
 
-  static async formatAccountAsset(
-    assets: Mosaic[],
-    publicKey: string
-  ): Promise<AssetObj[]> {
-    if (!AppState.chainAPI) {
-      throw new Error("Service Unavailable");
+  static async formatAccountAsset(assets: Mosaic[],publicKey: string): Promise<AssetObj[]> {
+    if(!AppState.chainAPI){
+      throw new Error("Service unavailable")
     }
-    const formattedAsset: any = [];
+    let formattedAsset: any = [];
     if (assets.length > 0) {
-      /* let mosaicQueryParams = Helper.createMosaicQueryParams();
+      let mosaicQueryParams = Helper.createMosaicQueryParams();
       let mosaicCreatorFilters = new MosaicCreatorFilters(publicKey);
       mosaicCreatorFilters.holding = false;
       mosaicQueryParams.ownerFilters = mosaicCreatorFilters;
-      let notHoldingMosaicSearch = await AppState.chainAPI.assetAPI.searchMosaics(mosaicQueryParams); //Search 0 balance asset */
-      const currentBlock =
-        await AppState.chainAPI.chainAPI.getBlockchainHeight();
+      let currentBlock = await AppState.chainAPI.chainAPI.getBlockchainHeight();
       let objAsset: AssetObj;
-      let assetName: NamespaceName[] = [];
+      let assetName: any=[];
       let isOwner: boolean = false;
       let isActive: boolean = false;
-      const assetsHex = assets.map((x) => x.id.toHex());
+      let assetsHex = assets.map(x => x.id.toHex());
 
-      const mosaicInfos = await AppState.chainAPI.assetAPI.getMosaics(
-        assets.map((x) => x.id)
-      );
-      const assetsNames = await TransactionUtils.getAssetsName(
-        assets.map((x) => x.id)
-      );
+      let assetsDetails = await AppState.chainAPI.assetAPI.getMosaics(assets.map(x => x.id));
+      let assetsNames = await TransactionUtils.getAssetsName(assets.map(x => x.id));
 
-      for (const key in assets) {
-        const assetDetails = mosaicInfos.find(
-          (x) => x.mosaicId.toHex() === assetsHex[key]
-        );
-        if (!assetDetails) {
-          throw new Error("Service Unavailable");
+      for (let key in assets) {
+        let assetDetails = assetsDetails.find(x => x.mosaicId.toHex() === assetsHex[key])
+        if(!assetDetails){
+          throw new Error("Service unavailable")
         }
-        const { owner, height, duration } = assetDetails;
-        if (duration == undefined) {
+        if(!assetDetails.duration){
+          isActive = true
+        }
+        else if ((assetDetails.height.compact() + assetDetails.duration.compact()) > currentBlock) {
           isActive = true;
-        } else if (height.compact() + duration.compact() > currentBlock) {
-          isActive = true;
-        } else if (height.compact() == 1) {
+        } else if (assetDetails.height.compact() == 1) {
           isActive = true;
         }
 
-        if (owner.publicKey == publicKey) {
+        if (assetDetails.owner.publicKey == publicKey) {
           isOwner = true;
         }
 
-        const assetNames = assetsNames[key];
+        let assetNames = assetsNames[key];
         if (assetNames.names.length) {
           assetName = assetNames.names;
+        } else {
+          assetName = '';
         }
         const assetIdHex = assetDetails.mosaicId.toHex();
         objAsset = {
           id: assetIdHex,
-          balance: Helper.convertToCurrency(
-            assets[key].amount.compact(),
-            assetDetails.divisibility
-          ),
+          balance: Helper.convertToCurrency(assets[key].amount.compact(), assetDetails.divisibility),
           name: assetName,
           isOwner,
           isActive,
-        };
-        formattedAsset.push(objAsset);
+        }
+        formattedAsset.push(objAsset);  
       }
 
       // let get0balanceAsset = mosaicSearch.mosaicsInfo.filter(id => !assets.find(o => o.id.toHex() == id.mosaicId.id.toHex()));
-
+      
       // for (let key in get0balanceAsset) {
       //   isOwner = true;
       //   isActive = true;
@@ -284,7 +272,7 @@ export class AccountUtils {
       //     isActive,
       //   }
       //   formattedAsset.push(objAsset);
-      // }
+      // }      
     }
     return formattedAsset;
   }

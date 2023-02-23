@@ -196,7 +196,7 @@
             >
               <div
                 v-if="
-                  level.type.toUpperCase() === namespaceInfo.name.toUpperCase()
+                  level.name.toUpperCase() === namespaceInfo.name.toUpperCase()
                 "
               >
                 {{ level.id }}
@@ -212,7 +212,7 @@
                   >{{ level.id }}</router-link
                 >
               </div>
-              <div>{{ level.type }}</div>
+              <div>{{ level.name }}</div>
             </div>
           </div>
         </div>
