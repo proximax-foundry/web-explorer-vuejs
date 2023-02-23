@@ -152,7 +152,14 @@ const localNetworkType = computed(() => ChainUtils.getNetworkType(networkState.c
 const namespaceIdFirstCharacterString = "89ABCDEF";
 const nativeTokenNamespaceId = computed(()=> new NamespaceId(AppState.nativeToken.fullNamespace).toHex());
 
-export const transactionTypeName = {
+interface IdName{
+  id: number,
+  name: string
+}
+
+type TxnTypeName = {[key: string] : IdName}
+
+export const transactionTypeName: TxnTypeName = {
   transfer: {
     id: TransactionType.TRANSFER,
     name: 'Transfer'
