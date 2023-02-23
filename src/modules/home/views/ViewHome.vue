@@ -38,7 +38,7 @@
     <div
       class="xl:grid xl:grid-cols-2 xl:gap-4 md:grid md:grid-rows-1 md:gap-2 sm:grid sm:grid-rows-1"
     >
-      <div class="box-border h-auto w-auto" style="width: 540px">
+      <div class="box-border h-auto w-auto">
         <LatestBlockDataTable></LatestBlockDataTable>
         <button
           class="content-center w-full h-6 text-xs text-center text-blue-primary rounded-none bg-gray-200"
@@ -49,7 +49,6 @@
       </div>
       <div
         class="box-content h-auto w-auto border-collapse"
-        style="width: 540px"
       >
         <LatestTransactionDataTable></LatestTransactionDataTable>
         <button
