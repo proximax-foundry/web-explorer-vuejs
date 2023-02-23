@@ -271,7 +271,6 @@ const fetchNamespaceDetail = async () => {
   let fetchInfo = await NamespaceUtils.fetchNamespaceInfo(
     validNamespaceData.namespaceIdHex
   );
-  console.log(fetchInfo)
   if (fetchInfo) {
     const namespaceMetadata = await MetadataUtils.getNamespaceMetadata(
       fetchInfo.name
