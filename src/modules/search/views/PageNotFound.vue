@@ -12,12 +12,6 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'ViewInvalidLink'
-}
-</script>
-
 <style scoped lang="scss">
 .text-5xl {
   font-size: 3rem; /* 48px */
