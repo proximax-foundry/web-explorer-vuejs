@@ -281,7 +281,7 @@ export default {
         txnQueryParams.publicKey = props.accountPublicKey;
       }
       txnQueryParams.pageNumber = currentPage.value;
-      if(selectedTxnType.value == undefined || selectedTxnType.value == 'all' || selectedTxnType.value == TransactionFilterType.ASSET){
+      if(selectedTxnType.value == undefined || selectedTxnType.value == 'all'){
         txnQueryParams.embedded = false;
       }else{
         txnQueryParams.embedded = true;
