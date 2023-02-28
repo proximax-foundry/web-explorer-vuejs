@@ -49,8 +49,11 @@ export default {
         searchType.value = 'Search';
         break;
     }
+
     let currentChainProfile = new ChainProfile(networkState.chainNetworkName);
      currentChainProfile.init();
+
+
 const BASE_URL = 'https://'+currentChainProfile.apiNodes[0]+'/transactions/confirmed/'+ props.param
 async function fetchToDo(BASE_URL){
   const response=await fetch(BASE_URL);
@@ -58,6 +61,7 @@ async function fetchToDo(BASE_URL){
   const data = response.json();
   return data
 }
+
 function displayValue(data){
   let rawData = '',
     f = {
@@ -79,13 +83,18 @@ function displayValue(data){
     }
     return rtnStr;
 });
+
   const rawDiv=document.getElementById("raw")
+
   rawDiv.innerHTML=rawData
+
 }
+
 fetchToDo(BASE_URL).then((value) => {
   const data = JSON.stringify(value)
     displayValue(data)
   });
+
     return {
       networkName,
       searchType,
@@ -99,12 +108,15 @@ fetchToDo(BASE_URL).then((value) => {
   @apply text-gray-800 text-xs;
   > div{
     @apply flex items-center border-b border-gray-100 py-4;
+
     > div:first-child{
       @apply w-40 text-xs pl-4;
     }
+
     > div:nth-child(2){
       @apply text-xs w-full;
     }
+
     > div:last-child{
       @apply border-none;
     }
