@@ -163,6 +163,15 @@ let redirectionRoutes: RouteRecordRaw[] = [
       title: "Asset Search Redirect",
     },
     component: null
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'PageNotFound',
+    props: false,
+    component: () => import('@/modules/search/views/PageNotFound.vue'),
+    meta: {
+      title: "Error 404 Page",
+    }
   }
 ];
 
