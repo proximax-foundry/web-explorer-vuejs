@@ -139,7 +139,7 @@ const searchPlaceHolder = computed(() => {
   @apply my-2;
 
   a {
-    @apply mr-4 hover: text-white duration-200 transition-all text-xs text-gray-200;
+    @apply mr-48 duration-200 transition-all text-xs text-gray-200;
   }
 }
 
