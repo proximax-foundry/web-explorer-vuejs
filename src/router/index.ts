@@ -50,6 +50,11 @@ const redirectionRoutes: RouteRecordRaw[] = [
       return { name: "ViewAsset", params: { id: to.params.assetId } };
     },
   },
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: () => {
+      return { name: 'PageNotFound' }},
+  },
 ];
 
 const routes: RouteRecordRaw[] = [
@@ -140,13 +145,26 @@ const routes: RouteRecordRaw[] = [
     component: () => import("@/modules/search/views/ViewInvalidSearch.vue"),
     meta: {
       title: "View Invalid Search",
-    },
+    }
   },
+  {
+    path: '/404',
+    name: 'PageNotFound',
+    props: false,
+    component: () => import('@/modules/search/views/PageNotFound.vue'),
+    meta: {
+      title: "Page Not Found",
+    }
+  }
 ];
+
+
+
+let allRoutes: RouteRecordRaw[] = routes.concat(redirectionRoutes);
 
 const router = createRouter({
   history: createWebHashHistory(),
-  routes: routes.concat(redirectionRoutes),
+  routes: allRoutes
 });
 
 export default router;
