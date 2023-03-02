@@ -97,164 +97,135 @@
   </div>
 </template>
 
-<script>
-import { Helper } from "@/util/typeHelper";
-import { AccountUtils } from "@/util/accountUtil";
-import { computed, ref} from "vue";
-import { AppState } from '@/state/appState';
-import { MosaicSearch } from "tsjs-xpx-chain-sdk";
+<script setup lang="ts">
+import { AccountUtils, type AssetObj } from "@/util/accountUtil";
+import { computed, ref } from "vue";
+import { AppState } from "@/state/appState";
+import { Mosaic, MosaicId, UInt64 } from "tsjs-xpx-chain-sdk";
 
-export default {
-  name:"AssetComponent",
-  props:{
-    accountAsset: Array,
-    accountPublicKey: String
-
+const prop = defineProps({
+  accountAsset: {
+    type: Array<{ id: string; amount: number }>,
+    required: true,
   },
-  setup(prop){
-    const pageSize = ref(10);
-    const currentPage = ref(1)
-    const totalPages = ref(0);
-    const isFetching = ref(true);
-    const isPagination = ref(false);
-    const accountAssets = ref([]);
-     
-    
+  accountPublicKey: {
+    type: String,
+    required: true,
+  },
+});
 
+const pageSize = ref(10);
+const currentPage = ref(1);
+const totalPages = ref(0);
+const isFetching = ref(true);
+const isPagination = ref(false);
+const accountAssets = ref<AssetObj[]>([]);
 
-    // let pagination = (blocks)=>{
-    //   let blockValue = blocks.slice((currentPage.value-1) * pageSize.value, currentPage.value * pageSize.value);
-    //   return blockValue;
-    // }
-   //   console.log(accountAssets.value);
+const enableFirstPage = computed(() => {
+  return currentPage.value > 1;
+});
 
-   
-    
-    const enableFirstPage = computed(() => {
-      return currentPage.value > 1;
-    });
+const enablePreviousPage = computed(() => {
+  return currentPage.value > 1;
+});
 
-    const enablePreviousPage = computed(() => {
-      return currentPage.value > 1;
-    });
+const enableNextPage = computed(() => {
+  return totalPages.value - currentPage.value > 0;
+});
 
-    const enableNextPage = computed(() => {
-      return (totalPages.value - currentPage.value) > 0;
-    });
+const enableLastPage = computed(() => {
+  return currentPage.value < totalPages.value;
+});
 
-    const enableLastPage = computed(() => {
-      return currentPage.value < totalPages.value;
-    });
+const naviFirst = () => {
+  currentPage.value = 1;
+  isFetching.value = true;
+  loadAsset();
+};
 
-    const naviFirst = () => {
-      currentPage.value = 1;
-      isFetching.value = true;
-      loadAsset();
-    }
+const naviPrevious = () => {
+  --currentPage.value;
+  isFetching.value = true;
+  loadAsset();
+};
 
-    const naviPrevious = () => {
-      --currentPage.value;
-      isFetching.value = true;
-      loadAsset();
-    }
+const naviNext = () => {
+  ++currentPage.value;
+  isFetching.value = true;
+  loadAsset();
+};
 
-    const naviNext = () => {
-      ++currentPage.value;
-      isFetching.value = true;
-      loadAsset();
-    }
+const naviLast = () => {
+  currentPage.value = totalPages.value;
+  isFetching.value = true;
+  loadAsset();
+};
 
-    const naviLast = () => {
-      currentPage.value = totalPages.value;
-      isFetching.value = true;
+const changeRows = () => {
+  currentPage.value = 1;
+  isFetching.value = true;
+  loadAsset();
+};
 
-      loadAsset();
-
-     // loadRecentBlock();
-    }
-
-    const changeRows = () => {
-      currentPage.value = 1;
-      isFetching.value = true;
-      loadAsset();
-      //loadRecentBlock();
-    }
-    const splitBalance = (balance) => {
-      let split = balance.toString().split(".")
-      if (split[1] != undefined){
-        return { left: split[0], right: split[1] }
-      }else{
-        return { left: split[0], right: null }
-      }
-    }
-    const loadAsset = async() => {
-      if(!AppState.isReady){
-        setTimeout(loadAsset, 1000);
-      }      
-      let mosaics_list = [];
-      if(prop.accountAsset.length > 10){
-        isPagination.value = true;
-        mosaics_list = prop.accountAsset.slice((currentPage.value-1) * pageSize.value, currentPage.value * pageSize.value);
-      }else{
-        mosaics_list = prop.accountAsset;
-      }
-      // console.log(mosaics_list);
-
-      let AssetList =  await AccountUtils.formatAccountAsset(mosaics_list, prop.accountPublicKey);
-      accountAssets.value = AssetList;
-            // console.log(pageSize.value);
-
-            // console.log(currentPage.value);
-
-      totalPages.value = Math.ceil(prop.accountAsset.length / pageSize.value); 
-      isFetching.value = false;
-      // console.log(totalPages.value);
-      // console.log(prop.accountAsset.length);
-
-    }
-    loadAsset();
-    
-    const displayTokenName = (name) => {
-
-      if(name === ""){
-        return { name: name, registered: false };
-      }
-
-      if(name==AppState.nativeToken.fullNamespace){
-        return { name: AppState.nativeToken.label, registered: true };
-      }else{
-        let foundToken = AppState.registeredToken.find(x => x.fullNamespace === name);
-        
-        if(foundToken){
-          return { name: foundToken.label, registered: true };
-        }
-        return { name: name, registered: false };
-      }
-    }
-
-    return{
-      splitBalance,
-      displayTokenName,
-      pageSize,
-      currentPage,
-      totalPages,
-      enableFirstPage,
-      enablePreviousPage,
-      enableNextPage,
-      enableLastPage,
-      naviFirst,
-      naviPrevious,
-      naviNext,
-      naviLast,
-      changeRows,
-      accountAssets,
-      isFetching,
-      isPagination
-    }
+const splitBalance = (balance: string) => {
+  let split = balance.split(".");
+  if (split[1] != undefined) {
+    return { left: split[0], right: split[1] };
+  } else {
+    return { left: split[0], right: null };
   }
-}
+};
+const loadAsset = async () => {
+  if (!AppState.isReady) {
+    setTimeout(loadAsset, 1000);
+  }
+  if (!prop.accountAsset) {
+    return;
+  }
+  let mosaicIds: Mosaic[] = [];
+  let mosaics_list: { id: string; amount: number }[] = [];
+  if (prop.accountAsset.length > 10) {
+    isPagination.value = true;
+    mosaics_list = prop.accountAsset.slice(
+      (currentPage.value - 1) * pageSize.value,
+      currentPage.value * pageSize.value
+    );
+  } else {
+    mosaics_list = prop.accountAsset;
+  }
+  for (let i = 0; i < mosaics_list.length; i++) {
+    let mosaic = mosaics_list[i];
+    mosaicIds.push(
+      new Mosaic(new MosaicId(mosaic.id), UInt64.fromUint(mosaic.amount))
+    );
+  }
+  let assetList = await AccountUtils.formatAccountAsset(
+    mosaicIds,
+    prop.accountPublicKey
+  );
+  accountAssets.value = assetList;
+  totalPages.value = Math.ceil(prop.accountAsset.length / pageSize.value);
+  isFetching.value = false;
+};
+
+loadAsset();
+
+const displayTokenName = (name: string) => {
+  if (name === "") {
+    return { name: name, registered: false };
+  }
+
+  if (name == AppState.nativeToken.fullNamespace) {
+    return { name: AppState.nativeToken.label, registered: true };
+  } else {
+    let foundToken = AppState.registeredToken.find(
+      (x) => x.fullNamespace === name
+    );
+
+    if (foundToken) {
+      return { name: foundToken.label, registered: true };
+    }
+    return { name: name, registered: false };
+  }
+};
 </script>
-
-<style>
-
-</style>
