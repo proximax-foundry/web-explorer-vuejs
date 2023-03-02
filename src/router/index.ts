@@ -88,6 +88,15 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: "View Invalid Search",
     }
+  },
+  {
+    path: '/404',
+    name: 'PageNotFound',
+    props: false,
+    component: () => import('@/modules/search/views/PageNotFound.vue'),
+    meta: {
+      title: "Page Not Found",
+    }
   }
 ];
 
@@ -163,7 +172,18 @@ let redirectionRoutes: RouteRecordRaw[] = [
       title: "Asset Search Redirect",
     },
     component: null
-  }
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    props: false,
+    redirect: to =>{
+      return { name: 'PageNotFound'}
+    },
+    name: "PageNotFoundRedirect",
+    meta: {
+      title: "Page Not Found Redirect",
+    }
+  },
 ];
 
 let allRoutes: RouteRecordRaw[] = routes.concat(redirectionRoutes);
