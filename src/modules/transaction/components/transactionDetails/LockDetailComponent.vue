@@ -6,65 +6,62 @@
     </div>
     <div>
       <div>Duration</div>
-      <div>
-        {{ txnDetail.detail.duration }} blocks
-      </div>
+      <div>{{ txnDetail.detail.duration }} blocks</div>
     </div>
     <div>
       <div>Amount</div>
       <div>
-        <span class="font-bold">{{ formatCurrency(txnDetail.detail.amountLocking)[0] }}</span>
-        <span class="text-xxs" v-if="formatCurrency(txnDetail.detail.amountLocking)[1]">.{{ formatCurrency(txnDetail.detail.amountLocking)[1] }}</span>
-        <div class="font-bold inline-block ml-1">{{nativeTokenNamespace}}</div>
+        <span class="font-bold">{{
+          formatCurrency(txnDetail.detail.amountLocking)[0]
+        }}</span>
+        <span
+          class="text-xxs"
+          v-if="formatCurrency(txnDetail.detail.amountLocking)[1]"
+          >.{{ formatCurrency(txnDetail.detail.amountLocking)[1] }}</span
+        >
+        <div class="font-bold inline-block ml-1">
+          {{ nativeTokenNamespace }}
+        </div>
       </div>
     </div>
     <div v-if="txnDetail.detail.isRefunded != undefined">
       <div>Refunded</div>
-      <div>{{ txnDetail.detail.isRefunded?'Yes':'No' }} </div>
+      <div>{{ txnDetail.detail.isRefunded ? "Yes" : "No" }}</div>
     </div>
   </div>
 </template>
 
-<script>
-import { AppState } from '@/state/appState';
-import { Helper } from "@/util/typeHelper";
-export default {
-  name: 'LockDetailComponent',
-  props: {
-    txnDetail: Object
-  },
-  setup(props) {
-    const nativeTokenNamespace = AppState.nativeToken.label;
+<script setup>
+import { AppState } from "@/state/appState";
 
-    const formatCurrency = (cost) => {
-      return cost.toString().split('.');
-    };
+defineProps({
+  txnDetail: Object,
+});
 
-    return {
-      nativeTokenNamespace,
-      formatCurrency
-    }
-  }
-}
+const nativeTokenNamespace = AppState.nativeToken.label;
+
+const formatCurrency = (cost) => {
+  return cost.toString().split(".");
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-.details{
+.details {
   @apply text-gray-800 text-xs;
-  > div{
+  > div {
     @apply flex items-center border-b border-gray-100 py-4;
 
-    > div:first-child{
+    > div:first-child {
       @apply w-40 text-xs pl-4;
     }
 
-    > div:nth-child(2){
+    > div:nth-child(2) {
       @apply text-xs w-full;
     }
   }
 
-  > div:last-child{
+  > div:last-child {
     @apply border-none;
   }
 }
