@@ -1,5 +1,4 @@
 import { NamespaceId, Convert, AliasType } from "tsjs-xpx-chain-sdk";
-
 import { TransactionUtils } from "@/util/transactionUtils";
 import { NamespaceUtils } from "@/util/namespaceUtil";
 import type { namespaceInfoFormatted } from "@/util/namespaceUtil";
@@ -308,7 +307,6 @@ export class SearchService {
         returnData.param = formattedNs.alias.id;
       }
     }
-
     return returnData;
   }
 
