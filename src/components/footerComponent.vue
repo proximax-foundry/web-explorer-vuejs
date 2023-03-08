@@ -1,5 +1,5 @@
 <template>
-  <footer class="z-10 w-full footer">
+  <footer class="w-full">
     <div class="bg-blue-theme">
       <div class="md:container mx-auto sm:grid-cols-2 lg:grid-cols-4 grid">
         <div class="flex py-10 sm:col-span-2">
@@ -146,8 +146,5 @@ versioning.value = packageData.version;
   a {
     @apply block mb-1 transition-all duration-200 hover:text-white;
   }
-}
-.footer{
-  z-index:2;
 }
 </style>

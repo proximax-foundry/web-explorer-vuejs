@@ -28,7 +28,7 @@
     <div class="relative">
       <div
         v-if="toggleSelection"
-        class="absolute border border-t-0 w-full z-50 bg-white max-h-52 overflow-auto px-1 filter drop-shodow-xl pb-2"
+        class="absolute border border-t-0 w-full z-50 bg-white max-h-52 overflow-auto px-1 filter drop-shadow-xl pb-2"
       >
         <div
           v-if="networks.length > 0"
