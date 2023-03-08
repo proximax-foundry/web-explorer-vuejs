@@ -8,7 +8,7 @@
           </div>
           <div>
             <div class="text-xxs sm:text-xs text-white mb-5">
-              Copyright 2022 ProximaX. All rights reserved.
+              Copyright {{ year }} ProximaX. All rights reserved.
             </div>
             <div>
               <p class="media-link">
@@ -125,6 +125,8 @@ library.add(
 const versioning = ref("0.0.1");
 
 versioning.value = packageData.version;
+
+const year = new Date().getFullYear();
 </script>
 
 <style lang="scss" scoped>
