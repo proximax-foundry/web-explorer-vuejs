@@ -1,5 +1,5 @@
 <template>
-  <footer class="w-full">
+  <footer class="z-10 w-full">
     <div class="bg-blue-theme">
       <div class="md:container mx-auto sm:grid-cols-2 lg:grid-cols-4 grid">
         <div class="flex py-10 sm:col-span-2">
