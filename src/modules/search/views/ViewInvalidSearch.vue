@@ -4,18 +4,12 @@
     <div class="p-3 bg-yellow-100 text-yellow-700">
       {{ searchType }} is not found in {{ networkName }}
     </div>
-    <div class="txn-div">
-      <div>
-        <div id="raw"></div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { networkState } from "@/state/networkState";
-import { ChainProfile } from "@/models/stores/chainProfile";
 
 const props = defineProps({
   type: {
@@ -56,62 +50,6 @@ switch (props.type) {
     break;
 }
 
-let currentChainProfile = new ChainProfile(networkState.chainNetworkName);
-currentChainProfile.init();
-
-const BASE_URL =
-  "https://" +
-  currentChainProfile.apiNodes[0] +
-  "/transactions/confirmed/" +
-  props.param;
-async function fetchToDo(BASE_URL: string) {
-  const response = await fetch(BASE_URL);
-  // fetching the reponse body data
-  const data = response.json();
-  return data;
-}
-
-function displayValue(data: string) {
-  let rawData = "",
-    f = {
-      brace: 0,
-    };
-  rawData = data.replace(
-    /({|}[,]*|[^{}:]+:[^{}:,]*[,{]*)/g,
-    (m: string, p1: any) => {
-      let rtnFn = () => {
-          return (
-            '<div style="text-indent: ' +
-            f["brace"] * 20 +
-            'px;">' +
-            p1 +
-            "</div>"
-          );
-        },
-        rtnStr = "";
-      if (p1.lastIndexOf("{") === p1.length - 1) {
-        rtnStr = rtnFn();
-        f["brace"] += 1;
-      } else if (p1.indexOf("}") === 0) {
-        f["brace"] -= 1;
-        rtnStr = rtnFn();
-      } else {
-        rtnStr = rtnFn();
-      }
-      return rtnStr;
-    }
-  );
-
-  const rawDiv = document.getElementById("raw");
-  if (rawDiv) {
-    rawDiv.innerHTML = rawData;
-  }
-}
-
-fetchToDo(BASE_URL).then((value) => {
-  const data = JSON.stringify(value);
-  displayValue(data);
-});
 </script>
 
 <style scoped lang="scss">
@@ -119,18 +57,18 @@ fetchToDo(BASE_URL).then((value) => {
 .details {
   @apply text-gray-800 text-xs;
 
-  > div {
+  >div {
     @apply flex items-center border-b border-gray-100 py-4;
 
-    > div:first-child {
+    >div:first-child {
       @apply w-40 text-xs pl-4;
     }
 
-    > div:nth-child(2) {
+    >div:nth-child(2) {
       @apply text-xs w-full;
     }
 
-    > div:last-child {
+    >div:last-child {
       @apply border-none;
     }
   }
