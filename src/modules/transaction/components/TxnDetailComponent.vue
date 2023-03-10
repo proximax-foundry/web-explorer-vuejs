@@ -243,10 +243,10 @@
     "
   />
   <div v-if="txnDetail.type === 'UNKNOWN'" class="txn-div">
-    <div>
+    <div class="bg-gray-400">
       <div>Raw Data</div>
         <span>
-          <pre class="bg-gray-400">{{ props.txnDetail.rawData }}</pre>
+          <pre>{{ props.txnDetail.rawData }}</pre>
         </span>
     </div>
   </div>
