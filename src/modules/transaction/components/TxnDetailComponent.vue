@@ -246,7 +246,7 @@
     <div>
       <div>Raw Data</div>
         <span>
-          <pre>{{ props.txnDetail.rawData }}</pre>
+          <pre class="bg-gray-400">{{ props.txnDetail.rawData }}</pre>
         </span>
     </div>
   </div>
