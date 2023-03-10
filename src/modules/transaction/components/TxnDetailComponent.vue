@@ -245,11 +245,9 @@
   <div v-if="txnDetail.type === 'UNKNOWN'" class="txn-div">
     <div>
       <div>Raw Data</div>
-      <div>
         <span>
-          <pre id="raw"></pre>
+          <pre>{{ props.txnDetail.rawData }}</pre>
         </span>
-      </div>
     </div>
   </div>
 </template>
@@ -284,8 +282,6 @@ import ChainDetailComponent from "@/modules/transaction/components/transactionDe
 import AccountDetailComponent from "@/modules/transaction/components/transactionDetails/AccountDetailComponent.vue";
 import MetadataDetailComponent from "@/modules/transaction/components/transactionDetails/MetadataDetailComponent.vue";
 import { TransactionType } from "tsjs-xpx-chain-sdk";
-import { ChainProfile } from "@/models/stores/chainProfile";
-import { networkState } from "@/state/networkState";
 
 const props = defineProps({
   txnDetail: Object,
@@ -317,67 +313,6 @@ const copy = (id) => {
   }
 };
 
-const networkName = computed(() => {
-  return networkState.chainNetworkName;
-});
-
-let currentChainProfile = new ChainProfile(networkName.value);
-currentChainProfile.init();
-
-const BASE_URL =
-  "https://" +
-  currentChainProfile.apiNodes[0] +
-  "/transactions/confirmed/" +
-  props.txnDetail.hash;
-
-async function fetchToDo(BASE_URL) {
-  const response = await fetch(BASE_URL);
-  // fetching the reponse body data
-  const data = response.json();
-  return data;
-}
-
-function displayValue(data) {
-  let rawData = "",
-    f = {
-      brace: 0,
-    };
-  rawData = data.replace(
-    /({|}[,]*|[^{}:]+:[^{}:,]*[,{]*)/g,
-    (m, p1) => {
-      let rtnFn = () => {
-        return (
-          '<div style="text-indent: ' +
-          f["brace"] * 20 +
-          'px;">' +
-          p1 +
-          "</div>"
-        );
-      },
-        rtnStr = "";
-      if (p1.lastIndexOf("{") === p1.length - 1) {
-        rtnStr = rtnFn();
-        f["brace"] += 1;
-      } else if (p1.indexOf("}") === 0) {
-        f["brace"] -= 1;
-        rtnStr = rtnFn();
-      } else {
-        rtnStr = rtnFn();
-      }
-      return rtnStr;
-    }
-  );
-
-  const rawDiv = document.getElementById("raw");
-  if (rawDiv) {
-    rawDiv.innerHTML = rawData;
-  }
-}
-
-fetchToDo(BASE_URL).then((value) => {
-  const data = JSON.stringify(value);
-  displayValue(data);
-});
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

@@ -133,6 +133,17 @@ const loadTxn = async () => {
           group: transaction.txnStatus.group,
           isFound: transaction.isFound,
         };
+        if(formattedTransaction.value.type === "UNKNOWN"){
+          formattedTransaction.value.rawData = {
+            type: transaction.txn.type,
+            networkType: transaction.txn.networkType,
+            version: transaction.txn.version,
+            maxFee: transaction.txn.maxFee,
+            deadline: transaction.txn.deadline,
+            signature: transaction.txn.signature,
+            signer: transaction.txn.signer
+          }
+        }
         if (transaction.txn.cosignatures != undefined) {
           formattedTransaction.value.cosigners = transaction.txn.cosignatures;
         } else {
