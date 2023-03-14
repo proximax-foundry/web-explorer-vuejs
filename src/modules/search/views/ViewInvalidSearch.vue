@@ -55,63 +55,6 @@ switch (props.type) {
     searchType.value = "Search";
     break;
 }
-
-let currentChainProfile = new ChainProfile(networkState.chainNetworkName);
-currentChainProfile.init();
-
-const BASE_URL =
-  "https://" +
-  currentChainProfile.apiNodes[0] +
-  "/transactions/confirmed/" +
-  props.param;
-async function fetchToDo(BASE_URL: string) {
-  const response = await fetch(BASE_URL);
-  // fetching the reponse body data
-  const data = response.json();
-  return data;
-}
-
-function displayValue(data: string) {
-  let rawData = "",
-    f = {
-      brace: 0,
-    };
-  rawData = data.replace(
-    /({|}[,]*|[^{}:]+:[^{}:,]*[,{]*)/g,
-    (m: string, p1: any) => {
-      let rtnFn = () => {
-          return (
-            '<div style="text-indent: ' +
-            f["brace"] * 20 +
-            'px;">' +
-            p1 +
-            "</div>"
-          );
-        },
-        rtnStr = "";
-      if (p1.lastIndexOf("{") === p1.length - 1) {
-        rtnStr = rtnFn();
-        f["brace"] += 1;
-      } else if (p1.indexOf("}") === 0) {
-        f["brace"] -= 1;
-        rtnStr = rtnFn();
-      } else {
-        rtnStr = rtnFn();
-      }
-      return rtnStr;
-    }
-  );
-
-  const rawDiv = document.getElementById("raw");
-  if (rawDiv) {
-    rawDiv.innerHTML = rawData;
-  }
-}
-
-fetchToDo(BASE_URL).then((value) => {
-  const data = JSON.stringify(value);
-  displayValue(data);
-});
 </script>
 
 <style scoped lang="scss">

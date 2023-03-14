@@ -144,7 +144,7 @@ const exportValue = () => {
           Timestamp: Helper.convertDisplayDateTimeFormat24(
             data.timestamp
           ).replace(",", ""),
-          Type: data.type,
+          Type: data.typeName,
           Block: data.block,
           Signer: Helper.createAddress(data.signerAddress).pretty(),
           Recipient: data.recipient
@@ -166,7 +166,7 @@ const exportValue = () => {
       case "Account":
         export_Value.push({
           TxHash: data.hash,
-          Type: data.type,
+          Type: data.typeName,
           Account: data.block,
           ApprovalDelta: data.oldApprovalNumber
             ? data.oldApprovalNumber
@@ -198,7 +198,7 @@ const exportValue = () => {
           Timestamp: Helper.convertDisplayDateTimeFormat24(
             data.timestamp
           ).replace(",", ""),
-          Type: data.type,
+          Type: data.typeName,
           Block: data.block,
           TxFee: (data.fee ? data.fee : 0) + " " + nativeTokenName.value,
           Transaction: displayAggregateTxn(data.txnList),
@@ -210,7 +210,7 @@ const exportValue = () => {
           Timestamp: Helper.convertDisplayDateTimeFormat24(
             data.timestamp
           ).replace(",", ""),
-          Type: data.type,
+          Type: data.typeName,
           Block: data.block,
           TxFee: (data.fee ? data.fee : 0) + " " + nativeTokenName.value,
           Info:
@@ -229,7 +229,7 @@ const exportValue = () => {
           Timestamp: Helper.convertDisplayDateTimeFormat24(
             data.timestamp
           ).replace(",", ""),
-          Type: data.type,
+          Type: data.typeName,
           Block: data.block,
           TxFee: (data.fee ? data.fee : 0) + " " + nativeTokenName.value,
           AssetID:
@@ -269,7 +269,7 @@ const exportValue = () => {
           Timestamp: Helper.convertDisplayDateTimeFormat24(
             data.timestamp
           ).replace(",", ""),
-          Type: data.type,
+          Type: data.typeName,
           Block: data.block,
           TxFee: (data.fee ? data.fee : 0) + " " + nativeTokenName.value,
           RegisterType: data.registerTypeName,
@@ -286,7 +286,7 @@ const exportValue = () => {
           Timestamp: Helper.convertDisplayDateTimeFormat24(
             data.timestamp
           ).replace(",", ""),
-          Type: data.type,
+          Type: data.typeName,
           Block: data.block,
           TxFee: (data.fee ? data.fee : 0) + " " + nativeTokenName.value,
           ScopedMetadataKey: data.scopedMetadataKey,
@@ -301,7 +301,7 @@ const exportValue = () => {
           Timestamp: Helper.convertDisplayDateTimeFormat24(
             data.timestamp
           ).replace(",", ""),
-          Type: data.type,
+          Type: data.typeName,
           Block: data.block,
           TxFee: (data.fee ? data.fee : 0) + " " + nativeTokenName.value,
           Offer: displayExchangeOffer(data.exchangeOffers),
@@ -313,7 +313,7 @@ const exportValue = () => {
           Timestamp: Helper.convertDisplayDateTimeFormat24(
             data.timestamp
           ).replace(",", ""),
-          Type: data.type,
+          Type: data.typeName,
           Block: data.block,
           TxFee: (data.fee ? data.fee : 0) + " " + nativeTokenName.value,
           LockHash: data.lockHash,
@@ -329,7 +329,7 @@ const exportValue = () => {
           Timestamp: Helper.convertDisplayDateTimeFormat24(
             data.timestamp
           ).replace(",", ""),
-          Type: data.type,
+          Type: data.typeName,
           Block: data.block,
           TxFee: (data.fee ? data.fee : 0) + " " + nativeTokenName.value,
           RemotePublicKey: data.remotePublicKey,
@@ -342,7 +342,7 @@ const exportValue = () => {
           Timestamp: Helper.convertDisplayDateTimeFormat24(
             data.timestamp
           ).replace(",", ""),
-          Type: data.type,
+          Type: data.typeName,
           Block: data.block,
           TxFee: (data.fee ? data.fee : 0) + " " + nativeTokenName.value,
           RestrictionType: data.restrictionTypeOutput,
@@ -355,7 +355,7 @@ const exportValue = () => {
           Timestamp: Helper.convertDisplayDateTimeFormat24(
             data.timestamp
           ).replace(",", ""),
-          Type: data.type,
+          Type: data.typeName,
           Block: data.block,
           Recipient: data.recipient
             ? Helper.createAddress(data.recipient).pretty()
@@ -383,7 +383,7 @@ const exportValue = () => {
           Timestamp: Helper.convertDisplayDateTimeFormat24(
             data.timestamp
           ).replace(",", ""),
-          Type: data.type,
+          Type: data.typeName,
           Block: data.block,
           TxFee: (data.fee ? data.fee : 0) + " " + nativeTokenName.value,
           Info:
@@ -404,7 +404,7 @@ const exportValue = () => {
           Timestamp: Helper.convertDisplayDateTimeFormat24(
             data.timestamp
           ).replace(",", ""),
-          Type: data.type,
+          Type: data.typeName,
           Block: data.block,
           Signer: Helper.createAddress(data.signerAddress).pretty(),
           Recipient: data.recipient

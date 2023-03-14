@@ -33,7 +33,7 @@
             </div>
             <div class="flex items-center">
               <div class="uppercase font-bold text-xs mr-2">
-                {{ data.type }}
+                {{ data.typeName }}
               </div>
             </div>
           </div>
@@ -60,8 +60,7 @@
                 {{ data.aliasName }}
                 <font-awesome-icon
                   v-if="data.aliasTypeName === 'Link'"
-                  icon="link"
-                />
+                  icon="link" />
                 <font-awesome-icon v-else icon="unlink" />
                 {{ data.assetId ? data.assetId : data.address }}
               </span>
@@ -104,7 +103,7 @@
         v-if="wideScreen"
       >
         <template #body="{ data }">
-          <span class="text-xs">{{ data.type }}</span>
+          <span class="text-xs">{{ data.typeName }}</span>
         </template>
       </Column>
       <Column
