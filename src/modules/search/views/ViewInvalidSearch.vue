@@ -4,11 +4,6 @@
     <div class="p-3 bg-yellow-100 text-yellow-700">
       {{ searchType }} is not found in {{ networkName }}
     </div>
-    <div class="txn-div">
-      <div>
-        <div id="raw"></div>
-      </div>
-    </div>
   </div>
 </template>
 
