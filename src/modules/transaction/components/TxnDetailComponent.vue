@@ -65,10 +65,10 @@
     <div>
       <div>Tx Type</div>
       <div>
-        {{ txnDetail.type }}
-        <span class="text-xxs text-gray-500"
-          >(Version: {{ txnDetail.version }})</span
-        >
+        {{ txnDetail.typeName }}
+        <span class="text-xxs text-gray-500">
+          (Version: {{ txnDetail.version }})
+        </span>
       </div>
     </div>
     <div v-if="txnDetail.group == 'confirmed'">
@@ -153,6 +153,12 @@
           />
         </div>
       </div>
+    </div>
+    <div v-if="Object.keys(txnDetail.unknownData).length"  class="bg-gray-200">
+        <div class="unknownDetails-col">Unknown Data</div>
+        <div class="unknownDetails">
+            <pre>{{ JSON.stringify(txnDetail.unknownData, undefined, 2) }}</pre>
+        </div>
     </div>
   </div>
   <TransferDetailComponent
@@ -242,11 +248,6 @@
       txnType == TransactionType.ACCOUNT_METADATA_V2
     "
   />
-  <div v-if="txnDetail.type === 'UNKNOWN'"  class="txn-div bg-gray-400">
-    <UnknownDataDetailComponent 
-      :txnDetail="txnDetail"
-    />
-  </div>
 </template>
 
 <script setup>
@@ -334,5 +335,33 @@ const copy = (id) => {
       @apply border-none;
     }
   }
+
+  .unknownDetails-col{
+    @apply flex items-center;
+  }
+
+  .unknownDetails{
+    @apply text-gray-800 text-xs flex items-center;
+  }
+
+  // .unknown-col{
+  //   @apply flex items-center bg-gray-200;
+
+  //   div.details-col {
+  //     @apply w-40 text-xs pl-4;
+  //   }
+
+  //   div.raw-details {
+  //     @apply text-gray-800 text-xs flex items-center w-full;
+  //   }
+
+    // .details-col{
+    //   @apply w-40 text-xs pl-4;
+    // }
+
+    // .raw-details {
+    //   @apply text-gray-800 text-xs flex items-center w-full;
+    // }
+  // }
 }
 </style>

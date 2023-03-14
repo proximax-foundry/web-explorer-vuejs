@@ -4,33 +4,30 @@
     <div v-if="!isFetching">
       <div
         class="filter shadow-xl border border-gray-50 p-5 mb-15"
-        v-if="formattedTransaction.isFound === true"
-      >
+        v-if="formattedTransaction.isFound === true" >
         <div class="flex items-center mb-4 border-b border-gray-100 relative">
           <div
             class="w-32 font-bold text-xs text-center p-2 relative"
             :class="`${currentPage != 'detail' ? 'cursor-pointer' : ''}`"
-            @click="currentPage = 'detail'"
-          >
+            @click="currentPage = 'detail'" >
             Overview
             <div
               v-if="currentPage == 'detail'"
               class="absolute w-full border-b border-yellow-500 transition-all duration-200"
-              style="bottom: -1px"
-            ></div>
+              style="bottom: -1px" >
+            </div>
           </div>
           <div
             class="w-32 font-bold text-xs text-center p-2 relative"
             :class="`${currentPage != 'inner' ? 'cursor-pointer' : ''}`"
             @click="currentPage = 'inner'"
-            v-if="innerTransaction"
-          >
+            v-if="innerTransaction">
             Inner Txns
             <div
               v-if="currentPage == 'inner'"
               class="absolute w-full border-b border-yellow-500 transition-all duration-200"
-              style="bottom: -1px"
-            ></div>
+              style="bottom: -1px">
+            </div>
           </div>
         </div>
         <TxnDetailComponent
@@ -47,8 +44,7 @@
       </div>
       <div
         v-else-if="formattedTransaction.isFound === 'error'"
-        class="p-3 bg-yellow-100 text-yellow-700"
-      >
+        class="p-3 bg-yellow-100 text-yellow-700">
         Transaction not found in {{ networkName }}
       </div>
       <div v-else class="filter shadow-xl border border-gray-50 p-5 mb-15">
@@ -118,9 +114,8 @@ const loadTxn = async () => {
             : "",
           timestamp: transaction.txn.timestamp,
           height: transaction.txn.transactionInfo.height.compact(),
-          type: TransactionUtils.getTransactionTypeName(transaction.txn.type)
-            ? TransactionUtils.getTransactionTypeName(transaction.txn.type)
-            : "UNKNOWN",
+          type: transaction.txn.type,
+          typeName: transaction.txn.transactionName,
           fee: Helper.convertToExact(
             transaction.txn.fee,
             AppState.nativeToken.divisibility
@@ -132,16 +127,9 @@ const loadTxn = async () => {
           detail: transaction.txn.detail,
           group: transaction.txnStatus.group,
           isFound: transaction.isFound,
+          unknownData: transaction.txn.unknownData ? transaction.txn.unknownData: {} 
         };
-        if(formattedTransaction.value.type === "UNKNOWN"){
-          formattedTransaction.value.unknownData = {
-            addActions: transaction.txn.unknownData.addActions,
-            driveKey: transaction.txn.unknownData.driveKey,
-            removeActions: transaction.txn.unknownData.removeActions,
-            rootHash: transaction.txn.unknownData.rootHash,
-            xorRootHash: transaction.txn.unknownData.xorRootHash,
-          }
-        }
+        
         if (transaction.txn.cosignatures != undefined) {
           formattedTransaction.value.cosigners = transaction.txn.cosignatures;
         } else {

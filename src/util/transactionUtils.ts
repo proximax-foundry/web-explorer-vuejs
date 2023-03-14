@@ -64,7 +64,7 @@ import {
   MetadataEntry,
   AggregateTransactionInfo,
   TransactionInfo,
-  TransactionStatus,
+  TransactionStatus
 } from "tsjs-xpx-chain-sdk";
 import type { InnerTransaction } from "tsjs-xpx-chain-sdk";
 import { networkState } from "@/state/networkState";
@@ -615,7 +615,7 @@ export class TransactionUtils {
         break;
 
       default:
-        typeName = "UNKNOWN";
+        typeName = "Unknown";
         break;
     }
 
@@ -677,15 +677,22 @@ export class TransactionUtils {
         if (aggregateTxn) {
           if (aggregateTxn.transactionInfo) {
             blockHeight = aggregateTxn.transactionInfo.height.compact();
+            txnBytes = aggregateTxn.transactionInfo.size ? aggregateTxn.transactionInfo.size: 0;
           }
-          txnBytes = aggregateTxn.size;
+          try {
+            if(txnBytes === 0){
+              txnBytes = aggregateTxn.size;
+            }
+          } catch (error) {
+            
+          }
           deadline = aggregateTxn.deadline.adjustedValue.compact();
         }
       } else {
         blockHeight = transactionInfo.height.compact();
-        // wait SDK to fix
+        
         try {
-          txnBytes = txn.serialize().length / 2;
+          txnBytes = txn.transactionInfo.size ? txn.transactionInfo.size: txn.serialize().length / 2;
         } catch (error) {
           console.error(error);
         }
@@ -2423,9 +2430,7 @@ export class TransactionUtils {
     const txnDetails = new InnerAliasTransaction();
     txnDetails.signer = addressAliasTxn.signer.publicKey;
     txnDetails.signerAddress = addressAliasTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(addressAliasTxn.type) ?? "";
-
+    txnDetails.type = addressAliasTxn.transactionName;
     txnDetails.address = addressAliasTxn.address.plain();
     txnDetails.aliasType = addressAliasTxn.actionType;
     txnDetails.aliasTypeName =
@@ -2451,9 +2456,7 @@ export class TransactionUtils {
     const txnDetails = new InnerAliasTransaction();
     txnDetails.signer = assetAliasTxn.signer.publicKey;
     txnDetails.signerAddress = assetAliasTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(assetAliasTxn.type) ?? "";
-
+    txnDetails.type = assetAliasTxn.transactionName;
     txnDetails.assetId = assetAliasTxn.mosaicId.toHex();
     txnDetails.aliasType = assetAliasTxn.actionType;
     txnDetails.aliasTypeName =
@@ -2480,8 +2483,7 @@ export class TransactionUtils {
     const txnDetails = new InnerExchangeTransaction();
     txnDetails.signer = addExchangeOfferTxn.signer.publicKey;
     txnDetails.signerAddress = addExchangeOfferTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(addExchangeOfferTxn.type) ?? "";
+    txnDetails.type = addExchangeOfferTxn.transactionName;
 
     for (let i = 0; i < addExchangeOfferTxn.offers.length; ++i) {
       const tempExchangeOffer = addExchangeOfferTxn.offers[i];
@@ -2546,9 +2548,7 @@ export class TransactionUtils {
     const txnDetails = new InnerExchangeTransaction();
     txnDetails.signer = removeExchangeOfferTxn.signer.publicKey;
     txnDetails.signerAddress = removeExchangeOfferTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(removeExchangeOfferTxn.type) ??
-      "";
+    txnDetails.type = removeExchangeOfferTxn.transactionName;
 
     for (let i = 0; i < removeExchangeOfferTxn.offers.length; ++i) {
       const tempExchangeOffer = removeExchangeOfferTxn.offers[i];
@@ -2597,8 +2597,7 @@ export class TransactionUtils {
     const txnDetails = new InnerChainTransaction();
     txnDetails.signer = chainConfigureTxn.signer.publicKey;
     txnDetails.signerAddress = chainConfigureTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(chainConfigureTxn.type) ?? "";
+    txnDetails.type = chainConfigureTxn.transactionName;
     txnDetails.applyHeightDelta = chainConfigureTxn.applyHeightDelta.compact();
     return txnDetails;
   }
@@ -2614,8 +2613,7 @@ export class TransactionUtils {
     const txnDetails = new InnerChainTransaction();
     txnDetails.signer = chainUpdateTxn.signer.publicKey;
     txnDetails.signerAddress = chainUpdateTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(chainUpdateTxn.type) ?? "";
+    txnDetails.type = chainUpdateTxn.transactionName;
     txnDetails.upgradePeriod = chainUpdateTxn.upgradePeriod.compact();
     txnDetails.newVersion = chainUpdateTxn.newBlockchainVersion.toHex();
     txnDetails.height = chainUpdateTxn.transactionInfo.height.compact();
@@ -2633,9 +2631,7 @@ export class TransactionUtils {
     const txnDetails = new InnerExchangeTransaction();
     txnDetails.signer = exchangeOfferTxn.signer.publicKey;
     txnDetails.signerAddress = exchangeOfferTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(exchangeOfferTxn.type) ?? "";
-
+    txnDetails.type = exchangeOfferTxn.transactionName;
     txnDetails.isTakingOffer = true;
     for (let i = 0; i < exchangeOfferTxn.offers.length; ++i) {
       const tempExchangeOffer = exchangeOfferTxn.offers[i];
@@ -2699,8 +2695,7 @@ export class TransactionUtils {
     const txnDetails = new InnerLinkTransaction();
     txnDetails.signer = accLinkTxn.signer.publicKey;
     txnDetails.signerAddress = accLinkTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(accLinkTxn.type) ?? "";
+    txnDetails.type = accLinkTxn.transactionName;
     txnDetails.action =
       accLinkTxn.linkAction === LinkAction.Link ? "Link" : "Unlink";
     txnDetails.remotePublicKey = accLinkTxn.remoteAccountKey;
@@ -2718,9 +2713,7 @@ export class TransactionUtils {
     const txnDetails = new InnerRestrictionTransaction();
     txnDetails.signer = accAddressRestrictTxn.signer.publicKey;
     txnDetails.signerAddress = accAddressRestrictTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(accAddressRestrictTxn.type) ?? "";
-
+    txnDetails.type = accAddressRestrictTxn.transactionName;
     txnDetails.restrictionTypeOutput = TransactionUtils.getRestrictionTypeName(
       accAddressRestrictTxn.restrictionType
     ).action;
@@ -2761,9 +2754,7 @@ export class TransactionUtils {
     const txnDetails = new InnerRestrictionTransaction();
     txnDetails.signer = accAssetRestrictTxn.signer.publicKey;
     txnDetails.signerAddress = accAssetRestrictTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(accAssetRestrictTxn.type) ?? "";
-
+    txnDetails.type = accAssetRestrictTxn.transactionName;
     txnDetails.restrictionTypeOutput = TransactionUtils.getRestrictionTypeName(
       accAssetRestrictTxn.restrictionType
     ).action;
@@ -2816,9 +2807,7 @@ export class TransactionUtils {
     const txnDetails = new InnerRestrictionTransaction();
     txnDetails.signer = accOperationRestrictTxn.signer.publicKey;
     txnDetails.signerAddress = accOperationRestrictTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(accOperationRestrictTxn.type) ??
-      "";
+    txnDetails.type = accOperationRestrictTxn.transactionName;
 
     txnDetails.restrictionTypeOutput = TransactionUtils.getRestrictionTypeName(
       accOperationRestrictTxn.restrictionType
@@ -2883,9 +2872,7 @@ export class TransactionUtils {
     const txnDetails = new InnerAssetTransaction();
     txnDetails.signer = assetDefTxn.signer.publicKey;
     txnDetails.signerAddress = assetDefTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(assetDefTxn.type) ?? "";
-
+    txnDetails.type = assetDefTxn.transactionName;
     txnDetails.assetId = assetDefTxn.mosaicId.toHex();
     txnDetails.divisibility = assetDefTxn.mosaicProperties.divisibility;
     txnDetails.duration = assetDefTxn.mosaicProperties.duration
@@ -2908,9 +2895,7 @@ export class TransactionUtils {
     const txnDetails = new InnerAssetTransaction();
     txnDetails.signer = assetSupplyChangeTxn.signer.publicKey;
     txnDetails.signerAddress = assetSupplyChangeTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(assetSupplyChangeTxn.type) ?? "";
-
+    txnDetails.type = assetSupplyChangeTxn.transactionName;
     const assetId = assetSupplyChangeTxn.mosaicId.toHex();
     txnDetails.assetId = assetId;
     txnDetails.supplyDelta = assetSupplyChangeTxn.delta.compact();
@@ -2945,9 +2930,7 @@ export class TransactionUtils {
     const txnDetails = new InnerAssetTransaction();
     txnDetails.signer = assetModifyLevyTxn.signer.publicKey;
     txnDetails.signerAddress = assetModifyLevyTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(assetModifyLevyTxn.type) ?? "";
-
+    txnDetails.type = assetModifyLevyTxn.transactionName;
     const assetId = assetModifyLevyTxn.mosaicId.toHex();
     const levyAssetId = assetModifyLevyTxn.mosaicLevy.mosaicId.toHex();
     const levyAmount = assetModifyLevyTxn.mosaicLevy.fee.compact();
@@ -2992,8 +2975,7 @@ export class TransactionUtils {
     const txnDetails = new InnerAssetTransaction();
     txnDetails.signer = assetRemoveLevyTxn.signer.publicKey;
     txnDetails.signerAddress = assetRemoveLevyTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(assetRemoveLevyTxn.type) ?? "";
+    txnDetails.type = assetRemoveLevyTxn.transactionName;
     const assetId = assetRemoveLevyTxn.mosaicId.toHex();
     txnDetails.assetId = assetId;
     try {
@@ -3019,9 +3001,7 @@ export class TransactionUtils {
     const txnDetails = new InnerNamespaceTransaction();
     txnDetails.signer = registerNSTxn.signer.publicKey;
     txnDetails.signerAddress = registerNSTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(registerNSTxn.type) ?? "";
-
+    txnDetails.type = registerNSTxn.transactionName;
     txnDetails.namespaceName = registerNSTxn.namespaceName;
     if (!registerNSTxn.duration) {
       throw new Error("Service Unavailable");
@@ -3067,9 +3047,7 @@ export class TransactionUtils {
     const txnDetails = new InnerSecretTransaction();
     txnDetails.signer = secretProofTxn.signer.publicKey;
     txnDetails.signerAddress = secretProofTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(secretProofTxn.type) ?? "";
-
+    txnDetails.type = secretProofTxn.transactionName;
     txnDetails.secret = secretProofTxn.secret;
     txnDetails.recipient = secretProofTxn.recipient.plain();
     txnDetails.hashType = myHashType[secretProofTxn.hashType];
@@ -3100,9 +3078,7 @@ export class TransactionUtils {
     const txnDetails = new InnerMetadataTransaction();
     txnDetails.signer = accMetadataTxn.signer.publicKey;
     txnDetails.signerAddress = accMetadataTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(accMetadataTxn.type) ?? "";
-
+    txnDetails.type = accMetadataTxn.transactionName;
     txnDetails.metadataType = MetadataType.ACCOUNT;
     txnDetails.metadataTypeName = "Account";
 
@@ -3127,8 +3103,7 @@ export class TransactionUtils {
     const txnDetails = new InnerMetadataTransaction();
     txnDetails.signer = accMetadataTxn.signer.publicKey;
     txnDetails.signerAddress = accMetadataTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(accMetadataTxn.type) ?? "";
+    txnDetails.type = accMetadataTxn.transactionName;
     txnDetails.metadataType = MetadataType.ACCOUNT;
     txnDetails.metadataTypeName = "Account";
 
@@ -3193,9 +3168,7 @@ export class TransactionUtils {
 
     txnDetails.signer = nsMetadataTxn.signer.publicKey;
     txnDetails.signerAddress = nsMetadataTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(nsMetadataTxn.type) ?? "";
-
+    txnDetails.type = nsMetadataTxn.transactionName;
     const nsId = nsMetadataTxn.targetNamespaceId.toHex();
 
     txnDetails.metadataType = MetadataType.NAMESPACE;
@@ -3235,9 +3208,7 @@ export class TransactionUtils {
 
     txnDetails.signer = nsMetadataTxn.signer.publicKey;
     txnDetails.signerAddress = nsMetadataTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(nsMetadataTxn.type) ?? "";
-
+    txnDetails.type = nsMetadataTxn.transactionName;
     const nsId = nsMetadataTxn.targetNamespaceId.toHex();
 
     txnDetails.metadataType = MetadataType.NAMESPACE;
@@ -3310,9 +3281,7 @@ export class TransactionUtils {
 
     txnDetails.signer = assetMetadataTxn.signer.publicKey;
     txnDetails.signerAddress = assetMetadataTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(assetMetadataTxn.type) ?? "";
-
+    txnDetails.type = assetMetadataTxn.transactionName;
     const assetId = assetMetadataTxn.targetMosaicId.toHex();
 
     txnDetails.metadataType = MetadataType.MOSAIC;
@@ -3347,8 +3316,7 @@ export class TransactionUtils {
     const txnDetails = new InnerMetadataTransaction();
     txnDetails.signer = assetMetadataTxn.signer.publicKey;
     txnDetails.signerAddress = assetMetadataTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(assetMetadataTxn.type) ?? "";
+    txnDetails.type = assetMetadataTxn.transactionName;
     const assetId = assetMetadataTxn.targetMosaicId.toHex();
 
     txnDetails.metadataType = MetadataType.MOSAIC;
@@ -3423,9 +3391,7 @@ export class TransactionUtils {
     const txnDetails = new InnerLockTransaction();
     txnDetails.signer = lockFundTxn.signer.publicKey;
     txnDetails.signerAddress = lockFundTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(lockFundTxn.type) ?? "";
-
+    txnDetails.type = lockFundTxn.transactionName;
     txnDetails.lockHash = lockFundTxn.hash;
     txnDetails.duration = lockFundTxn.duration.compact();
 
@@ -3463,9 +3429,7 @@ export class TransactionUtils {
     const txnDetails = new InnerLockTransaction();
     txnDetails.signer = lockFundTxn.signer.publicKey;
     txnDetails.signerAddress = lockFundTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(lockFundTxn.type) ?? "";
-
+    txnDetails.type = lockFundTxn.transactionName;
     txnDetails.lockHash = lockFundTxn.hash;
     txnDetails.duration = lockFundTxn.duration.compact();
 
@@ -3538,9 +3502,7 @@ export class TransactionUtils {
     const txnDetails = new InnerAccountTransaction();
     txnDetails.signer = modifyMultisigTxn.signer.publicKey;
     txnDetails.signerAddress = modifyMultisigTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(modifyMultisigTxn.type) ?? "";
-
+    txnDetails.type = modifyMultisigTxn.transactionName;
     txnDetails.approvalDelta = modifyMultisigTxn.minApprovalDelta;
     txnDetails.removalDelta = modifyMultisigTxn.minRemovalDelta;
     txnDetails.addedCosigner = modifyMultisigTxn.modifications
@@ -3572,9 +3534,7 @@ export class TransactionUtils {
     const txnDetails = new InnerAccountTransaction();
     txnDetails.signer = modifyMultisigTxn.signer.publicKey;
     txnDetails.signerAddress = modifyMultisigTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(modifyMultisigTxn.type) ?? "";
-
+    txnDetails.type = modifyMultisigTxn.transactionName;
     txnDetails.approvalDelta = modifyMultisigTxn.minApprovalDelta;
     txnDetails.removalDelta = modifyMultisigTxn.minRemovalDelta;
     txnDetails.addedCosigner = modifyMultisigTxn.modifications
@@ -3632,9 +3592,7 @@ export class TransactionUtils {
     const txnDetails = new InnerSecretTransaction();
     txnDetails.signer = secretLockTxn.signer.publicKey;
     txnDetails.signerAddress = secretLockTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(secretLockTxn.type) ?? "";
-
+    txnDetails.type = secretLockTxn.transactionName;
     txnDetails.duration = secretLockTxn.duration.compact();
     txnDetails.secret = secretLockTxn.secret;
     txnDetails.recipient = secretLockTxn.recipient.plain();
@@ -3702,9 +3660,7 @@ export class TransactionUtils {
 
     txnDetails.signer = secretLockTxn.signer.publicKey;
     txnDetails.signerAddress = secretLockTxn.signer.address.plain();
-    txnDetails.type =
-      TransactionUtils.getTransactionTypeName(secretLockTxn.type) ?? "";
-
+    txnDetails.type = secretLockTxn.transactionName;
     txnDetails.duration = secretLockTxn.duration.compact();
     txnDetails.secret = secretLockTxn.secret;
     txnDetails.recipient = secretLockTxn.recipient.plain();
@@ -4100,15 +4056,18 @@ export class TransactionUtils {
       );
       if (aggregateTxn && aggregateTxn.transactionInfo) {
         blockHeight = aggregateTxn.transactionInfo.height.compact();
-        txnBytes = aggregateTxn.size;
+        try {
+          txnBytes = aggregateTxn.transactionInfo.size ? aggregateTxn.transactionInfo.size: aggregateTxn.size;  
+        } catch (error) {
+          
+        }
         deadline = aggregateTxn.deadline.adjustedValue.compact();
       }
     } else {
       blockHeight = transactionInfo.height.compact();
 
-      // wait SDK to fix
       try {
-        txnBytes = txn.serialize().length / 2;
+        txnBytes = txn.transactionInfo.size ? txn.transactionInfo.size: txn.serialize().length / 2;
       } catch (error) {
         console.error(error);
       }
@@ -4127,11 +4086,8 @@ export class TransactionUtils {
     formattedTxn.block = blockHeight;
     formattedTxn.deadline = deadline;
 
-    if (txn.transactionName === "UNKNOWN") {
-      formattedTxn.type = "UNKNOWN";
-    } else {
-      formattedTxn.type = TransactionUtils.getTransactionTypeName(txn.type);
-    }
+    formattedTxn.type = txn.type;
+    formattedTxn.typeName = txn.transactionName;
 
     formattedTxn.maxFee =
       transactionInfo instanceof AggregateTransactionInfo
@@ -4182,7 +4138,7 @@ export class TransactionUtils {
         if (txn.messageType === MessageType.PlainMessage) {
           const newType = TransactionUtils.convertToSwapType(txn.message);
           if (newType) {
-            txn.type = newType;
+            txn.typeName = newType;
           }
         }
         switch (txn.messageType) {
@@ -4577,7 +4533,7 @@ export class TransactionUtils {
           const newType = TransactionUtils.convertToSwapType(txn.message);
 
           if (newType) {
-            txn.type = newType;
+            txn.typeName = newType;
           }
         }
 
@@ -6404,13 +6360,14 @@ export class TransactionUtils {
 
       for (let x = 0; x < aggregateTxn.innerTransactions.length; ++x) {
         const txnType = aggregateTxn.innerTransactions[x].type;
+        const txnTypeName = aggregateTxn.innerTransactions[x].transactionName;
         const listFound = txn.txnList.find((tx) => tx.type === txnType);
         if (listFound) {
           listFound.total += 1;
         } else {
           const txnList: TxnList = {
             type: txnType,
-            name: TransactionUtils.getTransactionTypeName(txnType),
+            name: txnTypeName,
             total: 1,
           };
           txn.txnList.push(txnList);
@@ -8622,7 +8579,8 @@ export class TransactionUtils {
         : transactionInfo.hash ?? "";
 
     const formattedTxn = new PartialTransaction(txnHash);
-    formattedTxn.type = TransactionUtils.getTransactionTypeName(txn.type);
+    formattedTxn.typeName = txn.transactionName;
+    formattedTxn.type = txn.type;
     formattedTxn.maxFee =
       transactionInfo instanceof AggregateTransactionInfo
         ? null
@@ -8678,7 +8636,8 @@ export class TransactionUtils {
         : transactionInfo.hash ?? "";
 
     const formattedTxn = new UnconfirmedTransaction(txnHash);
-    formattedTxn.type = TransactionUtils.getTransactionTypeName(txn.type);
+    formattedTxn.typeName = txn.transactionName;
+    formattedTxn.type = txn.type;
     formattedTxn.maxFee =
       transactionInfo instanceof AggregateTransactionInfo
         ? null
