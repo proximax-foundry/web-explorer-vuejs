@@ -10,7 +10,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { networkState } from "@/state/networkState";
-import { ChainProfile } from "@/models/stores/chainProfile";
 
 const props = defineProps({
   type: {
@@ -57,18 +56,18 @@ switch (props.type) {
 .details {
   @apply text-gray-800 text-xs;
 
-  > div {
+  >div {
     @apply flex items-center border-b border-gray-100 py-4;
 
-    > div:first-child {
+    >div:first-child {
       @apply w-40 text-xs pl-4;
     }
 
-    > div:nth-child(2) {
+    >div:nth-child(2) {
       @apply text-xs w-full;
     }
 
-    > div:last-child {
+    >div:last-child {
       @apply border-none;
     }
   }
