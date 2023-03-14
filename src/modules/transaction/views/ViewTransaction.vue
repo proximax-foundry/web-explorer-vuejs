@@ -134,14 +134,12 @@ const loadTxn = async () => {
           isFound: transaction.isFound,
         };
         if(formattedTransaction.value.type === "UNKNOWN"){
-          formattedTransaction.value.rawData = {
-            type: transaction.txn.type,
-            networkType: transaction.txn.networkType,
-            version: transaction.txn.version,
-            maxFee: transaction.txn.maxFee,
-            deadline: transaction.txn.deadline,
-            signature: transaction.txn.signature,
-            signer: transaction.txn.signer
+          formattedTransaction.value.unknownData = {
+            addActions: transaction.txn.unknownData.addActions,
+            driveKey: transaction.txn.unknownData.driveKey,
+            removeActions: transaction.txn.unknownData.removeActions,
+            rootHash: transaction.txn.unknownData.rootHash,
+            xorRootHash: transaction.txn.unknownData.xorRootHash,
           }
         }
         if (transaction.txn.cosignatures != undefined) {

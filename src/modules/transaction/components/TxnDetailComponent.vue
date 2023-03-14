@@ -242,11 +242,11 @@
       txnType == TransactionType.ACCOUNT_METADATA_V2
     "
   />
-  <div v-if="txnDetail.type === 'UNKNOWN'" class="txn-div">
+  <div v-if="txnDetail.type === 'UNKNOWN'"  class="txn-div">
     <div class="bg-gray-400">
-      <div>Raw Data</div>
+      <div>Unknown Data</div>
         <span>
-          <pre>{{ props.txnDetail.rawData }}</pre>
+            <pre id="unknown"></pre>
         </span>
     </div>
   </div>
@@ -282,6 +282,7 @@ import ChainDetailComponent from "@/modules/transaction/components/transactionDe
 import AccountDetailComponent from "@/modules/transaction/components/transactionDetails/AccountDetailComponent.vue";
 import MetadataDetailComponent from "@/modules/transaction/components/transactionDetails/MetadataDetailComponent.vue";
 import { TransactionType } from "tsjs-xpx-chain-sdk";
+import { onMounted } from "vue";
 
 const props = defineProps({
   txnDetail: Object,
@@ -312,6 +313,11 @@ const copy = (id) => {
     }
   }
 };
+
+onMounted(() => {
+  if(props.txnDetail.type === 'UNKNOWN')
+    document.getElementById("unknown").innerHTML = JSON.stringify(props.txnDetail.unknownData, undefined, 2);
+})
 
 </script>
 

@@ -6,6 +6,7 @@ export class CommonTransaction {
   signerAddress: string = "";
   signerName: string = "";
   deadline: number | null = null;
+  unknownData: Object = [];
 
   constructor(txnHash: string) {
     this.hash = txnHash;
