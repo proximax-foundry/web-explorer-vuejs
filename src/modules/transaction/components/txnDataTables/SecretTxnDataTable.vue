@@ -33,7 +33,7 @@
             </div>
             <div class="flex items-center">
               <div class="uppercase font-bold text-xs mr-2">
-                {{ data.type }}
+                {{ data.typeName }}
               </div>
               <div class="ml-2" v-if="accountAddress">
                 <img
@@ -158,7 +158,7 @@
         v-if="wideScreen"
       >
         <template #body="{ data }">
-          <span class="text-xs">{{ data.type }}</span>
+          <span class="text-xs">{{ data.typeName }}</span>
         </template>
       </Column>
       <Column

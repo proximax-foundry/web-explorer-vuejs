@@ -37,8 +37,10 @@ app.component("Toast", Toast);
 app.use(VueBlocksTree /* , {treeName:'blocks-tree'} */);
 app.mount("#app");
 
+AppStateUtils.addNewReadyStates("theme");
+AppStateUtils.addNewReadyStates("chainProfile");
+
 const loadThemeConfig = async () => {
-  AppStateUtils.addNewReadyStates("theme");
   try {
     const config = await fetch("./themeConfig.json", {
       headers: {
@@ -59,10 +61,8 @@ const loadThemeConfig = async () => {
     console.error(e);
   }
 };
-loadThemeConfig();
 
 const chainProfileIntegration = async () => {
-  AppStateUtils.addNewReadyStates("chainProfile");
   try {
     const networksInfo = await fetch("./chainProfile.json", {
       headers: {
@@ -165,3 +165,4 @@ const chainProfileIntegration = async () => {
 };
 
 chainProfileIntegration();
+loadThemeConfig();

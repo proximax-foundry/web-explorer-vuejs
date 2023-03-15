@@ -139,7 +139,7 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
-    path: "/search/:type/:param",
+    path: "/searchInvalid/:type/:param",
     name: "ViewInvalidSearch",
     props: true,
     component: () => import("@/modules/search/views/ViewInvalidSearch.vue"),

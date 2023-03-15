@@ -8,10 +8,10 @@
       <div>
         <div>Type</div>
         <div>
-          {{ TransactionUtils.getTransactionTypeName(item.type)
-          }}<span class="text-xxs text-gray-500">
-            (Version: {{ item.version }})</span
-          >
+          {{ item.transactionName }}
+          <span class="text-xxs text-gray-500">
+            (Version: {{ item.version }})
+          </span>
         </div>
       </div>
       <div>
@@ -69,6 +69,9 @@
               : "Yes"
           }}
         </div>
+      </div>
+      <div v-if="item.unknownData && Object.keys(item.unknownData).length">
+        <UnknownDataDetailComponent :txnDetail="item" />
       </div>
     </div>
     <div class="table_div" v-if="innerTxnExtractedData[index] != undefined">
@@ -222,10 +225,7 @@
       <div
         v-if="
           innerTxnExtractedData[index].infoInfoList.length > 0 &&
-          TransactionUtils.getTransactionTypeName(item.type) ==
-            'SDA Supply Change'
-        "
-      >
+          item.type == supplyChangeTxnType ">
         <div>Supply Delta</div>
         <div>
           {{
@@ -249,9 +249,7 @@
       <div
         v-if="
           innerTxnExtractedData[index].infoInfoList.length > 0 &&
-          TransactionUtils.getTransactionTypeName(item.type) == 'SDA Definition'
-        "
-      >
+          item.type == supplyDefinitionTxnType ">
         <div>Transferable</div>
         <div>
           {{
@@ -264,9 +262,7 @@
       <div
         v-if="
           innerTxnExtractedData[index].infoInfoList.length > 0 &&
-          TransactionUtils.getTransactionTypeName(item.type) == 'SDA Definition'
-        "
-      >
+          item.type == supplyDefinitionTxnType ">
         <div>Supply Mutable</div>
         <div>
           {{
@@ -279,9 +275,7 @@
       <div
         v-if="
           innerTxnExtractedData[index].infoInfoList.length > 0 &&
-          TransactionUtils.getTransactionTypeName(item.type) == 'SDA Definition'
-        "
-      >
+          item.type == supplyDefinitionTxnType ">
         <div>Divisibility</div>
         <div>
           {{
@@ -367,6 +361,7 @@ import { CosignUtils } from "@/util/cosignUtils";
 import { copyToClipboard } from "@/util/functions";
 import { useToast } from "primevue/usetoast";
 import { AppState } from "@/state/appState";
+import UnknownDataDetailComponent from "@/modules/transaction/components/transactionDetails/UnknownDataDetailComponent.vue";
 
 const props = defineProps({
   innerTxn: Object,
@@ -374,6 +369,8 @@ const props = defineProps({
   txnGroup: String,
 });
 
+const supplyChangeTxnType = TransactionType.MOSAIC_SUPPLY_CHANGE;
+const supplyDefinitionTxnType = TransactionType.MOSAIC_DEFINITION;
 const toast = useToast();
 const nativeTokenNamespace = AppState.nativeToken.fullNamespace;
 const copy = (id) => {
@@ -426,20 +423,24 @@ onBeforeMount(() => {
         txn,
         props.txnGroup
       );
-      extractedData.infoInfoList = extractedData.infos.filter(
-        (info) => info.label && info.type === MsgType.INFO
-      );
-      extractedData.infoGreenList = extractedData.infos.filter(
-        (info) => !info.label && info.type === MsgType.GREEN
-      );
-      extractedData.infoRedList = extractedData.infos.filter(
-        (info) => !info.label && info.type === MsgType.RED
-      );
-      extractedData.infoList = extractedData.infos.filter(
-        (info) => info.type === MsgType.NONE
-      );
 
-      innerTxnExtractedData.value[index] = extractedData;
+      if(extractedData){
+        extractedData.infoInfoList = extractedData.infos.filter(
+          (info) => info.label && info.type === MsgType.INFO
+        );
+        extractedData.infoGreenList = extractedData.infos.filter(
+          (info) => !info.label && info.type === MsgType.GREEN
+        );
+        extractedData.infoRedList = extractedData.infos.filter(
+          (info) => !info.label && info.type === MsgType.RED
+        );
+        extractedData.infoList = extractedData.infos.filter(
+          (info) => info.type === MsgType.NONE
+        );
+
+        innerTxnExtractedData.value[index] = extractedData;
+      }
+      
       let innerSigner = txn.signer;
       if (txn.type === TransactionType.MODIFY_MULTISIG_ACCOUNT) {
         let allDeepCosigners =

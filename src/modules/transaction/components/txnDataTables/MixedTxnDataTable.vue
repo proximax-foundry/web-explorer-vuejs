@@ -24,7 +24,7 @@
               class="inline-block"
               v-if="
                 data.sender === Helper.createAddress(accountAddress).plain() &&
-                data.type === 'Transfer'
+                data.type === transferTxnType
               "
             />
             <img
@@ -32,7 +32,7 @@
               class="inline-block"
               v-else-if="
                 data.sender != Helper.createAddress(accountAddress).plain() &&
-                data.type === 'Transfer'
+                data.type === transferTxnType
               "
             />
           </div>
@@ -63,7 +63,7 @@
             </div>
             <div class="flex items-center">
               <div class="uppercase font-bold text-xs mr-2">
-                {{ data.type }}
+                {{ data.typeName }}
               </div>
               <div class="ml-2" v-if="accountAddress">
                 <img
@@ -198,7 +198,7 @@
         v-if="wideScreen"
       >
         <template #body="{ data }">
-          <span class="text-xs">{{ data.type }}</span>
+          <span class="text-xs">{{ data.typeName }}</span>
         </template>
       </Column>
       <Column
@@ -349,6 +349,7 @@ import Column from "primevue/column";
 import { Helper } from "@/util/typeHelper";
 import { AppState } from "@/state/appState";
 import type { SDA } from "@/models/transactions/sda";
+import { TransactionType } from "tsjs-xpx-chain-sdk";
 
 defineProps({
   transactions: Array,
@@ -356,6 +357,7 @@ defineProps({
   pages: Number,
 });
 
+const transferTxnType = TransactionType.TRANSFER;
 const wideScreen = ref(false);
 const screenResizeHandler = () => {
   if (window.innerWidth < 1024) {

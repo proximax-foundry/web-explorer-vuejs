@@ -49,7 +49,6 @@ switch (props.type) {
     searchType.value = "Search";
     break;
 }
-
 </script>
 
 <style scoped lang="scss">
