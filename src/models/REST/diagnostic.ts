@@ -1,20 +1,21 @@
-import { 
-    DiagnosticHttp, BlockchainStorageInfo, ServerInfo
+import {
+  DiagnosticHttp,
+  BlockchainStorageInfo,
+  ServerInfo,
 } from "tsjs-xpx-chain-sdk";
 
 export class DiagnosticAPI {
+  diagnosticHttp: DiagnosticHttp;
 
-    diagnosticHttp: DiagnosticHttp;
+  constructor(endpoint: string) {
+    this.diagnosticHttp = new DiagnosticHttp(endpoint);
+  }
 
-    constructor(endpoint: string){
-        this.diagnosticHttp = new DiagnosticHttp(endpoint);
-    }
+  getServerInfo(): Promise<ServerInfo> {
+    return this.diagnosticHttp.getServerInfo().toPromise();
+  }
 
-    getServerInfo(): Promise<ServerInfo>{
-        return this.diagnosticHttp.getServerInfo().toPromise();
-    }
-
-    getDiagnosticStorage(): Promise<BlockchainStorageInfo>{
-        return this.diagnosticHttp.getDiagnosticStorage().toPromise();
-    }
+  getDiagnosticStorage(): Promise<BlockchainStorageInfo> {
+    return this.diagnosticHttp.getDiagnosticStorage().toPromise();
+  }
 }

@@ -1,16 +1,13 @@
-import { 
-    NetworkHttp, NetworkType
-} from "tsjs-xpx-chain-sdk";
+import { NetworkHttp, NetworkType } from "tsjs-xpx-chain-sdk";
 
 export class NetworkAPI {
+  networkHttp: NetworkHttp;
 
-    networkHttp: NetworkHttp;
+  constructor(endpoint: string) {
+    this.networkHttp = new NetworkHttp(endpoint);
+  }
 
-    constructor(endpoint: string){
-        this.networkHttp = new NetworkHttp(endpoint);
-    }
-
-    getNetworkType(): Promise<NetworkType>{
-        return this.networkHttp.getNetworkType().toPromise();
-    }
+  getNetworkType(): Promise<NetworkType> {
+    return this.networkHttp.getNetworkType().toPromise();
+  }
 }

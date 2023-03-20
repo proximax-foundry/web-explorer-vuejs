@@ -1,14 +1,9 @@
-/* src/main.css */
-/* @import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities"; */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Icons');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Material+Icons');
 
 .material-icons {
   font-family: 'Material Icons';
@@ -35,8 +30,6 @@
   font-feature-settings: 'liga';
 }
 .material-icons.md-16 { font-size: 16px; }
-
-// @import '~tailwind-sass';
 
 :root {
   --blue: #007bff;
@@ -70,12 +63,12 @@
 }
 
 a{
-  @apply cursor-pointer;
+  cursor: pointer; 
 }
 
 body{
   font-family: 'Inter', Lato, Arial, Helvetica, sans-serif !important;
-  @apply tracking-wide;
+  letter-spacing: 0.025em;
 }
 
 .animate__animated.animate__fadeInDown{
@@ -84,12 +77,6 @@ body{
 
 .animate__animated.animate__fadeInUp{
   --animate-duration: 0.5s;
-}
-
-.error{
-  color: var(--red);
-  font-size: 13px;
-  font-weight: bold;
 }
 
 .error_box{
@@ -229,7 +216,7 @@ body{
 }
 
 .text-outline{
-  @apply transition-all duration-200 group rounded-3xl border-solid w-full py-2 mb-1 flex;
+  @apply transition-all duration-200 rounded-3xl border-solid w-full py-2 mb-1 flex;
 }
 
 .text-placeholder{
@@ -272,7 +259,6 @@ body{
     @apply text-gray-600 py-5 text-left text-xs border-b border-t border-gray-200;
   }
 }
-
 
 .p-confirm-popup {
   background: #ffffff;
@@ -317,8 +303,6 @@ body{
 .p-confirm-popup .p-confirm-popup-message {
   margin-left: 1rem;
 }
-
-
 
 .p-dialog {
   border-radius: 3px;
@@ -398,8 +382,6 @@ body{
 .p-dialog-mask.p-component-overlay {
   background-color: rgba(0, 0, 0, 0.4);
 }
-
-
 
 .p-toast {
   opacity: 0.9;
