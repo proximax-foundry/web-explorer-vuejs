@@ -13,7 +13,7 @@ export interface BlockObj {
 }
 
 export class BlockUtils {
-  static async getBlockByHeight(blockHeight: number): Promise<BlockObj> {
+  static async getBlockByHeight(blockHeight: number): Promise<BlockObj | false> {
     if (!AppState.chainAPI) {
       throw new Error("Service Unavailable");
     }
@@ -33,7 +33,7 @@ export class BlockUtils {
       };
       return blockInfo;
     } catch (error) {
-      throw error;
+      return false;
     }
   }
 
