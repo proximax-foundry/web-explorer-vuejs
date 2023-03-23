@@ -35,82 +35,82 @@
     </div>
     <div v-else>
       <MixedTxnDataTable
-        :transactions="transactions"
+        :transactions="mixedTransactions"
         :pages="pages"
         v-if="selectedTxnType == 'all'"
       />
       <TransferTxnDataTable
-        :transactions="transactions"
+        :transactions="transferTransactions"
         :pages="pages"
         v-else-if="selectedTxnType === TransactionFilterType.TRANSFER"
       />
       <AccountTxnDataTable
-        :transactions="transactions"
+        :transactions="accountTransactions"
         :pages="pages"
         v-else-if="selectedTxnType === TransactionFilterType.ACCOUNT"
       />
       <AggregateTxnDataTable
-        :transactions="transactions"
+        :transactions="aggregateTransactions"
         :pages="pages"
         :selectedGroupType="transactionGroupType.CONFIRMED"
         v-else-if="selectedTxnType === TransactionFilterType.AGGREGATE"
       />
       <AliasTxnDataTable
-        :transactions="transactions"
+        :transactions="aliasTransactions"
         :pages="pages"
         :selectedGroupType="transactionGroupType.CONFIRMED"
         v-else-if="selectedTxnType === TransactionFilterType.ALIAS"
       />
       <AssetTxnDataTable
-        :transactions="transactions"
+        :transactions="assetTransactions"
         :pages="pages"
         :selectedGroupType="transactionGroupType.CONFIRMED"
         v-else-if="selectedTxnType === TransactionFilterType.ASSET"
       />
       <NamespaceTxnDataTable
-        :transactions="transactions"
+        :transactions="namespaceTransactions"
         :pages="pages"
         :selectedGroupType="transactionGroupType.CONFIRMED"
         v-else-if="selectedTxnType === TransactionFilterType.NAMESPACE"
       />
       <MetadataTxnDataTable
-        :transactions="transactions"
+        :transactions="metadataTransactions"
         :pages="pages"
         :selectedGroupType="transactionGroupType.CONFIRMED"
         v-else-if="selectedTxnType === TransactionFilterType.METADATA"
       />
       <ExchangeTxnDataTable
-        :transactions="transactions"
+        :transactions="exchangeTransactions"
         :pages="pages"
         :selectedGroupType="transactionGroupType.CONFIRMED"
         v-else-if="selectedTxnType === TransactionFilterType.EXCHANGE"
       />
       <LockTxnDataTable
-        :transactions="transactions"
+        :transactions="lockTransactions"
         :pages="pages"
         :selectedGroupType="transactionGroupType.CONFIRMED"
         v-else-if="selectedTxnType === TransactionFilterType.LOCK"
       />
       <LinkTxnDataTable
-        :transactions="transactions"
+        :transactions="linkTransactions"
         :pages="pages"
         :selectedGroupType="transactionGroupType.CONFIRMED"
         v-else-if="selectedTxnType === TransactionFilterType.LINK"
       />
       <RestrictionTxnDataTable
-        :transactions="transactions"
+        :transactions="restrictionTransactions"
         :pages="pages"
         :selectedGroupType="transactionGroupType.CONFIRMED"
         v-else-if="selectedTxnType === TransactionFilterType.RESTRICTION"
       />
       <SecretTxnDataTable
-        :transactions="transactions"
+        :transactions="secretTransactions"
         :pages="pages"
         :selectedGroupType="transactionGroupType.CONFIRMED"
         v-else-if="selectedTxnType === TransactionFilterType.SECRET"
       />
       <ChainTxnDataTable
-        :transactions="transactions"
+        :transactions="chainTransactions"
         :pages="pages"
         :selectedGroupType="transactionGroupType.CONFIRMED"
         v-else-if="selectedTxnType === TransactionFilterType.CHAIN"
@@ -281,6 +281,20 @@ const changeRows = () => {
   loadRecentTransactions();
 };
 const transactions = ref<any[]>([]);
+const mixedTransactions  = ref<any[]>([]);
+const transferTransactions  = ref<any[]>([]);
+const accountTransactions = ref<any[]>([]);
+const aggregateTransactions = ref<any[]>([]);
+const aliasTransactions = ref<any[]>([]);
+const assetTransactions = ref<any[]>([]);
+const namespaceTransactions = ref<any[]>([]);
+const metadataTransactions = ref<any[]>([]);
+const exchangeTransactions = ref<any[]>([]);
+const lockTransactions = ref<any[]>([]);
+const linkTransactions = ref<any[]>([]);
+const restrictionTransactions = ref<any[]>([]);
+const secretTransactions = ref<any[]>([]);
+const chainTransactions = ref<any[]>([]);
 const QueryParamsType = ref<number[] | undefined>(undefined);
 let transactionGroupType = Helper.getTransactionGroupType();
 let blockDescOrderSortingField = Helper.createTransactionFieldOrder(
@@ -303,8 +317,7 @@ let loadRecentTransactions = async () => {
   txnQueryParams.pageNumber = currentPage.value;
   if (
     selectedTxnType.value == undefined ||
-    selectedTxnType.value == "all" ||
-    selectedTxnType.value == TransactionFilterType.ASSET
+    selectedTxnType.value == "all"
   ) {
     txnQueryParams.embedded = false;
   } else {
@@ -328,6 +341,48 @@ let loadRecentTransactions = async () => {
       transactionSearchResult.transactions
     );
     transactions.value = formattedTxns;
+    if(selectedTxnType.value == 'all'){
+      mixedTransactions.value = formattedTxns;
+    }
+    if(selectedTxnType.value == TransactionFilterType.TRANSFER){
+      transferTransactions.value = formattedTxns;
+    }
+    if(selectedTxnType.value == TransactionFilterType.ACCOUNT){
+      accountTransactions.value = formattedTxns
+    }
+    if(selectedTxnType.value == TransactionFilterType.AGGREGATE){
+      aggregateTransactions.value = formattedTxns
+    }
+    if(selectedTxnType.value == TransactionFilterType.ALIAS){
+      aliasTransactions.value = formattedTxns
+    }
+    if(selectedTxnType.value == TransactionFilterType.ASSET){
+      assetTransactions.value = formattedTxns
+    }
+    if(selectedTxnType.value == TransactionFilterType.NAMESPACE){
+      namespaceTransactions.value = formattedTxns
+    }
+    if(selectedTxnType.value == TransactionFilterType.METADATA){
+      metadataTransactions.value = formattedTxns
+    }
+    if(selectedTxnType.value == TransactionFilterType.EXCHANGE){
+      exchangeTransactions.value = formattedTxns
+    }
+    if(selectedTxnType.value == TransactionFilterType.LOCK){
+      lockTransactions.value = formattedTxns
+    }
+    if(selectedTxnType.value == TransactionFilterType.LINK){
+      linkTransactions.value = formattedTxns
+    }
+    if(selectedTxnType.value == TransactionFilterType.RESTRICTION){
+      restrictionTransactions.value = formattedTxns
+    }
+    if(selectedTxnType.value == TransactionFilterType.SECRET){
+      secretTransactions.value = formattedTxns
+    }
+    if(selectedTxnType.value == TransactionFilterType.CHAIN){
+      chainTransactions.value = formattedTxns
+    }
     totalPages.value = transactionSearchResult.pagination.totalPages;
   } else {
     transactions.value = [];

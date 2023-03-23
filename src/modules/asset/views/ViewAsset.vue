@@ -211,6 +211,7 @@ const networkName = computed(() => {
 });
 
 const loadAsset = async () => {
+  try{
   if (!AppState.isReady && !networkName.value) {
     setTimeout(loadAsset, 1000);
     return;
@@ -250,12 +251,16 @@ const loadAsset = async () => {
       isShowInvalid.value = true;
     }
   }
+}
+catch(e){
+  isShowInvalid.value = true;
+  console.log(e)
+}
 };
 loadAsset();
 
 emitter.on("CHANGE_NETWORK", (payload: boolean) => {
   if (payload) {
-    assets.value = null;
     isShowInvalid.value = false;
     loadAsset();
   }

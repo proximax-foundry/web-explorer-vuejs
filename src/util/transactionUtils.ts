@@ -7549,17 +7549,12 @@ export class TransactionUtils {
       const registerTxn = transaction as RegisterNamespaceTransaction;
       txn.namespaceName = registerTxn.namespaceName;
       txn.namespaceId = registerTxn.namespaceId.id.toHex();
-      if (!registerTxn.duration) {
-        throw new Error("Service unavailable");
-      }
-      if (registerTxn.namespaceType === NamespaceType.RootNamespace) {
+      if (registerTxn.namespaceType === NamespaceType.RootNamespace && registerTxn.duration) {
         txn.duration = registerTxn.duration.compact();
         txn.registerType = NamespaceType.RootNamespace;
         txn.registerTypeName = "Root namespace";
       }
-      if (!registerTxn.parentId) {
-        throw new Error("Service unavailable");
-      } else {
+      if (registerTxn.parentId) {
         txn.registerType = NamespaceType.SubNamespace;
         txn.registerTypeName = "Sub namespace";
         txn.parentId = registerTxn.parentId.toHex();
@@ -7591,17 +7586,12 @@ export class TransactionUtils {
         const registerTxn = txns[i] as RegisterNamespaceTransaction;
         txn.namespaceName = registerTxn.namespaceName;
         txn.namespaceId = registerTxn.namespaceId.id.toHex();
-        if (!registerTxn.duration) {
-          throw new Error("Service unavailable");
-        }
-        if (registerTxn.namespaceType === NamespaceType.RootNamespace) {
+        if (registerTxn.namespaceType === NamespaceType.RootNamespace && registerTxn.duration) {
           txn.duration = registerTxn.duration.compact();
           txn.registerType = NamespaceType.RootNamespace;
           txn.registerTypeName = "Root namespace";
         }
-        if (!registerTxn.parentId) {
-          throw new Error("Service unavailable");
-        } else {
+        if (registerTxn.parentId) {
           txn.registerType = NamespaceType.SubNamespace;
           txn.registerTypeName = "Sub namespace";
           txn.parentId = registerTxn.parentId.toHex();
@@ -7634,17 +7624,12 @@ export class TransactionUtils {
         const registerTxn = txns[i] as RegisterNamespaceTransaction;
         txn.namespaceName = registerTxn.namespaceName;
         txn.namespaceId = registerTxn.namespaceId.id.toHex();
-        if (!registerTxn.duration) {
-          throw new Error("Service unavailable");
-        }
-        if (registerTxn.namespaceType === NamespaceType.RootNamespace) {
+        if (registerTxn.namespaceType === NamespaceType.RootNamespace && registerTxn.duration) {
           txn.duration = registerTxn.duration.compact();
           txn.registerType = NamespaceType.RootNamespace;
           txn.registerTypeName = "Root namespace";
         }
-        if (!registerTxn.parentId) {
-          throw new Error("Service unavailable");
-        } else {
+        if (registerTxn.parentId) {
           txn.registerType = NamespaceType.SubNamespace;
           txn.registerTypeName = "Sub namespace";
           txn.parentId = registerTxn.parentId.toHex();
@@ -7678,17 +7663,12 @@ export class TransactionUtils {
         const registerTxn = txns[i] as RegisterNamespaceTransaction;
         txn.namespaceName = registerTxn.namespaceName;
         txn.namespaceId = registerTxn.namespaceId.id.toHex();
-        if (!registerTxn.duration) {
-          throw new Error("Service unavailable");
-        }
-        if (registerTxn.namespaceType === NamespaceType.RootNamespace) {
+        if (registerTxn.namespaceType === NamespaceType.RootNamespace && registerTxn.duration) {
           txn.duration = registerTxn.duration.compact();
           txn.registerType = NamespaceType.RootNamespace;
           txn.registerTypeName = "Root namespace";
         }
-        if (!registerTxn.parentId) {
-          throw new Error("Service unavailable");
-        } else {
+        if (registerTxn.parentId) {
           txn.registerType = NamespaceType.SubNamespace;
           txn.registerTypeName = "Sub namespace";
           txn.parentId = registerTxn.parentId.toHex();
