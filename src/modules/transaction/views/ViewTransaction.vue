@@ -4,7 +4,7 @@
     <div v-if="!isFetching">
       <div
         class="filter shadow-xl border border-gray-50 p-5 mb-15"
-        v-if="formattedTransaction.isFound === true" >
+        v-if="formattedTransaction.isFound === true && isTxnFailed === false" >
         <div class="flex items-center mb-4 border-b border-gray-100 relative">
           <div
             class="w-32 font-bold text-xs text-center p-2 relative"
@@ -102,6 +102,7 @@ const loadTxn = async () => {
     return;
   } else {
     if (transaction.txnStatus.group == "failed") {
+      formattedTransaction.value = transaction
       isTxnFailed.value = true;
       failedStatus.value = transaction.txnStatus.status;
     } else {
