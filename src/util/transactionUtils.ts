@@ -658,6 +658,7 @@ export class TransactionUtils {
 
       let blockHeight: number = 0;
       let txnBytes: number = 0;
+      let txnFee: number = 0;
       let deadline = null;
 
       if (transactionInfo instanceof AggregateTransactionInfo) {
@@ -678,6 +679,7 @@ export class TransactionUtils {
           if (aggregateTxn.transactionInfo) {
             blockHeight = aggregateTxn.transactionInfo.height.compact();
             txnBytes = aggregateTxn.transactionInfo.size ? aggregateTxn.transactionInfo.size: 0;
+            txnFee = aggregateTxn.maxFee.compact();
           }
           try {
             if(txnBytes === 0){
@@ -690,7 +692,7 @@ export class TransactionUtils {
         }
       } else {
         blockHeight = transactionInfo.height.compact();
-        
+        txnFee = txn.maxFee.compact(); 
         try {
           txnBytes = txn.transactionInfo.size ? txn.transactionInfo.size: txn.serialize().length / 2;
         } catch (error) {
@@ -707,7 +709,7 @@ export class TransactionUtils {
         const blockInfo = await AppState.chainAPI.blockAPI.getBlockByHeight(
           blockHeight
         );
-        txn.fee = txnBytes * blockInfo.feeMultiplier;
+        txn.fee = /* txnBytes * blockInfo.feeMultiplier; */ txnFee;
         txn.timestamp = Helper.convertDisplayDateTimeFormat24(
           new Date(
             blockInfo.timestamp.compact() +
@@ -4040,6 +4042,7 @@ export class TransactionUtils {
 
     let blockHeight: number = 0;
     let txnBytes: number = 0;
+    let txnFee :number = 0;
     let deadline = null;
 
     if (transactionInfo instanceof AggregateTransactionInfo) {
@@ -4056,6 +4059,7 @@ export class TransactionUtils {
       );
       if (aggregateTxn && aggregateTxn.transactionInfo) {
         blockHeight = aggregateTxn.transactionInfo.height.compact();
+        txnFee = aggregateTxn.maxFee.compact();
         try {
           txnBytes = aggregateTxn.transactionInfo.size ? aggregateTxn.transactionInfo.size: aggregateTxn.size;  
         } catch (error) {
@@ -4065,7 +4069,7 @@ export class TransactionUtils {
       }
     } else {
       blockHeight = transactionInfo.height.compact();
-
+      txnFee = txn.maxFee.compact();
       try {
         txnBytes = txn.transactionInfo.size ? txn.transactionInfo.size: txn.serialize().length / 2;
       } catch (error) {
@@ -4078,7 +4082,7 @@ export class TransactionUtils {
       blockHeight
     );
 
-    const fee = txnBytes * blockInfo.feeMultiplier;
+    const fee = /* txnBytes * blockInfo.feeMultiplier */ txnFee;
 
     const formattedTxn: ConfirmedTransaction = new ConfirmedTransaction(
       txnHash
