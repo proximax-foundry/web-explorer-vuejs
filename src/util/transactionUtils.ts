@@ -3761,7 +3761,7 @@ export class TransactionUtils {
 
     const sdas: SDA[] = [];
 
-    txnDetails.message = transferTxn.message.payload;
+    txnDetails.message = transferTxn.message.message ? transferTxn.message.message : transferTxn.message.payload;
     txnDetails.messageType = transferTxn.message.type;
 
     switch (txnDetails.messageType) {
@@ -4132,7 +4132,7 @@ export class TransactionUtils {
 
       if (txns[i].type === TransactionType.TRANSFER) {
         const transferTxn = txns[i] as TransferTransaction;
-        txn.message = transferTxn.message.payload;
+        txn.message = transferTxn.message.message ? transferTxn.message.message : transferTxn.message.payload;
         txn.messageType = transferTxn.message.type;
 
         if (txn.messageType === MessageType.PlainMessage) {
@@ -4321,7 +4321,7 @@ export class TransactionUtils {
 
       if (txns[i].type === TransactionType.TRANSFER) {
         const transferTxn = txns[i] as TransferTransaction;
-        txn.message = transferTxn.message.payload;
+        txn.message = transferTxn.message.message ? transferTxn.message.message : transferTxn.message.payload;
         txn.messageType = transferTxn.message.type;
 
         // if(txn.messageType === MessageType.PlainMessage){
@@ -4526,7 +4526,7 @@ export class TransactionUtils {
 
       if (txns[i].type === TransactionType.TRANSFER) {
         const transferTxn = txns[i] as TransferTransaction;
-        txn.message = transferTxn.message.payload;
+        txn.message = transferTxn.message.message ? transferTxn.message.message : transferTxn.message.payload;
         txn.messageType = transferTxn.message.type;
 
         if (txn.messageType === MessageType.PlainMessage) {
@@ -4753,7 +4753,7 @@ export class TransactionUtils {
 
     if (transaction.type === TransactionType.TRANSFER) {
       const transferTxn = transaction as TransferTransaction;
-      txn.message = transferTxn.message.payload;
+      txn.message = transferTxn.message.message ? transferTxn.message.message : transferTxn.message.payload;
       txn.messageType = transferTxn.message.type;
       if (txn.messageType === MessageType.PlainMessage) {
         const newType = TransactionUtils.convertToSwapType(txn.message);
