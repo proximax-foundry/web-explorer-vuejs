@@ -124,6 +124,7 @@ import {
 } from "@/util/accountUtil";
 import { MetadataUtils, type MetadataObj } from "@/util/metadataUtil";
 import { AccountInfo, Address } from "tsjs-xpx-chain-sdk";
+import { MultisigInfo } from "@/models/multisigInfo";
 
 const props = defineProps({
   accountParam: String,
@@ -225,16 +226,48 @@ const loadAccountInfo = async () => {
     multisig.value.cosignatories = cosignatories.map((cosignatory) =>
       cosignatory.address.plain()
     );
-    multisig.value.multisigAccounts = multisigAccounts.map((acc) =>
-      acc.address.plain()
-    );
     cosignatoriesLength.value = cosignatories.length;
-    multisigLength.value = multisigAccounts.length;
   }
   isFetching.value = false;
 };
 
 loadAccountInfo();
+
+const generateMultisigInfoBelowLevelZero = async (strAddress: string) => {
+  if (!AppState.isReady) {
+    setTimeout(generateMultisigInfoBelowLevelZero, 1000);
+    return;
+  }
+  if (!AppState.chainAPI) {
+    return;
+  }
+  let address = Address.createFromRawAddress(strAddress);
+  let graphInfo =
+    await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(address);
+  let multisigInfos: MultisigInfo[] = [];
+  graphInfo.multisigAccounts.forEach((value, key) => {
+    const level = key;
+    for (let i = 0; i < value.length; ++i) {
+      let multiInfo = value[i];
+      let newMultisigInfo = new MultisigInfo(
+        multiInfo.account.publicKey,
+        level,
+        multiInfo.cosignatories.map((cosign) => cosign.publicKey),
+        multiInfo.multisigAccounts.map((cosign) => cosign.publicKey),
+        multiInfo.minApproval,
+        multiInfo.minRemoval
+      );
+      multisigInfos.push(newMultisigInfo);
+    }
+  });
+
+  const multisigAccBelowLevelZero = multisigInfos.filter((accounts) => accounts.level < 0 ).map(acc => AccountUtils.getAddressFromPublicKey(acc.publicKey)as string)
+  const uniqueMultisigAccBelowLevelZero = [...new Set(multisigAccBelowLevelZero)];
+  multisig.value.multisigAccounts = uniqueMultisigAccBelowLevelZero
+  multisigLength.value = uniqueMultisigAccBelowLevelZero.length;
+};
+
+generateMultisigInfoBelowLevelZero(strAddress.value);
 
 const networkName = computed(() => {
   return networkState.chainNetworkName;
