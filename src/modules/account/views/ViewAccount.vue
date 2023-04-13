@@ -262,9 +262,8 @@ const generateMultisigInfoBelowLevelZero = async (strAddress: string) => {
   });
 
   const multisigAccBelowLevelZero = multisigInfos.filter((accounts) => accounts.level < 0 ).map(acc => AccountUtils.getAddressFromPublicKey(acc.publicKey)as string)
-  const uniqueMultisigAccBelowLevelZero = [...new Set(multisigAccBelowLevelZero)];
-  multisig.value.multisigAccounts = uniqueMultisigAccBelowLevelZero
-  multisigLength.value = uniqueMultisigAccBelowLevelZero.length;
+  multisig.value.multisigAccounts = multisigAccBelowLevelZero
+  multisigLength.value = multisigAccBelowLevelZero.length;
 };
 
 generateMultisigInfoBelowLevelZero(strAddress.value);
