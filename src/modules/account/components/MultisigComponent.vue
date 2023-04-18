@@ -93,7 +93,7 @@
           <div class="text-xs font-semibold">Cosignatory of</div>
           <div class="border p-4 mt-3">
             <div v-if="multisigLength" class="w-full">
-              <Tree :value="multisigAccountsList" @node-select="onNodeSelect" selectionMode="single"></Tree>
+              <Tree v-model:expandedKeys="expandedKeys" :value="multisigAccountsList" @node-select="onNodeSelect" selectionMode="single"></Tree>
             </div>
             <div
               v-if="!multisigLength"
@@ -129,7 +129,7 @@ import { copyToClipboard } from "@/util/functions";
 import { Helper } from "@/util/typeHelper";
 import { useRouter } from "vue-router";
 import Tree from 'primevue/tree';
-import type { TreeNode } from "primevue/tree";
+import type { TreeNode, TreeExpandedKeys } from "primevue/tree";
 
 interface multisig {
   key: string, label: string, selectable: boolean, children: { key: string, label: string, selectable: boolean, children: { key: string, label: string, data: string, selectable: boolean}[] }[]
@@ -207,6 +207,21 @@ const onNodeSelect = (node:TreeNode) => {
 const setCurrentComponent = (page: string) => {
   currentComponent.value = page;
 };
+
+const expandedKeys = ref<TreeExpandedKeys>({});
+const expandTree = () => {
+    for (let node of multisigAccountsList.value) {
+        expandNode(node);
+    }
+
+    expandedKeys.value = { ...expandedKeys.value };
+};
+const expandNode = (node:TreeNode) => {
+    if (node.children && node.children.length) {
+        expandedKeys.value[node.key as string] = true;
+    }
+};
+expandTree()
 </script>
 
 <style scoped lang="scss">
