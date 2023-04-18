@@ -15,6 +15,11 @@ interface RegisteredToken {
   fullNamespace: string;
 }
 
+interface storeFailedTxnHashs {
+  networkName: string;
+  txnHash: string;
+}
+
 interface appStateInterface {
   buildTxn: BuildTransactions | null;
   nativeToken: NativeToken;
@@ -27,6 +32,7 @@ interface appStateInterface {
   readyStates: Map<string, boolean>;
   isReady: boolean;
   isPendingTxnAnnounce: boolean;
+  labelFailedTxn: storeFailedTxnHashs[];
 }
 
 export const AppState = reactive<appStateInterface>({
@@ -55,4 +61,5 @@ export const AppState = reactive<appStateInterface>({
   readyStates: new Map(),
   isReady: false,
   isPendingTxnAnnounce: false,
+  labelFailedTxn: [],
 });
