@@ -92,49 +92,8 @@
           <div class="gray-line my-8"></div>
           <div class="text-xs font-semibold">Cosignatory of</div>
           <div class="border p-4 mt-3">
-            <div class="flex flex-col gap-2">
-              <div
-                v-for="(multisig, index) in multisigAccountsList"
-                :key="index"
-              >
-                <div class="border w-full rounded-md p-3">
-                  <div class="flex items-center">
-                    <div
-                      :id="`multisigAddress${index}`"
-                      :copyValue="multisig"
-                      copySubject="Address"
-                      class="text-txs font-bold mt-1"
-                    >
-                      <router-link
-                        :to="{
-                          name: 'ViewAccount',
-                          params: { accountParam: multisig },
-                        }"
-                        class="hover:text-blue-primary hover:underline"
-                      >
-                        {{ multisig }}
-                      </router-link>
-                    </div>
-                    <img
-                      src="@/assets/img/icon-copy.svg"
-                      @click="copy(`multisigAddress${index}`)"
-                      class="ml-2 w-4 h-4 cursor-pointer"
-                    />
-                    <router-link
-                      :to="{
-                        name: 'ViewAccount',
-                        params: { accountParam: multisig },
-                      }"
-                      class="hover:bg-gray-200 w-7 h-7 ml-auto flex justify-center items-center rounded-full duration-300 transition-all cursor-pointer"
-                    >
-                      <img
-                        src="@/assets/img/chevron_right.svg"
-                        class="w-5 h-5"
-                      />
-                    </router-link>
-                  </div>
-                </div>
-              </div>
+            <div v-if="multisigLength" class="w-full">
+              <Tree :value="multisigAccountsList" @node-select="onNodeSelect" selectionMode="single"></Tree>
             </div>
             <div
               v-if="!multisigLength"
@@ -168,6 +127,13 @@ import SchemeComponent from "@/modules/account/components/SchemeComponent.vue";
 import { useToast } from "primevue/usetoast";
 import { copyToClipboard } from "@/util/functions";
 import { Helper } from "@/util/typeHelper";
+import { useRouter } from "vue-router";
+import Tree from 'primevue/tree';
+import type { TreeNode } from "primevue/tree";
+
+interface multisig {
+  key: string, label: string, selectable: boolean, children: { key: string, label: string, selectable: boolean, children: { key: string, label: string, data: string, selectable: boolean}[] }[]
+}
 
 const props = defineProps({
   cosignatories: {
@@ -175,7 +141,7 @@ const props = defineProps({
     required: true,
   },
   multisig: {
-    type: Array<string>,
+    type: Array<multisig>,
     required: true,
   },
   address: {
@@ -186,8 +152,13 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  multisigLength: {
+    type: Number,
+    required: true,
+  },
 });
 
+const router = useRouter();
 const currentComponent = ref("multisig");
 const toast = useToast();
 const prettyAddress = computed(() => {
@@ -199,7 +170,7 @@ const cosignerLength = computed(() => {
 });
 
 const multisigLength = computed(() => {
-  return props.multisig.length;
+  return props.multisigLength;
 });
 
 const multisigAccountsList = computed(() => {
@@ -226,8 +197,46 @@ const copy = (id: string) => {
     }
   }
 };
+const onNodeSelect = (node:TreeNode) => {
+  router.push({
+          name: "ViewAccount",
+          params: { accountParam: node.data},
+        });
+}
 
 const setCurrentComponent = (page: string) => {
   currentComponent.value = page;
 };
 </script>
+
+<style scoped lang="scss">
+.p-tree:deep{
+  .p-tree {
+    border: 1px solid #495057;
+    background: #ffffff;
+    color: #495057;
+    padding: 1.25rem;
+    border-radius: 6px;
+  }
+  .p-link {
+    margin-top: 0px;
+  }
+  .p-treenode-children {
+    padding: 0 0 0 1rem;
+  }
+  .p-tree-container .p-treenode .p-treenode-content {
+    border-radius: 6px;
+    transition: box-shadow 0.2s;
+    padding: 0.5rem;
+  }
+  .p-treenode-label{
+    border: 1px solid rgb(231, 231, 234);
+    border-radius: 6px;
+    padding: 20px 12px;
+    width: 100%;
+    font-size: 10px;
+    line-height: 12px;
+    font-weight: 700;
+  }
+}
+</style>

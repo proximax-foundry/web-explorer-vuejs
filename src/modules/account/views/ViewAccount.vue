@@ -91,9 +91,10 @@
         />
         <MultisigComponent
           :cosignatories="multisig.cosignatories"
-          :multisig="multisig.multisigAccounts"
+          :multisig="multisigAddress"
           :address="strAddress"
           :accountPublicKey="strPublicKey"
+          :multisig-length="multisigLength"
           v-else-if="currentComponent == 'multisig'"
         />
         <TransactionComponent
@@ -140,13 +141,12 @@ const cosignatoriesLength = ref(0);
 const isFetching = ref(true);
 const accountAssets = ref<{ id: string; amount: number }[]>([]);
 const delegatePublicKey = ref("0");
-const multisig = ref<{ cosignatories: string[]; multisigAccounts: string[] }>({
-  cosignatories: [],
-  multisigAccounts: [],
+const multisig = ref<{ cosignatories: string[] }>({
+  cosignatories: []
 });
 const accountNamespaces = ref<NamespaceObj[]>([]);
 const accountMetadata = ref<MetadataObj[]>([]);
-
+const multisigAddress = ref<{ key: string, label: string, selectable: boolean, children: { key: string, label: string, selectable: boolean, children: { key: string, label: string, data: string, selectable: boolean}[] }[] }[]>([]);
 const matchedNamespace = ref<MatchedNamespace[]>([]);
 
 const setCurrentComponent = (page: string) => {
@@ -222,7 +222,7 @@ const loadAccountInfo = async () => {
   matchedNamespace.value = linkedNamespaceToAccount;
   const multisigInfo = await AccountUtils.getMultisig(strAddress.value);
   if (multisigInfo) {
-    const { cosignatories, multisigAccounts } = multisigInfo;
+    const { cosignatories } = multisigInfo;
     multisig.value.cosignatories = cosignatories.map((cosignatory) =>
       cosignatory.address.plain()
     );
@@ -260,9 +260,81 @@ const generateMultisigInfoBelowLevelZero = async (strAddress: string) => {
       multisigInfos.push(newMultisigInfo);
     }
   });
+  var multisigAccounts: { key: string, label: string, selectable: boolean, children: { key: string, label: string, selectable: boolean, children: { key: string, label: string, data: string, selectable: boolean}[] }[] }[] = [];
+  var indexNo = 0
+  multisigAccounts.push({
+    key: "0",
+    label: strAddress,
+    selectable: false,
+    children: [
+        {
+            key: '0-0',
+            label: 'Level -1',
+            selectable: false,
+            children: []
+        },
+        {
+            key: '0-1',
+            label: 'Level -2',
+            selectable: false,
+            children: []
+        },
+        {
+            key: '0-2',
+            label: 'Level -3',
+            selectable: false,
+            children: []
+        },
+    ]
+  })
 
   const multisigAccBelowLevelZero = multisigInfos.filter((accounts) => accounts.level < 0 ).map(acc => AccountUtils.getAddressFromPublicKey(acc.publicKey)as string)
-  multisig.value.multisigAccounts = multisigAccBelowLevelZero
+  const multisigAccLevelNOne = multisigInfos.filter((accounts) => accounts.level == -1 ).map(acc => AccountUtils.getAddressFromPublicKey(acc.publicKey)as string)
+
+  multisigAccLevelNOne.forEach((element) => {
+    multisigAccounts[0].children[0].children.push(
+      {
+        key: '0-0-' + indexNo.toString(),
+        label: element,
+        data: element,
+        selectable: true
+      }
+    )
+    indexNo++
+  })
+  indexNo = 0
+
+  const multisigAccLevelNTwo = multisigInfos.filter((accounts) => accounts.level == -2 ).map(acc => AccountUtils.getAddressFromPublicKey(acc.publicKey)as string)
+
+  multisigAccLevelNTwo.forEach((element) => {
+    multisigAccounts[0].children[1].children.push(
+      {
+        key: '0-1-' + indexNo.toString(),
+        label: element,
+        data: element,
+        selectable: true
+      }
+    )
+    indexNo++
+  })
+  indexNo = 0
+
+  const multisigAccLevelNThree = multisigInfos.filter((accounts) => accounts.level == -3 ).map(acc => AccountUtils.getAddressFromPublicKey(acc.publicKey)as string)
+
+  multisigAccLevelNThree.forEach((element) => {
+    multisigAccounts[0].children[2].children.push(
+      {
+        key: '0-1-' + indexNo.toString(),
+        label: element,
+        data: element,
+        selectable: true
+      }
+    )
+    indexNo++
+  })
+  indexNo = 0
+  
+  multisigAddress.value = multisigAccounts
   multisigLength.value = multisigAccBelowLevelZero.length;
 };
 
