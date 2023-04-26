@@ -400,7 +400,3 @@ const currencyDivisibility = computed(() => {
   return AppState.nativeToken.divisibility;
 });
 </script>
-
-<style>
-.tooltip-inner { white-space: pre-wrap; }
-</style>
