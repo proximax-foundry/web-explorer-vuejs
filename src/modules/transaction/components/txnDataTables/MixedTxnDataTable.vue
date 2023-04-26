@@ -323,11 +323,9 @@
             <img
               src="@/modules/transaction/img/icon-message.svg"
               v-tooltip.left="
-                '<tiptitle>' +
                 data.messageTypeTitle +
-                '</tiptitle><tiptext>' +
-                data.message +
-                '</tiptext>'
+                '\n' +
+                data.message
               "
               class="inline-block"
               v-if="data.message && data.messageType !== 1"
@@ -407,3 +405,6 @@ const currencyDivisibility = computed(() => {
   return AppState.nativeToken.divisibility;
 });
 </script>
+<style>
+.tooltip-inner { white-space: pre-wrap; }
+</style>
