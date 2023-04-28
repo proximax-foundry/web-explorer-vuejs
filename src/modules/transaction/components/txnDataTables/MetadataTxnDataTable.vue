@@ -90,7 +90,7 @@
                 src="@/modules/transaction/img/icon-message.svg"
                 v-if="data.valueChange"
                 v-tooltip.left="
-                  '<tiptext>' + constructValueDisplay(data) + '</tiptext>'
+                  { value: `<tiptext>${constructValueDisplay(data)}</tiptext>` , escape: true, class: 'custom-error'  }
                 "
                 class="inline-block"
               />
@@ -222,7 +222,7 @@
               src="@/modules/transaction/img/icon-message.svg"
               v-if="data.valueChange"
               v-tooltip.left="
-                '<tiptext>' + constructValueDisplay(data) + '</tiptext>'
+                { value: `<tiptext>${constructValueDisplay(data)}</tiptext>` , escape: true, class: 'custom-error'  }
               "
               class="inline-block"
             />

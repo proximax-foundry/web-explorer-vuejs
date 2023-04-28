@@ -233,9 +233,8 @@
             <img
               src="@/modules/transaction/img/icon-message.svg"
               v-tooltip.left="
-                '<tiptitle>Secret</tiptitle><tiptext>' +
-                data.secret +
-                '</tiptext>'
+                { value: `<tiptitle>Secret</tiptitle>` +
+              `<tiptext>${data.secret}</tiptext>`, escape: true, class: 'custom-error'  }
               "
               class="inline-block"
             />
@@ -253,9 +252,8 @@
               src="@/modules/transaction/img/icon-message.svg"
               v-if="data.proof"
               v-tooltip.left="
-                '<tiptitle>Proof</tiptitle><tiptext>' +
-                data.proof +
-                '</tiptext>'
+                { value: `<tiptitle>Proof</tiptitle>` +
+              `<tiptext>${data.proof}</tiptext>`, escape: true, class: 'custom-error'  }
               "
               class="inline-block"
             />
@@ -274,9 +272,8 @@
               v-if="data.assetId"
               class="inline-block w-4/6"
               v-tooltip.left="
-                '<tiptitle>Sirius Digital Asset</tiptitle><tiptext>' +
-                constructSDA(data.assetId, data.amount, data.namespaceName) +
-                '</tiptext>'
+                { value: `<tiptitle>Sirius Digital Asset</tiptitle>` +
+              `<tiptext>${constructSDA(data.assetId, data.amount, data.namespaceName)}</tiptext>`, escape: true, class: 'custom-error'  }
               "
             />
           </div>

@@ -69,19 +69,15 @@
               namespace.expiringRelativeTime == 'undefined NaN undefined NaN'
             "
             v-tooltip.bottom="
-              '<tiptitle>End Block: ' +
-              namespace.endHeight +
-              '</tiptitle><tiptext>No expiry</tiptext>'
+              { value: `<tiptitle>End Block:${namespace.endHeight}</tiptitle>` +
+              `<tiptext>No expiry</tiptext>`, escape: true, class: 'custom-error'  }
             "
             >{{ namespace.endHeight }}</span
           ><span
             v-else
             v-tooltip.bottom="
-              '<tiptitle>End Block: ' +
-              namespace.endHeight +
-              '</tiptitle><tiptext>Estimated expiring on ' +
-              namespace.expiringRelativeTime +
-              '</tiptext>'
+              { value: `<tiptitle>End Block:${namespace.endHeight}</tiptitle>` +
+              `<tiptext>Estimated expiring on ${namespace.expiringRelativeTime} </tiptext>`, escape: true, class: 'custom-error'  }
             "
             >{{ namespace.endHeight }}</span
           >
@@ -139,19 +135,15 @@
               namespace.expiringRelativeTime == 'undefined NaN undefined NaN'
             "
             v-tooltip.bottom="
-              '<tiptitle>End Block: ' +
-              namespace.endHeight +
-              '</tiptitle><tiptext>No expiry</tiptext>'
+              { value: `<tiptitle>End Block:${namespace.endHeight}</tiptitle>` +
+              `<tiptext>No expiry</tiptext>`, escape: true, class: 'custom-error'  }
             "
             >{{ namespace.endHeight }}</span
           ><span
             v-else
             v-tooltip.bottom="
-              '<tiptitle>End Block: ' +
-              namespace.endHeight +
-              '</tiptitle><tiptext>Estimated expiring on ' +
-              namespace.expiringRelativeTime +
-              '</tiptext>'
+              { value: `<tiptitle>End Block:${namespace.endHeight}</tiptitle>` +
+              `<tiptext>Estimated expiring on ${namespace.expiringRelativeTime} </tiptext>`, escape: true, class: 'custom-error'  }
             "
             >{{ namespace.endHeight }}</span
           >
