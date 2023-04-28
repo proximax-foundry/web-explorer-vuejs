@@ -109,10 +109,9 @@ const loadTxn = async () => {
   } else {
     if (transaction.txnStatus.group == "failed") {
       isTxnFailed.value = true;
-      failedTxnDetails.value = AppState.labelFailedTxn
       let failedTxnHashs = failedTxnDetails.value.map((x)=> x.txnHash)
       if(!failedTxnHashs.includes(props.hash)){
-        AppState.labelFailedTxn.push({networkName: networkName.value, txnHash: props.hash})
+        failedTxnDetails.value.push({networkName: networkName.value, txnHash: props.hash})
       }
       failedStatus.value = transaction.txnStatus.status;
     } else {
