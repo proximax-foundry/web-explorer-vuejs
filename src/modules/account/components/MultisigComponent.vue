@@ -93,7 +93,19 @@
           <div class="text-xs font-semibold">Cosignatory of</div>
           <div class="border p-4 mt-3">
             <div v-if="multisigLength" class="w-full">
-              <Tree v-model:expandedKeys="expandedKeys" :value="multisigAccountsList" @node-select="onNodeSelect" selectionMode="single"></Tree>
+              <button
+                class="mr-5 w-32 blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto"
+                @click="expandTree()"
+              >
+                Expand All
+              </button>
+              <button
+                class="w-32 blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto"
+                @click="collapseTree()"
+              >
+                Collapse All
+              </button>
+              <Tree v-model:expandedKeys="expandedKeys" :value="multisigAccountsList" :filter="true" filterMode="strict" @node-select="onNodeSelect" selectionMode="single" class="pt-1.5"></Tree>
             </div>
             <div
               v-if="!multisigLength"
@@ -132,7 +144,7 @@ import Tree from 'primevue/tree';
 import type { TreeNode, TreeExpandedKeys } from "primevue/tree";
 
 interface multisig {
-  key: string, label: string, selectable: boolean, children: { key: string, label: string, selectable: boolean, children: { key: string, label: string, data: string, selectable: boolean}[] }[]
+  key: string, label: string, selectable: boolean, children: { key: string, label: string, data:string, selectable: boolean }[]
 }
 
 const props = defineProps({
@@ -216,6 +228,9 @@ const expandTree = () => {
 
     expandedKeys.value = { ...expandedKeys.value };
 };
+const collapseTree = () => {
+    expandedKeys.value = {};
+};
 const expandNode = (node:TreeNode) => {
     if (node.children && node.children.length) {
         expandedKeys.value[node.key as string] = true;
@@ -252,6 +267,18 @@ expandTree()
     font-size: 10px;
     line-height: 12px;
     font-weight: 700;
+  }
+  .p-tree-filter-container{
+    width: 99%;
+    border: 1px solid rgb(231, 231, 234);
+    border-radius: 6px;
+    padding: 6px 10px;
+    margin: 6px 0px
+  }
+  .p-tree-filter{
+    width: 98%;
+    outline: none;
+    height: 40px;
   }
 }
 </style>

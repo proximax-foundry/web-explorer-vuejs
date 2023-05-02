@@ -146,7 +146,7 @@ const multisig = ref<{ cosignatories: string[] }>({
 });
 const accountNamespaces = ref<NamespaceObj[]>([]);
 const accountMetadata = ref<MetadataObj[]>([]);
-const multisigAddress = ref<{ key: string, label: string, selectable: boolean, children: { key: string, label: string, selectable: boolean, children: { key: string, label: string, data: string, selectable: boolean}[] }[] }[]>([]);
+const multisigAddress = ref<{ key: string, label: string, selectable: boolean, children: { key: string, label: string, data:string, selectable: boolean}[] }[]>([]);
 const matchedNamespace = ref<MatchedNamespace[]>([]);
 
 const setCurrentComponent = (page: string) => {
@@ -260,41 +260,34 @@ const generateMultisigInfoBelowLevelZero = async (strAddress: string) => {
       multisigInfos.push(newMultisigInfo);
     }
   });
-  var multisigAccounts: { key: string, label: string, selectable: boolean, children: { key: string, label: string, selectable: boolean, children: { key: string, label: string, data: string, selectable: boolean}[] }[] }[] = [];
+  var multisigAccounts: { key: string, label: string, selectable: boolean, children: { key: string, label: string, data:string, selectable: boolean }[] }[] = [];
   var indexNo = 0
   multisigAccounts.push({
     key: "0",
-    label: strAddress,
+    label: "Level 1",
     selectable: false,
-    children: [
-        {
-            key: '0-0',
-            label: 'Level -1',
-            selectable: false,
-            children: []
-        },
-        {
-            key: '0-1',
-            label: 'Level -2',
-            selectable: false,
-            children: []
-        },
-        {
-            key: '0-2',
-            label: 'Level -3',
-            selectable: false,
-            children: []
-        },
-    ]
+    children: []
+  })
+  multisigAccounts.push({
+    key: "1",
+    label: "Level 2",
+    selectable: false,
+    children: []
+  })
+  multisigAccounts.push({
+    key: "2",
+    label: "Level 3",
+    selectable: false,
+    children: []
   })
 
   const multisigAccBelowLevelZero = multisigInfos.filter((accounts) => accounts.level < 0 ).map(acc => AccountUtils.getAddressFromPublicKey(acc.publicKey)as string)
-  const multisigAccLevelNOne = multisigInfos.filter((accounts) => accounts.level == -1 ).map(acc => AccountUtils.getAddressFromPublicKey(acc.publicKey)as string)
+  const multisigAccLevelNOne = multisigInfos.filter((accounts) => accounts.level == -1 ).map(acc => Helper.createAddress(AccountUtils.getAddressFromPublicKey(acc.publicKey)as string).pretty())
 
   multisigAccLevelNOne.forEach((element) => {
-    multisigAccounts[0].children[0].children.push(
+    multisigAccounts[0].children.push(
       {
-        key: '0-0-' + indexNo.toString(),
+        key: '0-' + indexNo.toString(),
         label: element,
         data: element,
         selectable: true
@@ -304,12 +297,12 @@ const generateMultisigInfoBelowLevelZero = async (strAddress: string) => {
   })
   indexNo = 0
 
-  const multisigAccLevelNTwo = multisigInfos.filter((accounts) => accounts.level == -2 ).map(acc => AccountUtils.getAddressFromPublicKey(acc.publicKey)as string)
+  const multisigAccLevelNTwo = multisigInfos.filter((accounts) => accounts.level == -2 ).map(acc => Helper.createAddress(AccountUtils.getAddressFromPublicKey(acc.publicKey)as string).pretty())
 
   multisigAccLevelNTwo.forEach((element) => {
-    multisigAccounts[0].children[1].children.push(
+    multisigAccounts[1].children.push(
       {
-        key: '0-1-' + indexNo.toString(),
+        key: '1-' + indexNo.toString(),
         label: element,
         data: element,
         selectable: true
@@ -319,12 +312,12 @@ const generateMultisigInfoBelowLevelZero = async (strAddress: string) => {
   })
   indexNo = 0
 
-  const multisigAccLevelNThree = multisigInfos.filter((accounts) => accounts.level == -3 ).map(acc => AccountUtils.getAddressFromPublicKey(acc.publicKey)as string)
+  const multisigAccLevelNThree = multisigInfos.filter((accounts) => accounts.level == -3 ).map(acc => Helper.createAddress(AccountUtils.getAddressFromPublicKey(acc.publicKey)as string).pretty())
 
   multisigAccLevelNThree.forEach((element) => {
-    multisigAccounts[0].children[2].children.push(
+    multisigAccounts[2].children.push(
       {
-        key: '0-1-' + indexNo.toString(),
+        key: '2-' + indexNo.toString(),
         label: element,
         data: element,
         selectable: true
