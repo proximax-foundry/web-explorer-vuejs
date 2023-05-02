@@ -47,14 +47,8 @@
         class="p-3 bg-yellow-100 text-yellow-700">
         Transaction not found in {{ networkName }}
       </div>
-      <div v-else-if="isTxnFailed === true">
-        <div v-for="value in failedTxnDetails">
-          <div v-if="networkName === value.networkName && hash === value.txnHash">
-            <div class="filter shadow-xl border border-gray-50 p-5 mb-15">
-              <TxnFailedComponent :hash="hash" :status="failedStatus" />
-            </div>
-          </div>
-        </div>
+      <div v-else class="filter shadow-xl border border-gray-50 p-5 mb-15">
+          <TxnFailedComponent :hash="hash" :status="failedStatus" />
       </div>
     </div>
     <div v-if="isFetching">
@@ -86,7 +80,6 @@ const emitter = internalInstance?.appContext.config.globalProperties.emitter;
 const currentPage = ref("detail");
 const txnType = ref(0);
 const isFetching = ref(true);
-const isTxnFailed = ref(false);
 const failedStatus = ref("");
 const failedTxnDetails = ref(<{networkName:string, txnHash:string}[]>[])
 const txn = ref({});
@@ -108,12 +101,15 @@ const loadTxn = async () => {
     return;
   } else {
     if (transaction.txnStatus.group == "failed") {
-      isTxnFailed.value = true;
       let failedTxnHashs = failedTxnDetails.value.map((x)=> x.txnHash)
       if(!failedTxnHashs.includes(props.hash)){
         failedTxnDetails.value.push({networkName: networkName.value, txnHash: props.hash})
       }
-      failedStatus.value = transaction.txnStatus.status;
+      if(failedTxnDetails.value){
+        if(networkName.value === failedTxnDetails.value[0].networkName && props.hash === failedTxnDetails.value[0].txnHash){
+          failedStatus.value = transaction.txnStatus.status;
+        }
+      }
     } else {
       txn.value = transaction.txn;
       if (transaction.isFound == true) {
@@ -194,7 +190,6 @@ const networkName = computed(() => {
 emitter.on("CHANGE_NETWORK", (payload: boolean) => {
   if (payload) {
     formattedTransaction.value = {}
-    isTxnFailed.value = false
     loadTxn();
     isFetching.value = true;
   }
