@@ -91,9 +91,10 @@
         />
         <MultisigComponent
           :cosignatories="multisig.cosignatories"
-          :multisig="multisig.multisigAccounts"
+          :multisig="multisigAddress"
           :address="strAddress"
           :accountPublicKey="strPublicKey"
+          :multisig-length="multisigLength"
           v-else-if="currentComponent == 'multisig'"
         />
         <TransactionComponent
@@ -124,6 +125,11 @@ import {
 } from "@/util/accountUtil";
 import { MetadataUtils, type MetadataObj } from "@/util/metadataUtil";
 import { AccountInfo, Address } from "tsjs-xpx-chain-sdk";
+import { MultisigInfo } from "@/models/multisigInfo";
+
+interface multisigLayer {
+  key: string, label: string, selectable: boolean, children: { key: string, label: string, data:string, selectable: boolean }[]
+}
 
 const props = defineProps({
   accountParam: String,
@@ -139,13 +145,12 @@ const cosignatoriesLength = ref(0);
 const isFetching = ref(true);
 const accountAssets = ref<{ id: string; amount: number }[]>([]);
 const delegatePublicKey = ref("0");
-const multisig = ref<{ cosignatories: string[]; multisigAccounts: string[] }>({
-  cosignatories: [],
-  multisigAccounts: [],
+const multisig = ref<{ cosignatories: string[] }>({
+  cosignatories: []
 });
 const accountNamespaces = ref<NamespaceObj[]>([]);
 const accountMetadata = ref<MetadataObj[]>([]);
-
+const multisigAddress = ref<multisigLayer[]>([]);
 const matchedNamespace = ref<MatchedNamespace[]>([]);
 
 const setCurrentComponent = (page: string) => {
@@ -221,20 +226,116 @@ const loadAccountInfo = async () => {
   matchedNamespace.value = linkedNamespaceToAccount;
   const multisigInfo = await AccountUtils.getMultisig(strAddress.value);
   if (multisigInfo) {
-    const { cosignatories, multisigAccounts } = multisigInfo;
+    const { cosignatories } = multisigInfo;
     multisig.value.cosignatories = cosignatories.map((cosignatory) =>
       cosignatory.address.plain()
     );
-    multisig.value.multisigAccounts = multisigAccounts.map((acc) =>
-      acc.address.plain()
-    );
     cosignatoriesLength.value = cosignatories.length;
-    multisigLength.value = multisigAccounts.length;
   }
   isFetching.value = false;
 };
 
 loadAccountInfo();
+
+const generateMultisigInfoBelowLevelZero = async (strAddress: string) => {
+  if (!AppState.isReady) {
+    setTimeout(generateMultisigInfoBelowLevelZero, 1000);
+    return;
+  }
+  if (!AppState.chainAPI) {
+    return;
+  }
+  let address = Address.createFromRawAddress(strAddress);
+  let graphInfo =
+    await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(address);
+  let multisigInfos: MultisigInfo[] = [];
+  graphInfo.multisigAccounts.forEach((value, key) => {
+    const level = key;
+    for (let i = 0; i < value.length; ++i) {
+      let multiInfo = value[i];
+      let newMultisigInfo = new MultisigInfo(
+        multiInfo.account.publicKey,
+        level,
+        multiInfo.cosignatories.map((cosign) => cosign.publicKey),
+        multiInfo.multisigAccounts.map((cosign) => cosign.publicKey),
+        multiInfo.minApproval,
+        multiInfo.minRemoval
+      );
+      multisigInfos.push(newMultisigInfo);
+    }
+  });
+  var multisigAccounts: multisigLayer[] = [];
+  var indexNo = 0
+  multisigAccounts.push({
+    key: "0",
+    label: "Level 1",
+    selectable: false,
+    children: []
+  })
+  multisigAccounts.push({
+    key: "1",
+    label: "Level 2",
+    selectable: false,
+    children: []
+  })
+  multisigAccounts.push({
+    key: "2",
+    label: "Level 3",
+    selectable: false,
+    children: []
+  })
+
+  const multisigAccBelowLevelZero = multisigInfos.filter((accounts) => accounts.level < 0 ).map(acc => AccountUtils.getAddressFromPublicKey(acc.publicKey)as string)
+  const multisigAccLevelNOne = multisigInfos.filter((accounts) => accounts.level == -1 ).map(acc => Helper.createAddress(AccountUtils.getAddressFromPublicKey(acc.publicKey)as string).pretty())
+
+  multisigAccLevelNOne.forEach((element) => {
+    multisigAccounts[0].children.push(
+      {
+        key: '0-' + indexNo.toString(),
+        label: element,
+        data: element,
+        selectable: true
+      }
+    )
+    indexNo++
+  })
+  indexNo = 0
+
+  const multisigAccLevelNTwo = multisigInfos.filter((accounts) => accounts.level == -2 ).map(acc => Helper.createAddress(AccountUtils.getAddressFromPublicKey(acc.publicKey)as string).pretty())
+
+  multisigAccLevelNTwo.forEach((element) => {
+    multisigAccounts[1].children.push(
+      {
+        key: '1-' + indexNo.toString(),
+        label: element,
+        data: element,
+        selectable: true
+      }
+    )
+    indexNo++
+  })
+  indexNo = 0
+
+  const multisigAccLevelNThree = multisigInfos.filter((accounts) => accounts.level == -3 ).map(acc => Helper.createAddress(AccountUtils.getAddressFromPublicKey(acc.publicKey)as string).pretty())
+
+  multisigAccLevelNThree.forEach((element) => {
+    multisigAccounts[2].children.push(
+      {
+        key: '2-' + indexNo.toString(),
+        label: element,
+        data: element,
+        selectable: true
+      }
+    )
+    indexNo++
+  })
+  indexNo = 0
+  
+  multisigAddress.value = multisigAccounts
+  multisigLength.value = multisigAccBelowLevelZero.length;
+};
+
+generateMultisigInfoBelowLevelZero(strAddress.value);
 
 const networkName = computed(() => {
   return networkState.chainNetworkName;
