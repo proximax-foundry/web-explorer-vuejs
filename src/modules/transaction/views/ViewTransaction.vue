@@ -81,7 +81,7 @@ const currentPage = ref("detail");
 const txnType = ref(0);
 const isFetching = ref(true);
 const failedStatus = ref("");
-const failedTxnDetails = ref(<{networkName:string, txnHash:string}[]>[])
+const failedTxnDetails = ref(<{networkName:string, txnHash:string, errMsg:string}[]>[])
 const txn = ref({});
 const formattedTransaction = ref<any>({});
 const innerTransaction = ref({});
@@ -100,15 +100,16 @@ const loadTxn = async () => {
     isFetching.value = false;
     return;
   } else {
-    if (transaction.txnStatus.group == "failed") {
-      let failedTxnHashs = failedTxnDetails.value.map((x)=> x.txnHash)
-      if(!failedTxnHashs.includes(props.hash)){
-        failedTxnDetails.value.push({networkName: networkName.value, txnHash: props.hash})
+    if(failedTxnDetails.value.length>0){
+      if(networkName.value === failedTxnDetails.value[0].networkName && props.hash === failedTxnDetails.value[0].txnHash){
+        failedStatus.value = failedTxnDetails.value[0].errMsg
       }
-      if(failedTxnDetails.value){
-        if(networkName.value === failedTxnDetails.value[0].networkName && props.hash === failedTxnDetails.value[0].txnHash){
-          failedStatus.value = transaction.txnStatus.status;
-        }
+    }
+    else if(transaction.txnStatus.group == "failed") {
+      let failedTxnHashs = failedTxnDetails.value.map((x)=> x.txnHash)
+      failedStatus.value = transaction.txnStatus.status;
+      if(!failedTxnHashs.includes(props.hash)){
+        failedTxnDetails.value.push({networkName: networkName.value, txnHash: props.hash, errMsg: failedStatus.value})
       }
     } else {
       txn.value = transaction.txn;
