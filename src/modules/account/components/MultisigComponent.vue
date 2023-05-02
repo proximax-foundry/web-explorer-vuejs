@@ -181,10 +181,6 @@ const cosignerLength = computed(() => {
   return props.cosignatories.length;
 });
 
-const multisigLength = computed(() => {
-  return props.multisigLength;
-});
-
 const multisigAccountsList = computed(() => {
   return props.multisig;
 });

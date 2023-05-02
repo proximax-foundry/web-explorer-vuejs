@@ -127,6 +127,10 @@ import { MetadataUtils, type MetadataObj } from "@/util/metadataUtil";
 import { AccountInfo, Address } from "tsjs-xpx-chain-sdk";
 import { MultisigInfo } from "@/models/multisigInfo";
 
+interface multisigLayer {
+  key: string, label: string, selectable: boolean, children: { key: string, label: string, data:string, selectable: boolean }[]
+}
+
 const props = defineProps({
   accountParam: String,
 });
@@ -146,7 +150,7 @@ const multisig = ref<{ cosignatories: string[] }>({
 });
 const accountNamespaces = ref<NamespaceObj[]>([]);
 const accountMetadata = ref<MetadataObj[]>([]);
-const multisigAddress = ref<{ key: string, label: string, selectable: boolean, children: { key: string, label: string, data:string, selectable: boolean}[] }[]>([]);
+const multisigAddress = ref<multisigLayer[]>([]);
 const matchedNamespace = ref<MatchedNamespace[]>([]);
 
 const setCurrentComponent = (page: string) => {
@@ -260,7 +264,7 @@ const generateMultisigInfoBelowLevelZero = async (strAddress: string) => {
       multisigInfos.push(newMultisigInfo);
     }
   });
-  var multisigAccounts: { key: string, label: string, selectable: boolean, children: { key: string, label: string, data:string, selectable: boolean }[] }[] = [];
+  var multisigAccounts: multisigLayer[] = [];
   var indexNo = 0
   multisigAccounts.push({
     key: "0",
