@@ -4,7 +4,7 @@
     <div v-if="!isFetching">
       <div
         class="filter shadow-xl border border-gray-50 p-5 mb-15"
-        v-if="formattedTransaction.isFound === true">
+        v-if="formattedTransaction.isFound === true" >
         <div class="flex items-center mb-4 border-b border-gray-100 relative">
           <div
             class="w-32 font-bold text-xs text-center p-2 relative"
@@ -48,7 +48,7 @@
         Transaction not found in {{ networkName }}
       </div>
       <div v-else class="filter shadow-xl border border-gray-50 p-5 mb-15">
-          <TxnFailedComponent :hash="hash" :status="failedStatus" />
+        <TxnFailedComponent :hash="hash" :status="failedStatus" />
       </div>
     </div>
     <div v-if="isFetching">
