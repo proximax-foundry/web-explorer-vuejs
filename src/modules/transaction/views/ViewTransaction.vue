@@ -73,7 +73,10 @@ import { Helper } from "@/util/typeHelper";
 import { TransactionUtils } from "@/util/transactionUtils";
 
 const props = defineProps({
-  hash: String,
+  hash: {
+  type: String,
+  required: true,
+  }
 });
 const internalInstance = getCurrentInstance();
 const emitter = internalInstance?.appContext.config.globalProperties.emitter;
@@ -100,17 +103,32 @@ const loadTxn = async () => {
     isFetching.value = false;
     return;
   } else {
-    if(failedTxnDetails.value.length>0){
-      if(networkName.value === failedTxnDetails.value[0].networkName && props.hash === failedTxnDetails.value[0].txnHash){
-        failedStatus.value = failedTxnDetails.value[0].errMsg
-      }
-    }
-    else if(transaction.txnStatus.group == "failed") {
-      let failedTxnHashs = failedTxnDetails.value.map((x)=> x.txnHash)
-      failedStatus.value = transaction.txnStatus.status;
-      if(!failedTxnHashs.includes(props.hash)){
-        failedTxnDetails.value.push({networkName: networkName.value, txnHash: props.hash, errMsg: failedStatus.value})
-      }
+    if(transaction.txnStatus.group == "failed") {
+      const data = sessionStorage.getItem("storeFailedTxnDetails")
+        if(data){
+          let getFailedTxns: Array<{networkName:string, txnHash:string, errMsg:string}> = JSON.parse(data)
+          failedTxnDetails.value = getFailedTxns
+        }
+        if(failedTxnDetails.value.length>0){
+          failedTxnDetails.value.forEach((value) =>{
+            if(networkName.value === value.networkName && props.hash === value.txnHash){
+              failedStatus.value = value.errMsg
+            }
+            else{
+              let failedTxnHashs = failedTxnDetails.value.map((x)=> x.txnHash)
+              failedStatus.value = transaction.txnStatus.status;
+              if(!failedTxnHashs.includes(props.hash)){
+                failedTxnDetails.value.push({networkName: networkName.value, txnHash: props.hash, errMsg: failedStatus.value})
+                sessionStorage.setItem("storeFailedTxnDetails",JSON.stringify(failedTxnDetails.value))
+              }
+            }
+          })
+        }
+        else{
+          failedStatus.value = transaction.txnStatus.status;
+          failedTxnDetails.value.push({networkName: networkName.value, txnHash: props.hash, errMsg: failedStatus.value})
+          sessionStorage.setItem("storeFailedTxnDetails",JSON.stringify(failedTxnDetails.value))
+        }
     } else {
       txn.value = transaction.txn;
       if (transaction.isFound == true) {
