@@ -106,13 +106,14 @@ const loadTxn = async () => {
     if(data){
       let getFailedTxns: Array<{networkName:string, txnHash:string, errMsg:string}> = JSON.parse(data)
       failedTxnDetails.value = getFailedTxns
-      failedTxnDetails.value.forEach((value) =>{
-      if(networkName.value === value.networkName && props.hash === value.txnHash){
-        failedStatus.value = value.errMsg
-        isTxnFailed.value = true
-      }
-    })
-  }
+    }
+
+  failedTxnDetails.value.forEach((value) =>{
+    if(networkName.value === value.networkName && props.hash === value.txnHash){
+      failedStatus.value = value.errMsg
+      isTxnFailed.value = true
+    }
+  })
 
   if(isTxnFailed.value === false){
   let transaction = await TransactionUtils.getTransaction(props.hash);
@@ -206,6 +207,7 @@ emitter.on("CHANGE_NETWORK", (payload: boolean) => {
   if (payload) {
     formattedTransaction.value = {}
     isFetching.value = true;
+    isTxnFailed.value = false;
     loadTxn();
   }
 });
