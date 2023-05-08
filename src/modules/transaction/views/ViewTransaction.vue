@@ -107,13 +107,16 @@ const loadTxn = async () => {
       let getFailedTxns: Array<{networkName:string, txnHash:string, errMsg:string}> = JSON.parse(data)
       failedTxnDetails.value = getFailedTxns
     }
-
-  failedTxnDetails.value.forEach((value) =>{
-    if(networkName.value === value.networkName && props.hash === value.txnHash){
-      failedStatus.value = value.errMsg
+    
+  if(failedTxnDetails.value){
+    let findFailedTxn = failedTxnDetails.value.find(x => x.networkName === networkName.value && x.txnHash === props.hash)
+    if(findFailedTxn){
+      failedStatus.value = findFailedTxn.errMsg
       isTxnFailed.value = true
+      isFetching.value = false;
+      return;
     }
-  })
+  }
 
   if(isTxnFailed.value === false){
   let transaction = await TransactionUtils.getTransaction(props.hash);
