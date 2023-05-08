@@ -1011,7 +1011,7 @@ export class TransactionUtils {
     if (divisibility === 0) {
       return amount;
     }
-    return amount > 0 ? amount / Math.pow(10, divisibility) : 0;
+    return amount / Math.pow(10, divisibility);
   }
 
   static convertToSwapType(txnMessage: string) {
@@ -1820,10 +1820,7 @@ export class TransactionUtils {
           const assetSupplyInfo: TxnDetails = {
             type: MsgType.INFO,
             label: "Supply Delta",
-            value:
-              assetSupplyFormat.supplyDelta > 0
-                ? assetSupplyFormat.supplyDelta
-                : "",
+            value: assetSupplyFormat.supplyDelta,
           };
           infos.push(assetSupplyInfo);
 
