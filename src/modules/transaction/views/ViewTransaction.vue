@@ -73,7 +73,10 @@ import { Helper } from "@/util/typeHelper";
 import { TransactionUtils } from "@/util/transactionUtils";
 
 const props = defineProps({
-  hash: String,
+  hash: {
+  type: String,
+  required: true,
+  }
 });
 const internalInstance = getCurrentInstance();
 const emitter = internalInstance?.appContext.config.globalProperties.emitter;
@@ -82,10 +85,14 @@ const txnType = ref(0);
 const isFetching = ref(true);
 const isTxnFailed = ref(false);
 const failedStatus = ref("");
-("");
+const failedTxnDetails = ref(<{networkName:string, txnHash:string, errMsg:string}[]>[])
 const txn = ref({});
 const formattedTransaction = ref<any>({});
 const innerTransaction = ref({});
+
+const networkName = computed(() => {
+  return networkState.chainNetworkName;
+});
 
 const loadTxn = async () => {
   if (!AppState.isReady) {
@@ -95,15 +102,36 @@ const loadTxn = async () => {
   if (!props.hash) {
     return;
   }
+  const data = sessionStorage.getItem("storeFailedTxnDetails")
+    if(data){
+      let getFailedTxns: Array<{networkName:string, txnHash:string, errMsg:string}> = JSON.parse(data)
+      failedTxnDetails.value = getFailedTxns
+    }
+    
+  if(failedTxnDetails.value){
+    let findFailedTxn = failedTxnDetails.value.find(x => x.networkName === networkName.value && x.txnHash === props.hash)
+    if(findFailedTxn){
+      failedStatus.value = findFailedTxn.errMsg
+      isTxnFailed.value = true
+      isFetching.value = false;
+      return;
+    }
+  }
+
+  if(isTxnFailed.value === false){
   let transaction = await TransactionUtils.getTransaction(props.hash);
   if (transaction.isFound == "error") {
     formattedTransaction.value = transaction;
     isFetching.value = false;
     return;
   } else {
-    if (transaction.txnStatus.group == "failed") {
-      isTxnFailed.value = true;
+    if(transaction.txnStatus.group == "failed") {
+      let failedTxnHashs = failedTxnDetails.value.map((x)=> x.txnHash)
       failedStatus.value = transaction.txnStatus.status;
+      if(!failedTxnHashs.includes(props.hash)){
+        failedTxnDetails.value.push({networkName: networkName.value, txnHash: props.hash, errMsg: failedStatus.value})
+        sessionStorage.setItem("storeFailedTxnDetails",JSON.stringify(failedTxnDetails.value))
+      }
     } else {
       txn.value = transaction.txn;
       if (transaction.isFound == true) {
@@ -173,18 +201,17 @@ const loadTxn = async () => {
       }
     }
   }
+}
   isFetching.value = false;
 };
 loadTxn();
 
-const networkName = computed(() => {
-  return networkState.chainNetworkName;
-});
-
 emitter.on("CHANGE_NETWORK", (payload: boolean) => {
   if (payload) {
-    loadTxn();
+    formattedTransaction.value = {}
     isFetching.value = true;
+    isTxnFailed.value = false;
+    loadTxn();
   }
 });
 </script>
