@@ -29,7 +29,7 @@
         </span>
       </div>
     </div>
-    <div v-if="txnDetail.group == 'confirmed'">
+    <div>
       <div>TX FEE</div>
       <div class="relative">
         <span class="font-bold">{{ maxFee[0] }}</span
@@ -84,6 +84,93 @@
         </div>
     </div>
   </div>
+    <TransferDetailComponent
+    :txnDetail="txnDetail"
+    v-if="txnType == TransactionType.TRANSFER"
+  />
+  <AliasDetailComponent
+    :txnDetail="txnDetail"
+    v-if="
+      txnType == TransactionType.ADDRESS_ALIAS ||
+      txnType == TransactionType.MOSAIC_ALIAS
+    "
+  />
+  <AggregateDetailComponent
+    :txnDetail="txnDetail"
+    v-if="
+      txnType == TransactionType.AGGREGATE_BONDED ||
+      txnType == TransactionType.AGGREGATE_COMPLETE
+    "
+  />
+  <NamespaceDetailComponent
+    :txnDetail="txnDetail"
+    v-if="txnType == TransactionType.REGISTER_NAMESPACE"
+  />
+  <ExchangeDetailComponent
+    :txnDetail="txnDetail"
+    v-if="
+      txnType == TransactionType.EXCHANGE_OFFER ||
+      txnType == TransactionType.ADD_EXCHANGE_OFFER ||
+      txnType == TransactionType.REMOVE_EXCHANGE_OFFER
+    "
+  />
+  <LockDetailComponent
+    :txnDetail="txnDetail"
+    v-if="txnType == TransactionType.LOCK"
+  />
+  <LinkAccountDetailComponent
+    :txnDetail="txnDetail"
+    v-if="txnType == TransactionType.LINK_ACCOUNT"
+  />
+  <RestrictionDetailComponent
+    :txnDetail="txnDetail"
+    :txnGroup="txnType"
+    v-if="
+      txnType == TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS ||
+      txnType == TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC ||
+      txnType == TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION
+    "
+  />
+  <SecretDetailComponent
+    :txnDetail="txnDetail"
+    :txnGroup="txnType"
+    v-if="
+      txnType == TransactionType.SECRET_PROOF ||
+      txnType == TransactionType.SECRET_LOCK
+    "
+  />
+  <AssetDetailComponent
+    :txnDetail="txnDetail"
+    :txnGroup="txnType"
+    v-if="
+      txnType == TransactionType.MOSAIC_DEFINITION ||
+      txnType == TransactionType.MOSAIC_SUPPLY_CHANGE ||
+      txnType == TransactionType.MODIFY_MOSAIC_LEVY ||
+      txnType == TransactionType.REMOVE_MOSAIC_LEVY
+    "
+  />
+  <ChainDetailComponent
+    :txnDetail="txnDetail"
+    v-if="
+      txnType == TransactionType.MOSAIC_DEFINITION ||
+      txnType == TransactionType.MOSAIC_SUPPLY_CHANGE ||
+      txnType == TransactionType.CHAIN_CONFIGURE ||
+      txnType == TransactionType.CHAIN_UPGRADE
+    "
+  />
+  <AccountDetailComponent
+    :txnDetail="txnDetail"
+    v-if="txnType == TransactionType.MODIFY_MULTISIG_ACCOUNT"
+  />
+  <MetadataDetailComponent
+    :txnDetail="txnDetail"
+    v-if="
+      txnType == TransactionType.MOSAIC_METADATA_V2 ||
+      txnType == TransactionType.NAMESPACE_METADATA_V2 ||
+      txnType == TransactionType.CHAIN_CONFIGURE ||
+      txnType == TransactionType.ACCOUNT_METADATA_V2
+    "
+  />
 </template>
 
 <script setup>
@@ -102,9 +189,24 @@ import { useToast } from "primevue/usetoast";
 import { AppState } from "@/state/appState";
 import { Helper } from "@/util/typeHelper";
 import { copyToClipboard } from "@/util/functions";
+import TransferDetailComponent from "@/modules/transaction/components/transactionDetails/TransferDetailComponent.vue";
+import AliasDetailComponent from "@/modules/transaction/components/transactionDetails/AliasDetailComponent.vue";
+import AggregateDetailComponent from "@/modules/transaction/components/transactionDetails/AggregateDetailComponent.vue";
+import NamespaceDetailComponent from "@/modules/transaction/components/transactionDetails/NamespaceDetailComponent.vue";
+import ExchangeDetailComponent from "@/modules/transaction/components/transactionDetails/ExchangeDetailComponent.vue";
+import LockDetailComponent from "@/modules/transaction/components/transactionDetails/LockDetailComponent.vue";
+import LinkAccountDetailComponent from "@/modules/transaction/components/transactionDetails/LinkAccountDetailComponent.vue";
+import RestrictionDetailComponent from "@/modules/transaction/components/transactionDetails/RestrictionDetailComponent.vue";
+import SecretDetailComponent from "@/modules/transaction/components/transactionDetails/SecretDetailComponent.vue";
+import AssetDetailComponent from "@/modules/transaction/components/transactionDetails/AssetDetailComponent.vue";
+import ChainDetailComponent from "@/modules/transaction/components/transactionDetails/ChainDetailComponent.vue";
+import AccountDetailComponent from "@/modules/transaction/components/transactionDetails/AccountDetailComponent.vue";
+import MetadataDetailComponent from "@/modules/transaction/components/transactionDetails/MetadataDetailComponent.vue";
+import { TransactionType } from "tsjs-xpx-chain-sdk";
 
 const props = defineProps({
   txnDetail: Object,
+  txnType: Number,
 });
 const toast = useToast();
 const nativeTokenNamespace = AppState.nativeToken.label;

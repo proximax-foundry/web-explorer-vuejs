@@ -31,6 +31,7 @@
             <PayloadDetailComponent
             v-if="currentPage == 'detail'"
             :txnDetail="transactionPayload"
+            :txnType="txnType"
           />
           <InnerPayloadTxnComponent
             v-else
@@ -52,13 +53,14 @@
 </template>
   
 <script setup lang="ts">
-import { TransactionMapping } from 'tsjs-xpx-chain-sdk';
+import { MessageType, TransactionGroupType, TransactionMapping } from 'tsjs-xpx-chain-sdk';
 import { ref } from 'vue';
 import { AppState } from "@/state/appState";
 import { TransactionUtils } from '@/util/transactionUtils';
 import { Helper } from '@/util/typeHelper';
 import PayloadDetailComponent from "@/modules/transaction/components/PayloadDetailComponent.vue";
 import InnerPayloadTxnComponent from "@/modules/transaction/components/InnerPayloadTxnComponent.vue";
+import type { SDA } from '@/models/transactions/sda';
   
   const props = defineProps({
     payload: {
@@ -77,17 +79,42 @@ import InnerPayloadTxnComponent from "@/modules/transaction/components/InnerPayl
 console.log(txn)
 
 const loadPayloadTransaction = async () =>{
-  if(txn){
+  let testTxn = TransactionUtils.formatTransferTransaction(txn,TransactionGroupType.UNCONFIRMED)
+  console.log(testTxn)
+  if(txn.transactionName === "Transfer"){
     transactionPayload.value = {
-      timestamp: txn.deadline.value,
-      type: txn.type,
-      typeName: txn.transactionName,
-      fee: Helper.convertToExact(
-            TransactionUtils.getFee(txn),
-            AppState.nativeToken.divisibility
-          ),
-      version: txn.version,
-      unknownData: txn.unknownData ? txn.unknownData: {} 
+          timestamp: Helper.formatDeadline(txn.deadline.adjustedValue.compact()),
+          type: txn.type,
+          typeName: txn.transactionName,
+          fee: TransactionUtils.convertToExactNativeAmount(txn.maxFee.compact()),
+          detail: {
+            recipient: txn.recipient.address,
+            amountTransfer: txn.mosaics[0].amount.compact().toString().split("."),
+            message: txn.message.message ? txn.message.message : txn.message.payload,
+            sda: []
+          },
+          version: txn.version,
+          unknownData: txn.unknownData ? txn.unknownData: {} 
+    }
+  }
+    const sdas: SDA[] = [];
+    if (txn.messageType === MessageType.PlainMessage) {
+        const newType = TransactionUtils.convertToSwapType(txn.message);
+
+        if (newType) {
+          txn.type = newType;
+        }
+      }
+    switch (txn.message.type) {
+      case MessageType.PlainMessage:
+        transactionPayload.value.detail.messageTypeTitle = "Plain Message";
+        break;
+      case MessageType.EncryptedMessage:
+        transactionPayload.value.detail.messageTypeTitle = "Encrypted Message";
+        break;
+      case MessageType.HexadecimalMessage:
+        transactionPayload.value.detail.messageTypeTitle = "Hexadecimal Message";
+        break;
     }
     if(txn.cosignatures != undefined) {
       transactionPayload.value.cosigners = txn.cosignatures;
@@ -127,9 +154,10 @@ const loadPayloadTransaction = async () =>{
         // }
 
         innerTransaction.value = txn.innerTransactions;
-      }
       isFetching.value = false;
   }
   loadPayloadTransaction()
+
+  console.log(transactionPayload.value)
 
 </script>
