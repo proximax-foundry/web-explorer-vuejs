@@ -8,7 +8,7 @@
           </div>
           <div>
             <div class="text-xxs sm:text-xs text-white mb-5">
-              Copyright 2022 ProximaX. All rights reserved.
+              Copyright © 2023. All Rights Reserved.
             </div>
             <div>
               <p class="media-link">

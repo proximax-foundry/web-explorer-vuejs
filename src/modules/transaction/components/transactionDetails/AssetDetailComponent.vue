@@ -44,7 +44,7 @@
         {{
           txnDetail.detail.supplyDirection == 0
             ? "Decrease: "
-            : "Increase: " + ": "
+            : "Increase: "
         }}
         {{ Helper.toCurrencyFormat(txnDetail.detail.supplyDelta, 0) }}
       </div>
