@@ -64,7 +64,8 @@ import {
   MetadataEntry,
   AggregateTransactionInfo,
   TransactionInfo,
-  TransactionStatus
+  TransactionStatus,
+  TransactionMapping
 } from "tsjs-xpx-chain-sdk";
 import type { InnerTransaction } from "tsjs-xpx-chain-sdk";
 import { networkState } from "@/state/networkState";
@@ -136,6 +137,7 @@ import type {
   TxnList,
 } from "@/models/transactions/transaction";
 import { HashType as myHashType } from "@/models/const/hashType";
+import { string } from "mathjs";
 export enum MsgType {
   NONE = 0,
   GREEN = 1,
@@ -8647,4 +8649,1049 @@ export class TransactionUtils {
   static castToAggregate(tx: Transaction) {
     return tx as AggregateTransaction;
   }
+
+  //------------- Decode transaction ------------------------------------------
+
+  static async decodeTransaction(tx: any): Promise<any> {
+    if (!AppState.chainAPI) {
+      throw new Error("Service unavailable");
+    }
+    let txn: any = {};
+      // extra transaction details for various transaction type
+      txn.detail = {};
+      switch (tx.type) {
+        case TransactionType.ADDRESS_ALIAS:
+        case TransactionType.MOSAIC_ALIAS:
+            txn.detail = await TransactionUtils.decodeAliasTransaction(tx)
+          break;
+        case TransactionType.AGGREGATE_BONDED:
+        case TransactionType.AGGREGATE_COMPLETE:
+            txn.detail = await TransactionUtils.decodeAggregateTransaction(tx)
+          break;
+        case TransactionType.CHAIN_CONFIGURE:
+        case TransactionType.CHAIN_UPGRADE:
+            txn.detail = await TransactionUtils.decodeChainTransaction(tx)
+          break;
+        case TransactionType.EXCHANGE_OFFER:
+        case TransactionType.ADD_EXCHANGE_OFFER:
+        case TransactionType.REMOVE_EXCHANGE_OFFER:
+            txn.detail = await TransactionUtils.decodeExchangeTransaction(tx)
+          break;
+        case TransactionType.LOCK:
+            txn.detail = await TransactionUtils.decodeLockTransaction(tx)
+          break;
+        case TransactionType.MODIFY_ACCOUNT_METADATA:
+          break;
+        case TransactionType.MODIFY_MOSAIC_METADATA:
+          break;
+        case TransactionType.MODIFY_NAMESPACE_METADATA:
+          break;
+        case TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS:
+        case TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC:
+        case TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION:
+            txn.detail = await TransactionUtils.decodeRestrictionTransaction(tx)
+          break; 
+        case TransactionType.MODIFY_MULTISIG_ACCOUNT:
+            txn.detail = await TransactionUtils.decodeAccountTransaction(tx)
+          break;
+        case TransactionType.MOSAIC_DEFINITION:
+        case TransactionType.MOSAIC_SUPPLY_CHANGE:
+        case TransactionType.MODIFY_MOSAIC_LEVY:
+        case TransactionType.REMOVE_MOSAIC_LEVY:
+            txn.detail = await TransactionUtils.decodeAssetTransaction(tx)
+          break;   
+        case TransactionType.REGISTER_NAMESPACE:
+            txn.detail = await TransactionUtils.decodeNamespaceTransaction(tx)
+          break;
+        case TransactionType.SECRET_LOCK:
+        case TransactionType.SECRET_PROOF:
+            txn.detail = await TransactionUtils.decodeSecretTransaction(tx)
+          break;
+        case TransactionType.TRANSFER:
+            txn.detail = await TransactionUtils.decodeTransferTransaction(tx)
+          break;
+        case TransactionType.ACCOUNT_METADATA_V2:
+        case TransactionType.MOSAIC_METADATA_V2:
+        case TransactionType.NAMESPACE_METADATA_V2:
+            txn.detail = await TransactionUtils.decodeMetadataTransaction(tx)
+          break;
+      }
+
+      return txn.detail
+    }
+
+    static async decodeAliasTransaction(
+      tx: Transaction
+    ): Promise<
+        any
+    > {
+      let txn = <{
+        address:string,
+        aliasType:number,
+        aliasTypeName:string,
+        aliasName:string,
+        assetId:string
+      }>{}
+  
+      if (tx.type === TransactionType.ADDRESS_ALIAS) {
+        const addressAliasTxn = tx as AddressAliasTransaction;
+  
+        txn.address = addressAliasTxn.address.plain();
+        txn.aliasType = addressAliasTxn.actionType;
+        txn.aliasTypeName =
+          addressAliasTxn.actionType === AliasActionType.Link ? "Link" : "Unlink";
+  
+        const nsId = addressAliasTxn.namespaceId;
+  
+        try {
+          const nsName = await TransactionUtils.getNamespacesName([nsId]);
+  
+          txn.aliasName = nsName[0].name;
+        } catch (error) {}
+      } else if (tx.type === TransactionType.MOSAIC_ALIAS) {
+        const assetAliasTxn = tx as MosaicAliasTransaction;
+  
+        txn.assetId = assetAliasTxn.mosaicId.toHex();
+        txn.aliasType = assetAliasTxn.actionType;
+        txn.aliasTypeName =
+          assetAliasTxn.actionType === AliasActionType.Link ? "Link" : "Unlink";
+  
+        const nsId = assetAliasTxn.namespaceId;
+  
+        try {
+          const nsName = await TransactionUtils.getNamespacesName([nsId]);
+  
+          txn.aliasName = nsName[0].name;
+        } catch (error) {}
+      }
+      return txn;
+    }
+
+    static async decodeAggregateTransaction(
+      tx: Transaction
+    ): Promise<
+        any
+    > {
+      let txn = <{
+        aggregateLength:number,
+        cosigners:string[],
+        txnList:TxnList[]
+      }>{}
+  
+      txn.txnList = []
+
+      if (
+        tx.type === TransactionType.AGGREGATE_BONDED ||
+        tx.type === TransactionType.AGGREGATE_COMPLETE
+      ) {
+        const aggregateTxn = tx as AggregateTransaction;
+        if (!aggregateTxn) {
+          throw new Error("Service unavailable");
+        }
+        txn.aggregateLength = aggregateTxn.innerTransactions.length;
+        txn.cosigners = aggregateTxn.cosignatures.map(
+          (cosignature) => cosignature.signer.publicKey
+        );
+  
+        for (let x = 0; x < aggregateTxn.innerTransactions.length; ++x) {
+          const txnType = aggregateTxn.innerTransactions[x].type;
+          const txnTypeName = aggregateTxn.innerTransactions[x].transactionName;
+          const listFound = txn.txnList.find((tx) => tx.type === txnType);
+          if (listFound) {
+            listFound.total += 1;
+          } else {
+            const txnList: TxnList = {
+              type: txnType,
+              name: txnTypeName,
+              total: 1,
+            };
+            txn.txnList.push(txnList);
+          }
+        }
+      }
+      return txn;
+    }
+
+    static async decodeChainTransaction(
+      tx: Transaction
+    ): Promise<
+        any
+    > {
+      let txn = <{
+        applyHeightDelta:number,
+        upgradePeriod:number,
+        newVersion:string
+      }>{}
+  
+      if (tx.type === TransactionType.CHAIN_CONFIGURE) {
+        const chainConfigureTxn = tx as ChainConfigTransaction;
+  
+        txn.applyHeightDelta = chainConfigureTxn.applyHeightDelta.compact();
+      } else if (tx.type === TransactionType.CHAIN_UPGRADE) {
+        const chainUpgradeTxn = tx as ChainUpgradeTransaction;
+  
+        txn.upgradePeriod = chainUpgradeTxn.upgradePeriod.compact();
+        txn.newVersion = chainUpgradeTxn.newBlockchainVersion.toHex();
+      }
+      return txn;
+    }
+
+    static async decodeExchangeTransaction(
+      tx: Transaction
+    ): Promise<
+        any
+    > {
+      let txn = <{
+        isTakingOffer:boolean,
+        exchangeOffers:TxnExchangeOffer[]
+      }>{}
+
+      txn.exchangeOffers=[]
+  
+      if (tx.type === TransactionType.EXCHANGE_OFFER) {
+        txn.isTakingOffer = true;
+        const exchangeOfferTxn = tx as ExchangeOfferTransaction;
+  
+        for (let i = 0; i < exchangeOfferTxn.offers.length; ++i) {
+          const tempExchangeOffer = exchangeOfferTxn.offers[i];
+  
+          const assetId = tempExchangeOffer.mosaicId.toHex();
+          const amount = tempExchangeOffer.mosaicAmount.compact();
+  
+          const newTxnExchangeOffer: TxnExchangeOffer = {
+            amount: amount,
+            amountIsRaw: true,
+            assetId: assetId,
+            cost: TransactionUtils.convertToExactNativeAmount(
+              tempExchangeOffer.cost.compact()
+            ),
+            owner: tempExchangeOffer.owner.publicKey,
+            type:
+              tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER
+                ? "Sell"
+                : "Buy",
+          };
+  
+          try {
+            const assetInfo = await TransactionUtils.getAssetInfo(assetId);
+            newTxnExchangeOffer.amountIsRaw = false;
+            newTxnExchangeOffer.amount = TransactionUtils.convertToExactAmount(
+              amount,
+              assetInfo.divisibility
+            );
+            const assetName = await TransactionUtils.getAssetName(assetId);
+            if (assetName.names.length) {
+              newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
+            }
+          } catch (error) {}
+          txn.exchangeOffers.push(newTxnExchangeOffer);
+        }
+      } else if (tx.type === TransactionType.ADD_EXCHANGE_OFFER) {
+        const addExchangeOfferTxn = tx as AddExchangeOfferTransaction;
+  
+        for (let i = 0; i < addExchangeOfferTxn.offers.length; ++i) {
+          const tempExchangeOffer = addExchangeOfferTxn.offers[i];
+          const assetId = tempExchangeOffer.mosaicId.toHex();
+          const amount = tempExchangeOffer.mosaicAmount.compact();
+  
+          const newTxnExchangeOffer: TxnExchangeOffer = {
+            amount: amount,
+            amountIsRaw: true,
+            assetId: assetId,
+            cost: TransactionUtils.convertToExactNativeAmount(
+              tempExchangeOffer.cost.compact()
+            ),
+            duration: tempExchangeOffer.duration.compact(),
+            type:
+              tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER
+                ? "Sell"
+                : "Buy",
+          };
+  
+          try {
+            const assetInfo = await TransactionUtils.getAssetInfo(assetId);
+  
+            newTxnExchangeOffer.amountIsRaw = false;
+            newTxnExchangeOffer.amount = TransactionUtils.convertToExactAmount(
+              amount,
+              assetInfo.divisibility
+            );
+  
+            const assetName = await TransactionUtils.getAssetName(assetId);
+  
+            if (assetName.names.length) {
+              newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
+            }
+          } catch (error) {}
+          txn.exchangeOffers.push(newTxnExchangeOffer);
+        }
+      } else if (tx.type === TransactionType.REMOVE_EXCHANGE_OFFER) {
+        const removeExchangeOfferTxn =
+          tx as RemoveExchangeOfferTransaction;
+  
+        for (let i = 0; i < removeExchangeOfferTxn.offers.length; ++i) {
+          const tempExchangeOffer = removeExchangeOfferTxn.offers[i];
+  
+          const assetId = tempExchangeOffer.mosaicId.toHex();
+  
+          const newTxnExchangeOffer: TxnExchangeOffer = {
+            assetId: assetId,
+            type:
+              tempExchangeOffer.offerType === ExchangeOfferType.SELL_OFFER
+                ? "Sell"
+                : "Buy",
+          };
+  
+          try {
+            const assetName = await TransactionUtils.getAssetName(assetId);
+  
+            if (assetName.names.length) {
+              newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
+            }
+          } catch (error) {}
+          txn.exchangeOffers.push(newTxnExchangeOffer);
+        }
+      }
+  
+      const allBuyOffers = txn.exchangeOffers.filter((x) => x.type === "Buy");
+      const allSellOffers = txn.exchangeOffers.filter((x) => x.type === "Sell");
+  
+      txn.exchangeOffers = txn.isTakingOffer
+        ? allSellOffers.concat(allBuyOffers)
+        : allBuyOffers.concat(allSellOffers);
+      return txn;
+    }
+
+    static async decodeLockTransaction(
+      tx: TransactionMapping
+    ): Promise<
+        any
+    > {
+      if (!AppState.chainAPI) {
+        throw new Error("Service unavailable");
+      }
+      let txn = <{
+        lockHash:string
+        duration:number,
+        amountLocking:number
+      }>{}
+  
+      const lockFundTxn = tx as LockFundsTransaction;
+      txn.lockHash = lockFundTxn.hash;
+      txn.duration = lockFundTxn.duration.compact();
+      const amount = lockFundTxn.mosaic.amount.compact();
+      txn.amountLocking = AppState.nativeToken.divisibility
+        ? amount / Math.pow(10, AppState.nativeToken.divisibility)
+        : amount;
+
+      return txn;
+    }
+
+    static async decodeRestrictionTransaction(
+      tx: Transaction
+    ): Promise<
+        any
+    > {
+      let txn = <{
+        restrictionTypeOutput:string
+        modification:RestrictionModification[]
+      }>{}
+  
+      if (
+        tx.type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS
+      ) {
+        const accAddressRestrictionTxn =
+        tx as AccountAddressRestrictionModificationTransaction;
+  
+        txn.restrictionTypeOutput = TransactionUtils.getRestrictionTypeName(
+          accAddressRestrictionTxn.restrictionType
+        ).action;
+  
+        for (let i = 0; i < accAddressRestrictionTxn.modifications.length; ++i) {
+          const modification = accAddressRestrictionTxn.modifications[i];
+  
+          const newRestrictionModification: RestrictionModification = {
+            action:
+              modification.modificationType === RestrictionModificationType.Add
+                ? "Add"
+                : "Remove",
+            value: modification.value,
+          };
+          txn.modification.push(newRestrictionModification);
+        }
+      } else if (
+        tx.type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC
+      ) {
+        const accAssetRestrictionTxn =
+        tx as AccountMosaicRestrictionModificationTransaction;
+  
+        txn.restrictionTypeOutput = TransactionUtils.getRestrictionTypeName(
+          accAssetRestrictionTxn.restrictionType
+        ).action;
+  
+        for (let i = 0; i < accAssetRestrictionTxn.modifications.length; ++i) {
+          const modification = accAssetRestrictionTxn.modifications[i];
+  
+          const newRestrictionModification: RestrictionModification = {
+            action:
+              modification.modificationType === RestrictionModificationType.Add
+                ? "Add"
+                : "Remove",
+            value: new MosaicId(modification.value).toHex(),
+          };
+  
+          try {
+            const assetId = newRestrictionModification.value;
+            if (assetId === AppState.nativeToken.assetId) {
+              newRestrictionModification.name = AppState.nativeToken.label;
+            } else {
+              const assetName = await TransactionUtils.getAssetName(assetId);
+  
+              if (assetName.names.length) {
+                newRestrictionModification.name = assetName.names[0].name;
+              }
+            }
+          } catch (error) {}
+          txn.modification.push(newRestrictionModification);
+        }
+      } else if (
+        tx.type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION
+      ) {
+        const accOperationRestrictionTxn =
+        tx as AccountOperationRestrictionModificationTransaction;
+  
+        txn.restrictionTypeOutput = TransactionUtils.getRestrictionTypeName(
+          accOperationRestrictionTxn.restrictionType
+        ).action;
+  
+        for (
+          let i = 0;
+          i < accOperationRestrictionTxn.modifications.length;
+          ++i
+        ) {
+          const modification = accOperationRestrictionTxn.modifications[i];
+  
+          const newRestrictionModification: RestrictionModification = {
+            action:
+              modification.modificationType === RestrictionModificationType.Add
+                ? "Add"
+                : "Remove",
+            value: TransactionUtils.getTransactionTypeNameByEnum(
+              modification.value
+            ),
+          };
+          txn.modification.push(newRestrictionModification);
+        }
+      }
+  
+      const allAddModification = txn.modification.filter(
+        (x) => x.action === "Add"
+      );
+      const allRemoveModification = txn.modification.filter(
+        (x) => x.action === "Remove"
+      );
+  
+      txn.modification = allAddModification.concat(allRemoveModification);
+  
+      return txn;
+    }
+
+    static async decodeAccountTransaction(
+      tx: Transaction
+    ): Promise<
+        any
+    > {
+      if (!AppState.chainAPI) {
+        throw new Error("Service unavailable");
+      }
+      let txn = <{
+        approvalDelta:number,
+        removalDelta:number,
+        addedCosigner:string[],
+        removedCosigner:string[],
+        oldApprovalNumber:number,
+        oldRemovalNumber:number
+      }>{}
+  
+      if (tx.type === TransactionType.MODIFY_MULTISIG_ACCOUNT) {
+        const modifyMultisigTxn = tx as ModifyMultisigAccountTransaction;
+  
+        txn.approvalDelta = modifyMultisigTxn.minApprovalDelta;
+        txn.removalDelta = modifyMultisigTxn.minRemovalDelta;
+        txn.addedCosigner = modifyMultisigTxn.modifications
+          .filter((x) => x.type === MultisigCosignatoryModificationType.Add)
+          .map((x) => x.cosignatoryPublicAccount.publicKey);
+        txn.removedCosigner = modifyMultisigTxn.modifications
+          .filter((x) => x.type === MultisigCosignatoryModificationType.Remove)
+          .map((x) => x.cosignatoryPublicAccount.publicKey);
+
+        try {
+          if(modifyMultisigTxn.signer){
+          const multisigInfo =
+            await AppState.chainAPI.accountAPI.getMultisigAccountInfo(
+              modifyMultisigTxn.signer.address
+            );
+          if (multisigInfo) {
+            txn.oldApprovalNumber = multisigInfo.minApproval;
+            txn.oldRemovalNumber = multisigInfo.minRemoval;
+          }
+        }
+        } catch (error) {
+          txn.oldApprovalNumber = 0;
+          txn.oldRemovalNumber = 0;
+        }
+      }
+      return txn;
+    }
+
+    static async decodeAssetTransaction(
+      tx: Transaction
+    ): Promise<any> {
+      let txn = <{
+        assetId:string,
+        divisibility:number,
+        duration:number | undefined,
+        transferable:boolean,
+        supplyMutable:boolean,
+        nonce:number,
+        supplyDelta:number,
+        supplyDirection:MosaicSupplyType,
+        levyAssetId:string,
+        levyAssetAmount:number,
+        levyAssetAmountIsRaw:boolean,
+        levyType:number,
+        levyRecipient:string,
+        namespaceName:string,
+        levyAssetName:string
+      }>{}
+  
+      if (tx.type === TransactionType.MOSAIC_DEFINITION) {
+        const assetDefinitionTxn = tx as MosaicDefinitionTransaction;
+  
+        txn.assetId = assetDefinitionTxn.mosaicId.toHex();
+        txn.divisibility = assetDefinitionTxn.mosaicProperties.divisibility;
+        txn.duration = assetDefinitionTxn.mosaicProperties.duration
+          ? assetDefinitionTxn.mosaicProperties.duration.compact()
+          : undefined;
+        txn.transferable = assetDefinitionTxn.mosaicProperties.transferable;
+        txn.supplyMutable = assetDefinitionTxn.mosaicProperties.supplyMutable;
+        txn.nonce = assetDefinitionTxn.mosaicNonce.toNumber();
+      } else if (tx.type === TransactionType.MOSAIC_SUPPLY_CHANGE) {
+        const assetSupplyChangeTxn = tx as MosaicSupplyChangeTransaction;
+  
+        const assetId = assetSupplyChangeTxn.mosaicId.toHex();
+  
+        txn.assetId = assetId;
+        txn.supplyDelta = assetSupplyChangeTxn.delta.compact();
+        //txn.supplyDeltaIsRaw = true;
+        txn.supplyDirection = assetSupplyChangeTxn.direction;
+  
+        if (assetSupplyChangeTxn.direction === MosaicSupplyType.Decrease) {
+          txn.supplyDelta = -txn.supplyDelta;
+        }
+  
+        try {
+          const assetInfo = await TransactionUtils.getAssetInfo(assetId);
+  
+          txn.supplyDelta = TransactionUtils.convertToExactAmount(
+            txn.supplyDelta,
+            assetInfo.divisibility
+          );
+  
+          //   txn.supplyDeltaIsRaw = false;
+        } catch (error) {}
+      } else if (tx.type === TransactionType.MODIFY_MOSAIC_LEVY) {
+        const assetModifyLevyTxn = tx as MosaicModifyLevyTransaction;
+  
+        const assetId = assetModifyLevyTxn.mosaicId.toHex();
+        const levyAssetId = assetModifyLevyTxn.mosaicLevy.mosaicId.toHex();
+        const levyAmount = assetModifyLevyTxn.mosaicLevy.fee.compact();
+  
+        txn.assetId = assetId;
+        txn.levyAssetId = levyAssetId;
+        txn.levyAssetAmount = levyAmount;
+        txn.levyAssetAmountIsRaw = true;
+        txn.levyType = assetModifyLevyTxn.mosaicLevy.type;
+        txn.levyRecipient = assetModifyLevyTxn.mosaicLevy.recipient.plain();
+  
+        try {
+          const assetName = await TransactionUtils.getAssetName(assetId);
+  
+          if (assetName.names.length) {
+            txn.namespaceName = assetName.names[0].name;
+          }
+  
+          const levyAssetInfo = await TransactionUtils.getAssetInfo(levyAssetId);
+  
+          txn.levyAssetAmount = TransactionUtils.convertToExactAmount(
+            levyAmount,
+            levyAssetInfo.divisibility
+          );
+  
+          txn.levyAssetAmountIsRaw = false;
+  
+          const levyAssetName = await TransactionUtils.getAssetName(levyAssetId);
+  
+          if (levyAssetName.names.length) {
+            txn.levyAssetName = levyAssetName.names[0].name;
+          }
+        } catch (error) {}
+      } else if (tx.type === TransactionType.REMOVE_MOSAIC_LEVY) {
+        const assetRemoveLevyTxn = tx as MosaicRemoveLevyTransaction;
+  
+        const assetId = assetRemoveLevyTxn.mosaicId.toHex();
+  
+        txn.assetId = assetId;
+        try {
+          const assetName = await TransactionUtils.getAssetName(assetId);
+  
+          if (assetName.names.length) {
+            txn.namespaceName = assetName.names[0].name;
+          }
+        } catch (error) {}
+      }
+      return txn;
+    }
+
+    static async decodeNamespaceTransaction(
+      tx: Transaction
+    ): Promise<
+      | any
+    > {
+      let txn = <{
+        namespaceName:string,
+        namespaceId:string,
+        duration:number,
+        registerType:number,
+        registerTypeName:string,
+        parentId:string,
+        parentName:string
+      }>{}
+  
+        if (tx.type === TransactionType.REGISTER_NAMESPACE) {
+          const registerTxn = tx as RegisterNamespaceTransaction;
+            txn.namespaceName = registerTxn.namespaceName;
+            txn.namespaceId = registerTxn.namespaceId.id.toHex();
+            if (registerTxn.namespaceType === NamespaceType.RootNamespace && registerTxn.duration) {
+              txn.duration = registerTxn.duration.compact();
+              txn.registerType = NamespaceType.RootNamespace;
+              txn.registerTypeName = "Root namespace";
+            }
+            if (registerTxn.parentId) {
+              txn.registerType = NamespaceType.SubNamespace;
+              txn.registerTypeName = "Sub namespace";
+              txn.parentId = registerTxn.parentId.toHex();
+              const namespaceName = await TransactionUtils.getNamespacesName([
+                registerTxn.parentId,
+              ]);
+              txn.parentName = namespaceName[0].name;
+            }
+            txn.namespaceId = registerTxn.namespaceId.toHex();
+        return txn;
+      }
+    }
+
+    static async decodeSecretTransaction(
+      tx: Transaction
+    ): Promise<
+        any
+    > {
+      let txn = <{
+        duration:number, 
+        secret:string, 
+        recipient:string,
+        recipientNamespaceId:string,
+        recipientNamespaceName:string,
+        amount:number,
+        hashType:string,
+        namespaceName:string,
+        isSendWithNamespace:boolean,
+        assetId:string,
+        amountIsRaw:boolean,
+        proof:string
+      }>{}
+  
+      if (tx.type === TransactionType.SECRET_LOCK) {
+        const secretLockTxn = tx as SecretLockTransaction;
+        txn.duration = secretLockTxn.duration.compact();
+        txn.secret = secretLockTxn.secret;
+        txn.recipient = secretLockTxn.recipient.plain();
+        txn.amount = secretLockTxn.mosaic.amount.compact();
+        txn.hashType = myHashType[secretLockTxn.hashType];
+  
+        const isNamespace = TransactionUtils.isNamespace(secretLockTxn.mosaic.id);
+  
+        try {
+          if (!isNamespace) {
+              txn.assetId = secretLockTxn.mosaic.id.toHex();
+  
+            const assetsNames = await TransactionUtils.getAssetsName([
+              secretLockTxn.mosaic.id,
+            ]);
+  
+            if (assetsNames[0].names.length) {
+              txn.namespaceName = assetsNames[0].names[0].name;
+            }
+          } else {
+            const namespaceId = new NamespaceId(
+              secretLockTxn.mosaic.id.toDTO().id
+            );
+
+              const linkedAssetId = await TransactionUtils.getAssetAlias(
+                namespaceId
+              );
+              txn.assetId = linkedAssetId.toHex();
+
+            txn.isSendWithNamespace = true;
+  
+            const nsNames = await TransactionUtils.getNamespacesName([
+              namespaceId,
+            ]);
+            txn.namespaceName = nsNames[0].name;
+          }
+  
+          if (
+            txn.namespaceName &&
+            txn.namespaceName === AppState.nativeToken.fullNamespace
+          ) {
+            txn.namespaceName = AppState.nativeToken.label;
+          }
+  
+          const assetInfo = await TransactionUtils.getAssetInfo(txn.assetId);
+  
+          if (assetInfo.divisibility > 0) {
+            txn.amount = TransactionUtils.convertToExactAmount(
+              txn.amount,
+              assetInfo.divisibility
+            );
+          }
+          txn.amountIsRaw = false;
+        } catch (error) {}
+      } else if (tx.type === TransactionType.SECRET_PROOF) {
+        const secretProofTxn = tx as SecretProofTransaction;
+        txn.secret = secretProofTxn.secret;
+        txn.recipient = secretProofTxn.recipient.plain();
+        txn.hashType = myHashType[secretProofTxn.hashType];
+        txn.proof = secretProofTxn.proof;
+      }
+  
+      return txn;
+    }
+
+    static async decodeTransferTransaction(
+      tx: Transaction,
+    ): Promise<
+      | any
+    > {
+      if (!AppState.chainAPI) {
+        throw new Error("Service unavailable");
+      }
+      let txn = <{
+        recipient:string,
+        message:string, 
+        messageType:number, 
+        type:string, 
+        messageTypeTitle:string,
+        recipientNamespaceId:string,
+        recipientNamespaceName:string,
+        amountTransfer:number,
+        sda:SDA[]
+      }>{}
+      const sdas: SDA[] = [];
+      
+          const transferTxn = tx as TransferTransaction;
+          txn.message = transferTxn.message.payload;
+          txn.messageType = transferTxn.message.type;
+          if (txn.messageType === MessageType.PlainMessage) {
+          const newType = TransactionUtils.convertToSwapType(txn.message);
+
+            if (newType) {
+              txn.type = newType;
+            }
+          }
+          switch (txn.messageType) {
+            case MessageType.PlainMessage:
+              txn.messageTypeTitle = "Plain Message";
+              break;
+            case MessageType.EncryptedMessage:
+              txn.messageTypeTitle = "Encrypted Message";
+              break;
+            case MessageType.HexadecimalMessage:
+              txn.messageTypeTitle = "Hexadecimal Message";
+              break;
+          }
+          if (transferTxn.recipient instanceof NamespaceId) {
+            txn.recipientNamespaceId = transferTxn.recipient.toHex();
+            const namespacesName = await TransactionUtils.getNamespacesName([
+            transferTxn.recipient,
+            ]);
+            txn.recipientNamespaceName = namespacesName[0].name;
+          }
+          else{
+            txn.recipient = transferTxn.recipient.plain()
+          }
+
+          for (let y = 0; y < transferTxn.mosaics.length; ++y) {
+            const rawAmount = transferTxn.mosaics[y].amount.compact();
+            const actualAmount = rawAmount;
+            const isSendWithNamespace = TransactionUtils.isNamespace(
+              transferTxn.mosaics[y].id
+            );
+            let assetId: MosaicId;
+            let assetIdHex: string;
+
+            if (isSendWithNamespace) {
+              const namespaceId = new NamespaceId(
+                transferTxn.mosaics[y].id.toDTO().id
+              );
+              assetId = await TransactionUtils.getAssetAlias(namespaceId);
+            } else {
+              assetId = transferTxn.mosaics[y].id;
+            }
+
+            assetIdHex = assetId.toHex();
+  
+            if (
+              [AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(
+                assetIdHex
+              )
+            ) {
+              txn.amountTransfer =
+                TransactionUtils.convertToExactNativeAmount(actualAmount);
+              continue;
+            }
+
+            const newSDA: SDA = {
+              amount: rawAmount,
+              divisibility: 0,
+              id: assetIdHex,
+              amountIsRaw: true,
+              sendWithNamespace: isSendWithNamespace,
+            };
+  
+            if (isSendWithNamespace) {
+              const namespaceId = transferTxn.mosaics[y].id;
+
+              newSDA.sendWithAlias = {
+                idHex: namespaceId.toHex(),
+                id: namespaceId.toDTO().id,
+              };
+            }
+
+            sdas.push(newSDA);
+          }
+  
+          const namespaceIds = sdas
+            .filter((sda) => sda.sendWithNamespace)
+            .map((sda) => {
+              if (sda.sendWithAlias) {
+                return Helper.createNamespaceId(sda.sendWithAlias.id);
+              }
+                return new NamespaceId("");
+            });
+  
+          const allAssetId = sdas
+            .filter((sda) => {
+              return sda.amountIsRaw;
+            })
+            .map((sda) => Helper.createAssetId(sda.id));
+
+          if (namespaceIds.length || allAssetId.length) {
+            let namespacesNames: NamespaceName[] = [];
+            namespacesNames =
+              await AppState.chainAPI.namespaceAPI.getNamespacesName(namespaceIds);
+            const assetsProperties = await AppState.chainAPI.assetAPI.getMosaics(
+              allAssetId
+            );
+            const aliasNames: MosaicNames[] =
+              await AppState.chainAPI.assetAPI.getMosaicsNames(allAssetId);
+
+            for (let x = 0; x < sdas.length; ++x) {
+              const assetProperties = assetsProperties.filter(
+                (aliasName) => aliasName.mosaicId.toHex() === sdas[x].id
+              )[0];
+
+              sdas[x].divisibility = assetProperties.divisibility;
+              sdas[x].amount = TransactionUtils.convertToExactAmount(
+                sdas[x].amount,
+                assetProperties.divisibility
+              );
+              sdas[x].amountIsRaw = false;
+
+              const mosaicNames: MosaicNames = aliasNames.filter(
+                (aliaName) => aliaName.mosaicId.toHex() === sdas[x].id
+              )[0];
+              const currentAliasNames: NamespaceName[] = mosaicNames.names;
+              sdas[x].currentAlias = currentAliasNames.map((currentAlias) => {
+                return {
+                  name: currentAlias.name,
+                  id: currentAlias.namespaceId.toDTO().id,
+                  idHex: currentAlias.namespaceId.toHex(),
+                };
+              });
+
+              const { sendWithAlias, currentAlias } = sdas[x];
+
+              if (sendWithAlias) {
+                sendWithAlias.name = namespacesNames
+                  .filter(
+                    (nsName) => nsName.namespaceId.toHex() === sendWithAlias.idHex
+                  )
+                  .map((nsName) => nsName.name)[0];
+              }
+              if (!currentAlias) {
+                sdas[x].label = sdas[x].id;
+              } else if (
+                currentAlias.length &&
+                AppState.registeredToken.find(
+                  (rt) => rt.fullNamespace === currentAlias[0].name
+                )
+              ) {
+                const findNamespace = AppState.registeredToken.find(
+                (rt) => rt.fullNamespace === currentAlias[0].name
+                );
+                if (findNamespace) {
+                  sdas[x].label = findNamespace.label;
+                }
+              } else if (currentAlias.length) {
+                sdas[x].label = currentAlias[0].name;
+              } else {
+              sdas[x].label = sdas[x].id;
+              }
+            }
+          }
+          txn.sda = sdas;
+          return txn
+    }
+
+    static async decodeMetadataTransaction(
+      tx: Transaction
+    ): Promise<
+          any
+    > {
+      let txn = <{
+        metadataType:number, 
+        metadataTypeName:string, 
+        scopedMetadataKey:string,
+        targetId:string,
+        targetPublicKey:string,
+        sizeChanged:number,
+        targetIdName:string,
+        oldValue:string,
+        newValue:string,
+        valueChange: string,
+      }>{}
+  
+      if (tx.type === TransactionType.MOSAIC_METADATA_V2) {
+        const assetMetadataTxn = tx as MosaicMetadataTransaction;
+  
+        const assetId = assetMetadataTxn.targetMosaicId.toHex();
+  
+        txn.metadataType = MetadataType.MOSAIC;
+        txn.metadataTypeName = "Asset";
+        txn.scopedMetadataKey = assetMetadataTxn.scopedMetadataKey.toHex();
+        txn.targetId = assetId;
+        txn.targetPublicKey = assetMetadataTxn.targetPublicKey.publicKey;
+        txn.sizeChanged = assetMetadataTxn.valueSizeDelta;
+
+        try {
+          const assetName = await TransactionUtils.getAssetName(assetId);
+  
+          if (assetName.names.length) {
+            txn.targetIdName = assetName.names[0].name;
+          }
+  
+          const assetMetadataEntry = await TransactionUtils.getAssetMetadata(
+            assetMetadataTxn.targetMosaicId,
+            assetMetadataTxn.scopedMetadataKey
+          );
+          if (assetMetadataEntry) {
+            txn.oldValue = assetMetadataEntry.value;
+            txn.newValue = TransactionUtils.applyValueChange(
+              txn.oldValue,
+              txn.valueChange,
+              txn.sizeChanged
+            );
+          } else {
+            txn.newValue = TransactionUtils.applyValueChange(
+              "",
+              txn.valueChange,
+              txn.sizeChanged
+            );
+          }
+        } catch (error) {}
+      } else if (tx.type === TransactionType.NAMESPACE_METADATA_V2) {
+        const namespaceMetadataTxn = tx as NamespaceMetadataTransaction;
+  
+        const nsId = namespaceMetadataTxn.targetNamespaceId.toHex();
+  
+        txn.metadataType = MetadataType.NAMESPACE;
+        txn.metadataTypeName = "Namespace";
+        txn.scopedMetadataKey = namespaceMetadataTxn.scopedMetadataKey.toHex();
+        txn.targetId = nsId;
+        txn.targetPublicKey = namespaceMetadataTxn.targetPublicKey.publicKey;
+        txn.sizeChanged = namespaceMetadataTxn.valueSizeDelta;
+  
+        try {
+          const nsName = await TransactionUtils.getNamespacesName([
+            NamespaceId.createFromEncoded(nsId),
+          ]);
+  
+          if (nsName.length) {
+            txn.targetIdName = nsName[0].name;
+          }
+  
+          const nsMetadataEntry = await TransactionUtils.getNamespaceMetadata(
+            namespaceMetadataTxn.targetNamespaceId,
+            namespaceMetadataTxn.scopedMetadataKey
+          );
+          if (nsMetadataEntry) {
+            txn.oldValue = nsMetadataEntry.value;
+            txn.newValue = TransactionUtils.applyValueChange(
+              txn.oldValue,
+              txn.valueChange,
+              txn.sizeChanged
+            );
+          } else {
+            txn.newValue = TransactionUtils.applyValueChange(
+              "",
+              txn.valueChange,
+              txn.sizeChanged
+            );
+          }
+        } catch (error) {}
+      } else if (tx.type === TransactionType.ACCOUNT_METADATA_V2) {
+        const accountMetadataTxn = tx as AccountMetadataTransaction;
+  
+        txn.metadataType = MetadataType.ACCOUNT;
+        txn.metadataTypeName = "Account";
+  
+        txn.scopedMetadataKey = accountMetadataTxn.scopedMetadataKey.toHex();
+        txn.targetPublicKey = accountMetadataTxn.targetPublicKey.publicKey;
+        txn.sizeChanged = accountMetadataTxn.valueSizeDelta;
+  
+        try {
+          const nsMetadataEntry = await TransactionUtils.getAccountMetadata(
+            accountMetadataTxn.targetPublicKey,
+            accountMetadataTxn.scopedMetadataKey
+          );
+          if (nsMetadataEntry) {
+            txn.oldValue = nsMetadataEntry.value;
+            txn.newValue = TransactionUtils.applyValueChange(
+              txn.oldValue,
+              txn.valueChange,
+              txn.sizeChanged
+            );
+          } else {
+            txn.newValue = TransactionUtils.applyValueChange(
+              "",
+              txn.valueChange,
+              txn.sizeChanged
+            );
+          }
+        } catch (error) {}
+      }
+  
+      return txn;
+    }
 }

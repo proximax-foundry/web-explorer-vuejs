@@ -1,24 +1,8 @@
 <template>
   <div class="txn-div">
-    <div
-      v-if="txnDetail.group == 'partial' || txnDetail.group == 'unconfirmed'"
-    >
+    <div>
       <div>Deadline</div>
-      <div>{{ txnDetail.timestamp }}</div>
-    </div>
-    <div v-else>
-      <div>Timestamp</div>
-      <div>{{ txnDetail.timestamp }}</div>
-    </div>
-    <div v-if="txnDetail.group == 'confirmed'">
-      <div>Block</div>
-      <div>
-        <router-link
-          :to="{ name: 'ViewBlock', params: { blockHeight: txnDetail.height } }"
-          class="text-blue-600 hover:text-blue-primary hover:underline"
-          >{{ txnDetail.height }}</router-link
-        >
-      </div>
+      <div>{{ txnDetail.deadline }}</div>
     </div>
     <div>
       <div>Tx Type</div>
@@ -76,12 +60,6 @@
           />
         </div>
       </div>
-    </div>
-    <div v-if="Object.keys(txnDetail.unknownData).length"  class="bg-gray-200">
-        <div class="unknownDetails-col">Unknown Data</div>
-        <div class="unknownDetails">
-            <pre>{{ JSON.stringify(txnDetail.unknownData, undefined, 2) }}</pre>
-        </div>
     </div>
   </div>
     <TransferDetailComponent

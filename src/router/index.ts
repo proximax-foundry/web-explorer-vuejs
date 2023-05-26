@@ -139,10 +139,10 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
-    path: "/payload/:payload",
-    name: "ViewPayload",
+    path: "/payload",
+    name: "ViewPayloadSearch",
     props: true,
-    component: () => import("@/modules/transaction/views/ViewPayload.vue"),
+    component: () => import("@/modules/transaction/views/ViewPayloadSearch.vue"),
     meta: {
       title: "View Payload",
     },
