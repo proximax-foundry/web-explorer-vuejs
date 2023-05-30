@@ -1694,7 +1694,7 @@ export class TransactionUtils {
               AppState.networkType
             );
             const removeCosignerInfo: TxnDetails = {
-              type: MsgType.GREEN,
+              type: MsgType.RED,
               value: modifyMultisigFormat.removedCosigner[i],
               short: Helper.createAddress(
                 publicAccount.address.plain()
@@ -3558,24 +3558,6 @@ export class TransactionUtils {
     return txnDetails;
   }
 
-  async extractModifyMultisig(
-    modifyMultisigTxn: ModifyMultisigAccountTransaction,
-    txnGroupType: TransactionGroupType = TransactionGroupType.CONFIRMED
-  ): Promise<InnerAccountTransaction> {
-    if (txnGroupType === TransactionGroupType.CONFIRMED) {
-      return await TransactionUtils.extractConfirmedModifyMultisig(
-        modifyMultisigTxn
-      );
-    } else if (txnGroupType === TransactionGroupType.UNCONFIRMED) {
-      return await TransactionUtils.extractUnconfirmedModifyMultisig(
-        modifyMultisigTxn
-      );
-    } else {
-      return await TransactionUtils.extractPartialModifyMultisig(
-        modifyMultisigTxn
-      );
-    }
-  }
   // --------------------------------------end------------------------------------------------------------------
 
   // -----------------------------------extract Secret Lock only---------------------------------------------------
