@@ -1,6 +1,6 @@
 {
   "name": "explorer-vite",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "private": true,
   "scripts": {
     "dev": "vite ",
@@ -29,7 +29,7 @@
     "primeicons": "^5.0.0",
     "primevue": "^3.21.0",
     "rxjs": "^7.8.0",
-    "tsjs-xpx-chain-sdk": "^0.9.19",
+    "tsjs-xpx-chain-sdk": "^0.9.20",
     "utf-8-validate": "^5.0.10",
     "v-tooltip": "^2.1.3",
     "vite-plugin-node-polyfills": "^0.7.0",
