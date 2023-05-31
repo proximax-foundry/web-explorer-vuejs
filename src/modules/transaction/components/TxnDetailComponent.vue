@@ -288,9 +288,6 @@ onMounted(async () => {
     // remove those not signed
     pendingCosigners.value = allCosigners.value.filter(pk => !signedSigners.value.includes(pk));
 
-    console.log(allCosigners.value)
-    console.log(pendingCosigners.value)
-    console.log(signedSigners.value)
   }
 })
 
