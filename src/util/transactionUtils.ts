@@ -658,7 +658,6 @@ export class TransactionUtils {
 
       let blockHeight: number = 0;
       let txnBytes: number = 0;
-      let txnFee: number = 0;
       let deadline = null;
 
       if (transactionInfo instanceof AggregateTransactionInfo) {
@@ -679,7 +678,6 @@ export class TransactionUtils {
           if (aggregateTxn.transactionInfo) {
             blockHeight = aggregateTxn.transactionInfo.height.compact();
             txnBytes = aggregateTxn.transactionInfo.size ? aggregateTxn.transactionInfo.size: 0;
-            txnFee = aggregateTxn.maxFee.compact();
           }
           try {
             if(txnBytes === 0){
@@ -692,7 +690,7 @@ export class TransactionUtils {
         }
       } else {
         blockHeight = transactionInfo.height.compact();
-        txnFee = txn.maxFee.compact(); 
+        
         try {
           txnBytes = txn.transactionInfo.size ? txn.transactionInfo.size: txn.serialize().length / 2;
         } catch (error) {
@@ -709,7 +707,7 @@ export class TransactionUtils {
         const blockInfo = await AppState.chainAPI.blockAPI.getBlockByHeight(
           blockHeight
         );
-        txn.fee = /* txnBytes * blockInfo.feeMultiplier; */ txnFee;
+        txn.fee = txnBytes * blockInfo.feeMultiplier;
         txn.timestamp = Helper.convertDisplayDateTimeFormat24(
           new Date(
             blockInfo.timestamp.compact() +
@@ -1696,7 +1694,7 @@ export class TransactionUtils {
               AppState.networkType
             );
             const removeCosignerInfo: TxnDetails = {
-              type: MsgType.GREEN,
+              type: MsgType.RED,
               value: modifyMultisigFormat.removedCosigner[i],
               short: Helper.createAddress(
                 publicAccount.address.plain()
@@ -3560,24 +3558,6 @@ export class TransactionUtils {
     return txnDetails;
   }
 
-  async extractModifyMultisig(
-    modifyMultisigTxn: ModifyMultisigAccountTransaction,
-    txnGroupType: TransactionGroupType = TransactionGroupType.CONFIRMED
-  ): Promise<InnerAccountTransaction> {
-    if (txnGroupType === TransactionGroupType.CONFIRMED) {
-      return await TransactionUtils.extractConfirmedModifyMultisig(
-        modifyMultisigTxn
-      );
-    } else if (txnGroupType === TransactionGroupType.UNCONFIRMED) {
-      return await TransactionUtils.extractUnconfirmedModifyMultisig(
-        modifyMultisigTxn
-      );
-    } else {
-      return await TransactionUtils.extractPartialModifyMultisig(
-        modifyMultisigTxn
-      );
-    }
-  }
   // --------------------------------------end------------------------------------------------------------------
 
   // -----------------------------------extract Secret Lock only---------------------------------------------------
@@ -4039,7 +4019,6 @@ export class TransactionUtils {
 
     let blockHeight: number = 0;
     let txnBytes: number = 0;
-    let txnFee :number = 0;
     let deadline = null;
 
     if (transactionInfo instanceof AggregateTransactionInfo) {
@@ -4056,7 +4035,6 @@ export class TransactionUtils {
       );
       if (aggregateTxn && aggregateTxn.transactionInfo) {
         blockHeight = aggregateTxn.transactionInfo.height.compact();
-        txnFee = aggregateTxn.maxFee.compact();
         try {
           txnBytes = aggregateTxn.transactionInfo.size ? aggregateTxn.transactionInfo.size: aggregateTxn.size;  
         } catch (error) {
@@ -4066,7 +4044,7 @@ export class TransactionUtils {
       }
     } else {
       blockHeight = transactionInfo.height.compact();
-      txnFee = txn.maxFee.compact();
+
       try {
         txnBytes = txn.transactionInfo.size ? txn.transactionInfo.size: txn.serialize().length / 2;
       } catch (error) {
@@ -4079,7 +4057,7 @@ export class TransactionUtils {
       blockHeight
     );
 
-    const fee = /* txnBytes * blockInfo.feeMultiplier */ txnFee;
+    const fee = txnBytes * blockInfo.feeMultiplier;
 
     const formattedTxn: ConfirmedTransaction = new ConfirmedTransaction(
       txnHash
