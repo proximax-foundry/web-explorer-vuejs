@@ -33,7 +33,6 @@ import {
   ExchangeOfferTransaction,
   RemoveExchangeOfferTransaction,
   AccountLinkTransaction,
-  LockFundsTransaction,
   AccountMetadataTransaction,
   NamespaceMetadataTransaction,
   MosaicMetadataTransaction,
@@ -64,7 +63,8 @@ import {
   MetadataEntry,
   AggregateTransactionInfo,
   TransactionInfo,
-  TransactionStatus
+  TransactionStatus,
+  HashLockTransaction
 } from "tsjs-xpx-chain-sdk";
 import type { InnerTransaction } from "tsjs-xpx-chain-sdk";
 import { networkState } from "@/state/networkState";
@@ -207,11 +207,11 @@ export const transactionTypeName = {
     name: "Modify Multisig Account",
   },
   aggregateComplete: {
-    id: TransactionType.AGGREGATE_COMPLETE,
+    id: TransactionType.AGGREGATE_COMPLETE_V1,
     name: "Aggregate Complete",
   },
   aggregateBonded: {
-    id: TransactionType.AGGREGATE_BONDED,
+    id: TransactionType.AGGREGATE_BONDED_V1,
     name: "Aggregate Bonded",
   },
   mosaicAlias: {
@@ -223,7 +223,7 @@ export const transactionTypeName = {
     name: "Address Alias",
   },
   lock: {
-    id: TransactionType.LOCK,
+    id: TransactionType.HASH_LOCK,
     name: "LockFund",
   },
   accountLink: {
@@ -532,10 +532,10 @@ export class TransactionUtils {
       case TransactionType.ADD_EXCHANGE_OFFER:
         typeName = transactionTypeName.addExchangeOffer.name;
         break;
-      case TransactionType.AGGREGATE_BONDED:
+      case TransactionType.AGGREGATE_BONDED_V1:
         typeName = transactionTypeName.aggregateBonded.name;
         break;
-      case TransactionType.AGGREGATE_COMPLETE:
+      case TransactionType.AGGREGATE_COMPLETE_V1:
         typeName = transactionTypeName.aggregateComplete.name;
         break;
       case TransactionType.CHAIN_CONFIGURE:
@@ -553,7 +553,7 @@ export class TransactionUtils {
       case TransactionType.LINK_ACCOUNT:
         typeName = transactionTypeName.accountLink.name;
         break;
-      case TransactionType.LOCK:
+      case TransactionType.HASH_LOCK:
         typeName = transactionTypeName.lock.name;
         break;
       case TransactionType.MODIFY_ACCOUNT_METADATA:
@@ -666,8 +666,8 @@ export class TransactionUtils {
         //txnBytes = aggregateTxn.serialize().length / 2;
         //deadline = aggregateTxn.deadline.adjustedValue.compact();
       } else if (
-        txn.type === TransactionType.AGGREGATE_BONDED ||
-        txn.type === TransactionType.AGGREGATE_COMPLETE
+        txn.type === TransactionType.AGGREGATE_BONDED_V1 ||
+        txn.type === TransactionType.AGGREGATE_COMPLETE_V1
       ) {
         if (!txnHash) {
           txnHash = "";
@@ -726,8 +726,8 @@ export class TransactionUtils {
             txnStatus.group
           );
           break;
-        case TransactionType.AGGREGATE_BONDED:
-        case TransactionType.AGGREGATE_COMPLETE:
+        case TransactionType.AGGREGATE_BONDED_V1:
+        case TransactionType.AGGREGATE_COMPLETE_V1:
           txn.detail = await TransactionUtils.formatAggregateTransaction(
             txn,
             txnStatus.group
@@ -754,7 +754,7 @@ export class TransactionUtils {
             txnStatus.group
           );
           break;
-        case TransactionType.LOCK:
+        case TransactionType.HASH_LOCK:
           txn.detail = await TransactionUtils.formatLockTransaction(
             txn,
             txnStatus.group
@@ -995,7 +995,7 @@ export class TransactionUtils {
       valueUint8Array[i] = oldValueBytes[i] ^ valueChangeBytes[i];
     }
 
-    return Convert.decodeHexToUtf8(Convert.uint8ToHex(valueUint8Array));
+    return Convert.decodeHexToUtf8(Convert.uint8ArrayToHex(valueUint8Array));
   }
 
   static convertToExactNativeAmount(amount: number) {
@@ -1413,9 +1413,9 @@ export class TransactionUtils {
         }
         break;
 
-      case TransactionType.LOCK:
+      case TransactionType.HASH_LOCK:
         {
-          const lockFundTx = innerTransaction as LockFundsTransaction;
+          const lockFundTx = innerTransaction as HashLockTransaction;
           tempData = await TransactionUtils.extractLockHash(
             lockFundTx,
             groupType
@@ -3107,7 +3107,7 @@ export class TransactionUtils {
     txnDetails.scopedMetadataKey = accMetadataTxn.scopedMetadataKey.toHex();
     txnDetails.targetPublicKey = accMetadataTxn.targetPublicKey.publicKey;
     txnDetails.sizeChanged = accMetadataTxn.valueSizeDelta;
-    txnDetails.valueChange = Convert.uint8ToHex(
+    txnDetails.valueChange = Convert.uint8ArrayToHex(
       accMetadataTxn.valueDifferences
     );
 
@@ -3214,7 +3214,7 @@ export class TransactionUtils {
     txnDetails.targetId = nsId;
     txnDetails.targetPublicKey = nsMetadataTxn.targetPublicKey.publicKey;
     txnDetails.sizeChanged = nsMetadataTxn.valueSizeDelta;
-    txnDetails.valueChange = Convert.uint8ToHex(nsMetadataTxn.valueDifferences);
+    txnDetails.valueChange = Convert.uint8ArrayToHex(nsMetadataTxn.valueDifferences);
 
     try {
       const nsName = await TransactionUtils.getNamespacesName([
@@ -3322,7 +3322,7 @@ export class TransactionUtils {
     txnDetails.targetId = assetId;
     txnDetails.targetPublicKey = assetMetadataTxn.targetPublicKey.publicKey;
     txnDetails.sizeChanged = assetMetadataTxn.valueSizeDelta;
-    txnDetails.valueChange = Convert.uint8ToHex(
+    txnDetails.valueChange = Convert.uint8ArrayToHex(
       assetMetadataTxn.valueDifferences
     );
 
@@ -3377,7 +3377,7 @@ export class TransactionUtils {
 
   // -----------------------------------extract Lock Hash only---------------------------------------------------
   static async extractConfirmedLockHash(
-    lockFundTxn: LockFundsTransaction
+    lockFundTxn: HashLockTransaction
   ): Promise<InnerLockTransaction> {
     if (!AppState.chainAPI) {
       throw new Error("Service unavailable");
@@ -3412,13 +3412,13 @@ export class TransactionUtils {
   }
 
   static extractUnconfirmedLockHash(
-    lockFundTxn: LockFundsTransaction
+    lockFundTxn: HashLockTransaction
   ): InnerLockTransaction {
     return TransactionUtils.extractPartialLockHash(lockFundTxn);
   }
 
   static extractPartialLockHash(
-    lockFundTxn: LockFundsTransaction
+    lockFundTxn: HashLockTransaction
   ): InnerLockTransaction {
     if (!lockFundTxn.signer) {
       throw new Error("Service Unavailable");
@@ -3438,7 +3438,7 @@ export class TransactionUtils {
   }
 
   static async extractLockHash(
-    lockFundTxn: LockFundsTransaction,
+    lockFundTxn: HashLockTransaction,
     txnGroupType: TransactionGroupType = TransactionGroupType.CONFIRMED
   ): Promise<InnerLockTransaction> {
     if (txnGroupType === TransactionGroupType.CONFIRMED) {
@@ -4045,8 +4045,8 @@ export class TransactionUtils {
       //txnBytes = aggregateTxn.serialize().length / 2;
       //deadline = aggregateTxn.deadline.adjustedValue.compact();
     } else if (
-      txn.type === TransactionType.AGGREGATE_BONDED ||
-      txn.type === TransactionType.AGGREGATE_COMPLETE
+      txn.type === TransactionType.AGGREGATE_BONDED_V1 ||
+      txn.type === TransactionType.AGGREGATE_COMPLETE_V1
     ) {
       const aggregateTxn = await TransactionUtils.autoFindAggregateTransaction(
         txnHash
@@ -5843,7 +5843,7 @@ export class TransactionUtils {
       txn.targetPublicKey = assetMetadataTxn.targetPublicKey.publicKey;
       txn.sizeChanged = assetMetadataTxn.valueSizeDelta;
       if (groupType != "confirmed") {
-        txn.valueChange = Convert.uint8ToHex(assetMetadataTxn.valueDifferences);
+        txn.valueChange = Convert.uint8ArrayToHex(assetMetadataTxn.valueDifferences);
       }
 
       try {
@@ -5884,7 +5884,7 @@ export class TransactionUtils {
       txn.targetPublicKey = namespaceMetadataTxn.targetPublicKey.publicKey;
       txn.sizeChanged = namespaceMetadataTxn.valueSizeDelta;
       if (groupType != "confirmed") {
-        txn.valueChange = Convert.uint8ToHex(
+        txn.valueChange = Convert.uint8ArrayToHex(
           namespaceMetadataTxn.valueDifferences
         );
       }
@@ -5927,7 +5927,7 @@ export class TransactionUtils {
       txn.targetPublicKey = accountMetadataTxn.targetPublicKey.publicKey;
       txn.sizeChanged = accountMetadataTxn.valueSizeDelta;
       if (groupType != "confirmed") {
-        txn.valueChange = Convert.uint8ToHex(
+        txn.valueChange = Convert.uint8ArrayToHex(
           accountMetadataTxn.valueDifferences
         );
       }
@@ -5982,7 +5982,7 @@ export class TransactionUtils {
         txn.targetId = assetId;
         txn.targetPublicKey = assetMetadataTxn.targetPublicKey.publicKey;
         txn.sizeChanged = assetMetadataTxn.valueSizeDelta;
-        txn.valueChange = Convert.uint8ToHex(assetMetadataTxn.valueDifferences);
+        txn.valueChange = Convert.uint8ArrayToHex(assetMetadataTxn.valueDifferences);
 
         try {
           const assetName = await TransactionUtils.getAssetName(assetId);
@@ -6021,7 +6021,7 @@ export class TransactionUtils {
         txn.targetId = nsId;
         txn.targetPublicKey = namespaceMetadataTxn.targetPublicKey.publicKey;
         txn.sizeChanged = namespaceMetadataTxn.valueSizeDelta;
-        txn.valueChange = Convert.uint8ToHex(
+        txn.valueChange = Convert.uint8ArrayToHex(
           namespaceMetadataTxn.valueDifferences
         );
 
@@ -6062,7 +6062,7 @@ export class TransactionUtils {
         txn.scopedMetadataKey = accountMetadataTxn.scopedMetadataKey.toHex();
         txn.targetPublicKey = accountMetadataTxn.targetPublicKey.publicKey;
         txn.sizeChanged = accountMetadataTxn.valueSizeDelta;
-        txn.valueChange = Convert.uint8ToHex(
+        txn.valueChange = Convert.uint8ArrayToHex(
           accountMetadataTxn.valueDifferences
         );
 
@@ -6185,7 +6185,7 @@ export class TransactionUtils {
         txn.targetId = assetId;
         txn.targetPublicKey = assetMetadataTxn.targetPublicKey.publicKey;
         txn.sizeChanged = assetMetadataTxn.valueSizeDelta;
-        txn.valueChange = Convert.uint8ToHex(assetMetadataTxn.valueDifferences);
+        txn.valueChange = Convert.uint8ArrayToHex(assetMetadataTxn.valueDifferences);
 
         try {
           const assetName = await TransactionUtils.getAssetName(assetId);
@@ -6225,7 +6225,7 @@ export class TransactionUtils {
         txn.targetId = nsId;
         txn.targetPublicKey = namespaceMetadataTxn.targetPublicKey.publicKey;
         txn.sizeChanged = namespaceMetadataTxn.valueSizeDelta;
-        txn.valueChange = Convert.uint8ToHex(
+        txn.valueChange = Convert.uint8ArrayToHex(
           namespaceMetadataTxn.valueDifferences
         );
 
@@ -6267,7 +6267,7 @@ export class TransactionUtils {
         txn.scopedMetadataKey = accountMetadataTxn.scopedMetadataKey.toHex();
         txn.targetPublicKey = accountMetadataTxn.targetPublicKey.publicKey;
         txn.sizeChanged = accountMetadataTxn.valueSizeDelta;
-        txn.valueChange = Convert.uint8ToHex(
+        txn.valueChange = Convert.uint8ArrayToHex(
           accountMetadataTxn.valueDifferences
         );
 
@@ -6341,8 +6341,8 @@ export class TransactionUtils {
     }
 
     if (
-      transaction.type === TransactionType.AGGREGATE_BONDED ||
-      transaction.type === TransactionType.AGGREGATE_COMPLETE
+      transaction.type === TransactionType.AGGREGATE_BONDED_V1 ||
+      transaction.type === TransactionType.AGGREGATE_COMPLETE_V1
     ) {
       const aggregateTxn = await TransactionUtils.autoFindAggregateTransaction(
         txn.hash
@@ -6389,8 +6389,8 @@ export class TransactionUtils {
       ) as UnconfirmedAggregateTransaction;
 
       if (
-        txns[i].type === TransactionType.AGGREGATE_BONDED ||
-        txns[i].type === TransactionType.AGGREGATE_COMPLETE
+        txns[i].type === TransactionType.AGGREGATE_BONDED_V1 ||
+        txns[i].type === TransactionType.AGGREGATE_COMPLETE_V1
       ) {
         const aggregateTxn =
           await TransactionUtils.autoFindAggregateTransaction(txn.hash);
@@ -6437,8 +6437,8 @@ export class TransactionUtils {
       ) as ConfirmedAggregateTransaction;
 
       if (
-        txns[i].type === TransactionType.AGGREGATE_BONDED ||
-        txns[i].type === TransactionType.AGGREGATE_COMPLETE
+        txns[i].type === TransactionType.AGGREGATE_BONDED_V1 ||
+        txns[i].type === TransactionType.AGGREGATE_COMPLETE_V1
       ) {
         const aggregateTxn =
           await TransactionUtils.autoFindAggregateTransaction(txn.hash);
@@ -6484,8 +6484,8 @@ export class TransactionUtils {
         formattedTxn
       ) as PartialAggregateTransaction;
       if (
-        txns[i].type === TransactionType.AGGREGATE_BONDED ||
-        txns[i].type === TransactionType.AGGREGATE_COMPLETE
+        txns[i].type === TransactionType.AGGREGATE_BONDED_V1 ||
+        txns[i].type === TransactionType.AGGREGATE_COMPLETE_V1
       ) {
         const aggregateTxn =
           await TransactionUtils.autoFindAggregateTransaction(txn.hash);
@@ -7389,7 +7389,7 @@ export class TransactionUtils {
       ) as ConfirmedLockTransaction;
     }
 
-    const lockFundTxn = transaction as LockFundsTransaction;
+    const lockFundTxn = transaction as HashLockTransaction;
     txn.lockHash = lockFundTxn.hash;
     txn.duration = lockFundTxn.duration.compact();
     const amount = lockFundTxn.mosaic.amount.compact();
@@ -7425,7 +7425,7 @@ export class TransactionUtils {
         formattedTxn
       ) as UnconfirmedLockTransaction;
 
-      const lockFundTxn = txns[i] as LockFundsTransaction;
+      const lockFundTxn = txns[i] as HashLockTransaction;
       txn.lockHash = lockFundTxn.hash;
       txn.duration = lockFundTxn.duration.compact();
       const amount = lockFundTxn.mosaic.amount.compact();
@@ -7454,7 +7454,7 @@ export class TransactionUtils {
         ConfirmedLockTransaction,
         formattedTxn
       ) as ConfirmedLockTransaction;
-      const lockFundTxn = txns[i] as LockFundsTransaction;
+      const lockFundTxn = txns[i] as HashLockTransaction;
       txn.lockHash = lockFundTxn.hash;
       txn.duration = lockFundTxn.duration.compact();
 
@@ -7491,7 +7491,7 @@ export class TransactionUtils {
         PartialLockTransaction,
         formattedTxn
       ) as PartialLockTransaction;
-      const lockFundTxn = txns[i] as LockFundsTransaction;
+      const lockFundTxn = txns[i] as HashLockTransaction;
 
       txn.lockHash = lockFundTxn.hash;
       txn.duration = lockFundTxn.duration.compact();
@@ -8584,8 +8584,8 @@ export class TransactionUtils {
     formattedTxn.deadline = deadline;
 
     if (
-      txn.type === TransactionType.AGGREGATE_BONDED ||
-      txn.type === TransactionType.AGGREGATE_COMPLETE
+      txn.type === TransactionType.AGGREGATE_BONDED_V1 ||
+      txn.type === TransactionType.AGGREGATE_COMPLETE_V1
     ) {
       const aggregateTxn = txn as AggregateTransaction;
 

@@ -67,7 +67,7 @@
       <div>
         {{ txnDetail.typeName }}
         <span class="text-xxs text-gray-500">
-          (Version: {{ txnDetail.version }})
+          (Version: {{ txnDetail.version.txnTypeVersion }})
         </span>
       </div>
     </div>
@@ -91,8 +91,8 @@
     <div>
       <div
         v-if="
-          txnType == TransactionType.AGGREGATE_BONDED ||
-          txnType == TransactionType.AGGREGATE_COMPLETE
+          txnType == TransactionType.AGGREGATE_BONDED_V1 ||
+          txnType == TransactionType.AGGREGATE_COMPLETE_V1
         "
       >
         Signer
@@ -175,8 +175,8 @@
   <AggregateDetailComponent
     :txnDetail="txnDetail"
     v-if="
-      txnType == TransactionType.AGGREGATE_BONDED ||
-      txnType == TransactionType.AGGREGATE_COMPLETE
+      txnType == TransactionType.AGGREGATE_BONDED_V1 ||
+      txnType == TransactionType.AGGREGATE_COMPLETE_V1
     "
   />
   <NamespaceDetailComponent
