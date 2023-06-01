@@ -193,7 +193,7 @@
   />
   <LockDetailComponent
     :txnDetail="txnDetail"
-    v-if="txnType == TransactionType.LOCK"
+    v-if="txnType == TransactionType.HASH_LOCK"
   />
   <LinkAccountDetailComponent
     :txnDetail="txnDetail"
