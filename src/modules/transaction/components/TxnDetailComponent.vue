@@ -120,15 +120,15 @@
   <AliasDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.ADDRESS_ALIAS ||
     txnType == TransactionType.MOSAIC_ALIAS
     " />
-  <AggregateDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.AGGREGATE_BONDED ||
-    txnType == TransactionType.AGGREGATE_COMPLETE
+  <AggregateDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.AGGREGATE_BONDED_V1 ||
+    txnType == TransactionType.AGGREGATE_COMPLETE_V1
     " />
   <NamespaceDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.REGISTER_NAMESPACE" />
   <ExchangeDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.EXCHANGE_OFFER ||
     txnType == TransactionType.ADD_EXCHANGE_OFFER ||
     txnType == TransactionType.REMOVE_EXCHANGE_OFFER
     " />
-  <LockDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.LOCK" />
+  <LockDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.HASH_LOCK" />
   <LinkAccountDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.LINK_ACCOUNT" />
   <RestrictionDetailComponent :txnDetail="txnDetail" :txnGroup="txnType" v-if="txnType == TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS ||
     txnType == TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC ||
@@ -157,100 +157,13 @@
     <div>
       <div>Cosigner List</div>
       <div>
-        <div v-for="(cosigner, index) in allCosigners" :key="index" class="py-1">
+        <div v-for="(cosigner, index) in allCosigners" :key="index" class="py-1 break-all">
           <div v-if="pendingCosigners.includes(cosigner)" class="text-red-500">{{ cosigner }} (Pending) </div>
           <div v-if="signedSigners.includes(cosigner)" class="text-green-500">{{ cosigner }} (Signed)</div>
         </div>
       </div>
     </div>
   </div>
-  <TransferDetailComponent
-    :txnDetail="txnDetail"
-    v-if="txnType == TransactionType.TRANSFER"
-  />
-  <AliasDetailComponent
-    :txnDetail="txnDetail"
-    v-if="
-      txnType == TransactionType.ADDRESS_ALIAS ||
-      txnType == TransactionType.MOSAIC_ALIAS
-    "
-  />
-  <AggregateDetailComponent
-    :txnDetail="txnDetail"
-    v-if="
-      txnType == TransactionType.AGGREGATE_BONDED_V1 ||
-      txnType == TransactionType.AGGREGATE_COMPLETE_V1
-    "
-  />
-  <NamespaceDetailComponent
-    :txnDetail="txnDetail"
-    v-if="txnType == TransactionType.REGISTER_NAMESPACE"
-  />
-  <ExchangeDetailComponent
-    :txnDetail="txnDetail"
-    v-if="
-      txnType == TransactionType.EXCHANGE_OFFER ||
-      txnType == TransactionType.ADD_EXCHANGE_OFFER ||
-      txnType == TransactionType.REMOVE_EXCHANGE_OFFER
-    "
-  />
-  <LockDetailComponent
-    :txnDetail="txnDetail"
-    v-if="txnType == TransactionType.HASH_LOCK"
-  />
-  <LinkAccountDetailComponent
-    :txnDetail="txnDetail"
-    v-if="txnType == TransactionType.LINK_ACCOUNT"
-  />
-  <RestrictionDetailComponent
-    :txnDetail="txnDetail"
-    :txnGroup="txnType"
-    v-if="
-      txnType == TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS ||
-      txnType == TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC ||
-      txnType == TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION
-    "
-  />
-  <SecretDetailComponent
-    :txnDetail="txnDetail"
-    :txnGroup="txnType"
-    v-if="
-      txnType == TransactionType.SECRET_PROOF ||
-      txnType == TransactionType.SECRET_LOCK
-    "
-  />
-  <AssetDetailComponent
-    :txnDetail="txnDetail"
-    :txnGroup="txnType"
-    v-if="
-      txnType == TransactionType.MOSAIC_DEFINITION ||
-      txnType == TransactionType.MOSAIC_SUPPLY_CHANGE ||
-      txnType == TransactionType.MODIFY_MOSAIC_LEVY ||
-      txnType == TransactionType.REMOVE_MOSAIC_LEVY
-    "
-  />
-  <ChainDetailComponent
-    :txnDetail="txnDetail"
-    v-if="
-      txnType == TransactionType.MOSAIC_DEFINITION ||
-      txnType == TransactionType.MOSAIC_SUPPLY_CHANGE ||
-      txnType == TransactionType.CHAIN_CONFIGURE ||
-      txnType == TransactionType.CHAIN_UPGRADE
-    "
-  />
-  <AccountDetailComponent
-    :txnDetail="txnDetail"
-    v-if="txnType == TransactionType.MODIFY_MULTISIG_ACCOUNT"
-  />
-  <MetadataDetailComponent
-    :txnDetail="txnDetail"
-    v-if="
-      txnType == TransactionType.MOSAIC_METADATA_V2 ||
-      txnType == TransactionType.NAMESPACE_METADATA_V2 ||
-      txnType == TransactionType.CHAIN_CONFIGURE ||
-      txnType == TransactionType.ACCOUNT_METADATA_V2
-    "
-  />
 </template>
 
 <script setup>
