@@ -1,3 +1,4 @@
+import { firstValueFrom } from "rxjs";
 import {
   BlockHttp,
   NetworkHttp,
@@ -16,24 +17,23 @@ export class BlockAPI {
   }
 
   getBlockByHeight(height: number): Promise<BlockInfo> {
-    return this.blockHttp.getBlockByHeight(height).toPromise();
+    return firstValueFrom(this.blockHttp.getBlockByHeight(height));
   }
 
   getBlockReceipts(height: number): Promise<Statement> {
-    return this.blockHttp.getBlockReceipts(height).toPromise();
+    return firstValueFrom(this.blockHttp.getBlockReceipts(height));
   }
 
   getBlockTransactions(height: number): Promise<Transaction[]> {
-    return this.blockHttp.getBlockTransactions(height).toPromise();
+    return firstValueFrom(this.blockHttp.getBlockTransactions(height));
   }
 
   getBlocksByHeightWithLimit(
     height: number,
     limitType?: LimitType
   ): Promise<BlockInfo[]> {
-    return this.blockHttp
-      .getBlocksByHeightWithLimit(height, limitType)
-      .toPromise();
+    return firstValueFrom(this.blockHttp
+      .getBlocksByHeightWithLimit(height, limitType));
   }
 
   /**
@@ -41,7 +41,7 @@ export class BlockAPI {
    * @param hash - The hash of the receipt statement or resolution.
    */
   getMerkleReceipts(height: number, hash: string): Promise<MerkleProofInfo> {
-    return this.blockHttp.getMerkleReceipts(height, hash).toPromise();
+    return firstValueFrom(this.blockHttp.getMerkleReceipts(height, hash));
   }
 
   /**
@@ -49,6 +49,6 @@ export class BlockAPI {
    * @param hash - The hash of the transaction.
    */
   getMerkleTransaction(height: number, hash: string): Promise<MerkleProofInfo> {
-    return this.blockHttp.getMerkleTransaction(height, hash).toPromise();
+    return firstValueFrom(this.blockHttp.getMerkleTransaction(height, hash));
   }
 }

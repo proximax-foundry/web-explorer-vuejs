@@ -48,7 +48,7 @@
       <div>
         {{ txnDetail.typeName }}
         <span class="text-xxs text-gray-500">
-          (Version: {{ txnDetail.version }})
+          (Version: {{ txnDetail.version.txnTypeVersion }})
         </span>
       </div>
     </div>
@@ -66,9 +66,12 @@
       <div class="break-all">{{ txnDetail.signature }}</div>
     </div>
     <div>
-      <div v-if="txnType == TransactionType.AGGREGATE_BONDED ||
-        txnType == TransactionType.AGGREGATE_COMPLETE
-        ">
+      <div
+        v-if="
+          txnType == TransactionType.AGGREGATE_BONDED_V1 ||
+          txnType == TransactionType.AGGREGATE_COMPLETE_V1
+        "
+      >
         Signer
       </div>
       <div v-else>From</div>
@@ -117,15 +120,15 @@
   <AliasDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.ADDRESS_ALIAS ||
     txnType == TransactionType.MOSAIC_ALIAS
     " />
-  <AggregateDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.AGGREGATE_BONDED ||
-    txnType == TransactionType.AGGREGATE_COMPLETE
+  <AggregateDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.AGGREGATE_BONDED_V1 ||
+    txnType == TransactionType.AGGREGATE_COMPLETE_V1
     " />
   <NamespaceDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.REGISTER_NAMESPACE" />
   <ExchangeDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.EXCHANGE_OFFER ||
     txnType == TransactionType.ADD_EXCHANGE_OFFER ||
     txnType == TransactionType.REMOVE_EXCHANGE_OFFER
     " />
-  <LockDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.LOCK" />
+  <LockDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.HASH_LOCK" />
   <LinkAccountDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.LINK_ACCOUNT" />
   <RestrictionDetailComponent :txnDetail="txnDetail" :txnGroup="txnType" v-if="txnType == TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS ||
     txnType == TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC ||
@@ -154,7 +157,7 @@
     <div>
       <div>Cosigner List</div>
       <div>
-        <div v-for="(cosigner, index) in allCosigners" :key="index" class="py-1">
+        <div v-for="(cosigner, index) in allCosigners" :key="index" class="py-1 break-all">
           <div v-if="pendingCosigners.includes(cosigner)" class="text-red-500">{{ cosigner }} (Pending) </div>
           <div v-if="signedSigners.includes(cosigner)" class="text-green-500">{{ cosigner }} (Signed)</div>
         </div>

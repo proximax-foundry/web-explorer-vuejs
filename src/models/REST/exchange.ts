@@ -1,3 +1,4 @@
+import { firstValueFrom } from "rxjs";
 import {
   ExchangeHttp,
   NetworkHttp,
@@ -19,17 +20,17 @@ export class ExchangeAPI {
   getAccountExchanges(
     accountId: Address | PublicAccount
   ): Promise<AccountExchanges | undefined> {
-    return this.exchangeHttp.getAccountExchanges(accountId).toPromise();
+    return firstValueFrom(this.exchangeHttp.getAccountExchanges(accountId));
   }
 
   getExchangeOffers(
     offerType: ExchangeOfferType,
     mosaicId: MosaicId
   ): Promise<MosaicExchange[]> {
-    return this.exchangeHttp.getExchangeOffers(offerType, mosaicId).toPromise();
+    return firstValueFrom(this.exchangeHttp.getExchangeOffers(offerType, mosaicId));
   }
 
   getExchangeList(): Promise<MosaicId[]> {
-    return this.exchangeHttp.getOfferList().toPromise();
+    return firstValueFrom(this.exchangeHttp.getOfferList());
   }
 }

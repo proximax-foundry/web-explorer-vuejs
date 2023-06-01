@@ -1,3 +1,4 @@
+import { firstValueFrom } from "rxjs";
 import {
   TransactionHttp,
   SignedTransaction,
@@ -22,23 +23,21 @@ export class TransactionAPI {
   announce(
     signedTransaction: SignedTransaction
   ): Promise<TransactionAnnounceResponse> {
-    return this.transactionHttp.announce(signedTransaction).toPromise();
+    return firstValueFrom(this.transactionHttp.announce(signedTransaction));
   }
 
   announceAggregateBonded(
     signedTransaction: SignedTransaction
   ): Promise<TransactionAnnounceResponse> {
-    return this.transactionHttp
-      .announceAggregateBonded(signedTransaction)
-      .toPromise();
+    return firstValueFrom(this.transactionHttp
+      .announceAggregateBonded(signedTransaction));
   }
 
   announceAggregateBondedCosignature(
     cosignatureSignedTransaction: CosignatureSignedTransaction
   ): Promise<TransactionAnnounceResponse> {
-    return this.transactionHttp
-      .announceAggregateBondedCosignature(cosignatureSignedTransaction)
-      .toPromise();
+    return firstValueFrom(this.transactionHttp
+      .announceAggregateBondedCosignature(cosignatureSignedTransaction));
   }
 
   /**
@@ -46,7 +45,7 @@ export class TransactionAPI {
    * @param transactionId - Transaction id or hash.
    */
   getTransaction(transactionId: string): Promise<Transaction> {
-    return this.transactionHttp.getTransaction(transactionId).toPromise();
+    return firstValueFrom(this.transactionHttp.getTransaction(transactionId));
   }
 
   /**
@@ -54,9 +53,8 @@ export class TransactionAPI {
    * @param transactionId - Transaction id or hash.
    */
   getUnconfirmedTransaction(transactionId: string): Promise<Transaction> {
-    return this.transactionHttp
-      .getUnconfirmedTransaction(transactionId)
-      .toPromise();
+    return firstValueFrom(this.transactionHttp
+      .getUnconfirmedTransaction(transactionId));
   }
 
   /**
@@ -64,9 +62,8 @@ export class TransactionAPI {
    * @param transactionId - Transaction id or hash.
    */
   getPartialTransaction(transactionId: string): Promise<Transaction> {
-    return this.transactionHttp
-      .getPartialTransaction(transactionId)
-      .toPromise();
+    return firstValueFrom(this.transactionHttp
+      .getPartialTransaction(transactionId));
   }
 
   /**
@@ -75,7 +72,7 @@ export class TransactionAPI {
    *
    */
   getTransactions(transactionIds: string[]): Promise<Transaction[]> {
-    return this.transactionHttp.getTransactions(transactionIds).toPromise();
+    return firstValueFrom(this.transactionHttp.getTransactions(transactionIds));
   }
 
   /**
@@ -83,40 +80,35 @@ export class TransactionAPI {
    * @param transactionId - Transaction id or hash.
    */
   getTransactionEffectiveFee(transactionId: string): Promise<number> {
-    return this.transactionHttp
-      .getTransactionEffectiveFee(transactionId)
-      .toPromise();
+    return firstValueFrom(this.transactionHttp
+      .getTransactionEffectiveFee(transactionId));
   }
 
   getTransactionStatus(transactionHash: string): Promise<TransactionStatus> {
-    return this.transactionHttp
-      .getTransactionStatus(transactionHash)
-      .toPromise();
+    return firstValueFrom(this.transactionHttp
+      .getTransactionStatus(transactionHash));
   }
 
   getTransactionsStatuses(
     transactionHashes: string[]
   ): Promise<TransactionStatus[]> {
-    return this.transactionHttp
-      .getTransactionsStatuses(transactionHashes)
-      .toPromise();
+    return firstValueFrom(this.transactionHttp
+      .getTransactionsStatuses(transactionHashes));
   }
 
   searchTransactions(
     transactionGroupType: TransactionGroupType,
     transactionQueryParams?: TransactionQueryParams
   ): Promise<TransactionSearch> {
-    return this.transactionHttp
-      .searchTransactions(transactionGroupType, transactionQueryParams)
-      .toPromise();
+    return firstValueFrom(this.transactionHttp
+      .searchTransactions(transactionGroupType, transactionQueryParams));
   }
 
   getTransactionsCount(
     transactionTypes: TransactionType[],
     transactionGroupType: TransactionGroupType
   ): Promise<TransactionCount[]> {
-    return this.transactionHttp
-      .getTransactionsCount(transactionTypes, transactionGroupType)
-      .toPromise();
+    return firstValueFrom(this.transactionHttp
+      .getTransactionsCount(transactionTypes, transactionGroupType));
   }
 }
