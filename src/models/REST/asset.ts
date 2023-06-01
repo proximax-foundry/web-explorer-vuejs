@@ -1,3 +1,4 @@
+import { firstValueFrom } from "rxjs";
 import {
   MosaicHttp,
   NetworkHttp,
@@ -19,29 +20,29 @@ export class AssetAPI {
   }
 
   getMosaic(mosaicId: MosaicId): Promise<MosaicInfo> {
-    return this.mosaicHttp.getMosaic(mosaicId).toPromise();
+    return firstValueFrom(this.mosaicHttp.getMosaic(mosaicId));
   }
 
   getMosaicRichlist(
     mosaicId: MosaicId,
     queryParams?: PageQueryParams
   ): Promise<RichlistEntry[]> {
-    return this.mosaicHttp.getMosaicRichlist(mosaicId, queryParams).toPromise();
+    return firstValueFrom(this.mosaicHttp.getMosaicRichlist(mosaicId, queryParams));
   }
 
   getMosaics(mosaicIds: MosaicId[]): Promise<MosaicInfo[]> {
-    return this.mosaicHttp.getMosaics(mosaicIds).toPromise();
+    return firstValueFrom(this.mosaicHttp.getMosaics(mosaicIds));
   }
 
   getMosaicsNames(mosaicIds: MosaicId[]): Promise<MosaicNames[]> {
-    return this.mosaicHttp.getMosaicsNames(mosaicIds).toPromise();
+    return firstValueFrom(this.mosaicHttp.getMosaicsNames(mosaicIds));
   }
 
   getMosaicLevy(mosaicId: MosaicId): Promise<MosaicLevy> {
-    return this.mosaicHttp.getMosaicLevy(mosaicId).toPromise();
+    return firstValueFrom(this.mosaicHttp.getMosaicLevy(mosaicId));
   }
 
   searchMosaics(queryParams: MosaicQueryParams): Promise<MosaicSearch> {
-    return this.mosaicHttp.searchMosaics(queryParams).toPromise();
+    return firstValueFrom(this.mosaicHttp.searchMosaics(queryParams));
   }
 }
