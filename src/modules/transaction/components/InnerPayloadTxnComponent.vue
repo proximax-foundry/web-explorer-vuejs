@@ -10,7 +10,7 @@
           <div>
             {{ item.transactionName }}
             <span class="text-xxs text-gray-500">
-              (Version: {{ item.version }})
+              (Version: {{ item.version.txnTypeVersion }})
             </span>
           </div>
         </div>
@@ -360,7 +360,6 @@
   const props = defineProps({
     innerTxn: Object,
     txn: Object,
-    txnGroup: String,
   });
   
   const supplyChangeTxnType = TransactionType.MOSAIC_SUPPLY_CHANGE;

@@ -32,7 +32,7 @@ import InputText from 'primevue/inputtext';
 import Accordion from 'primevue/accordion';
 import AccordionTab from 'primevue/accordiontab';
 import ViewPayload from "@/modules/transaction/views/ViewPayload.vue";
-import { Convert } from 'tsjs-xpx-chain-sdk';
+import { Convert, TransactionMapping } from 'tsjs-xpx-chain-sdk';
 
 const enterText = ref("");
 const isSearching = ref(false);
@@ -48,6 +48,8 @@ const searchPayload = async () => {
         isSearching.value = false
         isPayloadTxn.value = false
         findPayload.value = enterText.value
+        const test = TransactionMapping.createFromPayload(findPayload.value)
+        console.log(test)
         convertPayload.value = Convert.hexToUint8(findPayload.value)
     }
 };
