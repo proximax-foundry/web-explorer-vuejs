@@ -109,10 +109,10 @@
         <pre>{{ JSON.stringify(txnDetail.unknownData, undefined, 2) }}</pre>
       </div>
     </div>
-    
+
 
   </div>
-  
+
   <TransferDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.TRANSFER" />
   <AliasDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.ADDRESS_ALIAS ||
     txnType == TransactionType.MOSAIC_ALIAS
@@ -150,17 +150,17 @@
     txnType == TransactionType.CHAIN_CONFIGURE ||
     txnType == TransactionType.ACCOUNT_METADATA_V2
     " />
-    <div class="cosignerDetails " v-if="txnDetail.group == 'partial'">
+  <div class="cosignerDetails " v-if="txnDetail.group == 'partial'">
+    <div>
+      <div>Cosigner List</div>
       <div>
-        <div>Cosigner List</div>
-        <div>
-          <div v-for="(cosigner, index) in allCosigners" :key="index" class="py-1">
-            <div v-if="pendingCosigners.includes(cosigner)" class= "text-red-500"  >{{ cosigner }} (Pending) </div>
-            <div v-if="signedSigners.includes(cosigner)" class= "text-green-500"  >{{ cosigner }} (Signed)</div>
-          </div>
+        <div v-for="(cosigner, index) in allCosigners" :key="index" class="py-1">
+          <div v-if="pendingCosigners.includes(cosigner)" class="text-red-500">{{ cosigner }} (Pending) </div>
+          <div v-if="signedSigners.includes(cosigner)" class="text-green-500">{{ cosigner }} (Signed)</div>
         </div>
       </div>
     </div>
+  </div>
 </template>
 
 <script setup>
@@ -246,7 +246,7 @@ onMounted(async () => {
               const level = allMultisigKey[y];
               const multisigAccountsInfo = accountMultisigGraphInfo.multisigAccounts.get(level);
               for (let x = 0; x < multisigAccountsInfo.length; ++x) {
-                if (MultisigUtils.isFullySigned(multisigAccountsInfo[x], this.signedSigners)) {
+                if (MultisigUtils.isFullySigned(multisigAccountsInfo[x], signedSigners.value)) {
                   signedSigners.value.push(multisigAccountsInfo[x].account.publicKey);
                 }
               }
@@ -258,7 +258,34 @@ onMounted(async () => {
         }
         signedSigners.value = Array.from(new Set(signedSigners.value));
 
-      } else {
+      } else if (txn.innerTransactions[i].type === TransactionType.ACCOUNT_METADATA_V2 || txn.innerTransactions[i].type === TransactionType.MOSAIC_METADATA_V2 || txn.innerTransactions[i].type === TransactionType.NAMESPACE_METADATA_V2) {
+
+        let innerTransaction = txn.innerTransactions[i];
+
+        currentInnerSigner = innerTransaction.targetPublicKey;
+        try {
+          let accountMultisigGraphInfo = await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(currentInnerSigner.address);
+          let allMultisigKey = Array.from(accountMultisigGraphInfo.multisigAccounts.keys()).sort((a, b) => { return a - b }); // ascending keys
+          for (let y = 0; y < allMultisigKey.length; ++y) {
+            const level = allMultisigKey[y];
+            const multisigAccountsInfo = accountMultisigGraphInfo.multisigAccounts.get(level);
+            let cosigners = MultisigUtils.findCosigners(multisigAccountsInfo);
+            currentInnerSigners = currentInnerSigners.concat(cosigners);
+            for (let x = 0; x < multisigAccountsInfo.length; ++x) {
+              if (MultisigUtils.isFullySigned(multisigAccountsInfo[x], signedSigners.value)) {
+                signedSigners.value.push(multisigAccountsInfo[x].account.publicKey);
+              }
+            }
+          }
+        } catch (error) {
+          //console.log(error);
+        }
+
+        signedSigners.value = Array.from(new Set(signedSigners.value));
+
+      }
+
+      else {
 
         try {
           let accountMultisigGraphInfo = await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(innerSigner.address);
@@ -269,7 +296,7 @@ onMounted(async () => {
             let cosigners = MultisigUtils.findCosigners(multisigAccountsInfo);
             currentInnerSigners = currentInnerSigners.concat(cosigners);
             for (let x = 0; x < multisigAccountsInfo.length; ++x) {
-              if (MultisigUtils.isFullySigned(multisigAccountsInfo[x], this.signedSigners)) {
+              if (MultisigUtils.isFullySigned(multisigAccountsInfo[x], signedSigners.value)) {
                 signedSigners.value.push(multisigAccountsInfo[x].account.publicKey);
               }
             }
@@ -334,7 +361,7 @@ const copy = (id) => {
     }
   }
 
-  
+
 
   .unknownDetails-col {
     @apply flex items-center;
@@ -384,7 +411,7 @@ const copy = (id) => {
     }
   }
 
-  
+
 
   .unknownDetails-col {
     @apply flex items-center;
