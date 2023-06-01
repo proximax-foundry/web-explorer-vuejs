@@ -10,7 +10,7 @@
         <div>
           {{ item.transactionName }}
           <span class="text-xxs text-gray-500">
-            (Version: {{ item.version }})
+            (Version: {{ item.version.txnTypeVersion }})
           </span>
         </div>
       </div>
