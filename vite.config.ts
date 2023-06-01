@@ -22,6 +22,9 @@ export default defineConfig(({command,mode})=>{
   }
   return{
     base:  publicPath,
+    server: {
+      port:8081
+    },
     plugins: [
       vue(),
       nodePolyfills({
