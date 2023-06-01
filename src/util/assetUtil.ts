@@ -42,7 +42,7 @@ export class AssetUtils {
     }
   }
 
-  static async getAssetProperties(assetIdHex: string): Promise<AssetObj> {
+  static async getAssetProperties(assetIdHex: string): Promise<AssetObj | false> {
     try {
       const assetId = new MosaicId(assetIdHex);
       let assetName: any = [];
@@ -81,7 +81,7 @@ export class AssetUtils {
       };
       return assetInfo;
     } catch (error) {
-      throw error;
+      return false;
     }
   }
 
