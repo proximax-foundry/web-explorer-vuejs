@@ -13,7 +13,7 @@
         </span>
       </div>
     </div>
-    <div>
+    <div v-if="maxFee">
       <div>TX FEE</div>
       <div class="relative">
         <span class="font-bold">{{ maxFee[0] }}</span
@@ -26,7 +26,7 @@
         /><span class="font-bold">{{ nativeTokenNamespace }}</span>
       </div>
     </div>
-    <div v-if="txnDetail.cosigners.length > 0">
+    <div v-if="txnDetail.cosigners?.length > 0">
       <div>Cosigner{{ txnDetail.cosigners.length > 1 ? "s" : "" }}</div>
       <div>
         <div
@@ -76,8 +76,8 @@
   <AggregateDetailComponent
     :txnDetail="txnDetail"
     v-if="
-      txnType == TransactionType.AGGREGATE_BONDED ||
-      txnType == TransactionType.AGGREGATE_COMPLETE
+      txnType == TransactionType.AGGREGATE_BONDED_V1 ||
+      txnType == TransactionType.AGGREGATE_COMPLETE_V1
     "
   />
   <NamespaceDetailComponent
@@ -94,7 +94,7 @@
   />
   <LockDetailComponent
     :txnDetail="txnDetail"
-    v-if="txnType == TransactionType.LOCK"
+    v-if="txnType == TransactionType.HASH_LOCK"
   />
   <LinkAccountDetailComponent
     :txnDetail="txnDetail"
@@ -192,7 +192,7 @@ const maxFee = computed(() => {
   if (!props.txnDetail) {
     return "";
   }
-  return props.txnDetail.fee.toString().split(".");
+  return props.txnDetail.fee?.toString().split(".");
 });
 
 const copy = (id) => {
@@ -244,24 +244,5 @@ const copy = (id) => {
     @apply text-gray-800 text-xs flex items-center;
   }
 
-  // .unknown-col{
-  //   @apply flex items-center bg-gray-200;
-
-  //   div.details-col {
-  //     @apply w-40 text-xs pl-4;
-  //   }
-
-  //   div.raw-details {
-  //     @apply text-gray-800 text-xs flex items-center w-full;
-  //   }
-
-    // .details-col{
-    //   @apply w-40 text-xs pl-4;
-    // }
-
-    // .raw-details {
-    //   @apply text-gray-800 text-xs flex items-center w-full;
-    // }
-  // }
 }
 </style>

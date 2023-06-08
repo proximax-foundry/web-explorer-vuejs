@@ -8631,9 +8631,9 @@ export class TransactionUtils {
     return tx as AggregateTransaction;
   }
 
-  //------------- Decode transaction ------------------------------------------
+  //------------- Extract transaction Details ------------------------------------------
 
-  static async decodeTransaction(tx: any): Promise<any> {
+  static async extractTransactionDetails(tx: any): Promise<any> {
     if (!AppState.chainAPI) {
       throw new Error("Service unavailable");
     }
@@ -8643,65 +8643,62 @@ export class TransactionUtils {
       switch (tx.type) {
         case TransactionType.ADDRESS_ALIAS:
         case TransactionType.MOSAIC_ALIAS:
-            txn.detail = await TransactionUtils.decodeAliasTransaction(tx)
+            txn.detail = await TransactionUtils.extractAliasTransaction(tx)
           break;
-        case TransactionType.AGGREGATE_BONDED:
-        case TransactionType.AGGREGATE_COMPLETE:
-            txn.detail = await TransactionUtils.decodeAggregateTransaction(tx)
+        case TransactionType.AGGREGATE_BONDED_V1:
+        case TransactionType.AGGREGATE_COMPLETE_V1:
+            txn.detail = await TransactionUtils.extractAggregateTransaction(tx)
           break;
         case TransactionType.CHAIN_CONFIGURE:
         case TransactionType.CHAIN_UPGRADE:
-            txn.detail = await TransactionUtils.decodeChainTransaction(tx)
+            txn.detail = await TransactionUtils.extractChainTransaction(tx)
           break;
         case TransactionType.EXCHANGE_OFFER:
         case TransactionType.ADD_EXCHANGE_OFFER:
         case TransactionType.REMOVE_EXCHANGE_OFFER:
-            txn.detail = await TransactionUtils.decodeExchangeTransaction(tx)
+            txn.detail = await TransactionUtils.extractExchangeTransaction(tx)
           break;
-        case TransactionType.LOCK:
-            txn.detail = await TransactionUtils.decodeLockTransaction(tx)
+        case TransactionType.LINK_ACCOUNT:
+            txn.detail = await TransactionUtils.extractLinkTransaction(tx);
           break;
-        case TransactionType.MODIFY_ACCOUNT_METADATA:
-          break;
-        case TransactionType.MODIFY_MOSAIC_METADATA:
-          break;
-        case TransactionType.MODIFY_NAMESPACE_METADATA:
+        case TransactionType.HASH_LOCK:
+            txn.detail = await TransactionUtils.extractLockTransaction(tx)
           break;
         case TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS:
         case TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC:
         case TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION:
-            txn.detail = await TransactionUtils.decodeRestrictionTransaction(tx)
+            txn.detail = await TransactionUtils.extractRestrictionTransaction(tx)
           break; 
         case TransactionType.MODIFY_MULTISIG_ACCOUNT:
-            txn.detail = await TransactionUtils.decodeAccountTransaction(tx)
+            txn.detail = await TransactionUtils.extractAccountTransaction(tx)
           break;
         case TransactionType.MOSAIC_DEFINITION:
         case TransactionType.MOSAIC_SUPPLY_CHANGE:
         case TransactionType.MODIFY_MOSAIC_LEVY:
         case TransactionType.REMOVE_MOSAIC_LEVY:
-            txn.detail = await TransactionUtils.decodeAssetTransaction(tx)
+            txn.detail = await TransactionUtils.extractAssetTransaction(tx)
           break;   
         case TransactionType.REGISTER_NAMESPACE:
-            txn.detail = await TransactionUtils.decodeNamespaceTransaction(tx)
+            txn.detail = await TransactionUtils.extractNamespaceTransaction(tx)
           break;
         case TransactionType.SECRET_LOCK:
         case TransactionType.SECRET_PROOF:
-            txn.detail = await TransactionUtils.decodeSecretTransaction(tx)
+            txn.detail = await TransactionUtils.extractSecretTransaction(tx)
           break;
         case TransactionType.TRANSFER:
-            txn.detail = await TransactionUtils.decodeTransferTransaction(tx)
+            txn.detail = await TransactionUtils.extractTransferTransaction(tx)
           break;
         case TransactionType.ACCOUNT_METADATA_V2:
         case TransactionType.MOSAIC_METADATA_V2:
         case TransactionType.NAMESPACE_METADATA_V2:
-            txn.detail = await TransactionUtils.decodeMetadataTransaction(tx)
+            txn.detail = await TransactionUtils.extractMetadataTransaction(tx)
           break;
       }
 
       return txn.detail
     }
 
-    static async decodeAliasTransaction(
+    static async extractAliasTransaction(
       tx: Transaction
     ): Promise<
         any
@@ -8748,7 +8745,7 @@ export class TransactionUtils {
       return txn;
     }
 
-    static async decodeAggregateTransaction(
+    static async extractAggregateTransaction(
       tx: Transaction
     ): Promise<
         any
@@ -8762,8 +8759,8 @@ export class TransactionUtils {
       txn.txnList = []
 
       if (
-        tx.type === TransactionType.AGGREGATE_BONDED ||
-        tx.type === TransactionType.AGGREGATE_COMPLETE
+        tx.type === TransactionType.AGGREGATE_BONDED_V1 ||
+        tx.type === TransactionType.AGGREGATE_COMPLETE_V1
       ) {
         const aggregateTxn = tx as AggregateTransaction;
         if (!aggregateTxn) {
@@ -8793,7 +8790,7 @@ export class TransactionUtils {
       return txn;
     }
 
-    static async decodeChainTransaction(
+    static async extractChainTransaction(
       tx: Transaction
     ): Promise<
         any
@@ -8817,7 +8814,7 @@ export class TransactionUtils {
       return txn;
     }
 
-    static async decodeExchangeTransaction(
+    static async extractExchangeTransaction(
       tx: Transaction
     ): Promise<
         any
@@ -8943,8 +8940,27 @@ export class TransactionUtils {
       return txn;
     }
 
-    static async decodeLockTransaction(
-      tx: TransactionMapping
+    static async extractLinkTransaction(
+      tx: Transaction
+    ): Promise<any> {
+      let txn = <{
+        action:string
+        remotePublicKey:string
+      }>{}
+  
+      if (tx.type === TransactionType.LINK_ACCOUNT) {
+        const linkAccTxn = tx as AccountLinkTransaction;
+  
+        txn.action =
+          linkAccTxn.linkAction === LinkAction.Link ? "Link" : "Unlink";
+  
+        txn.remotePublicKey = linkAccTxn.remoteAccountKey;
+      }
+      return txn;
+    }
+
+    static async extractLockTransaction(
+      tx: Transaction
     ): Promise<
         any
     > {
@@ -8957,7 +8973,7 @@ export class TransactionUtils {
         amountLocking:number
       }>{}
   
-      const lockFundTxn = tx as LockFundsTransaction;
+      const lockFundTxn = tx as HashLockTransaction;
       txn.lockHash = lockFundTxn.hash;
       txn.duration = lockFundTxn.duration.compact();
       const amount = lockFundTxn.mosaic.amount.compact();
@@ -8968,7 +8984,7 @@ export class TransactionUtils {
       return txn;
     }
 
-    static async decodeRestrictionTransaction(
+    static async extractRestrictionTransaction(
       tx: Transaction
     ): Promise<
         any
@@ -9077,7 +9093,7 @@ export class TransactionUtils {
       return txn;
     }
 
-    static async decodeAccountTransaction(
+    static async extractAccountTransaction(
       tx: Transaction
     ): Promise<
         any
@@ -9125,7 +9141,7 @@ export class TransactionUtils {
       return txn;
     }
 
-    static async decodeAssetTransaction(
+    static async extractAssetTransaction(
       tx: Transaction
     ): Promise<any> {
       let txn = <{
@@ -9234,7 +9250,7 @@ export class TransactionUtils {
       return txn;
     }
 
-    static async decodeNamespaceTransaction(
+    static async extractNamespaceTransaction(
       tx: Transaction
     ): Promise<
       | any
@@ -9272,7 +9288,7 @@ export class TransactionUtils {
       }
     }
 
-    static async decodeSecretTransaction(
+    static async extractSecretTransaction(
       tx: Transaction
     ): Promise<
         any
@@ -9359,7 +9375,7 @@ export class TransactionUtils {
       return txn;
     }
 
-    static async decodeTransferTransaction(
+    static async extractTransferTransaction(
       tx: Transaction,
     ): Promise<
       | any
@@ -9370,18 +9386,21 @@ export class TransactionUtils {
       let txn = <{
         recipient:string,
         message:string, 
+        payload:string, 
         messageType:number, 
         type:string, 
         messageTypeTitle:string,
         recipientNamespaceId:string,
         recipientNamespaceName:string,
         amountTransfer:number,
+        rawAmount:number,
         sda:SDA[]
       }>{}
       const sdas: SDA[] = [];
       
           const transferTxn = tx as TransferTransaction;
-          txn.message = transferTxn.message.payload;
+          txn.message = transferTxn.message.message;
+          txn.payload = transferTxn.message.payload
           txn.messageType = transferTxn.message.type;
           if (txn.messageType === MessageType.PlainMessage) {
           const newType = TransactionUtils.convertToSwapType(txn.message);
@@ -9439,6 +9458,7 @@ export class TransactionUtils {
             ) {
               txn.amountTransfer =
                 TransactionUtils.convertToExactNativeAmount(actualAmount);
+              txn.rawAmount = rawAmount;
               continue;
             }
 
@@ -9545,7 +9565,7 @@ export class TransactionUtils {
           return txn
     }
 
-    static async decodeMetadataTransaction(
+    static async extractMetadataTransaction(
       tx: Transaction
     ): Promise<
           any

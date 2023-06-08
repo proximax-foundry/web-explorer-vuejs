@@ -2,8 +2,7 @@
     <div>
         <div class="flex justify-center">
             <div class="flex border rounded-lg border-gray-900">
-                <InputText v-model="enterText" placeholder="Search Payload"
-                    class="text-tsm sm:w-48 lg:w-96 bg-transparent px-2 py-1"/>
+                <Textarea v-model="enterText" placeholder="Search Payload" class="rounded-lg bg-transparent p-1" autoResize rows="6" cols="80" />
                 <div v-if="isSearching" class="flex justify-center items-center w-10">
                     <div class="flex justify-center items-center border-gray-400">
                         <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-navy-primary mr-2"></div>
@@ -28,7 +27,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import InputText from 'primevue/inputtext';
+import Textarea from 'primevue/textarea';
 import Accordion from 'primevue/accordion';
 import AccordionTab from 'primevue/accordiontab';
 import ViewPayload from "@/modules/transaction/views/ViewPayload.vue";

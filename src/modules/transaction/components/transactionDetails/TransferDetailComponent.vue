@@ -22,7 +22,7 @@
         />
       </div>
     </div>
-    <div v-if="txnDetail.detail.amountTransfer">
+    <div v-if="txnDetail.detail.amountTransfer && toggleConvert === false">
       <div>Amount</div>
       <div class="relative">
         <span class="font-bold">{{ transferAmount[0] }}</span
@@ -47,7 +47,7 @@
         </div>
       </div>
     </div> -->
-    <div v-if="txnDetail.detail.sda.length > 0">
+    <div v-if="txnDetail.detail.sda.length > 0 && toggleConvert === false">
       <div>Amount</div>
       <div class="relative">
         <div v-for="(sda, index) in txnDetail.detail.sda" :key="index">
@@ -88,15 +88,72 @@
         <!-- <div v-if="txnDetail.detail.amount.length == 0">-</div> -->
       </div>
     </div>
-    <div v-if="txnDetail.detail.message">
+    <div v-if="txnDetail.detail.message && toggleConvert === false">
       <div>{{ txnDetail.detail.messageTypeTitle }}</div>
       <div class="break-all">{{ txnDetail.detail.message }}</div>
     </div>
   </div>
+
+    <div class="details" v-if=" txnDetail.dataType === `Payload` && toggleConvert === true"> 
+      <div v-if="txnDetail.detail.amountTransfer">
+          <div>Amount</div>
+          <div class="relative">
+            <div class="font-bold">{{ txnDetail.detail.rawAmount }}</div>
+            <div v-if="txnDetail.detail.sda.length > 0">
+            <div class="relative">
+              <div v-for="(sda, index) in txnDetail.detail.sda" :key="index">
+                <span class="font-bold">{{ sdaAmount[index][0] }}</span
+                >{{ sdaAmount[index][1] > 0 ? "." : ""
+                }}<span class="text-xxs">{{ sdaAmount[index][1] }}</span>
+                <img
+                  v-if="
+                    sda.currentAlias[0] && sda.currentAlias[0].name == 'xarcade.xar'
+                  "
+                  src="@/modules/account/img/xarcade-logo.svg"
+                  class="inline-block h-7 w-7 mr-2 ml-2 border-2 rounded-3xl"
+                />
+                <img
+                  v-else-if="
+                    sda.currentAlias[0] && sda.currentAlias[0].name == 'prx.metx'
+                  "
+                  src="@/modules/account/img/metx-logo.svg"
+                  class="inline-block h-7 w-7 mr-2 ml-2 border-2 rounded-3xl"
+                />
+                <img
+                  v-else
+                  src="@/modules/transaction/img/proximax-logo-gray.svg"
+                  class="inline-block h-6 w-6 mr-2 ml-2"
+                />
+                <div
+                  class="inline-block text-gray-400 text-txs hover:text-gray-700 duration-300 transition-all"
+                >
+                  <router-link
+                    :to="{ name: 'ViewAsset', params: { id: sda.id } }"
+                    class="hover:text-blue-primary hover:underline"
+                    >{{ sda.label }}</router-link
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="txnDetail.detail.payload">
+        <div>{{ txnDetail.detail.messageTypeTitle }}</div>
+        <div class="break-all">{{ txnDetail.detail.payload }}</div>
+      </div>
+    </div>
+
+    <div v-if="txnDetail.dataType === `Payload`">
+      <div class="flex justify-center">
+        <button class="bg-blue-500 hover:bg-blue-70 font-bold py-2 px-4 rounded-full" @click="convertTransaction">{{ text }}</button>
+      </div>
+    </div>
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useToast } from "primevue/usetoast";
 import { AppState } from "@/state/appState";
 import { Helper } from "@/util/typeHelper";
@@ -108,6 +165,24 @@ const props = defineProps({
 
 const toast = useToast();
 const nativeTokenLabel = AppState.nativeToken.label;
+const toggleConvert = ref(false);
+const text = ref("");
+
+if(props.txnDetail.dataType === "Payload"){
+  toggleConvert.value = true
+  text.value = "Convert to Transaction"
+}
+
+const convertTransaction = () => {
+  if(toggleConvert.value === true){
+    toggleConvert.value = false
+    text.value = "Convert to Payload"
+  }
+  else{
+    toggleConvert.value = true
+    text.value = "Convert to Transaction"
+  }
+}
 
 const transferAmount = computed(() => {
   return props.txnDetail.detail.amountTransfer.toString().split(".");
