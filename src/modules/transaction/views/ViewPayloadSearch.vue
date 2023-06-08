@@ -47,8 +47,6 @@ const searchPayload = async () => {
         isSearching.value = false
         isPayloadTxn.value = false
         findPayload.value = enterText.value
-        const test = TransactionMapping.createFromPayload(findPayload.value)
-        console.log(test)
         convertPayload.value = Convert.hexToUint8(findPayload.value)
     }
 };
