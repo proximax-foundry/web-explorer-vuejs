@@ -31,7 +31,7 @@ import Textarea from 'primevue/textarea';
 import Accordion from 'primevue/accordion';
 import AccordionTab from 'primevue/accordiontab';
 import ViewPayload from "@/modules/transaction/views/ViewPayload.vue";
-import { Convert, TransactionMapping } from 'tsjs-xpx-chain-sdk';
+import { Convert } from 'tsjs-xpx-chain-sdk';
 
 const enterText = ref("");
 const isSearching = ref(false);
