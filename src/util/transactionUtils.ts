@@ -8629,4 +8629,5 @@ export class TransactionUtils {
   static castToAggregate(tx: Transaction) {
     return tx as AggregateTransaction;
   }
+  
 }
