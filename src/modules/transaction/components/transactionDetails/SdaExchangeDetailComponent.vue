@@ -19,6 +19,19 @@
         </div>
       </div>
     </div>
+    <div v-else-if="offer.assetIdGet">
+      <div>Asset ID Get</div>
+      <div>
+        <div class="inline-block">
+          <router-link
+            :to="{ name: 'ViewAsset', params: { id: offer.assetIdGet } }"
+            class="hover:text-blue-primary hover:underline text-blue-600"
+          >
+            {{ offer.assetIdGet }}
+          </router-link>
+        </div>
+      </div>
+    </div>
     <div v-if="offer.amountGive">
       <div>SDA Give</div>
       <div>
@@ -29,6 +42,19 @@
         <div class="text-gray-400 hover:text-gray-700 duration-300 transition-all inline-block ml-2">
           <router-link :to="{ name: 'ViewAsset', params: { id: offer.assetIdGive } }"
             class="hover:text-blue-primary hover:underline">
+            {{ offer.assetIdGive }}
+          </router-link>
+        </div>
+      </div>
+    </div>
+    <div v-else-if="offer.assetIdGive">
+      <div>Asset ID Give</div>
+      <div>
+        <div class="inline-block">
+          <router-link
+            :to="{ name: 'ViewAsset', params: { id: offer.assetIdGive } }"
+            class="hover:text-blue-primary hover:underline text-blue-600"
+          >
             {{ offer.assetIdGive }}
           </router-link>
         </div>

@@ -65,7 +65,8 @@ import {
   TransactionInfo,
   TransactionStatus,
   HashLockTransaction,
-  PlaceSdaExchangeOfferTransaction
+  PlaceSdaExchangeOfferTransaction,
+  RemoveSdaExchangeOfferTransaction
 } from "tsjs-xpx-chain-sdk";
 import type { InnerTransaction } from "tsjs-xpx-chain-sdk";
 import { networkState } from "@/state/networkState";
@@ -8692,6 +8693,35 @@ export class TransactionUtils {
           } catch (error) {}
         }
       }
+      else if(txns[i].type === TransactionType.REMOVE_SDA_EXCHANGE_OFFER){
+        const sdaExchangeOfferTxn = txns[i] as RemoveSdaExchangeOfferTransaction;
+
+        for (let i = 0; i < sdaExchangeOfferTxn.offers.length; ++i) {
+          const tempSdaExchangeOffer = sdaExchangeOfferTxn.offers[i];
+
+          const assetIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
+          const assetIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
+
+        const newTxnSdaExchangeOffer: TxnSdaExchange = {
+          assetIdGet: assetIdGet,
+          assetIdGive: assetIdGive,
+        };
+
+          try {
+            const assetSdaGetName = await TransactionUtils.getAssetName(assetIdGet);
+
+            if (assetSdaGetName.names.length) {
+              newTxnSdaExchangeOffer.assetSdaGetNamespace = assetSdaGetName.names[0].name;
+            }
+
+            const assetSdaGiveName = await TransactionUtils.getAssetName(assetIdGive);
+
+            if (assetSdaGiveName.names.length) {
+              newTxnSdaExchangeOffer.assetSdaGiveNamespace = assetSdaGiveName.names[0].name;
+            }
+          } catch (error) {}
+        }
+      }
       formatedTxns.push(txn);
     }
 
@@ -8760,6 +8790,35 @@ export class TransactionUtils {
           txn.sdaExchange.push(newTxnSdaExchange);
         }
       }
+      else if(txns[i].type === TransactionType.REMOVE_SDA_EXCHANGE_OFFER){
+        const sdaExchangeOfferTxn = txns[i] as RemoveSdaExchangeOfferTransaction;
+
+        for (let i = 0; i < sdaExchangeOfferTxn.offers.length; ++i) {
+          const tempSdaExchangeOffer = sdaExchangeOfferTxn.offers[i];
+
+          const assetIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
+          const assetIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
+
+        const newTxnSdaExchangeOffer: TxnSdaExchange = {
+          assetIdGet: assetIdGet,
+          assetIdGive: assetIdGive,
+        };
+
+          try {
+            const assetSdaGetName = await TransactionUtils.getAssetName(assetIdGet);
+
+            if (assetSdaGetName.names.length) {
+              newTxnSdaExchangeOffer.assetSdaGetNamespace = assetSdaGetName.names[0].name;
+            }
+
+            const assetSdaGiveName = await TransactionUtils.getAssetName(assetIdGive);
+
+            if (assetSdaGiveName.names.length) {
+              newTxnSdaExchangeOffer.assetSdaGiveNamespace = assetSdaGiveName.names[0].name;
+            }
+          } catch (error) {}
+        }
+      }
       formatedTxns.push(txn);
     }
     return formatedTxns;
@@ -8824,6 +8883,35 @@ export class TransactionUtils {
           }
         } catch (error) {}
           txn.sdaExchange.push(newTxnSdaExchange);
+        }
+      }
+      else if(txns[i].type === TransactionType.REMOVE_SDA_EXCHANGE_OFFER){
+        const sdaExchangeOfferTxn = txns[i] as RemoveSdaExchangeOfferTransaction;
+
+        for (let i = 0; i < sdaExchangeOfferTxn.offers.length; ++i) {
+          const tempSdaExchangeOffer = sdaExchangeOfferTxn.offers[i];
+
+          const assetIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
+          const assetIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
+
+        const newTxnSdaExchangeOffer: TxnSdaExchange = {
+          assetIdGet: assetIdGet,
+          assetIdGive: assetIdGive,
+        };
+
+          try {
+            const assetSdaGetName = await TransactionUtils.getAssetName(assetIdGet);
+
+            if (assetSdaGetName.names.length) {
+              newTxnSdaExchangeOffer.assetSdaGetNamespace = assetSdaGetName.names[0].name;
+            }
+
+            const assetSdaGiveName = await TransactionUtils.getAssetName(assetIdGive);
+
+            if (assetSdaGiveName.names.length) {
+              newTxnSdaExchangeOffer.assetSdaGiveNamespace = assetSdaGiveName.names[0].name;
+            }
+          } catch (error) {}
         }
       }
       formatedTxns.push(txn);

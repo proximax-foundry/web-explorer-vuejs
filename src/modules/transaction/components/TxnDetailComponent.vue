@@ -153,7 +153,8 @@
     txnType == TransactionType.CHAIN_CONFIGURE ||
     txnType == TransactionType.ACCOUNT_METADATA_V2
     " />
-  <SdaExchangeDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.PLACE_SDA_EXCHANGE_OFFER" />
+  <SdaExchangeDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.PLACE_SDA_EXCHANGE_OFFER ||
+    txnType == TransactionType.REMOVE_SDA_EXCHANGE_OFFER" />
   <div class="cosignerDetails " v-if="txnDetail.group == 'partial'">
     <div>
       <div>Cosigner List</div>
