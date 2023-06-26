@@ -163,6 +163,7 @@
                 class="text-blue-600 hover:text-blue-primary flex hover:underline"
                 >{{ sdaName.name }}</router-link
               >
+              {{ sdaName.amount }}
             </span>
           </div>
         </template>
