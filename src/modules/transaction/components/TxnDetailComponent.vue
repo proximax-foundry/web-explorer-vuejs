@@ -153,6 +153,7 @@
     txnType == TransactionType.CHAIN_CONFIGURE ||
     txnType == TransactionType.ACCOUNT_METADATA_V2
     " />
+  <SdaExchangeDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.PLACE_SDA_EXCHANGE_OFFER" />
   <div class="cosignerDetails " v-if="txnDetail.group == 'partial'">
     <div>
       <div>Cosigner List</div>
@@ -195,6 +196,7 @@ import AssetDetailComponent from "@/modules/transaction/components/transactionDe
 import ChainDetailComponent from "@/modules/transaction/components/transactionDetails/ChainDetailComponent.vue";
 import AccountDetailComponent from "@/modules/transaction/components/transactionDetails/AccountDetailComponent.vue";
 import MetadataDetailComponent from "@/modules/transaction/components/transactionDetails/MetadataDetailComponent.vue";
+import SdaExchangeDetailComponent from "@/modules/transaction/components/transactionDetails/SdaExchangeDetailComponent.vue";
 import UnknownDataDetailComponent from "@/modules/transaction/components/transactionDetails/UnknownDataDetailComponent.vue";
 import { AggregateTransaction, PublicAccount, TransactionType } from "tsjs-xpx-chain-sdk";
 import { MultisigUtils } from '@/util/multisigUtils'
