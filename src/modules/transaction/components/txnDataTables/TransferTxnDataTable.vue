@@ -257,7 +257,7 @@
           </div>
         </template>
       </Column>
-      <Column header="AMOUNT(XPX)" headerStyle="width:110px" v-if="wideScreen">
+      <Column v-for="col of column" :key="col.field" :field="col.field" :header="'AMOUNT(' + col.header + ')'" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{ data }">
           <div class="text-xs" v-if="data.amountTransfer">
             {{
@@ -342,6 +342,10 @@ onMounted(() => {
   window.addEventListener("resize", screenResizeHandler);
 });
 const nativeTokenName = computed(() => AppState.nativeToken.label);
+
+const column = [
+    { field: 'token', header: nativeTokenName.value },
+];
 
 const countDecimals = function (amount: number) {
   if (Math.floor(amount) === amount) return 0;
