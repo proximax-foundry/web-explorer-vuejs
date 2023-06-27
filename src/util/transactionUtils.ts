@@ -830,6 +830,7 @@ export class TransactionUtils {
           );
           break;
         case TransactionType.PLACE_SDA_EXCHANGE_OFFER:
+        case TransactionType.REMOVE_SDA_EXCHANGE_OFFER:
           txn.detail = await TransactionUtils.formatSdaExchangeTransaction(
             txn,
             txnStatus.group
@@ -8587,48 +8588,82 @@ export class TransactionUtils {
       for (let i = 0; i < sdaExchangeOfferTxn.offers.length; ++i) {
         const tempSdaExchangeOffer = sdaExchangeOfferTxn.offers[i];
 
-        const assetIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
-        const assetIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
+        const sdaIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
+        const sdaIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
         const amountGet = tempSdaExchangeOffer.mosaicAmountGet.compact();
         const amountGive = tempSdaExchangeOffer.mosaicAmountGive.compact();
         const duration = tempSdaExchangeOffer.duration.compact();
 
-      const newTxnSdaExchange: TxnSdaExchange = {
-        assetIdGet: assetIdGet,
-        assetIdGive: assetIdGive,
+      const newTxnSdaExchangeOffer: TxnSdaExchange = {
+        sdaIdGet: sdaIdGet,
+        sdaIdGive: sdaIdGive,
         amountGet: amountGet,
         amountGive: amountGive,
         duration: duration,
       };
 
       try {
-        const assetInfoSdaGet = await TransactionUtils.getAssetInfo(assetIdGet);
-        const assetInfoSdaGive = await TransactionUtils.getAssetInfo(assetIdGive);
+        const sdaGetInfo = await TransactionUtils.getAssetInfo(sdaIdGet);
+        const SdaGiveInfo = await TransactionUtils.getAssetInfo(sdaIdGive);
 
-        newTxnSdaExchange.amountGet = TransactionUtils.convertToExactAmount(
+        newTxnSdaExchangeOffer.amountGet = TransactionUtils.convertToExactAmount(
           amountGet,
-          assetInfoSdaGet.divisibility
+          sdaGetInfo.divisibility
         );
-        newTxnSdaExchange.amountGive = TransactionUtils.convertToExactAmount(
+        newTxnSdaExchangeOffer.amountGive = TransactionUtils.convertToExactAmount(
           amountGive,
-          assetInfoSdaGive.divisibility
+          SdaGiveInfo.divisibility
         );
 
-        const assetSdaGetName = await TransactionUtils.getAssetName(assetIdGet);
+        const sdaGetName = await TransactionUtils.getAssetName(sdaIdGet);
 
-        if (assetSdaGetName.names.length) {
-          newTxnSdaExchange.assetSdaGetNamespace = assetSdaGetName.names[0].name;
+        if (sdaGetName.names.length) {
+          newTxnSdaExchangeOffer.sdaGetNamespace = sdaGetName.names[0].name;
         }
 
-        const assetSdaGiveName = await TransactionUtils.getAssetName(assetIdGive);
+        const sdaGiveName = await TransactionUtils.getAssetName(sdaIdGive);
 
-        if (assetSdaGiveName.names.length) {
-          newTxnSdaExchange.assetSdaGiveNamespace = assetSdaGiveName.names[0].name;
+        if (sdaGiveName.names.length) {
+          newTxnSdaExchangeOffer.sdaGiveNamespace = sdaGiveName.names[0].name;
         }
       } catch (error) {}
-        txn.sdaExchange.push(newTxnSdaExchange);
+        if(newTxnSdaExchangeOffer){
+          txn.sdaExchange.push(newTxnSdaExchangeOffer);
+        }
       }
     }
+    else if(transaction.type === TransactionType.REMOVE_SDA_EXCHANGE_OFFER){
+        const sdaExchangeOfferTxn = transaction as RemoveSdaExchangeOfferTransaction;
+
+        for (let i = 0; i < sdaExchangeOfferTxn.offers.length; ++i) {
+          const tempSdaExchangeOffer = sdaExchangeOfferTxn.offers[i];
+
+          const sdaIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
+          const sdaIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
+
+        const newTxnSdaExchangeOffer: TxnSdaExchange = {
+          sdaIdGet: sdaIdGet,
+          sdaIdGive: sdaIdGive,
+        };
+
+          try {
+            const sdaGetName = await TransactionUtils.getAssetName(sdaIdGet);
+
+            if (sdaGetName.names.length) {
+              newTxnSdaExchangeOffer.sdaGetNamespace = sdaGetName.names[0].name;
+            }
+
+            const sdaGiveName = await TransactionUtils.getAssetName(sdaIdGive);
+
+            if (sdaGiveName.names.length) {
+              newTxnSdaExchangeOffer.sdaGiveNamespace = sdaGiveName.names[0].name;
+            }
+          } catch (error) {}
+            if(newTxnSdaExchangeOffer){
+              txn.sdaExchange.push(newTxnSdaExchangeOffer);
+            }
+        }
+      }
     return txn;
   }
 
@@ -8652,45 +8687,48 @@ export class TransactionUtils {
         for (let i = 0; i < sdaExchangeOfferTxn.offers.length; ++i) {
           const tempSdaExchangeOffer = sdaExchangeOfferTxn.offers[i];
 
-          const assetIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
-          const assetIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
+          const sdaIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
+          const sdaIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
           const amountGet = tempSdaExchangeOffer.mosaicAmountGet.compact();
           const amountGive = tempSdaExchangeOffer.mosaicAmountGive.compact();
           const duration = tempSdaExchangeOffer.duration.compact();
 
         const newTxnSdaExchangeOffer: TxnSdaExchange = {
-          assetIdGet: assetIdGet,
-          assetIdGive: assetIdGive,
+          sdaIdGet: sdaIdGet,
+          sdaIdGive: sdaIdGive,
           amountGet: amountGet,
           amountGive: amountGive,
           duration: duration,
         };
 
           try {
-            const assetInfoSdaGet = await TransactionUtils.getAssetInfo(assetIdGet);
-            const assetInfoSdaGive = await TransactionUtils.getAssetInfo(assetIdGive);
+            const sdaGetInfo = await TransactionUtils.getAssetInfo(sdaIdGet);
+            const SdaGiveInfo = await TransactionUtils.getAssetInfo(sdaIdGive);
 
             newTxnSdaExchangeOffer.amountGet = TransactionUtils.convertToExactAmount(
               amountGet,
-              assetInfoSdaGet.divisibility
+              sdaGetInfo.divisibility
             );
             newTxnSdaExchangeOffer.amountGive = TransactionUtils.convertToExactAmount(
               amountGive,
-              assetInfoSdaGive.divisibility
+              SdaGiveInfo.divisibility
             );
 
-            const assetSdaGetName = await TransactionUtils.getAssetName(assetIdGet);
+            const sdaGetName = await TransactionUtils.getAssetName(sdaIdGet);
 
-            if (assetSdaGetName.names.length) {
-              newTxnSdaExchangeOffer.assetSdaGetNamespace = assetSdaGetName.names[0].name;
+            if (sdaGetName.names.length) {
+              newTxnSdaExchangeOffer.sdaGetNamespace = sdaGetName.names[0].name;
             }
 
-            const assetSdaGiveName = await TransactionUtils.getAssetName(assetIdGive);
+            const sdaGiveName = await TransactionUtils.getAssetName(sdaIdGive);
 
-            if (assetSdaGiveName.names.length) {
-              newTxnSdaExchangeOffer.assetSdaGiveNamespace = assetSdaGiveName.names[0].name;
+            if (sdaGiveName.names.length) {
+              newTxnSdaExchangeOffer.sdaGiveNamespace = sdaGiveName.names[0].name;
             }
           } catch (error) {}
+            if(newTxnSdaExchangeOffer){
+              txn.sdaExchange.push(newTxnSdaExchangeOffer);
+            }
         }
       }
       else if(txns[i].type === TransactionType.REMOVE_SDA_EXCHANGE_OFFER){
@@ -8699,27 +8737,30 @@ export class TransactionUtils {
         for (let i = 0; i < sdaExchangeOfferTxn.offers.length; ++i) {
           const tempSdaExchangeOffer = sdaExchangeOfferTxn.offers[i];
 
-          const assetIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
-          const assetIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
+          const sdaIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
+          const sdaIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
 
         const newTxnSdaExchangeOffer: TxnSdaExchange = {
-          assetIdGet: assetIdGet,
-          assetIdGive: assetIdGive,
+          sdaIdGet: sdaIdGet,
+          sdaIdGive: sdaIdGive,
         };
 
           try {
-            const assetSdaGetName = await TransactionUtils.getAssetName(assetIdGet);
+            const sdaGetName = await TransactionUtils.getAssetName(sdaIdGet);
 
-            if (assetSdaGetName.names.length) {
-              newTxnSdaExchangeOffer.assetSdaGetNamespace = assetSdaGetName.names[0].name;
+            if (sdaGetName.names.length) {
+              newTxnSdaExchangeOffer.sdaGetNamespace = sdaGetName.names[0].name;
             }
 
-            const assetSdaGiveName = await TransactionUtils.getAssetName(assetIdGive);
+            const sdaGiveName = await TransactionUtils.getAssetName(sdaIdGive);
 
-            if (assetSdaGiveName.names.length) {
-              newTxnSdaExchangeOffer.assetSdaGiveNamespace = assetSdaGiveName.names[0].name;
+            if (sdaGiveName.names.length) {
+              newTxnSdaExchangeOffer.sdaGiveNamespace = sdaGiveName.names[0].name;
             }
           } catch (error) {}
+            if(newTxnSdaExchangeOffer){
+              txn.sdaExchange.push(newTxnSdaExchangeOffer);
+            }
         }
       }
       formatedTxns.push(txn);
@@ -8748,46 +8789,48 @@ export class TransactionUtils {
         for (let i = 0; i < sdaExchangeOfferTxn.offers.length; ++i) {
           const tempSdaExchangeOffer = sdaExchangeOfferTxn.offers[i];
 
-          const assetIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
-          const assetIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
+          const sdaIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
+          const sdaIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
           const amountGet = tempSdaExchangeOffer.mosaicAmountGet.compact();
           const amountGive = tempSdaExchangeOffer.mosaicAmountGive.compact();
           const duration = tempSdaExchangeOffer.duration.compact();
 
-        const newTxnSdaExchange: TxnSdaExchange = {
-          assetIdGet: assetIdGet,
-          assetIdGive: assetIdGive,
+        const newTxnSdaExchangeOffer: TxnSdaExchange = {
+          sdaIdGet: sdaIdGet,
+          sdaIdGive: sdaIdGive,
           amountGet: amountGet,
           amountGive: amountGive,
           duration: duration,
         };
 
         try {
-          const assetInfoSdaGet = await TransactionUtils.getAssetInfo(assetIdGet);
-          const assetInfoSdaGive = await TransactionUtils.getAssetInfo(assetIdGive);
+          const sdaGetInfo = await TransactionUtils.getAssetInfo(sdaIdGet);
+          const SdaGiveInfo = await TransactionUtils.getAssetInfo(sdaIdGive);
 
-          newTxnSdaExchange.amountGet = TransactionUtils.convertToExactAmount(
+          newTxnSdaExchangeOffer.amountGet = TransactionUtils.convertToExactAmount(
             amountGet,
-            assetInfoSdaGet.divisibility
+            sdaGetInfo.divisibility
           );
-          newTxnSdaExchange.amountGive = TransactionUtils.convertToExactAmount(
+          newTxnSdaExchangeOffer.amountGive = TransactionUtils.convertToExactAmount(
             amountGive,
-            assetInfoSdaGive.divisibility
+            SdaGiveInfo.divisibility
           );
 
-          const assetSdaGetName = await TransactionUtils.getAssetName(assetIdGet);
+          const sdaGetName = await TransactionUtils.getAssetName(sdaIdGet);
 
-          if (assetSdaGetName.names.length) {
-            newTxnSdaExchange.assetSdaGetNamespace = assetSdaGetName.names[0].name;
+          if (sdaGetName.names.length) {
+            newTxnSdaExchangeOffer.sdaGetNamespace = sdaGetName.names[0].name;
           }
 
-          const assetSdaGiveName = await TransactionUtils.getAssetName(assetIdGive);
+          const sdaGiveName = await TransactionUtils.getAssetName(sdaIdGive);
 
-          if (assetSdaGiveName.names.length) {
-            newTxnSdaExchange.assetSdaGiveNamespace = assetSdaGiveName.names[0].name;
+          if (sdaGiveName.names.length) {
+            newTxnSdaExchangeOffer.sdaGiveNamespace = sdaGiveName.names[0].name;
           }
         } catch (error) {}
-          txn.sdaExchange.push(newTxnSdaExchange);
+          if(newTxnSdaExchangeOffer){
+            txn.sdaExchange.push(newTxnSdaExchangeOffer);
+          }
         }
       }
       else if(txns[i].type === TransactionType.REMOVE_SDA_EXCHANGE_OFFER){
@@ -8796,27 +8839,30 @@ export class TransactionUtils {
         for (let i = 0; i < sdaExchangeOfferTxn.offers.length; ++i) {
           const tempSdaExchangeOffer = sdaExchangeOfferTxn.offers[i];
 
-          const assetIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
-          const assetIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
+          const sdaIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
+          const sdaIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
 
         const newTxnSdaExchangeOffer: TxnSdaExchange = {
-          assetIdGet: assetIdGet,
-          assetIdGive: assetIdGive,
+          sdaIdGet: sdaIdGet,
+          sdaIdGive: sdaIdGive,
         };
 
           try {
-            const assetSdaGetName = await TransactionUtils.getAssetName(assetIdGet);
+            const sdaGetName = await TransactionUtils.getAssetName(sdaIdGet);
 
-            if (assetSdaGetName.names.length) {
-              newTxnSdaExchangeOffer.assetSdaGetNamespace = assetSdaGetName.names[0].name;
+            if (sdaGetName.names.length) {
+              newTxnSdaExchangeOffer.sdaGetNamespace = sdaGetName.names[0].name;
             }
 
-            const assetSdaGiveName = await TransactionUtils.getAssetName(assetIdGive);
+            const sdaGiveName = await TransactionUtils.getAssetName(sdaIdGive);
 
-            if (assetSdaGiveName.names.length) {
-              newTxnSdaExchangeOffer.assetSdaGiveNamespace = assetSdaGiveName.names[0].name;
+            if (sdaGiveName.names.length) {
+              newTxnSdaExchangeOffer.sdaGiveNamespace = sdaGiveName.names[0].name;
             }
           } catch (error) {}
+            if(newTxnSdaExchangeOffer){
+              txn.sdaExchange.push(newTxnSdaExchangeOffer);
+            }
         }
       }
       formatedTxns.push(txn);
@@ -8843,46 +8889,48 @@ export class TransactionUtils {
         for (let i = 0; i < sdaExchangeOfferTxn.offers.length; ++i) {
           const tempSdaExchangeOffer = sdaExchangeOfferTxn.offers[i];
 
-          const assetIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
-          const assetIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
+          const sdaIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
+          const sdaIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
           const amountGet = tempSdaExchangeOffer.mosaicAmountGet.compact();
           const amountGive = tempSdaExchangeOffer.mosaicAmountGive.compact();
           const duration = tempSdaExchangeOffer.duration.compact();
 
-        const newTxnSdaExchange: TxnSdaExchange = {
-          assetIdGet: assetIdGet,
-          assetIdGive: assetIdGive,
+        const newTxnSdaExchangeOffer: TxnSdaExchange = {
+          sdaIdGet: sdaIdGet,
+          sdaIdGive: sdaIdGive,
           amountGet: amountGet,
           amountGive: amountGive,
           duration: duration,
         };
 
         try {
-          const assetInfoSdaGet = await TransactionUtils.getAssetInfo(assetIdGet);
-          const assetInfoSdaGive = await TransactionUtils.getAssetInfo(assetIdGive);
+          const sdaGetInfo = await TransactionUtils.getAssetInfo(sdaIdGet);
+          const SdaGiveInfo = await TransactionUtils.getAssetInfo(sdaIdGive);
 
-          newTxnSdaExchange.amountGet = TransactionUtils.convertToExactAmount(
+          newTxnSdaExchangeOffer.amountGet = TransactionUtils.convertToExactAmount(
             amountGet,
-            assetInfoSdaGet.divisibility
+            sdaGetInfo.divisibility
           );
-          newTxnSdaExchange.amountGive = TransactionUtils.convertToExactAmount(
+          newTxnSdaExchangeOffer.amountGive = TransactionUtils.convertToExactAmount(
             amountGive,
-            assetInfoSdaGive.divisibility
+            SdaGiveInfo.divisibility
           );
 
-          const assetSdaGetName = await TransactionUtils.getAssetName(assetIdGet);
+          const sdaGetName = await TransactionUtils.getAssetName(sdaIdGet);
 
-          if (assetSdaGetName.names.length) {
-            newTxnSdaExchange.assetSdaGetNamespace = assetSdaGetName.names[0].name;
+          if (sdaGetName.names.length) {
+            newTxnSdaExchangeOffer.sdaGetNamespace = sdaGetName.names[0].name;
           }
 
-          const assetSdaGiveName = await TransactionUtils.getAssetName(assetIdGive);
+          const sdaGiveName = await TransactionUtils.getAssetName(sdaIdGive);
 
-          if (assetSdaGiveName.names.length) {
-            newTxnSdaExchange.assetSdaGiveNamespace = assetSdaGiveName.names[0].name;
+          if (sdaGiveName.names.length) {
+            newTxnSdaExchangeOffer.sdaGiveNamespace = sdaGiveName.names[0].name;
           }
         } catch (error) {}
-          txn.sdaExchange.push(newTxnSdaExchange);
+          if(newTxnSdaExchangeOffer){
+            txn.sdaExchange.push(newTxnSdaExchangeOffer);
+          }
         }
       }
       else if(txns[i].type === TransactionType.REMOVE_SDA_EXCHANGE_OFFER){
@@ -8891,27 +8939,30 @@ export class TransactionUtils {
         for (let i = 0; i < sdaExchangeOfferTxn.offers.length; ++i) {
           const tempSdaExchangeOffer = sdaExchangeOfferTxn.offers[i];
 
-          const assetIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
-          const assetIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
+          const sdaIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
+          const sdaIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
 
         const newTxnSdaExchangeOffer: TxnSdaExchange = {
-          assetIdGet: assetIdGet,
-          assetIdGive: assetIdGive,
+          sdaIdGet: sdaIdGet,
+          sdaIdGive: sdaIdGive,
         };
 
           try {
-            const assetSdaGetName = await TransactionUtils.getAssetName(assetIdGet);
+            const sdaGetName = await TransactionUtils.getAssetName(sdaIdGet);
 
-            if (assetSdaGetName.names.length) {
-              newTxnSdaExchangeOffer.assetSdaGetNamespace = assetSdaGetName.names[0].name;
+            if (sdaGetName.names.length) {
+              newTxnSdaExchangeOffer.sdaGetNamespace = sdaGetName.names[0].name;
             }
 
-            const assetSdaGiveName = await TransactionUtils.getAssetName(assetIdGive);
+            const sdaGiveName = await TransactionUtils.getAssetName(sdaIdGive);
 
-            if (assetSdaGiveName.names.length) {
-              newTxnSdaExchangeOffer.assetSdaGiveNamespace = assetSdaGiveName.names[0].name;
+            if (sdaGiveName.names.length) {
+              newTxnSdaExchangeOffer.sdaGiveNamespace = sdaGiveName.names[0].name;
             }
           } catch (error) {}
+            if(newTxnSdaExchangeOffer){
+              txn.sdaExchange.push(newTxnSdaExchangeOffer);
+            }
         }
       }
       formatedTxns.push(txn);

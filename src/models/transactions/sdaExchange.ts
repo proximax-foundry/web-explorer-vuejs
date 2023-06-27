@@ -1,8 +1,8 @@
 export interface TxnSdaExchange {
-    assetIdGet: string;
-    assetIdGive: string;
-    assetSdaGetNamespace?: string;
-    assetSdaGiveNamespace?: string;
+    sdaIdGet: string;
+    sdaIdGive: string;
+    sdaGetNamespace?: string;
+    sdaGiveNamespace?: string;
     amountGet?: number;
     amountGive?: number;
     duration?: number;

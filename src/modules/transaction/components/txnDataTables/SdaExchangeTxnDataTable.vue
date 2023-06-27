@@ -155,15 +155,35 @@
         <template #body="{ data }">
           <div v-if="checkOtherSDA(data.sdaExchange)">
             <span
-              v-for="(sdaName, index) in displaySDAs(data.sdaExchange)"
+              v-for="(item, index) in data.sdaExchange"
               :key="index"
             >
               <router-link
-                :to="{ name: 'ViewAsset', params: { id: sdaName.name } }"
+                v-if="item.sdaGetNamespace"
+                :to="{ name: 'ViewAsset', params: { id: item.sdaGetNamespace } }"
                 class="text-blue-600 hover:text-blue-primary flex hover:underline"
-                >{{ sdaName.name }}</router-link
+                >{{ item.sdaGetNamespace }}</router-link
               >
-              {{ sdaName.amount }}
+              <router-link
+                v-else
+                :to="{ name: 'ViewAsset', params: { id: item.sdaIdGet } }"
+                class="text-blue-600 hover:text-blue-primary flex hover:underline"
+                >{{ item.sdaIdGet }}</router-link
+              >
+              {{ item.amountGet }}
+              <router-link
+                v-if="item.sdaGiveNamespace"
+                :to="{ name: 'ViewAsset', params: { id: item.sdaGiveNamespace } }"
+                class="text-blue-600 hover:text-blue-primary flex hover:underline"
+                >{{ item.sdaGiveNamespace }}</router-link
+              >
+              <router-link
+                v-else
+                :to="{ name: 'ViewAsset', params: { id: item.sdaIdGive } }"
+                class="text-blue-600 hover:text-blue-primary flex hover:underline"
+                >{{ item.sdaIdGive }}</router-link
+              >
+              {{ item.amountGive }}
             </span>
           </div>
         </template>
@@ -174,14 +194,15 @@
         v-if="wideScreen"
       >
         <template #body="{ data }">
-          <span
+          <span v-for="(item, index) in data.sdaExchange"
+            :key="index"
             class="text-xs font-bold"
             v-tooltip.left="
-              { value: `<tiptext>Approximately ${durationTime(getDuration(data.sdaExchange))} Day${(durationTime(getDuration(data.sdaExchange)) > 1 ? 's' : '')}</tiptext>` , escape: true }
+              { value: `<tiptext>Approximately ${durationTime(item.duration)} Day${(durationTime(item.duration) > 1 ? 's' : '')}</tiptext>` , escape: true }
             "
             >{{
-              getDuration(data.sdaExchange)
-                ? getDuration(data.sdaExchange) + " Block" + (getDuration(data.sdaExchange) > 1 ? "s" : "")
+              item.duration
+                ? item.duration + " Block" + (item.duration > 1 ? "s" : "")
                 : "-"
             }}</span
           >
@@ -244,59 +265,6 @@ import type { TxnSdaExchange } from "@/models/transactions/sdaExchange";
   }
   return false;
 };
-
-const displaySDAs = (sdas: TxnSdaExchange[]) => {
-  let sda_rows: { name: string; amount?: number; duration: number }[] = [];
-  if (sdas.length > 0) {
-    for (const sda of sdas) {
-      if (sda.assetSdaGetNamespace || sda.assetSdaGiveNamespace) {
-        if(sda.assetSdaGetNamespace && sda.duration){
-          sda_rows.push({
-            amount: sda.amountGet,
-            name: sda.assetSdaGetNamespace,
-            duration: sda.duration,
-          });
-        }
-        if(sda.assetSdaGiveNamespace && sda.duration){
-          sda_rows.push({
-            amount: sda.amountGive,
-            name: sda.assetSdaGiveNamespace,
-            duration: sda.duration,
-          });
-        } 
-      }
-      else {
-        if(sda.assetIdGet && sda.duration){
-          sda_rows.push({
-            amount: sda.amountGet,
-            name: sda.assetIdGet,
-            duration: sda.duration,
-          });
-        }
-        if(sda.assetIdGive && sda.duration){
-          sda_rows.push({
-            amount: sda.amountGive,
-            name: sda.assetIdGive,
-            duration: sda.duration,
-          });
-        }
-      }
-    }
-    return sda_rows;
-  }
-};
-
-const getDuration = (sdas: TxnSdaExchange[]) => {
-    let duration = 0
-    if (sdas.length > 0) {
-        for (const sda of sdas) {
-            if(sda.duration){
-                duration = sda.duration
-            }
-        }
-    }
-    return duration
-}
   
   let chainConfig = new ChainProfileConfig(networkState.chainNetworkName);
     chainConfig.init();

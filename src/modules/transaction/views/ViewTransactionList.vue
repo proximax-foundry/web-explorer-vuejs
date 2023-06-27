@@ -119,7 +119,7 @@
         :transactions="sdaExchangeTransactions"
         :pages="pages"
         :selectedGroupType="transactionGroupType.CONFIRMED"
-        v-else-if="selectedTxnType === TransactionFilterType.SDA_EXCHANGE"
+        v-else-if="selectedTxnType === TransactionFilterType['SDA EXCHANGE']"
       />
       <div
         class="sm:flex sm:justify-between my-5 mb-15"
@@ -391,7 +391,7 @@ let loadRecentTransactions = async () => {
     if(selectedTxnType.value == TransactionFilterType.CHAIN){
       chainTransactions.value = formattedTxns
     }
-    if(selectedTxnType.value == TransactionFilterType.SDA_EXCHANGE){
+    if(selectedTxnType.value == TransactionFilterType['SDA EXCHANGE']){
       sdaExchangeTransactions.value = formattedTxns
     }
     totalPages.value = transactionSearchResult.pagination.totalPages;
@@ -446,7 +446,7 @@ const changeSearchTxnType = () => {
     case TransactionFilterType.RESTRICTION:
       QueryParamsType.value = TransactionFilterTypes.getRestrictionTypes();
       break;
-    case TransactionFilterType.SDA_EXCHANGE:
+    case TransactionFilterType['SDA EXCHANGE']:
       QueryParamsType.value = TransactionFilterTypes.getSdaExchangeTypes();
       break;
     default:
@@ -529,7 +529,7 @@ const formatConfirmedTransaction = async (transactions: Transaction[]) => {
           transactions
         );
       break;
-    case TransactionFilterType.SDA_EXCHANGE:
+    case TransactionFilterType['SDA EXCHANGE']:
       formattedTxns =
         await TransactionUtils.formatConfirmedSdaExchangeTransaction(
           transactions

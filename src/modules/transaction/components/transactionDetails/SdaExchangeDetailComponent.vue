@@ -12,22 +12,22 @@
         }}</span>
         <span class="text-xxs" v-if="formatCurrency(offer.amountGet)[1]">.{{ formatCurrency(offer.amountGet)[1] }}</span>
         <div class="text-gray-400 hover:text-gray-700 duration-300 transition-all inline-block ml-2">
-          <router-link :to="{ name: 'ViewAsset', params: { id: offer.assetIdGet } }"
+          <router-link :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGet } }"
             class="hover:text-blue-primary hover:underline">
-            {{ offer.assetIdGet }}
+            {{ offer.sdaIdGet }}
           </router-link>
         </div>
       </div>
     </div>
-    <div v-else-if="offer.assetIdGet">
-      <div>Asset ID Get</div>
+    <div v-else-if="offer.sdaIdGet">
+      <div>SDA ID Get</div>
       <div>
         <div class="inline-block">
           <router-link
-            :to="{ name: 'ViewAsset', params: { id: offer.assetIdGet } }"
+            :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGet } }"
             class="hover:text-blue-primary hover:underline text-blue-600"
           >
-            {{ offer.assetIdGet }}
+            {{ offer.sdaIdGet }}
           </router-link>
         </div>
       </div>
@@ -40,22 +40,22 @@
         }}</span>
         <span class="text-xxs" v-if="formatCurrency(offer.amountGive)[1]">.{{ formatCurrency(offer.amountGive)[1] }}</span>
         <div class="text-gray-400 hover:text-gray-700 duration-300 transition-all inline-block ml-2">
-          <router-link :to="{ name: 'ViewAsset', params: { id: offer.assetIdGive } }"
+          <router-link :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGive } }"
             class="hover:text-blue-primary hover:underline">
-            {{ offer.assetIdGive }}
+            {{ offer.sdaIdGive }}
           </router-link>
         </div>
       </div>
     </div>
-    <div v-else-if="offer.assetIdGive">
-      <div>Asset ID Give</div>
+    <div v-else-if="offer.sdaIdGive">
+      <div>SDA ID Give</div>
       <div>
         <div class="inline-block">
           <router-link
-            :to="{ name: 'ViewAsset', params: { id: offer.assetIdGive } }"
+            :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGive } }"
             class="hover:text-blue-primary hover:underline text-blue-600"
           >
-            {{ offer.assetIdGive }}
+            {{ offer.sdaIdGive }}
           </router-link>
         </div>
       </div>
