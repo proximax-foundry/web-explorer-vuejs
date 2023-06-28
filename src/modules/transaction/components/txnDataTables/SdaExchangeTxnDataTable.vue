@@ -153,7 +153,6 @@
           header="SDA(Get/Give)" headerStyle="width:150px" 
           v-if="wideScreen">
         <template #body="{ data }">
-          <div v-if="checkOtherSDA(data.sdaExchange)">
             <span
               v-for="(item, index) in data.sdaExchange"
               :key="index"
@@ -185,7 +184,6 @@
               >
               {{ item.amountGive }}
             </span>
-          </div>
         </template>
       </Column>
         <Column
@@ -222,7 +220,6 @@
   import { networkState } from "@/state/networkState";
   import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
   import { AppState } from "@/state/appState";
-import type { TxnSdaExchange } from "@/models/transactions/sdaExchange";
   
   defineProps({
     transactions: Array,
@@ -256,15 +253,6 @@ import type { TxnSdaExchange } from "@/models/transactions/sdaExchange";
   const convertLocalTime = (dateTimeInJSON: string) => {
     return Helper.convertDisplayDateTimeFormat24(dateTimeInJSON);
   };
-
-  const checkOtherSDA = (assets: TxnSdaExchange[]) => {
-  if (assets) {
-    if (assets.length > 0) {
-      return true;
-    }
-  }
-  return false;
-};
   
   let chainConfig = new ChainProfileConfig(networkState.chainNetworkName);
     chainConfig.init();
