@@ -58,7 +58,7 @@
                   </div>
                 </div>
                 <div v-else-if="toggleConvert">
-
+                  <SdasHandler :txnDetail="data" />
                 </div>
               </div>
               <div v-else-if="data.name === 'InnerTransactions'">
@@ -192,8 +192,9 @@
   
 <script setup lang="ts">
 import { TransactionUtils } from '@/util/transactionUtils';
-import { Address, Convert, Deadline, Id, MessageType, TransactionType, Mosaic, MosaicId, MosaicNames, NamespaceId, NamespaceName, NetworkType, PublicAccount, Transaction, TransactionMapping, UInt64, AliasActionType, NamespaceType } from 'tsjs-xpx-chain-sdk';
-import {  ref } from 'vue';
+import { Address, Convert, Deadline, Id, MessageType, TransactionType, Mosaic, MosaicId, NamespaceId, NetworkType, PublicAccount, Transaction, TransactionMapping, UInt64, AliasActionType, NamespaceType } from 'tsjs-xpx-chain-sdk';
+import { ref } from 'vue';
+import SdasHandler from '../components/payloadDetails/SdasHandler.vue';
 
 const props = defineProps({
   payload: {
