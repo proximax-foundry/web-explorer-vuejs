@@ -1,62 +1,76 @@
 <template>
-  <div class="details" v-for="(offer, item) in txnDetail.detail.sdaExchange" :key="item">
-    <div v-if="offer.duration">
+  <div class="details" v-if="txnDetail.detail.sdaExchange.length > 0">
+    <div>
       <div>Duration</div>
-      <div>{{ offer.duration }} blocks</div>
+      <div class="relative">
+        <div v-for="offer in txnDetail.detail.sdaExchange">
+          <span>
+            {{ offer.duration }} blocks
+          </span>
+        </div>
+      </div>
     </div>
-    <div v-if="offer.amountGet">
+    <div v-if="checkAmountGet(txnDetail.detail.sdaExchange)">
       <div>SDA Get</div>
-      <div>
-        <span class="font-bold">{{
-          Helper.convertToCurrency(formatCurrency(offer.amountGet)[0], 0)
-        }}</span>
-        <span class="text-xxs" v-if="formatCurrency(offer.amountGet)[1]">.{{ formatCurrency(offer.amountGet)[1] }}</span>
-        <div class="text-gray-400 hover:text-gray-700 duration-300 transition-all inline-block ml-2">
-          <router-link :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGet } }"
-            class="hover:text-blue-primary hover:underline">
-            {{ offer.sdaIdGet }}
-          </router-link>
+      <div class="relative">
+        <div v-for="offer in txnDetail.detail.sdaExchange">
+          <span class="font-bold">{{
+            Helper.convertToCurrency(formatCurrency(offer.amountGet)[0], 0)
+          }}</span>
+          <span class="text-xxs" v-if="formatCurrency(offer.amountGet)[1]">.{{ formatCurrency(offer.amountGet)[1] }}</span>
+          <div class="text-gray-400 hover:text-gray-700 duration-300 transition-all inline-block ml-2">
+            <router-link :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGet } }"
+              class="hover:text-blue-primary hover:underline">
+              {{ offer.sdaIdGet }}
+            </router-link>
+          </div>
         </div>
       </div>
     </div>
-    <div v-else-if="offer.sdaIdGet">
+    <div v-else>
       <div>SDA ID Get</div>
-      <div>
-        <div class="inline-block">
-          <router-link
-            :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGet } }"
-            class="hover:text-blue-primary hover:underline text-blue-600"
-          >
-            {{ offer.sdaIdGet }}
-          </router-link>
+      <div class="relative">
+        <div v-for="offer in txnDetail.detail.sdaExchange">
+          <div class="inline-block">
+            <router-link
+              :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGet } }"
+              class="hover:text-blue-primary hover:underline text-blue-600"
+            >
+              {{ offer.sdaIdGet }}
+            </router-link>
+          </div>
         </div>
       </div>
     </div>
-    <div v-if="offer.amountGive">
+    <div v-if="checkAmountGive(txnDetail.detail.sdaExchange)">
       <div>SDA Give</div>
-      <div>
-        <span class="font-bold">{{
-          Helper.convertToCurrency(formatCurrency(offer.amountGive)[0], 0)
-        }}</span>
-        <span class="text-xxs" v-if="formatCurrency(offer.amountGive)[1]">.{{ formatCurrency(offer.amountGive)[1] }}</span>
-        <div class="text-gray-400 hover:text-gray-700 duration-300 transition-all inline-block ml-2">
-          <router-link :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGive } }"
-            class="hover:text-blue-primary hover:underline">
-            {{ offer.sdaIdGive }}
-          </router-link>
+      <div class="relative">
+        <div v-for="offer in txnDetail.detail.sdaExchange">
+          <span class="font-bold">{{
+            Helper.convertToCurrency(formatCurrency(offer.amountGive)[0], 0)
+          }}</span>
+          <span class="text-xxs" v-if="formatCurrency(offer.amountGive)[1]">.{{ formatCurrency(offer.amountGive)[1] }}</span>
+          <div class="text-gray-400 hover:text-gray-700 duration-300 transition-all inline-block ml-2">
+            <router-link :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGive } }"
+              class="hover:text-blue-primary hover:underline">
+              {{ offer.sdaIdGive }}
+            </router-link>
+          </div>
         </div>
       </div>
     </div>
-    <div v-else-if="offer.sdaIdGive">
+    <div v-else>
       <div>SDA ID Give</div>
-      <div>
-        <div class="inline-block">
-          <router-link
-            :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGive } }"
-            class="hover:text-blue-primary hover:underline text-blue-600"
-          >
-            {{ offer.sdaIdGive }}
-          </router-link>
+      <div class="relative">
+        <div v-for="offer in txnDetail.detail.sdaExchange">
+          <div class="inline-block">
+            <router-link
+              :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGive } }"
+              class="hover:text-blue-primary hover:underline text-blue-600"
+            >
+              {{ offer.sdaIdGive }}
+            </router-link>
+          </div>
         </div>
       </div>
     </div>
@@ -73,6 +87,28 @@ defineProps({
 const formatCurrency = (amount) => {
   return amount.toString().split(".");
 };
+
+const checkAmountGet = (data) => {
+  for(let i=0; i<data.length; i++){
+    if(data[i].amountGet){
+      return true
+    }
+    else{
+      return false
+    }
+  }
+}
+
+const checkAmountGive = (data) => {
+  for(let i=0; i<data.length; i++){
+    if(data[i].amountGive){
+      return true
+    }
+    else{
+      return false
+    }
+  }
+}
 </script>
   
   <!-- Add "scoped" attribute to limit CSS to this component only -->

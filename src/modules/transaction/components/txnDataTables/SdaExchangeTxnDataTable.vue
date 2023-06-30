@@ -150,12 +150,16 @@
           </template>
         </Column>
         <Column 
-          header="SDA(Get/Give)" headerStyle="width:150px" 
+          header="SDA(Get/Give/Duration)" headerStyle="width:150px" 
           v-if="wideScreen">
         <template #body="{ data }">
             <span
+              class="inline-block bg-blue-100 font-bold text-xs py-1 px-2 my-1 mx-1 rounded"
               v-for="(item, index) in data.sdaExchange"
               :key="index"
+              v-tooltip.left="
+                { value: `<tiptext>Approximately ${durationTime(item.duration)} Day${(durationTime(item.duration) > 1 ? 's' : '')}</tiptext>` , escape: true }
+              "
             >
               <router-link
                 v-if="item.sdaGetNamespace"
@@ -183,27 +187,14 @@
                 >{{ item.sdaIdGive }}</router-link
               >
               {{ item.amountGive }}
+              <div>
+                {{
+                  item.duration
+                    ? item.duration + " Block" + (item.duration > 1 ? "s" : "")
+                    : "-"
+                }}
+              </div>
             </span>
-        </template>
-      </Column>
-        <Column
-        header="Duration"
-        headerStyle="width:40px;text-transform:uppercase"
-        v-if="wideScreen"
-      >
-        <template #body="{ data }">
-          <span v-for="(item, index) in data.sdaExchange"
-            :key="index"
-            class="text-xs font-bold"
-            v-tooltip.left="
-              { value: `<tiptext>Approximately ${durationTime(item.duration)} Day${(durationTime(item.duration) > 1 ? 's' : '')}</tiptext>` , escape: true }
-            "
-            >{{
-              item.duration
-                ? item.duration + " Block" + (item.duration > 1 ? "s" : "")
-                : "-"
-            }}</span
-          >
         </template>
       </Column>
         <template #empty> No transaction found </template>
