@@ -161,32 +161,40 @@
                 { value: `<tiptext>Approximately ${durationTime(item.duration)} Day${(durationTime(item.duration) > 1 ? 's' : '')}</tiptext>` , escape: true }
               "
             >
-              <router-link
-                v-if="item.sdaGetNamespace"
-                :to="{ name: 'ViewAsset', params: { id: item.sdaGetNamespace } }"
-                class="text-blue-600 hover:text-blue-primary flex hover:underline"
-                >{{ item.sdaGetNamespace }}</router-link
-              >
-              <router-link
-                v-else
-                :to="{ name: 'ViewAsset', params: { id: item.sdaIdGet } }"
-                class="text-blue-600 hover:text-blue-primary flex hover:underline"
-                >{{ item.sdaIdGet }}</router-link
-              >
-              {{ item.amountGet }}
-              <router-link
-                v-if="item.sdaGiveNamespace"
-                :to="{ name: 'ViewAsset', params: { id: item.sdaGiveNamespace } }"
-                class="text-blue-600 hover:text-blue-primary flex hover:underline"
-                >{{ item.sdaGiveNamespace }}</router-link
-              >
-              <router-link
-                v-else
-                :to="{ name: 'ViewAsset', params: { id: item.sdaIdGive } }"
-                class="text-blue-600 hover:text-blue-primary flex hover:underline"
-                >{{ item.sdaIdGive }}</router-link
-              >
-              {{ item.amountGive }}
+              <div>
+                <span>{{ item.amountGet }}</span>
+                <div class="inline-block ml-2">
+                  <router-link
+                    v-if="item.sdaGetNamespace"
+                    :to="{ name: 'ViewAsset', params: { id: item.sdaGetNamespace } }"
+                    class="text-blue-600 hover:text-blue-primary flex hover:underline"
+                    >{{ item.sdaGetNamespace }}</router-link
+                  >
+                  <router-link
+                    v-else
+                    :to="{ name: 'ViewAsset', params: { id: item.sdaIdGet } }"
+                    class="text-blue-600 hover:text-blue-primary flex hover:underline"
+                    >{{ item.sdaIdGet }}</router-link
+                  >
+                </div>
+              </div>
+              <div>
+                <span>{{ item.amountGive }}</span>
+                <div class="inline-block ml-2">
+                  <router-link
+                    v-if="item.sdaGiveNamespace"
+                    :to="{ name: 'ViewAsset', params: { id: item.sdaGiveNamespace } }"
+                    class="text-blue-600 hover:text-blue-primary flex hover:underline"
+                    >{{ item.sdaGiveNamespace }}</router-link
+                  >
+                  <router-link
+                    v-else
+                    :to="{ name: 'ViewAsset', params: { id: item.sdaIdGive } }"
+                    class="text-blue-600 hover:text-blue-primary flex hover:underline"
+                    >{{ item.sdaIdGive }}</router-link
+                  >
+                </div>
+              </div>
               <div>
                 {{
                   item.duration
