@@ -1,7 +1,7 @@
 <template>
   <div class="details">
     <div>
-      <div>SDA</div>
+      <div>Offers</div>
       <div>
         <div
           v-for="(offer, index) in txnDetail.detail.sdaExchange"
@@ -11,7 +11,7 @@
           <div v-if="offer.amountGet">
             <div>
               <div>
-                <span>Get: </span>
+                <span class="text-orange-400 text-xxs">Get: </span>
                 <span class="font-bold">{{
                   Helper.convertToCurrency(
                     formatCurrency(offer.amountGet)[0],
@@ -21,11 +21,15 @@
                 <span class="text-xxs" v-if="formatCurrency(offer.amountGet)[1]"
                   >.{{ formatCurrency(offer.amountGet)[1] }}</span
                 >
-                <div v-if="offer.sdaGetNamespace"
+                <div
+                  v-if="offer.sdaGetNamespace"
                   class="text-gray-400 hover:text-gray-700 duration-300 transition-all inline-block ml-2"
                 >
                   <router-link
-                    :to="{ name: 'ViewAsset', params: { id: offer.sdaGetNamespace } }"
+                    :to="{
+                      name: 'ViewAsset',
+                      params: { id: offer.sdaGetNamespace },
+                    }"
                     class="hover:text-blue-primary hover:underline"
                   >
                     {{ offer.sdaGetNamespace }}
@@ -47,7 +51,7 @@
           <div v-else>
             <div>
               <div>
-                <span>SDA ID Get:</span>
+                <span class="text-orange-400 text-xxs">SDA ID Get:</span>
                 <div class="inline-block">
                   <router-link
                     :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGet } }"
@@ -62,7 +66,7 @@
           <div v-if="offer.amountGive">
             <div>
               <div>
-                <span>Give: </span>
+                <span class="text-orange-400 text-xxs">Give: </span>
                 <span class="font-bold">{{
                   Helper.convertToCurrency(
                     formatCurrency(offer.amountGive)[0],
@@ -78,7 +82,10 @@
                   class="text-gray-400 hover:text-gray-700 duration-300 transition-all inline-block ml-2"
                 >
                   <router-link
-                    :to="{ name: 'ViewAsset', params: { id: offer.sdaGiveNamespace } }"
+                    :to="{
+                      name: 'ViewAsset',
+                      params: { id: offer.sdaGiveNamespace },
+                    }"
                     class="hover:text-blue-primary hover:underline"
                   >
                     {{ offer.sdaGiveNamespace }}
@@ -100,7 +107,7 @@
           <div v-else>
             <div>
               <div>
-                <span>SDA ID Give:</span>
+                <span class="text-orange-400 text-xxs">SDA ID Give:</span>
                 <div class="inline-block">
                   <router-link
                     :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGive } }"
@@ -112,7 +119,10 @@
               </div>
             </div>
           </div>
-          <div>Duration: {{ offer.duration }} blocks</div>
+          <div>
+            <span class="text-orange-400 text-xxs"> Duration: </span>
+            <span>{{ offer.duration }} blocks</span>
+          </div>
         </div>
       </div>
     </div>

@@ -150,7 +150,7 @@
           </template>
         </Column>
         <Column 
-          header="SDA(Get/Give/Duration)" headerStyle="width:150px" 
+          header="OFFERS(GET/GIVE/DURATION)" headerStyle="width:150px" 
           v-if="wideScreen">
         <template #body="{ data }">
             <span
