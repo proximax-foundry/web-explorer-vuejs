@@ -1,19 +1,17 @@
 <template>
   <div class="details">
     <div>
-      <div>
-          SDA
-        <div>(Get/Give/Duration)</div>
-      </div>
+      <div>SDA</div>
       <div>
         <div
           v-for="(offer, index) in txnDetail.detail.sdaExchange"
           :key="index"
-          class="py-1"
+          class="bg-blue-100 font-bold text-xs w-48 py-1 px-2 my-1 mx-1 rounded"
         >
           <div v-if="offer.amountGet">
             <div>
               <div>
+                <span>Get: </span>
                 <span class="font-bold">{{
                   Helper.convertToCurrency(
                     formatCurrency(offer.amountGet)[0],
@@ -49,6 +47,7 @@
           <div v-else>
             <div>
               <div>
+                <span>SDA ID Get:</span>
                 <div class="inline-block">
                   <router-link
                     :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGet } }"
@@ -63,6 +62,7 @@
           <div v-if="offer.amountGive">
             <div>
               <div>
+                <span>Give: </span>
                 <span class="font-bold">{{
                   Helper.convertToCurrency(
                     formatCurrency(offer.amountGive)[0],
@@ -100,6 +100,7 @@
           <div v-else>
             <div>
               <div>
+                <span>SDA ID Give:</span>
                 <div class="inline-block">
                   <router-link
                     :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGive } }"
@@ -111,7 +112,7 @@
               </div>
             </div>
           </div>
-          <div>{{ offer.duration }} blocks</div>
+          <div>Duration: {{ offer.duration }} blocks</div>
         </div>
       </div>
     </div>
