@@ -12,7 +12,7 @@
             <div>
               <div>
                 <span class="text-muted">Get: </span>
-                <span class="font-bold">{{
+                <span>{{
                   Helper.convertToCurrency(
                     formatCurrency(offer.amountGet)[0],
                     0
@@ -23,7 +23,7 @@
                 >
                 <div
                   v-if="offer.sdaGetNamespace"
-                  class="text-gray-400 hover:text-gray-700 duration-300 transition-all inline-block ml-2"
+                  class="hover:text-gray-700 duration-300 transition-all inline-block ml-2"
                 >
                   <router-link
                     :to="{
@@ -36,7 +36,7 @@
                   </router-link>
                 </div>
                 <div v-else
-                  class="text-gray-400 hover:text-gray-700 duration-300 transition-all inline-block ml-2"
+                  class="hover:text-gray-700 duration-300 transition-all inline-block ml-2"
                 >
                   <router-link
                     :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGet } }"
@@ -67,7 +67,7 @@
             <div>
               <div>
                 <span class="text-muted">Give: </span>
-                <span class="font-bold">{{
+                <span>{{
                   Helper.convertToCurrency(
                     formatCurrency(offer.amountGive)[0],
                     0
@@ -79,7 +79,7 @@
                   >.{{ formatCurrency(offer.amountGive)[1] }}</span
                 >
                 <div v-if="offer.sdaGiveNamespace"
-                  class="text-gray-400 hover:text-gray-700 duration-300 transition-all inline-block ml-2"
+                  class="hover:text-gray-700 duration-300 transition-all inline-block ml-2"
                 >
                   <router-link
                     :to="{
@@ -92,7 +92,7 @@
                   </router-link>
                 </div>
                 <div v-else
-                  class="text-gray-400 hover:text-gray-700 duration-300 transition-all inline-block ml-2"
+                  class="hover:text-gray-700 duration-300 transition-all inline-block ml-2"
                 >
                   <router-link
                     :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGive } }"
@@ -121,7 +121,7 @@
           </div>
           <div>
             <span class="text-muted"> Duration: </span>
-            <span class="font-bold">{{ offer.duration }} blocks</span>
+            <span>{{ offer.duration }} blocks</span>
           </div>
         </div>
       </div>
