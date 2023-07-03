@@ -6,7 +6,7 @@
         <div
           v-for="(offer, index) in txnDetail.detail.sdaExchange"
           :key="index"
-          class="bg-blue-100 font-bold text-xs w-48 py-1 px-2 my-1 mx-1 rounded"
+          class="bg-color text-xs w-48 py-1 px-2 my-1 mx-1 rounded"
         >
           <div v-if="offer.amountGet">
             <div>
@@ -121,7 +121,7 @@
           </div>
           <div>
             <span class="text-muted"> Duration: </span>
-            <span>{{ offer.duration }} blocks</span>
+            <span class="font-bold">{{ offer.duration }} blocks</span>
           </div>
         </div>
       </div>
@@ -161,6 +161,10 @@ const formatCurrency = (amount) => {
   > div:last-child {
     @apply border-none;
   }
+}
+
+.bg-color{
+  background-color: rgba(173,181,189,0.1);
 }
 
 .text-muted{
