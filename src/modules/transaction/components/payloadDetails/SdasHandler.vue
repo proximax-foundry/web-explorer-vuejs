@@ -1,5 +1,5 @@
 <template>
-    <div v-for="item in formattedTxn" class="details">
+    <div v-for="item in formattedTxn" :class="[(txnType === 'Aggregate Bonded V1') ? 'table_div' : 'details']">
       <div v-if="item.amountTransfer">
         <div>Amount</div>
         <div class="relative">
@@ -14,7 +14,7 @@
           <span class="font-bold ml-2">{{ nativeTokenLabel }}</span>
         </div>
       </div>
-      <div v-if="item.sda.length > 0">
+      <div v-if="item.sda?.length > 0">
         <div>SDAs</div>
         <div class="relative">
           <div v-for="(sda, index) in item.sda" :key="index">
@@ -68,9 +68,18 @@ import { computed, ref } from "vue";
   
 const props = defineProps({
     txnDetail: Object,
+    txnData: Object,
   });
 
 const formattedTxn = ref<any>([]);
+const txnType = computed(() =>{
+  for(let item in props.txnData){
+    if(props.txnData[item].name === "Type"){
+      return props.txnData[item].value
+    }
+  }
+})
+
 const nativeTokenNamespaceId = computed(() =>
     new NamespaceId(AppState.nativeToken.fullNamespace).toHex()
 );
@@ -212,14 +221,10 @@ const formatSDAs = async (data: any) => {
                 }
                 txn.sda = sdas
             }
-    return txn
+    formattedTxn.value.push(txn)
 }
 
-const doSomething = async() =>{
-    formattedTxn.value.push(await formatSDAs(props.txnDetail))
-}
-doSomething()
-console.log(formattedTxn.value)
+formatSDAs(props.txnDetail)
 
 const transferAmount = computed(() => {
     for(let item in formattedTxn.value){
@@ -260,6 +265,30 @@ const sdaAmount = computed(() => {
 
   > div:last-child {
     @apply border-none;
+  }
+}
+
+.table_div {
+  @apply text-xs;
+
+  > div {
+    @apply grid grid-cols-4;
+
+    > div {
+      @apply p-2;
+    }
+
+    > div:first-child {
+      @apply text-blue-primary font-bold;
+    }
+
+    > div:nth-child(2) {
+      @apply break-all col-span-3;
+    }
+  }
+
+  > div:nth-child(2n + 1) {
+    @apply bg-gray-100;
   }
 }
 </style>
