@@ -23,12 +23,12 @@
                 >
                 <div
                   v-if="offer.sdaGetNamespace"
-                  class="hover:text-gray-700 duration-300 transition-all inline-block ml-2"
+                  class="text-blue-600 hover:text-gray-700 duration-300 transition-all inline-block ml-2"
                 >
                   <router-link
                     :to="{
                       name: 'ViewAsset',
-                      params: { id: offer.sdaGetNamespace },
+                      params: { id: offer.sdaIdGet },
                     }"
                     class="hover:text-blue-primary hover:underline"
                   >
@@ -36,7 +36,7 @@
                   </router-link>
                 </div>
                 <div v-else
-                  class="hover:text-gray-700 duration-300 transition-all inline-block ml-2"
+                  class="text-blue-600 hover:text-gray-700 duration-300 transition-all inline-block ml-2"
                 >
                   <router-link
                     :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGet } }"
@@ -52,7 +52,7 @@
             <div>
               <div>
                 <span class="text-muted">SDA ID Get:</span>
-                <div class="inline-block">
+                <div class="text-blue-600 inline-block">
                   <router-link
                     :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGet } }"
                     class="hover:text-blue-primary hover:underline text-blue-600"
@@ -79,12 +79,12 @@
                   >.{{ formatCurrency(offer.amountGive)[1] }}</span
                 >
                 <div v-if="offer.sdaGiveNamespace"
-                  class="hover:text-gray-700 duration-300 transition-all inline-block ml-2"
+                  class="text-blue-600 hover:text-gray-700 duration-300 transition-all inline-block ml-2"
                 >
                   <router-link
                     :to="{
                       name: 'ViewAsset',
-                      params: { id: offer.sdaGiveNamespace },
+                      params: { id: offer.sdaIdGive },
                     }"
                     class="hover:text-blue-primary hover:underline"
                   >
@@ -92,7 +92,7 @@
                   </router-link>
                 </div>
                 <div v-else
-                  class="hover:text-gray-700 duration-300 transition-all inline-block ml-2"
+                  class="text-blue-600 hover:text-gray-700 duration-300 transition-all inline-block ml-2"
                 >
                   <router-link
                     :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGive } }"
@@ -108,7 +108,7 @@
             <div>
               <div>
                 <span class="text-muted">SDA ID Give:</span>
-                <div class="inline-block">
+                <div class="text-blue-600 inline-block">
                   <router-link
                     :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGive } }"
                     class="hover:text-blue-primary hover:underline text-blue-600"

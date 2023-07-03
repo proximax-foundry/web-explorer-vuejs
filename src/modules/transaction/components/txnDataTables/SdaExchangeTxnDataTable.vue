@@ -166,7 +166,7 @@
                 <div class="inline-block ml-2">
                   <router-link
                     v-if="item.sdaGetNamespace"
-                    :to="{ name: 'ViewAsset', params: { id: item.sdaGetNamespace } }"
+                    :to="{ name: 'ViewAsset', params: { id: item.sdaIdGet } }"
                     class="text-blue-600 hover:text-blue-primary flex hover:underline"
                     >{{ item.sdaGetNamespace }}</router-link
                   >
@@ -183,7 +183,7 @@
                 <div class="inline-block ml-2">
                   <router-link
                     v-if="item.sdaGiveNamespace"
-                    :to="{ name: 'ViewAsset', params: { id: item.sdaGiveNamespace } }"
+                    :to="{ name: 'ViewAsset', params: { id: item.sdaIdGive } }"
                     class="text-blue-600 hover:text-blue-primary flex hover:underline"
                     >{{ item.sdaGiveNamespace }}</router-link
                   >
