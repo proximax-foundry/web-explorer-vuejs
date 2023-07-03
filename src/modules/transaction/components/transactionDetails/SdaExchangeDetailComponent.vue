@@ -11,7 +11,7 @@
           <div v-if="offer.amountGet">
             <div>
               <div>
-                <span class="text-orange-400 text-xxs">Get: </span>
+                <span class="text-muted">Get: </span>
                 <span class="font-bold">{{
                   Helper.convertToCurrency(
                     formatCurrency(offer.amountGet)[0],
@@ -51,7 +51,7 @@
           <div v-else>
             <div>
               <div>
-                <span class="text-orange-400 text-xxs">SDA ID Get:</span>
+                <span class="text-muted">SDA ID Get:</span>
                 <div class="inline-block">
                   <router-link
                     :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGet } }"
@@ -66,7 +66,7 @@
           <div v-if="offer.amountGive">
             <div>
               <div>
-                <span class="text-orange-400 text-xxs">Give: </span>
+                <span class="text-muted">Give: </span>
                 <span class="font-bold">{{
                   Helper.convertToCurrency(
                     formatCurrency(offer.amountGive)[0],
@@ -107,7 +107,7 @@
           <div v-else>
             <div>
               <div>
-                <span class="text-orange-400 text-xxs">SDA ID Give:</span>
+                <span class="text-muted">SDA ID Give:</span>
                 <div class="inline-block">
                   <router-link
                     :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGive } }"
@@ -120,7 +120,7 @@
             </div>
           </div>
           <div>
-            <span class="text-orange-400 text-xxs"> Duration: </span>
+            <span class="text-muted"> Duration: </span>
             <span>{{ offer.duration }} blocks</span>
           </div>
         </div>
@@ -161,5 +161,9 @@ const formatCurrency = (amount) => {
   > div:last-child {
     @apply border-none;
   }
+}
+
+.text-muted{
+  color: #6c757d;
 }
 </style>
