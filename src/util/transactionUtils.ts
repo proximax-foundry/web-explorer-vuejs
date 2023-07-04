@@ -64,7 +64,9 @@ import {
   AggregateTransactionInfo,
   TransactionInfo,
   TransactionStatus,
-  HashLockTransaction
+  HashLockTransaction,
+  PlaceSdaExchangeOfferTransaction,
+  RemoveSdaExchangeOfferTransaction
 } from "tsjs-xpx-chain-sdk";
 import type { InnerTransaction } from "tsjs-xpx-chain-sdk";
 import { networkState } from "@/state/networkState";
@@ -113,6 +115,9 @@ import {
   ConfirmedSecretTransaction,
   UnconfirmedSecretTransaction,
   PartialSecretTransaction,
+  UnconfirmedSdaExchangeTransaction,
+  ConfirmedSdaExchangeTransaction,
+  PartialSdaExchangeTransaction,
   ConfirmedTransaction,
   UnconfirmedTransaction,
   PartialTransaction,
@@ -132,6 +137,7 @@ import {
 } from "@/models/transactions/transaction";
 import type {
   TxnExchangeOffer,
+  TxnSdaExchange,
   RestrictionModification,
   TxnList,
 } from "@/models/transactions/transaction";
@@ -301,6 +307,10 @@ export const transactionTypeName = {
   removeRemoveLevy: {
     id: TransactionType.REMOVE_MOSAIC_LEVY,
     name: "Remove SDA Levy",
+  },
+  placeSdaExchange: {
+    id: TransactionType.PLACE_SDA_EXCHANGE_OFFER,
+    name: "Place SDA Exchange",
   },
 };
 
@@ -613,6 +623,9 @@ export class TransactionUtils {
       case TransactionType.REMOVE_MOSAIC_LEVY:
         typeName = transactionTypeName.removeRemoveLevy.name;
         break;
+      case TransactionType.PLACE_SDA_EXCHANGE_OFFER:
+        typeName = transactionTypeName.placeSdaExchange.name;
+        break;
 
       default:
         typeName = "Unknown";
@@ -812,6 +825,13 @@ export class TransactionUtils {
         case TransactionType.MOSAIC_METADATA_V2:
         case TransactionType.NAMESPACE_METADATA_V2:
           txn.detail = await TransactionUtils.formatMetadataTransaction(
+            txn,
+            txnStatus.group
+          );
+          break;
+        case TransactionType.PLACE_SDA_EXCHANGE_OFFER:
+        case TransactionType.REMOVE_SDA_EXCHANGE_OFFER:
+          txn.detail = await TransactionUtils.formatSdaExchangeTransaction(
             txn,
             txnStatus.group
           );
@@ -8516,6 +8536,434 @@ export class TransactionUtils {
         txn.recipient = secretProofTxn.recipient.plain();
         txn.hashType = myHashType[secretProofTxn.hashType];
         txn.proof = secretProofTxn.proof;
+      }
+      formatedTxns.push(txn);
+    }
+
+    return formatedTxns;
+  }
+
+  //------------- SDA Exchange Txn-----------------------------------------------------------
+  static async formatSdaExchangeTransaction(
+    transaction: Transaction,
+    groupType: string
+  ): Promise<
+    | ConfirmedSdaExchangeTransaction
+    | UnconfirmedSdaExchangeTransaction
+    | PartialSdaExchangeTransaction
+  > {
+    let formattedTxn: any;
+    let txn:
+      | PartialSdaExchangeTransaction
+      | UnconfirmedSdaExchangeTransaction
+      | ConfirmedSdaExchangeTransaction;
+    if (groupType == "partial") {
+      formattedTxn = await TransactionUtils.formatPartialTransaction(
+        transaction
+      );
+      txn = PartialTransaction.convertToSubClass(
+        PartialSdaExchangeTransaction,
+        formattedTxn
+      ) as PartialSdaExchangeTransaction;
+    } else if (groupType == "unconfirmed") {
+      formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(
+        transaction
+      );
+      txn = UnconfirmedTransaction.convertToSubClass(
+        UnconfirmedSdaExchangeTransaction,
+        formattedTxn
+      ) as UnconfirmedSdaExchangeTransaction;
+    } else {
+      formattedTxn = await TransactionUtils.formatConfirmedTransaction(
+        transaction
+      );
+      txn = ConfirmedTransaction.convertToSubClass(
+        ConfirmedSdaExchangeTransaction,
+        formattedTxn
+      ) as ConfirmedSdaExchangeTransaction;
+    }
+
+    if (transaction.type === TransactionType.PLACE_SDA_EXCHANGE_OFFER) {
+      const sdaExchangeOfferTxn = transaction as PlaceSdaExchangeOfferTransaction;
+      for (let i = 0; i < sdaExchangeOfferTxn.offers.length; ++i) {
+        const tempSdaExchangeOffer = sdaExchangeOfferTxn.offers[i];
+
+        const sdaIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
+        const sdaIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
+        const amountGet = tempSdaExchangeOffer.mosaicAmountGet.compact();
+        const amountGive = tempSdaExchangeOffer.mosaicAmountGive.compact();
+        const duration = tempSdaExchangeOffer.duration.compact();
+
+      const newTxnSdaExchangeOffer: TxnSdaExchange = {
+        sdaIdGet: sdaIdGet,
+        sdaIdGive: sdaIdGive,
+        amountGet: amountGet,
+        amountGive: amountGive,
+        duration: duration,
+      };
+
+      try {
+        const sdaGetInfo = await TransactionUtils.getAssetInfo(sdaIdGet);
+        const SdaGiveInfo = await TransactionUtils.getAssetInfo(sdaIdGive);
+
+        newTxnSdaExchangeOffer.amountGet = TransactionUtils.convertToExactAmount(
+          amountGet,
+          sdaGetInfo.divisibility
+        );
+        newTxnSdaExchangeOffer.amountGive = TransactionUtils.convertToExactAmount(
+          amountGive,
+          SdaGiveInfo.divisibility
+        );
+
+        const sdaGetName = await TransactionUtils.getAssetName(sdaIdGet);
+
+        if (sdaGetName.names.length) {
+          newTxnSdaExchangeOffer.sdaGetNamespace = sdaGetName.names[0].name;
+        }
+
+        const sdaGiveName = await TransactionUtils.getAssetName(sdaIdGive);
+
+        if (sdaGiveName.names.length) {
+          newTxnSdaExchangeOffer.sdaGiveNamespace = sdaGiveName.names[0].name;
+        }
+      } catch (error) {}
+        if(newTxnSdaExchangeOffer){
+          txn.sdaExchange.push(newTxnSdaExchangeOffer);
+        }
+      }
+    }
+    else if(transaction.type === TransactionType.REMOVE_SDA_EXCHANGE_OFFER){
+        const sdaExchangeOfferTxn = transaction as RemoveSdaExchangeOfferTransaction;
+
+        for (let i = 0; i < sdaExchangeOfferTxn.offers.length; ++i) {
+          const tempSdaExchangeOffer = sdaExchangeOfferTxn.offers[i];
+
+          const sdaIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
+          const sdaIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
+
+        const newTxnSdaExchangeOffer: TxnSdaExchange = {
+          sdaIdGet: sdaIdGet,
+          sdaIdGive: sdaIdGive,
+        };
+
+          try {
+            const sdaGetName = await TransactionUtils.getAssetName(sdaIdGet);
+
+            if (sdaGetName.names.length) {
+              newTxnSdaExchangeOffer.sdaGetNamespace = sdaGetName.names[0].name;
+            }
+
+            const sdaGiveName = await TransactionUtils.getAssetName(sdaIdGive);
+
+            if (sdaGiveName.names.length) {
+              newTxnSdaExchangeOffer.sdaGiveNamespace = sdaGiveName.names[0].name;
+            }
+          } catch (error) {}
+            if(newTxnSdaExchangeOffer){
+              txn.sdaExchange.push(newTxnSdaExchangeOffer);
+            }
+        }
+      }
+    return txn;
+  }
+
+  static async formatUnconfirmedSdaExchangeTransaction(
+    txns: Transaction[]
+  ): Promise<UnconfirmedSdaExchangeTransaction[]> {
+    const formatedTxns: UnconfirmedSdaExchangeTransaction[] = [];
+
+    for (let i = 0; i < txns.length; ++i) {
+      const formattedTxn = await TransactionUtils.formatUnconfirmedTransaction(
+        txns[i]
+      );
+      const txn = UnconfirmedTransaction.convertToSubClass(
+        UnconfirmedSdaExchangeTransaction,
+        formattedTxn
+      ) as UnconfirmedSdaExchangeTransaction;
+
+      if (txns[i].type === TransactionType.PLACE_SDA_EXCHANGE_OFFER) {
+        const sdaExchangeOfferTxn = txns[i] as PlaceSdaExchangeOfferTransaction;
+
+        for (let i = 0; i < sdaExchangeOfferTxn.offers.length; ++i) {
+          const tempSdaExchangeOffer = sdaExchangeOfferTxn.offers[i];
+
+          const sdaIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
+          const sdaIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
+          const amountGet = tempSdaExchangeOffer.mosaicAmountGet.compact();
+          const amountGive = tempSdaExchangeOffer.mosaicAmountGive.compact();
+          const duration = tempSdaExchangeOffer.duration.compact();
+
+        const newTxnSdaExchangeOffer: TxnSdaExchange = {
+          sdaIdGet: sdaIdGet,
+          sdaIdGive: sdaIdGive,
+          amountGet: amountGet,
+          amountGive: amountGive,
+          duration: duration,
+        };
+
+          try {
+            const sdaGetInfo = await TransactionUtils.getAssetInfo(sdaIdGet);
+            const SdaGiveInfo = await TransactionUtils.getAssetInfo(sdaIdGive);
+
+            newTxnSdaExchangeOffer.amountGet = TransactionUtils.convertToExactAmount(
+              amountGet,
+              sdaGetInfo.divisibility
+            );
+            newTxnSdaExchangeOffer.amountGive = TransactionUtils.convertToExactAmount(
+              amountGive,
+              SdaGiveInfo.divisibility
+            );
+
+            const sdaGetName = await TransactionUtils.getAssetName(sdaIdGet);
+
+            if (sdaGetName.names.length) {
+              newTxnSdaExchangeOffer.sdaGetNamespace = sdaGetName.names[0].name;
+            }
+
+            const sdaGiveName = await TransactionUtils.getAssetName(sdaIdGive);
+
+            if (sdaGiveName.names.length) {
+              newTxnSdaExchangeOffer.sdaGiveNamespace = sdaGiveName.names[0].name;
+            }
+          } catch (error) {}
+            if(newTxnSdaExchangeOffer){
+              txn.sdaExchange.push(newTxnSdaExchangeOffer);
+            }
+        }
+      }
+      else if(txns[i].type === TransactionType.REMOVE_SDA_EXCHANGE_OFFER){
+        const sdaExchangeOfferTxn = txns[i] as RemoveSdaExchangeOfferTransaction;
+
+        for (let i = 0; i < sdaExchangeOfferTxn.offers.length; ++i) {
+          const tempSdaExchangeOffer = sdaExchangeOfferTxn.offers[i];
+
+          const sdaIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
+          const sdaIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
+
+        const newTxnSdaExchangeOffer: TxnSdaExchange = {
+          sdaIdGet: sdaIdGet,
+          sdaIdGive: sdaIdGive,
+        };
+
+          try {
+            const sdaGetName = await TransactionUtils.getAssetName(sdaIdGet);
+
+            if (sdaGetName.names.length) {
+              newTxnSdaExchangeOffer.sdaGetNamespace = sdaGetName.names[0].name;
+            }
+
+            const sdaGiveName = await TransactionUtils.getAssetName(sdaIdGive);
+
+            if (sdaGiveName.names.length) {
+              newTxnSdaExchangeOffer.sdaGiveNamespace = sdaGiveName.names[0].name;
+            }
+          } catch (error) {}
+            if(newTxnSdaExchangeOffer){
+              txn.sdaExchange.push(newTxnSdaExchangeOffer);
+            }
+        }
+      }
+      formatedTxns.push(txn);
+    }
+
+    return formatedTxns;
+  }
+
+  static async formatConfirmedSdaExchangeTransaction(
+    txns: Transaction[]
+  ): Promise<ConfirmedSdaExchangeTransaction[]> {
+    const formatedTxns: ConfirmedSdaExchangeTransaction[] = [];
+
+    for (let i = 0; i < txns.length; ++i) {
+      const formattedTxn = await TransactionUtils.formatConfirmedTransaction(
+        txns[i]
+      );
+      const txn = ConfirmedTransaction.convertToSubClass(
+        ConfirmedSdaExchangeTransaction,
+        formattedTxn
+      ) as ConfirmedSdaExchangeTransaction;
+
+      if (txns[i].type === TransactionType.PLACE_SDA_EXCHANGE_OFFER) {
+        const sdaExchangeOfferTxn = txns[i] as PlaceSdaExchangeOfferTransaction;
+
+        for (let i = 0; i < sdaExchangeOfferTxn.offers.length; ++i) {
+          const tempSdaExchangeOffer = sdaExchangeOfferTxn.offers[i];
+
+          const sdaIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
+          const sdaIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
+          const amountGet = tempSdaExchangeOffer.mosaicAmountGet.compact();
+          const amountGive = tempSdaExchangeOffer.mosaicAmountGive.compact();
+          const duration = tempSdaExchangeOffer.duration.compact();
+
+        const newTxnSdaExchangeOffer: TxnSdaExchange = {
+          sdaIdGet: sdaIdGet,
+          sdaIdGive: sdaIdGive,
+          amountGet: amountGet,
+          amountGive: amountGive,
+          duration: duration,
+        };
+
+        try {
+          const sdaGetInfo = await TransactionUtils.getAssetInfo(sdaIdGet);
+          const SdaGiveInfo = await TransactionUtils.getAssetInfo(sdaIdGive);
+
+          newTxnSdaExchangeOffer.amountGet = TransactionUtils.convertToExactAmount(
+            amountGet,
+            sdaGetInfo.divisibility
+          );
+          newTxnSdaExchangeOffer.amountGive = TransactionUtils.convertToExactAmount(
+            amountGive,
+            SdaGiveInfo.divisibility
+          );
+
+          const sdaGetName = await TransactionUtils.getAssetName(sdaIdGet);
+
+          if (sdaGetName.names.length) {
+            newTxnSdaExchangeOffer.sdaGetNamespace = sdaGetName.names[0].name;
+          }
+
+          const sdaGiveName = await TransactionUtils.getAssetName(sdaIdGive);
+
+          if (sdaGiveName.names.length) {
+            newTxnSdaExchangeOffer.sdaGiveNamespace = sdaGiveName.names[0].name;
+          }
+        } catch (error) {}
+          if(newTxnSdaExchangeOffer){
+            txn.sdaExchange.push(newTxnSdaExchangeOffer);
+          }
+        }
+      }
+      else if(txns[i].type === TransactionType.REMOVE_SDA_EXCHANGE_OFFER){
+        const sdaExchangeOfferTxn = txns[i] as RemoveSdaExchangeOfferTransaction;
+
+        for (let i = 0; i < sdaExchangeOfferTxn.offers.length; ++i) {
+          const tempSdaExchangeOffer = sdaExchangeOfferTxn.offers[i];
+
+          const sdaIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
+          const sdaIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
+
+        const newTxnSdaExchangeOffer: TxnSdaExchange = {
+          sdaIdGet: sdaIdGet,
+          sdaIdGive: sdaIdGive,
+        };
+
+          try {
+            const sdaGetName = await TransactionUtils.getAssetName(sdaIdGet);
+
+            if (sdaGetName.names.length) {
+              newTxnSdaExchangeOffer.sdaGetNamespace = sdaGetName.names[0].name;
+            }
+
+            const sdaGiveName = await TransactionUtils.getAssetName(sdaIdGive);
+
+            if (sdaGiveName.names.length) {
+              newTxnSdaExchangeOffer.sdaGiveNamespace = sdaGiveName.names[0].name;
+            }
+          } catch (error) {}
+            if(newTxnSdaExchangeOffer){
+              txn.sdaExchange.push(newTxnSdaExchangeOffer);
+            }
+        }
+      }
+      formatedTxns.push(txn);
+    }
+    return formatedTxns;
+  }
+
+  static async formatPartialSdaExchangeTransaction(
+    txns: Transaction[]
+  ): Promise<PartialSdaExchangeTransaction[]> {
+    const formatedTxns: PartialSdaExchangeTransaction[] = [];
+
+    for (let i = 0; i < txns.length; ++i) {
+      const formattedTxn = await TransactionUtils.formatPartialTransaction(
+        txns[i]
+      );
+      const txn = PartialTransaction.convertToSubClass(
+        PartialSdaExchangeTransaction,
+        formattedTxn
+      ) as PartialSdaExchangeTransaction;
+      if (txns[i].type === TransactionType.PLACE_SDA_EXCHANGE_OFFER) {
+        const sdaExchangeOfferTxn = txns[i] as PlaceSdaExchangeOfferTransaction;
+
+        for (let i = 0; i < sdaExchangeOfferTxn.offers.length; ++i) {
+          const tempSdaExchangeOffer = sdaExchangeOfferTxn.offers[i];
+
+          const sdaIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
+          const sdaIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
+          const amountGet = tempSdaExchangeOffer.mosaicAmountGet.compact();
+          const amountGive = tempSdaExchangeOffer.mosaicAmountGive.compact();
+          const duration = tempSdaExchangeOffer.duration.compact();
+
+        const newTxnSdaExchangeOffer: TxnSdaExchange = {
+          sdaIdGet: sdaIdGet,
+          sdaIdGive: sdaIdGive,
+          amountGet: amountGet,
+          amountGive: amountGive,
+          duration: duration,
+        };
+
+        try {
+          const sdaGetInfo = await TransactionUtils.getAssetInfo(sdaIdGet);
+          const SdaGiveInfo = await TransactionUtils.getAssetInfo(sdaIdGive);
+
+          newTxnSdaExchangeOffer.amountGet = TransactionUtils.convertToExactAmount(
+            amountGet,
+            sdaGetInfo.divisibility
+          );
+          newTxnSdaExchangeOffer.amountGive = TransactionUtils.convertToExactAmount(
+            amountGive,
+            SdaGiveInfo.divisibility
+          );
+
+          const sdaGetName = await TransactionUtils.getAssetName(sdaIdGet);
+
+          if (sdaGetName.names.length) {
+            newTxnSdaExchangeOffer.sdaGetNamespace = sdaGetName.names[0].name;
+          }
+
+          const sdaGiveName = await TransactionUtils.getAssetName(sdaIdGive);
+
+          if (sdaGiveName.names.length) {
+            newTxnSdaExchangeOffer.sdaGiveNamespace = sdaGiveName.names[0].name;
+          }
+        } catch (error) {}
+          if(newTxnSdaExchangeOffer){
+            txn.sdaExchange.push(newTxnSdaExchangeOffer);
+          }
+        }
+      }
+      else if(txns[i].type === TransactionType.REMOVE_SDA_EXCHANGE_OFFER){
+        const sdaExchangeOfferTxn = txns[i] as RemoveSdaExchangeOfferTransaction;
+
+        for (let i = 0; i < sdaExchangeOfferTxn.offers.length; ++i) {
+          const tempSdaExchangeOffer = sdaExchangeOfferTxn.offers[i];
+
+          const sdaIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
+          const sdaIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
+
+        const newTxnSdaExchangeOffer: TxnSdaExchange = {
+          sdaIdGet: sdaIdGet,
+          sdaIdGive: sdaIdGive,
+        };
+
+          try {
+            const sdaGetName = await TransactionUtils.getAssetName(sdaIdGet);
+
+            if (sdaGetName.names.length) {
+              newTxnSdaExchangeOffer.sdaGetNamespace = sdaGetName.names[0].name;
+            }
+
+            const sdaGiveName = await TransactionUtils.getAssetName(sdaIdGive);
+
+            if (sdaGiveName.names.length) {
+              newTxnSdaExchangeOffer.sdaGiveNamespace = sdaGiveName.names[0].name;
+            }
+          } catch (error) {}
+            if(newTxnSdaExchangeOffer){
+              txn.sdaExchange.push(newTxnSdaExchangeOffer);
+            }
+        }
       }
       formatedTxns.push(txn);
     }
