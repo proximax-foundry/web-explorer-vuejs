@@ -137,26 +137,21 @@
                         </div>
                       </div>
                       <div v-else-if="item.name === 'SDA'">
-                        <div v-if="!toggleConvert">
-                          <div>{{ item.name }}</div>
-                          <div>
-                            <router-link
-                              :to="{
-                                name: 'ViewAsset',
-                                params: { id: item.value },
-                              }"
-                              class="hover:text-blue-primary hover:underline"
-                              >{{ item.value }}
-                            </router-link>
-                            <span
-                              class="text-xxs text-gray-500"
-                              v-if="item.secondaryValue"
-                              >({{ item.secondaryValue }})</span
-                            >
-                          </div>
-                        </div>
-                        <div v-else-if="toggleConvert">
-                          <SdasHandler :txnDetail="item" :txnData="allData" />
+                        <div>{{ item.name }}</div>
+                        <div>
+                          <router-link
+                            :to="{
+                              name: 'ViewAsset',
+                              params: { id: item.value },
+                            }"
+                            class="hover:text-blue-primary hover:underline"
+                            >{{ item.value }}
+                          </router-link>
+                          <span
+                            class="text-xxs text-gray-500"
+                            v-if="item.secondaryValue"
+                            >({{ item.secondaryValue }})</span
+                          >
                         </div>
                       </div>
                       <div
@@ -288,6 +283,9 @@ import {
   UInt64,
   AliasActionType,
   NamespaceType,
+  ExchangeOfferType,
+  LinkAction,
+  HashType,
 } from "tsjs-xpx-chain-sdk";
 import { ref } from "vue";
 import SdasHandler from "../components/payloadDetails/SdasHandler.vue";
@@ -352,6 +350,11 @@ let ignoreList = [
 let globalConfig = {
   "version.networkType": { value: (data: any) => NetworkType[data] },
   "message.type": { value: (data: any) => MessageType[data] },
+  "offers.type": { value: (data: any) => ExchangeOfferType[data] },
+  actionType: {value: (data: any) => AliasActionType[data] },
+  linkAction: {value: (data: any) => LinkAction[data] },
+  namespaceType: {value: (data: any) => NamespaceType[data]} ,
+  hashType: {value: (data: any) => HashType[data]} ,
   mosaics: { name: "SDAs", handlerType: "assets" },
   mosaicId: { name: "SDA", handlerType: "assetID" },
 };
