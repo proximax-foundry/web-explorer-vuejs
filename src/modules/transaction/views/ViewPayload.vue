@@ -204,25 +204,8 @@
                   </div>
                 </div>
               </div>
-              <div v-else-if="data.name === 'SDA'" class="txn-div">
-                <div v-if="!toggleConvert">
-                  <div>{{ data.name }}</div>
-                  <div>
-                    <router-link
-                      :to="{ name: 'ViewAsset', params: { id: data.value } }"
-                      class="hover:text-blue-primary hover:underline"
-                      >{{ data.value }}
-                    </router-link>
-                    <span
-                      class="text-xxs text-gray-500"
-                      v-if="data.secondaryValue"
-                      >({{ data.secondaryValue }})</span
-                    >
-                  </div>
-                </div>
-                <div v-else-if="toggleConvert">
-                  <SdaHandler :txnDetail="data" :txnData="allData" />
-                </div>
+              <div v-else-if="data.name === 'SDA'">
+                <SdaHandler :txnDetail="data" :txnData="allData" :toggleTransform="toggleConvert" />
               </div>
               <div v-else-if="data.name === 'NamespaceId'" class="txn-div">
                 <div v-if="!toggleConvert">
@@ -241,7 +224,7 @@
                   </div>
                 </div>
                 <div v-else-if="toggleConvert">
-                  <NamespaceIdHandlerVue :txnDetail="payloadNamespaceId" :txnData="allData" />
+                  <NamespaceIdHandler :txnDetail="payloadNamespaceId" :txnData="allData" />
                 </div>
               </div>
               <div
@@ -321,9 +304,9 @@ import {
   LinkAction,
   HashType,
 } from "tsjs-xpx-chain-sdk";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import SdasHandler from "../components/payloadDetails/SdasHandler.vue";
-import NamespaceIdHandlerVue from "../components/payloadDetails/NamespaceIdHandler.vue";
+import NamespaceIdHandler from "../components/payloadDetails/NamespaceIdHandler.vue";
 import SdaHandler from "../components/payloadDetails/SdaHandler.vue";
 
 const props = defineProps({
@@ -388,6 +371,7 @@ let globalConfig = {
   "version.networkType": { value: (data: any) => NetworkType[data] },
   "message.type": { value: (data: any) => MessageType[data] },
   "offers.type": { value: (data: any) => ExchangeOfferType[data] },
+  "offers.mosaicId": { name: "SDA", handlerType: "assetID" },
   actionType: {value: (data: any) => AliasActionType[data] },
   linkAction: {value: (data: any) => LinkAction[data] },
   namespaceType: {value: (data: any) => NamespaceType[data]} ,
@@ -716,57 +700,6 @@ const getInnerTxns = (data: any) => {
   return innerTxnArray;
 };
 
-const getAliasTxn = async (data: any, type: number) => {
-  let txn = <
-    {
-      address: string;
-      aliasType: number;
-      aliasTypeName: string;
-      aliasName: string;
-      assetId: string;
-    }
-  >{};
-  if (type === TransactionType.ADDRESS_ALIAS) {
-    for (let i = 0; i < data.length; i++) {
-      if (data[i].name === "Address") {
-        txn.address = data[i].value;
-      } else if (data[i].name === "ActionType") {
-        txn.aliasType = data[i].value;
-        txn.aliasTypeName =
-          data[i].value === AliasActionType.Link ? "Link" : "Unlink";
-      } else if (data[i].name === "NamespaceId") {
-        const nsId = data[i].value;
-        try {
-          const nsName = await TransactionUtils.getNamespacesName([nsId]);
-          console.log(nsName);
-          txn.aliasName = nsName[0].name;
-        } catch (error) {}
-      }
-    }
-  } else if (type === TransactionType.MOSAIC_ALIAS) {
-    for (let i = 0; i < data.length; i++) {
-      if (data[i].name === "SDA") {
-        txn.assetId = data[i].value;
-      } else if (data[i].name === "ActionType") {
-        txn.aliasType = data[i].value;
-        txn.aliasTypeName =
-          data[i].value === AliasActionType.Link ? "Link" : "Unlink";
-      } else if (data[i].name === "NamespaceId") {
-        const namespaceId: NamespaceId = data[i].value;
-        const nsId = namespaceId;
-        try {
-          const nsName = await TransactionUtils.getNamespacesName([nsId]);
-          console.log(nsName);
-          txn.aliasName = nsName[0].name;
-        } catch (error) {
-          console.log(error);
-        }
-      }
-    }
-  }
-  return txn;
-};
-
 const getNamespaceTxn = async (data: any) => {
   let txn = <
     {
@@ -807,6 +740,14 @@ const getNamespaceTxn = async (data: any) => {
 };
 
 console.log(allData);
+
+const txnType = computed<any>(() => {
+  for(let item in allData){
+    if(allData[item].name === "Type"){
+      return allData[item].secondaryValue
+    }
+  }
+})
 
 messagePayload.value = getMessage(allData);
 

@@ -1,5 +1,5 @@
 <template>
-    <div v-for="item in formattedTxn" :class="[(txnType === 'Aggregate Bonded V1') ? 'table_div' : 'details']">
+    <div v-for="item in formattedTxn" :class="[ checkTxnType(txnType) ? 'table_div' : 'details']">
       <div v-if="item.amountTransfer">
         <div>Amount</div>
         <div class="relative">
@@ -63,7 +63,7 @@ import type { SDA } from "@/models/transactions/sda";
 import { AppState } from "@/state/appState";
 import { TransactionUtils } from "@/util/transactionUtils";
 import { Helper } from "@/util/typeHelper";
-import { MosaicNames, NamespaceId, NamespaceName, type MosaicId } from "tsjs-xpx-chain-sdk";
+import { MosaicNames, NamespaceId, NamespaceName, TransactionType, type MosaicId } from "tsjs-xpx-chain-sdk";
 import { computed, ref } from "vue";
   
 const props = defineProps({
@@ -75,10 +75,19 @@ const formattedTxn = ref<any>([]);
 const txnType = computed(() =>{
   for(let item in props.txnData){
     if(props.txnData[item].name === "Type"){
-      return props.txnData[item].value
+      return props.txnData[item].secondaryValue
     }
   }
 })
+
+const checkTxnType = (type:number) =>{
+  if(type == TransactionType.AGGREGATE_BONDED_V1 || type == TransactionType.AGGREGATE_COMPLETE_V1){
+    return true
+  }
+  else{
+    return false
+  }
+}
 
 const nativeTokenNamespaceId = computed(() =>
     new NamespaceId(AppState.nativeToken.fullNamespace).toHex()

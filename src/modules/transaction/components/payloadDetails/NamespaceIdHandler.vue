@@ -1,17 +1,22 @@
 <template>
   <div
     v-for="item in formattedNamespaceId"
-    :class="[txnType === 'Aggregate Bonded V1' ? 'table_div' : 'details']"
+    :class="[checkTxnType(txnType) ? 'table_div' : 'details']"
   >
     <div v-if="item.aliasName">
       <div>Namespace Name</div>
       <div>{{ item.aliasName }}</div>
+    </div>
+    <div v-else class="text-red-600">
+      <div>Error</div>
+      <div>Namespace Name Not Found</div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { TransactionUtils } from "@/util/transactionUtils";
+import { TransactionType } from "tsjs-xpx-chain-sdk";
 import { NamespaceId } from "tsjs-xpx-chain-sdk";
 import { computed, ref } from "vue";
 
@@ -24,10 +29,19 @@ const formattedNamespaceId = ref<any>([]);
 const txnType = computed(() => {
   for (let item in props.txnData) {
     if (props.txnData[item].name === "Type") {
-      return props.txnData[item].value;
+      return props.txnData[item].secondaryValue;
     }
   }
 });
+
+const checkTxnType = (type:number) =>{
+  if(type == TransactionType.AGGREGATE_BONDED_V1 || type == TransactionType.AGGREGATE_COMPLETE_V1){
+    return true
+  }
+  else{
+    return false
+  }
+}
 
 const formatNamespaceID = async (namespaceId: NamespaceId | undefined) => {
   let txn = <{
