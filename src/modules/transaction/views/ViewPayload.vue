@@ -39,9 +39,10 @@
       </p>
       <button
         class="bg-blue-500 hover:bg-blue-70 font-bold py-2 px-4 rounded-full"
-        @click="toggleConvert = !toggleConvert"
+        title="Resolve data in this network"
+        @click="toggleTransform = !toggleTransform"
       >
-        Convert
+        <img src="@/assets/img/transform_icon.svg" class="w-7" />
       </button>
     </div>
 
@@ -50,33 +51,44 @@
         <div v-for="data in allData">
           <div v-if="!txnHeaderProp.includes(data.name)">
             <div v-if="data.value instanceof Array">
-              <div v-if="data.name === 'Message'" class="txn-div">
-                <div v-if="messagePayload[1] !== ''">
-                  <div>{{ messagePayload[0] }}</div>
-                  <div>{{ messagePayload[1] }}</div>
-                </div>
-              </div>
-              <div v-else-if="data.name === 'SDAs'" class="txn-div">
-                <div v-if="!toggleConvert">
-                  <div>{{ data.name }}</div>
-                  <div class="relative">
-                    <div v-for="item in data.value">
-                      <router-link
-                        :to="{
-                          name: 'ViewAsset',
-                          params: { id: item.value.toString() },
-                        }"
-                        class="hover:text-blue-primary hover:underline"
-                        >{{ item.value }}</router-link
-                      >
-                      <span class="text-xxs text-gray-500"
-                        >({{ item.secondaryValue }})</span
-                      >
-                    </div>
+              <div
+                v-if="data.name === 'Message'"
+                v-for="item in data.value"
+                class="txn-div"
+              >
+                <div v-if="item.name === 'Payload' && item.value !== ''">
+                  <div v-for="item in data.value">
+                    <div v-if="item.name === 'Type'">{{ item.value }}</div>
+                  </div>
+                  <div v-for="item in data.value">
+                    <div v-if="item.name === 'Payload'">{{ item.value }}</div>
                   </div>
                 </div>
-                <div v-else-if="toggleConvert">
-                  <SdasHandler :txnDetail="data" :txnData="allData" />
+              </div>
+              <div v-else-if="data.name === 'SDAs'">
+                <SdasHandler
+                  :txnDetail="data"
+                  :txnData="allData"
+                  :toggleTransform="toggleTransform"
+                  :txnType="txnType"
+                />
+              </div>
+              <div v-else-if="data.name === 'Offers'">
+                <div v-for="item in data.value">
+                  <div v-if="item.name === 'SDA'">
+                    <SdaHandler
+                      :txnDetail="item"
+                      :txnData="allData"
+                      :toggleTransform="toggleTransform"
+                      :txnType="txnType"
+                    />
+                  </div>
+                  <div v-else class="txn-div">
+                    <div>
+                      <div>{{ item.name }}</div>
+                      <div>{{ item.value }}</div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div v-else-if="data.name === 'InnerTransactions'">
@@ -86,36 +98,36 @@
                 >
                   <div v-for="item in innerTxns[index]">
                     <div v-if="item.value instanceof Array">
-                      <div v-if="item.name === 'Message'" class="table_div">
-                        <div v-if="messagePayload[1] !== ''">
-                          <div>{{ messagePayload[0] }}</div>
-                          <div>{{ messagePayload[1] }}</div>
-                        </div>
-                      </div>
-                      <div v-else-if="item.name === 'SDAs'">
-                        <div v-if="!toggleConvert" class="table_div">
-                          <div>
-                            <div>{{ item.name }}</div>
-                            <div class="relative">
-                              <div v-for="childItem in item.value">
-                                <router-link
-                                  :to="{
-                                    name: 'ViewAsset',
-                                    params: { id: childItem.value.toString() },
-                                  }"
-                                  class="hover:text-blue-primary hover:underline"
-                                  >{{ childItem.value }}</router-link
-                                >
-                                <span class="text-xxs text-gray-500"
-                                  >({{ childItem.secondaryValue }})</span
-                                >
-                              </div>
+                      <div
+                        v-if="item.name === 'Message'"
+                        v-for="childItem in item.value"
+                        class="table_div"
+                      >
+                        <div
+                          v-if="
+                            childItem.name === 'Payload' &&
+                            childItem.value !== ''
+                          "
+                        >
+                          <div v-for="childItem in item.value">
+                            <div v-if="childItem.name === 'Type'">
+                              {{ childItem.value }}
+                            </div>
+                          </div>
+                          <div v-for="childItem in item.value">
+                            <div v-if="childItem.name === 'Payload'">
+                              {{ item.value }}
                             </div>
                           </div>
                         </div>
-                        <div v-else-if="toggleConvert">
-                          <SdasHandler :txnDetail="item" :txnData="allData" />
-                        </div>
+                      </div>
+                      <div v-else-if="item.name === 'SDAs'">
+                        <SdasHandler
+                          :txnDetail="item"
+                          :txnData="allData"
+                          :toggleTransform="toggleTransform"
+                          :txnType="txnType"
+                        />
                       </div>
                       <div v-else>
                         <div v-for="childItem in item.value" class="table_div">
@@ -126,33 +138,39 @@
                         </div>
                       </div>
                     </div>
-                    <div v-else class="table_div">
-                      <div v-if="item.name === 'Type'">
-                        <div>{{ item.name }}</div>
+                    <div v-else>
+                      <div v-if="item.name === 'Type'" class="table_div">
                         <div>
-                          {{ item.value }}
-                          <span class="text-xxs text-gray-500"
-                            >({{ item.secondaryValue }})</span
-                          >
+                          <div>{{ item.name }}</div>
+                          <div>
+                            {{ item.value }}
+                            <span class="text-xxs text-gray-500"
+                              >({{ item.secondaryValue }})</span
+                            >
+                          </div>
                         </div>
                       </div>
                       <div v-else-if="item.name === 'SDA'">
-                        <div>{{ item.name }}</div>
-                        <div>
-                          <router-link
-                            :to="{
-                              name: 'ViewAsset',
-                              params: { id: item.value },
-                            }"
-                            class="hover:text-blue-primary hover:underline"
-                            >{{ item.value }}
-                          </router-link>
-                          <span
-                            class="text-xxs text-gray-500"
-                            v-if="item.secondaryValue"
-                            >({{ item.secondaryValue }})</span
-                          >
-                        </div>
+                        <SdaHandler
+                          :txnDetail="item"
+                          :txnData="allData"
+                          :toggleTransform="toggleTransform"
+                          :txnType="txnType"
+                        />
+                      </div>
+                      <div
+                        v-else-if="
+                          item.name === 'NamespaceId' ||
+                          item.name === 'ParentId'
+                        "
+                      >
+                        <NamespaceIdHandler
+                          :txnDetail="item"
+                          :NamespaceID="payloadNamespaceId"
+                          :toggleTransform="toggleTransform"
+                          :txnType="txnType"
+                          :innerType="innerTxnType"
+                        />
                       </div>
                       <div
                         v-else-if="
@@ -160,24 +178,29 @@
                           item.name === 'Recipient' ||
                           item.name === 'TargetPublicKey'
                         "
+                        class="table_div"
                       >
-                        <div>{{ item.name }}</div>
                         <div>
-                          <router-link
-                            id="account"
-                            :to="{
-                              name: 'ViewAccount',
-                              params: { accountParam: item.value },
-                            }"
-                            class="hover:text-blue-primary hover:underline text-blue-600"
-                          >
-                            {{ item.value }}
-                          </router-link>
+                          <div>{{ item.name }}</div>
+                          <div>
+                            <router-link
+                              id="account"
+                              :to="{
+                                name: 'ViewAccount',
+                                params: { accountParam: item.value },
+                              }"
+                              class="hover:text-blue-primary hover:underline text-blue-600"
+                            >
+                              {{ item.value }}
+                            </router-link>
+                          </div>
                         </div>
                       </div>
-                      <div v-else>
-                        <div>{{ item.name }}</div>
-                        <div>{{ item.value }}</div>
+                      <div v-else class="table_div">
+                        <div>
+                          <div>{{ item.name }}</div>
+                          <div>{{ item.value }}</div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -205,27 +228,24 @@
                 </div>
               </div>
               <div v-else-if="data.name === 'SDA'">
-                <SdaHandler :txnDetail="data" :txnData="allData" :toggleTransform="toggleConvert" />
+                <SdaHandler
+                  :txnDetail="data"
+                  :txnData="allData"
+                  :toggleTransform="toggleTransform"
+                  :txnType="txnType"
+                />
               </div>
-              <div v-else-if="data.name === 'NamespaceId'" class="txn-div">
-                <div v-if="!toggleConvert">
-                  <div>{{ data.name }}</div>
-                  <div>
-                    <router-link
-                      :to="{ name: 'ViewNamespace', params: { namespaceParam: data.value } }"
-                      class="hover:text-blue-primary hover:underline"
-                      >{{ data.value }}
-                    </router-link>
-                    <span
-                      class="text-xxs text-gray-500"
-                      v-if="data.secondaryValue"
-                      >({{ data.secondaryValue }})</span
-                    >
-                  </div>
-                </div>
-                <div v-else-if="toggleConvert">
-                  <NamespaceIdHandler :txnDetail="payloadNamespaceId" :txnData="allData" />
-                </div>
+              <div
+                v-else-if="
+                  data.name === 'NamespaceId' || data.name === 'ParentId'
+                "
+              >
+                <NamespaceIdHandler
+                  :txnDetail="data"
+                  :NamespaceID="payloadNamespaceId"
+                  :toggleTransform="toggleTransform"
+                  :txnType="txnType"
+                />
               </div>
               <div
                 v-else-if="
@@ -282,14 +302,12 @@
 </template>
 
 <script setup lang="ts">
-import { TransactionUtils } from "@/util/transactionUtils";
 import {
   Address,
   Convert,
   Deadline,
   Id,
   MessageType,
-  TransactionType,
   Mosaic,
   MosaicId,
   NamespaceId,
@@ -318,10 +336,9 @@ const props = defineProps({
 
 const txn = ref();
 const innerTxns = ref();
-const messagePayload = ref();
-const toggleConvert = ref(false);
+const innerTxnType = ref();
+const toggleTransform = ref(false);
 const payloadNamespaceId = ref();
-const txnDetail = ref<any>({});
 
 const convertPayload = Convert.uint8ArrayToHex(props.payload);
 
@@ -372,10 +389,10 @@ let globalConfig = {
   "message.type": { value: (data: any) => MessageType[data] },
   "offers.type": { value: (data: any) => ExchangeOfferType[data] },
   "offers.mosaicId": { name: "SDA", handlerType: "assetID" },
-  actionType: {value: (data: any) => AliasActionType[data] },
-  linkAction: {value: (data: any) => LinkAction[data] },
-  namespaceType: {value: (data: any) => NamespaceType[data]} ,
-  hashType: {value: (data: any) => HashType[data]} ,
+  actionType: { value: (data: any) => AliasActionType[data] },
+  linkAction: { value: (data: any) => LinkAction[data] },
+  namespaceType: { value: (data: any) => NamespaceType[data] },
+  hashType: { value: (data: any) => HashType[data] },
   mosaics: { name: "SDAs", handlerType: "assets" },
   mosaicId: { name: "SDA", handlerType: "assetID" },
 };
@@ -438,7 +455,7 @@ let extractTxnDataBasedOnClass = (data: any, key: string): rowData | null => {
     };
   } else if (classType === NamespaceId.name) {
     let d = data as NamespaceId;
-    payloadNamespaceId.value = d
+    payloadNamespaceId.value = d;
     finalData = d.toHex();
     handlerType = "namespace";
 
@@ -448,7 +465,6 @@ let extractTxnDataBasedOnClass = (data: any, key: string): rowData | null => {
     };
   } else if (classType === MosaicId.name) {
     let d = data as MosaicId;
-    console.log(d)
     finalData = d.toHex();
     handlerType = "asset";
 
@@ -664,30 +680,15 @@ let getData = (
 
 let allData = getData(txn.value, "", globalConfig);
 
-const getMessage = (data: any) => {
-  for (let i = 0; i < data.length; i++) {
-    if (data[i].name === "Message") {
-      let messageArray = data[i].value.map((x: { value: any }) => x.value);
-      return messageArray;
-    } else if (data[i].name === "InnerTransactions") {
-      for (let item in data[i].value) {
-        if (data[i].value[item].name === "Message") {
-          let messageArray = data[i].value[item].value.map(
-            (x: { value: any }) => x.value
-          );
-          return messageArray;
-        }
-      }
-    }
-  }
-};
-
 const getInnerTxns = (data: any) => {
   let innerTxnArray: any[] = [];
   let tempArray = [];
   for (let i = 0; i < data.length; i++) {
     if (data[i].name === "InnerTransactions") {
       for (let item in data[i].value) {
+        if (data[i].value[item].name === "Type") {
+          innerTxnType.value = data[i].value[item].secondaryValue;
+        }
         if (tempArray[0]?.name === data[i].value[item].name) {
           innerTxnArray.push(tempArray);
           tempArray = [];
@@ -700,56 +701,15 @@ const getInnerTxns = (data: any) => {
   return innerTxnArray;
 };
 
-const getNamespaceTxn = async (data: any) => {
-  let txn = <
-    {
-      namespaceName: string;
-      namespaceId: string;
-      duration: number;
-      registerType: number;
-      registerTypeName: string;
-      parentId: string;
-      parentName: string;
-    }
-  >{};
-  for (let i = 0; i < data.length; i++) {
-    if (data[i].name === "NamespaceName") {
-      txn.namespaceName = data[i].value;
-    } else if (data[i].name === "NamespaceId") {
-      txn.namespaceId = data[i].value;
-    } else if (data[i].name === "NamespaceType") {
-      if (data[i].value === NamespaceType.RootNamespace) {
-        txn.registerType = NamespaceType.RootNamespace;
-        txn.registerTypeName = "Root namespace";
-      }
-    } else if (data[i].name === "Duration") {
-      txn.duration = data[i].value;
-    }
-    /*
-    if (registerTxn.parentId) {
-      txn.registerType = NamespaceType.SubNamespace;
-      txn.registerTypeName = "Sub namespace";
-      txn.parentId = registerTxn.parentId.toHex();
-      const namespaceName = await TransactionUtils.getNamespacesName([
-        registerTxn.parentId,
-      ]);
-      txn.parentName = namespaceName[0].name;
-    }*/
-  }
-  return txn;
-};
-
-console.log(allData);
+//console.log(allData);
 
 const txnType = computed<any>(() => {
-  for(let item in allData){
-    if(allData[item].name === "Type"){
-      return allData[item].secondaryValue
+  for (let item in allData) {
+    if (allData[item].name === "Type") {
+      return allData[item].secondaryValue;
     }
   }
-})
-
-messagePayload.value = getMessage(allData);
+});
 
 innerTxns.value = getInnerTxns(allData);
 </script>

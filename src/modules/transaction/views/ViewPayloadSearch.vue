@@ -18,7 +18,16 @@
             <AccordionTab class="p-accordion-header p-highlight" :disabled="isPayloadTxn">
                 <div v-if="findPayload.length == 0"></div>
                 <div v-else>
-                    <ViewPayload :payload="convertPayload" class="mt-3" />
+                    <div v-if="isFetch">
+                        <ViewPayload :payload="convertPayload" class="mt-3" />
+                    </div>
+                    <div v-else>
+                        <div class="pb-14 pt-2">
+                            <div class="p-3 bg-yellow-100 text-yellow-700">
+                                The Payload is not found in {{ networkName }}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </AccordionTab>
         </Accordion>
@@ -26,18 +35,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import Textarea from 'primevue/textarea';
 import Accordion from 'primevue/accordion';
 import AccordionTab from 'primevue/accordiontab';
 import ViewPayload from "@/modules/transaction/views/ViewPayload.vue";
 import { Convert } from 'tsjs-xpx-chain-sdk';
+import { networkState } from '@/state/networkState';
 
 const enterText = ref("");
 const isSearching = ref(false);
 const isPayloadTxn = ref(true);
+const isFetch = ref(true);
 const findPayload = ref("");
 const convertPayload = ref()
+
+const networkName = computed(() => {
+  return networkState.chainNetworkName;
+});
 
 const searchPayload = async () => {
     if (enterText.value.length == 0) {
@@ -47,7 +62,10 @@ const searchPayload = async () => {
         isSearching.value = false
         isPayloadTxn.value = false
         findPayload.value = enterText.value
-        convertPayload.value = Convert.hexToUint8(findPayload.value)
+        try{
+            convertPayload.value = Convert.hexToUint8(findPayload.value)
+        }
+        catch(e){ isFetch.value = false}
     }
 };
 
@@ -56,6 +74,7 @@ watch(
   (value) => {
     isPayloadTxn.value = true
     findPayload.value = ""
+    isFetch.value = true
   }
 )
 </script>

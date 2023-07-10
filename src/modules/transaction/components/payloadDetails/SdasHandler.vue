@@ -1,5 +1,9 @@
 <template>
-    <div v-for="item in formattedTxn" :class="[ checkTxnType(txnType) ? 'table_div' : 'details']">
+  <div v-if="toggleTransform">
+    <div
+      v-for="item in formattedTxn"
+      :class="[checkTxnType(txnType) ? 'table_div' : 'txn-div']"
+    >
       <div v-if="item.amountTransfer">
         <div>Amount</div>
         <div class="relative">
@@ -43,220 +47,243 @@
             <div
               class="inline-block text-gray-400 text-txs hover:text-gray-700 duration-300 transition-all"
             >
-              <!-- <router-link v-if="sda.currentAlias[0]" :to="{ name: 'ViewAsset', params: { id: sda.id }}" class="hover:text-blue-primary hover:underline">{{ sda.label }}</router-link> -->
-              <!-- {{ sda.name?' / ':'' }} -->
               <router-link
                 :to="{ name: 'ViewAsset', params: { id: sda.id } }"
-                class="hover:text-blue-primary hover:underline"
+                class="hover:text-blue-primary hover:underline text-blue-600"
                 >{{ sda.label }}</router-link
               >
             </div>
           </div>
-          <!-- <div v-if="txnDetail.detail.amount.length == 0">-</div> -->
         </div>
       </div>
     </div>
+  </div>
+  <div v-else :class="[checkTxnType(txnType) ? 'table_div' : 'txn-div']">
+    <div v-if="txnDetail">
+      <div>{{ txnDetail.name }}</div>
+      <div class="relative">
+        <div v-for="item in txnDetail.value">
+          <router-link
+            :to="{
+              name: 'ViewAsset',
+              params: { id: item.value.toString() },
+            }"
+            class="hover:text-blue-primary hover:underline text-blue-600"
+            >{{ item.value }}</router-link
+          >
+          <span class="text-xxs text-gray-500"
+            >({{ item.secondaryValue }})</span
+          >
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
-  
-<script setup lang='ts'>
+
+<script setup lang="ts">
 import type { SDA } from "@/models/transactions/sda";
 import { AppState } from "@/state/appState";
 import { TransactionUtils } from "@/util/transactionUtils";
 import { Helper } from "@/util/typeHelper";
-import { MosaicNames, NamespaceId, NamespaceName, TransactionType, type MosaicId } from "tsjs-xpx-chain-sdk";
+import {
+  MosaicNames,
+  NamespaceId,
+  NamespaceName,
+  TransactionType,
+  type MosaicId,
+} from "tsjs-xpx-chain-sdk";
 import { computed, ref } from "vue";
-  
+
 const props = defineProps({
-    txnDetail: Object,
-    txnData: Object,
-  });
+  txnDetail: Object,
+  toggleTransform: Boolean,
+  txnType: Number,
+});
 
 const formattedTxn = ref<any>([]);
-const txnType = computed(() =>{
-  for(let item in props.txnData){
-    if(props.txnData[item].name === "Type"){
-      return props.txnData[item].secondaryValue
-    }
+const detectError = ref(false);
+const checkTxnType = (type: any) => {
+  if (
+    type == TransactionType.AGGREGATE_BONDED_V1 ||
+    type == TransactionType.AGGREGATE_COMPLETE_V1
+  ) {
+    return true;
+  } else {
+    return false;
   }
-})
-
-const checkTxnType = (type:number) =>{
-  if(type == TransactionType.AGGREGATE_BONDED_V1 || type == TransactionType.AGGREGATE_COMPLETE_V1){
-    return true
-  }
-  else{
-    return false
-  }
-}
+};
 
 const nativeTokenNamespaceId = computed(() =>
-    new NamespaceId(AppState.nativeToken.fullNamespace).toHex()
+  new NamespaceId(AppState.nativeToken.fullNamespace).toHex()
 );
 const nativeTokenLabel = AppState.nativeToken.label;
 
 const formatSDAs = async (data: any) => {
-    let txn = < {
-        amountTransfer: number,
-        sda: SDA[]
-    } > {}
-    const sdas: SDA[] = []
-        for (let item in data.value) {
-            const rawAmount = data.value[item].secondaryValue;
-            const isSendWithNamespace = TransactionUtils.isNamespaceWithString(
-                    data.value[item].value
-                );
+  let txn = <
+    {
+      amountTransfer: number;
+      sda: SDA[];
+    }
+  >{};
+  const sdas: SDA[] = [];
+  for (let item in data.value) {
+    const rawAmount = data.value[item].secondaryValue;
+    const isSendWithNamespace = TransactionUtils.isNamespaceWithString(
+      data.value[item].value
+    );
 
-                let assetId: MosaicId;
-                let assetIdHex: string;
+    let assetId: MosaicId;
+    let assetIdHex: string;
 
-                if (isSendWithNamespace) {
-                    const namespaceId = new NamespaceId(
-                        data.value[item].value.toDTO().id
-                    );
-                    assetId = await TransactionUtils.getAssetAlias(namespaceId);
-                    assetIdHex = assetId.toHex();
-                } else {
-                    assetIdHex = data.value[item].value
-                }
+    if (isSendWithNamespace) {
+      const namespaceId = new NamespaceId(data.value[item].value.toDTO().id);
+      assetId = await TransactionUtils.getAssetAlias(namespaceId);
+      assetIdHex = assetId.toHex();
+    } else {
+      assetIdHex = data.value[item].value;
+    }
 
-                if (
-                    [AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(
-                        assetIdHex
-                    )
-                ) {
-                    txn.amountTransfer = TransactionUtils.convertToExactNativeAmount(rawAmount);
-                    continue;
-                }
+    if (
+      [AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(
+        assetIdHex
+      )
+    ) {
+      txn.amountTransfer =
+        TransactionUtils.convertToExactNativeAmount(rawAmount);
+      continue;
+    }
 
-                const newSDA: SDA = {
-                    amount: rawAmount,
-                    divisibility: 0,
-                    id: assetIdHex,
-                    amountIsRaw: true,
-                    sendWithNamespace: isSendWithNamespace,
-                };
+    const newSDA: SDA = {
+      amount: rawAmount,
+      divisibility: 0,
+      id: assetIdHex,
+      amountIsRaw: true,
+      sendWithNamespace: isSendWithNamespace,
+    };
 
-                if (isSendWithNamespace) {
-                    const namespaceId = data.value[item].value;
+    if (isSendWithNamespace) {
+      const namespaceId = data.value[item].value;
 
-                    newSDA.sendWithAlias = {
-                        idHex: namespaceId.toHex(),
-                        id: namespaceId.toDTO().id,
-                    };
-                }
+      newSDA.sendWithAlias = {
+        idHex: namespaceId.toHex(),
+        id: namespaceId.toDTO().id,
+      };
+    }
 
-                sdas.push(newSDA);
+    sdas.push(newSDA);
 
-                const namespaceIds = sdas
-                    .filter((sda) => sda.sendWithNamespace)
-                    .map((sda) => {
-                        if (sda.sendWithAlias) {
-                            return Helper.createNamespaceId(sda.sendWithAlias.id);
-                        }
-                        return new NamespaceId("");
-                    });
+    const namespaceIds = sdas
+      .filter((sda) => sda.sendWithNamespace)
+      .map((sda) => {
+        if (sda.sendWithAlias) {
+          return Helper.createNamespaceId(sda.sendWithAlias.id);
+        }
+        return new NamespaceId("");
+      });
 
-                const allAssetId = sdas
-                    .filter((sda) => {
-                        return sda.amountIsRaw;
-                    })
-                    .map((sda) => Helper.createAssetId(sda.id));
+    const allAssetId = sdas
+      .filter((sda) => {
+        return sda.amountIsRaw;
+      })
+      .map((sda) => Helper.createAssetId(sda.id));
 
-                if (namespaceIds.length || allAssetId.length) {
-                    let namespacesNames: NamespaceName[] = [];
-                    if (!AppState.chainAPI) {
-                        return
-                    }
-                    namespacesNames = await AppState.chainAPI.namespaceAPI.getNamespacesName(
-                        namespaceIds
-                    );
-                    const assetsProperties = await AppState.chainAPI.assetAPI.getMosaics(
-                        allAssetId
-                    );
-                    const aliasNames: MosaicNames[] =
-                        await AppState.chainAPI.assetAPI.getMosaicsNames(allAssetId);
+    if (namespaceIds.length || allAssetId.length) {
+      let namespacesNames: NamespaceName[] = [];
+      if (!AppState.chainAPI) {
+        return;
+      }
+      namespacesNames = await AppState.chainAPI.namespaceAPI.getNamespacesName(
+        namespaceIds
+      );
+      const assetsProperties = await AppState.chainAPI.assetAPI.getMosaics(
+        allAssetId
+      );
+      const aliasNames: MosaicNames[] =
+        await AppState.chainAPI.assetAPI.getMosaicsNames(allAssetId);
 
-                    for (let x = 0; x < sdas.length; ++x) {
-                        const assetProperties = assetsProperties.filter(
-                            (aliasName) => aliasName.mosaicId.toHex() === sdas[x].id
-                        )[0];
+      for (let x = 0; x < sdas.length; ++x) {
+        const assetProperties = assetsProperties.filter(
+          (aliasName) => aliasName.mosaicId.toHex() === sdas[x].id
+        )[0];
 
-                        sdas[x].divisibility = assetProperties.divisibility;
-                        sdas[x].amount = TransactionUtils.convertToExactAmount(
-                            sdas[x].amount,
-                            assetProperties.divisibility
-                        );
-                        sdas[x].amountIsRaw = false;
+        sdas[x].divisibility = assetProperties.divisibility;
+        sdas[x].amount = TransactionUtils.convertToExactAmount(
+          sdas[x].amount,
+          assetProperties.divisibility
+        );
+        sdas[x].amountIsRaw = false;
 
-                        const mosaicNames: MosaicNames = aliasNames.filter(
-                            (aliaName) => aliaName.mosaicId.toHex() === sdas[x].id
-                        )[0];
-                        const currentAliasNames: NamespaceName[] = mosaicNames.names;
-                        sdas[x].currentAlias = currentAliasNames.map((currentAlias) => {
-                            return {
-                                name: currentAlias.name,
-                                id: currentAlias.namespaceId.toDTO().id,
-                                idHex: currentAlias.namespaceId.toHex(),
-                            };
-                        });
-                        const { sendWithAlias, currentAlias } = sdas[x];
-                        if (sendWithAlias) {
-                            sendWithAlias.name = namespacesNames
-                                .filter(
-                                    (nsName) => nsName.namespaceId.toHex() === sendWithAlias.idHex
-                                )
-                                .map((nsName) => nsName.name)[0];
-                        }
-                        if (!currentAlias) {
-                            sdas[x].label = sdas[x].id;
-                        } else if (
-                            currentAlias.length &&
-                            AppState.registeredToken.find(
-                                (rt) => rt.fullNamespace === currentAlias[0].name
-                            )
-                        ) {
-                            const findNamespace = AppState.registeredToken.find(
-                                (rt) => rt.fullNamespace === currentAlias[0].name
-                            );
-                            if (findNamespace) {
-                                sdas[x].label = findNamespace.label;
-                            }
-                        } else if (currentAlias.length) {
-                            sdas[x].label = currentAlias[0].name;
-                        } else {
-                            sdas[x].label = sdas[x].id;
-                        }
-                    }
-                }
-                txn.sda = sdas
-            }
-    formattedTxn.value.push(txn)
-}
+        const mosaicNames: MosaicNames = aliasNames.filter(
+          (aliaName) => aliaName.mosaicId.toHex() === sdas[x].id
+        )[0];
+        const currentAliasNames: NamespaceName[] = mosaicNames.names;
+        sdas[x].currentAlias = currentAliasNames.map((currentAlias) => {
+          return {
+            name: currentAlias.name,
+            id: currentAlias.namespaceId.toDTO().id,
+            idHex: currentAlias.namespaceId.toHex(),
+          };
+        });
+        const { sendWithAlias, currentAlias } = sdas[x];
+        if (sendWithAlias) {
+          sendWithAlias.name = namespacesNames
+            .filter(
+              (nsName) => nsName.namespaceId.toHex() === sendWithAlias.idHex
+            )
+            .map((nsName) => nsName.name)[0];
+        }
+        if (!currentAlias) {
+          sdas[x].label = sdas[x].id;
+        } else if (
+          currentAlias.length &&
+          AppState.registeredToken.find(
+            (rt) => rt.fullNamespace === currentAlias[0].name
+          )
+        ) {
+          const findNamespace = AppState.registeredToken.find(
+            (rt) => rt.fullNamespace === currentAlias[0].name
+          );
+          if (findNamespace) {
+            sdas[x].label = findNamespace.label;
+          }
+        } else if (currentAlias.length) {
+          sdas[x].label = currentAlias[0].name;
+        } else {
+          sdas[x].label = sdas[x].id;
+        }
+      }
+    }
+    txn.sda = sdas;
+  }
+  formattedTxn.value.push(txn);
+};
 
-formatSDAs(props.txnDetail)
+formatSDAs(props.txnDetail);
 
 const transferAmount = computed(() => {
-    for(let item in formattedTxn.value){
-        return formattedTxn.value[item].amountTransfer.toString().split(".");
-    }
+  for (let item in formattedTxn.value) {
+    return formattedTxn.value[item].amountTransfer.toString().split(".");
+  }
 });
 
 const sdaAmount = computed(() => {
   let formattedSDA: any[] = [];
-  for(let item in formattedTxn.value){
+  for (let item in formattedTxn.value) {
     if (formattedTxn.value[item].sda.length > 0) {
-        formattedTxn.value[item].sda.forEach((sda: { amount: { toString: () => string; }; }) => {
-        formattedSDA.push(sda.amount.toString().split("."));
-        });
+      formattedTxn.value[item].sda.forEach(
+        (sda: { amount: { toString: () => string } }) => {
+          formattedSDA.push(sda.amount.toString().split("."));
+        }
+      );
     }
     return formattedSDA;
   }
 });
-
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
+.txn-div,
 .details {
   @apply text-gray-800 text-xs;
 
@@ -270,10 +297,10 @@ const sdaAmount = computed(() => {
     > div:nth-child(2) {
       @apply text-xs;
     }
-  }
 
-  > div:last-child {
-    @apply border-none;
+    > div:last-child {
+      @apply border-none;
+    }
   }
 }
 
@@ -301,4 +328,3 @@ const sdaAmount = computed(() => {
   }
 }
 </style>
-  
