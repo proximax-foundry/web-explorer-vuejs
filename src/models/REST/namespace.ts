@@ -1,4 +1,4 @@
-import { firstValueFrom } from "rxjs";
+import { lastValueFrom } from "rxjs";
 import {
   NamespaceHttp,
   NetworkHttp,
@@ -18,22 +18,22 @@ export class NamespaceAPI {
   }
 
   getLinkedAddress(namespaceId: NamespaceId): Promise<Address> {
-    return firstValueFrom(this.namespaceHttp.getLinkedAddress(namespaceId));
+    return lastValueFrom(this.namespaceHttp.getLinkedAddress(namespaceId));
   }
 
   getLinkedMosaicId(namespaceId: NamespaceId): Promise<MosaicId> {
-    return firstValueFrom(this.namespaceHttp.getLinkedMosaicId(namespaceId));
+    return lastValueFrom(this.namespaceHttp.getLinkedMosaicId(namespaceId));
   }
 
   getNamespace(namespaceId: NamespaceId): Promise<NamespaceInfo> {
-    return firstValueFrom(this.namespaceHttp.getNamespace(namespaceId));
+    return lastValueFrom(this.namespaceHttp.getNamespace(namespaceId));
   }
 
   getNamespacesFromAccount(
     address: Address,
     queryParams?: QueryParams
   ): Promise<NamespaceInfo[]> {
-    return firstValueFrom(this.namespaceHttp
+    return lastValueFrom(this.namespaceHttp
       .getNamespacesFromAccount(address, queryParams));
   }
 
@@ -41,11 +41,11 @@ export class NamespaceAPI {
     addresses: Address[],
     queryParams?: QueryParams
   ): Promise<NamespaceInfo[]> {
-    return firstValueFrom(this.namespaceHttp
+    return lastValueFrom(this.namespaceHttp
       .getNamespacesFromAccounts(addresses, queryParams));
   }
 
   getNamespacesName(namespaceIds: NamespaceId[]): Promise<NamespaceName[]> {
-    return firstValueFrom(this.namespaceHttp.getNamespacesName(namespaceIds));
+    return lastValueFrom(this.namespaceHttp.getNamespacesName(namespaceIds));
   }
 }

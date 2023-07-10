@@ -1,4 +1,4 @@
-import { firstValueFrom } from "rxjs";
+import { lastValueFrom } from "rxjs";
 import {
   MosaicHttp,
   NetworkHttp,
@@ -20,29 +20,29 @@ export class AssetAPI {
   }
 
   getMosaic(mosaicId: MosaicId): Promise<MosaicInfo> {
-    return firstValueFrom(this.mosaicHttp.getMosaic(mosaicId));
+    return lastValueFrom(this.mosaicHttp.getMosaic(mosaicId));
   }
 
   getMosaicRichlist(
     mosaicId: MosaicId,
     queryParams?: PageQueryParams
   ): Promise<RichlistEntry[]> {
-    return firstValueFrom(this.mosaicHttp.getMosaicRichlist(mosaicId, queryParams));
+    return lastValueFrom(this.mosaicHttp.getMosaicRichlist(mosaicId, queryParams));
   }
 
   getMosaics(mosaicIds: MosaicId[]): Promise<MosaicInfo[]> {
-    return firstValueFrom(this.mosaicHttp.getMosaics(mosaicIds));
+    return lastValueFrom(this.mosaicHttp.getMosaics(mosaicIds));
   }
 
   getMosaicsNames(mosaicIds: MosaicId[]): Promise<MosaicNames[]> {
-    return firstValueFrom(this.mosaicHttp.getMosaicsNames(mosaicIds));
+    return lastValueFrom(this.mosaicHttp.getMosaicsNames(mosaicIds));
   }
 
   getMosaicLevy(mosaicId: MosaicId): Promise<MosaicLevy> {
-    return firstValueFrom(this.mosaicHttp.getMosaicLevy(mosaicId));
+    return lastValueFrom(this.mosaicHttp.getMosaicLevy(mosaicId));
   }
 
   searchMosaics(queryParams: MosaicQueryParams): Promise<MosaicSearch> {
-    return firstValueFrom(this.mosaicHttp.searchMosaics(queryParams));
+    return lastValueFrom(this.mosaicHttp.searchMosaics(queryParams));
   }
 }

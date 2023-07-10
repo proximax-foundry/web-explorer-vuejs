@@ -1,4 +1,4 @@
-import { firstValueFrom } from "rxjs";
+import { lastValueFrom } from "rxjs";
 import {
   DiagnosticHttp,
   BlockchainStorageInfo,
@@ -13,10 +13,10 @@ export class DiagnosticAPI {
   }
 
   getServerInfo(): Promise<ServerInfo> {
-    return firstValueFrom(this.diagnosticHttp.getServerInfo());
+    return lastValueFrom(this.diagnosticHttp.getServerInfo());
   }
 
   getDiagnosticStorage(): Promise<BlockchainStorageInfo> {
-    return firstValueFrom(this.diagnosticHttp.getDiagnosticStorage());
+    return lastValueFrom(this.diagnosticHttp.getDiagnosticStorage());
   }
 }

@@ -78,7 +78,7 @@ export class Helper {
     publicKeyTosign: string,
     innerTransactions: InnerTransaction[]
   ): InnerTransaction[] {
-    const networkType = transactions[0].networkType;
+    const networkType = transactions[0].version.networkType;
     const publicAccount = PublicAccount.createFromPublicKey(
       publicKeyTosign,
       networkType
@@ -95,7 +95,7 @@ export class Helper {
     transactions: Transaction[],
     publicKeyTosign: string
   ): InnerTransaction[] {
-    const networkType = transactions[0].networkType;
+    const networkType = transactions[0].version.networkType;
     const publicAccount = PublicAccount.createFromPublicKey(
       publicKeyTosign,
       networkType
@@ -129,7 +129,7 @@ export class Helper {
   }
 
   static createAccount(privateKey: string, network: NetworkType): Account {
-    return Account.createFromPrivateKey(privateKey, network);
+    return Account.createFromPrivateKey(privateKey, network,1);
   }
 
   static createNonceRandom(): MosaicNonce {

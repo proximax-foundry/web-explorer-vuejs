@@ -1,4 +1,4 @@
-import { firstValueFrom } from "rxjs";
+import { lastValueFrom } from "rxjs";
 import { ChainHttp, BlockchainScore } from "tsjs-xpx-chain-sdk";
 
 export class ChainAPI {
@@ -9,12 +9,12 @@ export class ChainAPI {
   }
 
   getBlockchainHeight(): Promise<number> {
-    return firstValueFrom(this.chainHttp
+    return lastValueFrom(this.chainHttp
       .getBlockchainHeight())
       .then((blockNum) => blockNum.compact());
   }
 
   getBlockchainScore(): Promise<BlockchainScore> {
-    return firstValueFrom(this.chainHttp.getBlockchainScore());
+    return lastValueFrom(this.chainHttp.getBlockchainScore());
   }
 }

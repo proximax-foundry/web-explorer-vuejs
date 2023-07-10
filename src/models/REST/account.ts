@@ -1,4 +1,4 @@
-import { firstValueFrom } from "rxjs";
+import { lastValueFrom } from "rxjs";
 import {
   AccountHttp,
   NetworkHttp,
@@ -22,51 +22,51 @@ export class AccountAPI {
   }
 
   getAccountInfo(address: Address): Promise<AccountInfo> {
-    return firstValueFrom(this.accountHttp.getAccountInfo(address));
+    return lastValueFrom(this.accountHttp.getAccountInfo(address));
   }
 
   aggregateBondedTransactions(
     publicAccount: PublicAccount,
     queryParams?: TransactionQueryParams
   ): Promise<AggregateTransaction[]> {
-    return firstValueFrom(this.accountHttp
+    return lastValueFrom(this.accountHttp
       .aggregateBondedTransactions(publicAccount, queryParams));
   }
 
   getAccountRestrictions(address: Address): Promise<AccountRestrictionsInfo> {
-    return firstValueFrom(this.accountHttp.getAccountRestrictions(address));
+    return lastValueFrom(this.accountHttp.getAccountRestrictions(address));
   }
 
   getAccountRestrictionsFromAccounts(
     addresses: Address[]
   ): Promise<AccountRestrictionsInfo[]> {
-    return firstValueFrom(this.accountHttp
+    return lastValueFrom(this.accountHttp
       .getAccountRestrictionsFromAccounts(addresses));
   }
 
   getAccountsInfo(addresses: Address[]): Promise<AccountInfo[]> {
-    return firstValueFrom(this.accountHttp.getAccountsInfo(addresses));
+    return lastValueFrom(this.accountHttp.getAccountsInfo(addresses));
   }
 
   getAccountsNames(addresses: Address[]): Promise<AccountNames[]> {
-    return firstValueFrom(this.accountHttp.getAccountsNames(addresses));
+    return lastValueFrom(this.accountHttp.getAccountsNames(addresses));
   }
 
   getMultisigAccountGraphInfo(
     address: Address
   ): Promise<MultisigAccountGraphInfo> {
-    return firstValueFrom(this.accountHttp.getMultisigAccountGraphInfo(address));
+    return lastValueFrom(this.accountHttp.getMultisigAccountGraphInfo(address));
   }
 
   getMultisigAccountInfo(address: Address): Promise<MultisigAccountInfo> {
-    return firstValueFrom(this.accountHttp.getMultisigAccountInfo(address));
+    return lastValueFrom(this.accountHttp.getMultisigAccountInfo(address));
   }
 
   transactions(
     publicAccount: PublicAccount,
     queryParams?: TransactionQueryParams
   ): Promise<Transaction[]> {
-    return firstValueFrom(this.accountHttp
+    return lastValueFrom(this.accountHttp
       .transactions(publicAccount, queryParams));
   }
 
@@ -74,7 +74,7 @@ export class AccountAPI {
     accountId: Address | PublicAccount,
     queryParams?: TransactionQueryParams
   ): Promise<Transaction[]> {
-    return firstValueFrom(this.accountHttp
+    return lastValueFrom(this.accountHttp
       .incomingTransactions(accountId, queryParams));
   }
 
@@ -82,7 +82,7 @@ export class AccountAPI {
     publicAccount: PublicAccount,
     queryParams?: TransactionQueryParams
   ): Promise<Transaction[]> {
-    return firstValueFrom(this.accountHttp
+    return lastValueFrom(this.accountHttp
       .outgoingTransactions(publicAccount, queryParams));
   }
 
@@ -90,7 +90,7 @@ export class AccountAPI {
     publicAccount: PublicAccount,
     queryParams?: TransactionQueryParams
   ): Promise<Transaction[]> {
-    return firstValueFrom(this.accountHttp
+    return lastValueFrom(this.accountHttp
       .unconfirmedTransactions(publicAccount, queryParams));
   }
 }
