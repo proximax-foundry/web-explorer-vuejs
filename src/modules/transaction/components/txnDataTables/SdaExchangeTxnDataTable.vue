@@ -158,12 +158,12 @@
               v-for="(item, index) in data.sdaExchange"
               :key="index"
               v-tooltip.left="
-                { value: `<tiptext>Approximately ${durationTime(item.duration)} Day${(durationTime(item.duration) > 1 ? 's' : '')}</tiptext>` , escape: true }
+                { value: `<tiptext>Approximately ${durationTime(item.duration)} Day${(durationTime(item.duration) > 1 ? 's' : '')}</tiptext>`, disabled:Boolean(item.duration === undefined) , escape: true }
               "
             >
               <div>
-                <span>{{ item.amountGet }}</span>
-                <div class="inline-block ml-2">
+                <span v-if="item.amountGet" class="mr-2">{{ item.amountGet }}</span>
+                <div class="inline-block">
                   <router-link
                     v-if="item.sdaGetNamespace"
                     :to="{ name: 'ViewAsset', params: { id: item.sdaIdGet } }"
@@ -179,8 +179,8 @@
                 </div>
               </div>
               <div>
-                <span>{{ item.amountGive }}</span>
-                <div class="inline-block ml-2">
+                <span v-if="item.amountGive" class="mr-2">{{ item.amountGive }}</span>
+                <div class="inline-block">
                   <router-link
                     v-if="item.sdaGiveNamespace"
                     :to="{ name: 'ViewAsset', params: { id: item.sdaIdGive } }"
@@ -195,7 +195,7 @@
                   >
                 </div>
               </div>
-              <div>
+              <div v-if="item.duration">
                 {{
                   item.duration
                     ? item.duration + " Block" + (item.duration > 1 ? "s" : "")

@@ -6,7 +6,7 @@
         <div
           v-for="(offer, index) in txnDetail.detail.sdaExchange"
           :key="index"
-          class="bg-color text-xs w-48 py-1 px-2 my-1 mx-1 rounded"
+          class="bg-color text-xs w-auto py-1 px-2 my-1 mx-1 rounded"
         >
           <div v-if="offer.amountGet">
             <div>
@@ -119,7 +119,7 @@
               </div>
             </div>
           </div>
-          <div>
+          <div v-if="offer.duration">
             <span class="text-muted"> Duration: </span>
             <span>{{ offer.duration }} blocks</span>
           </div>
@@ -150,11 +150,11 @@ const formatCurrency = (amount) => {
     @apply flex items-center border-b border-gray-100 py-4;
 
     > div:first-child {
-      @apply w-40 text-xs pl-4;
+      @apply w-32 text-xs pl-4;
     }
 
     > div:nth-child(2) {
-      @apply text-xs w-full;
+      @apply text-xs w-auto;
     }
   }
 
