@@ -144,7 +144,6 @@ import type {
 } from "@/models/transactions/transaction";
 import { HashType as myHashType } from "@/models/const/hashType";
 import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
-import { BlockUtils } from "./blockUtil";
 export enum MsgType {
   NONE = 0,
   GREEN = 1,
@@ -161,7 +160,7 @@ export enum InnerTxnLegendType {
 }
 export interface TxnDetails {
   type: MsgType;
-  value: string | number;
+  value: string | number | any[];
   label?: string;
   short?: string;
   hover?: string;
@@ -1225,93 +1224,6 @@ export class TransactionUtils {
             sdas: [],
             legendType: InnerTxnLegendType.BUY_SELL,
             typeName: addExchangeOfferFormat.type,
-          };
-        }
-        break;
-
-      case TransactionType.PLACE_SDA_EXCHANGE_OFFER:
-        {
-          const addSdaExchangeOfferTx = innerTransaction as PlaceSdaExchangeOfferTransaction;
-          console.log(addSdaExchangeOfferTx)
-          let getBlock = await BlockUtils.getBlockByHeight(addSdaExchangeOfferTx.transactionInfo!.height.compact())
-          console.log(getBlock)
-          tempData = await TransactionUtils.extractAddSDAExchangeOffer(
-            addSdaExchangeOfferTx
-          );
-          const addSdaExchangeOfferFormat = tempData as InnerSdaExchangeTransaction;
-          console.log(addSdaExchangeOfferFormat)
-          const infos: TxnDetails[] = [];
-
-          let chainConfig = new ChainProfileConfig(networkState.chainNetworkName);
-          chainConfig.init();
-          let blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
-
-          const durationTime = (block: number) => {
-            let durationByHour = block / ((60 / blockTargetTime) * 60);
-            let durationByDay = durationByHour / 24;
-            return durationByDay;
-           };
-
-          const knownToken = [{
-            namespace: "prx.xpx",
-            name: "XPX"
-          },
-          {
-            namespace: "prx.metx",
-            name: "METX"
-          }, 
-          {
-            namespace: "xarcade.xar",
-            name: "XAR"
-          }];
-
-          for (
-            let i = 0;
-            i < addSdaExchangeOfferFormat.sdaExchange.length;
-            ++i
-          ) {
-            const offer = addSdaExchangeOfferFormat.sdaExchange[i];
-            const findGetToken = knownToken.find(token => token.namespace == offer.sdaGetNamespace)
-            const findGiveToken = knownToken.find(token => token.namespace == offer.sdaGiveNamespace)
-            const getOfferingAssetString =
-                findGetToken
-                ? ` ${findGetToken.name}`
-                : ` ${offer.sdaIdGet}`;
-            const giveOfferingAssetString =
-                findGiveToken
-                ? ` ${findGiveToken.name}`
-                : ` ${offer.sdaIdGive}`;
-            const getOfferInfo: TxnDetails = {
-              type: MsgType.GREEN,
-              value:
-              `Get: ` + `${offer.amountGet} ` + getOfferingAssetString
-            };
-            infos.push(getOfferInfo);
-
-            const giveOfferInfo: TxnDetails = {
-              type: MsgType.GREEN,
-              value:
-              `Give: ` + `${offer.amountGive} ` + giveOfferingAssetString
-            };
-            infos.push(giveOfferInfo);
-
-            const durationOfferInfo: TxnDetails = {
-              type: MsgType.GREEN,
-              value:
-              `Duration: ${offer.duration}`
-            };
-            infos.push(durationOfferInfo);
-          }
-          transactionDetails = {
-            signer: addSdaExchangeOfferFormat.signer,
-            signerAddressPlain: addSdaExchangeOfferFormat.signerAddress,
-            signerAddressPretty: Address.createFromRawAddress(
-              addSdaExchangeOfferFormat.signerAddress
-            ).pretty(),
-            infos: infos,
-            sdas: [],
-            legendType: InnerTxnLegendType.ADD_REMOVE,
-            typeName: addSdaExchangeOfferFormat.type,
           };
         }
         break;
@@ -2519,11 +2431,155 @@ export class TransactionUtils {
           };
         }
         break;
+
+      case TransactionType.PLACE_SDA_EXCHANGE_OFFER:
+        {
+          const addSdaExchangeOfferTx = innerTransaction as PlaceSdaExchangeOfferTransaction;
+          tempData = await TransactionUtils.extractAddSDAExchangeOffer(
+            addSdaExchangeOfferTx
+          );
+          const addSdaExchangeOfferFormat = tempData as InnerSdaExchangeTransaction;
+          const infos: TxnDetails[] = [];
+          const offers = []
+
+          const currentHeight = await AppState.chainAPI!.chainAPI.getBlockchainHeight()
+
+          let chainConfig = new ChainProfileConfig(networkState.chainNetworkName);
+          chainConfig.init();
+          let blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
+
+          const durationTime = (block: number) => {
+            let durationByHour = block / ((60 / blockTargetTime) * 60);
+            let durationByDay = durationByHour / 24;
+            return durationByDay;
+           };
+
+          const addDays = (date:Date, days: number) => {
+            date.setDate(date.getDate() + days);
+            return date;
+          }
+
+          const knownToken = [{
+            namespace: "prx.xpx",
+            name: "XPX"
+          },
+          {
+            namespace: "prx.metx",
+            name: "METX"
+          }, 
+          {
+            namespace: "xarcade.xar",
+            name: "XAR"
+          }];
+
+          for (
+            let i = 0;
+            i < addSdaExchangeOfferFormat.sdaExchange.length;
+            ++i
+          ) {
+            let offerDetail = <{
+              sdaIdGet: string,
+              sdaIdGive: string,
+              amountGet: number,
+              amountGive: number,
+              deadline: string,
+              sdaGetNamespace?: string,
+              sdaGiveNamespace?: string,
+            }>{}
+            const offer = addSdaExchangeOfferFormat.sdaExchange[i];
+            offerDetail.amountGet = offer.amountGet!
+            offerDetail.amountGive = offer.amountGive!
+            offerDetail.sdaIdGet = offer.sdaIdGet
+            offerDetail.sdaIdGive = offer.sdaIdGive
+
+            const currentDate = new Date(Date.now() + ((addSdaExchangeOfferTx.transactionInfo!.height.compact() - currentHeight) * 15000))
+            const deadline = Helper.convertDisplayDateTimeFormat24(addDays(currentDate,durationTime(offer.duration!)).toJSON())
+            offerDetail.deadline = deadline
+
+            const findGetToken = knownToken.find(token => token.namespace == offer.sdaGetNamespace)
+            const findGiveToken = knownToken.find(token => token.namespace == offer.sdaGiveNamespace)
+            
+            const getOfferingAssetString =
+                findGetToken
+                ?   findGetToken.name
+                :   offer.sdaGetNamespace ?  offer.sdaGetNamespace : offer.sdaIdGet;
+            offerDetail.sdaGetNamespace = getOfferingAssetString
+            const giveOfferingAssetString =
+                findGiveToken
+                ?   findGiveToken.name
+                :   offer.sdaGiveNamespace ?  offer.sdaGiveNamespace : offer.sdaIdGive;
+            offerDetail.sdaGiveNamespace = giveOfferingAssetString
+            offers.push(offerDetail)
+          }
+
+          const offerInfo: TxnDetails = {
+            type: MsgType.GREEN,
+            value: offers
+          };
+          infos.push(offerInfo);
+
+          transactionDetails = {
+            signer: addSdaExchangeOfferFormat.signer,
+            signerAddressPlain: addSdaExchangeOfferFormat.signerAddress,
+            signerAddressPretty: Address.createFromRawAddress(
+              addSdaExchangeOfferFormat.signerAddress
+            ).pretty(),
+            infos: infos,
+            sdas: [],
+            legendType: InnerTxnLegendType.ADD_REMOVE,
+            typeName: addSdaExchangeOfferFormat.type,
+          };
+        }
+        break;
+      
+      case TransactionType.REMOVE_SDA_EXCHANGE_OFFER:
+        {
+          const removeSdaExchangeOfferTx = innerTransaction as RemoveSdaExchangeOfferTransaction;
+            tempData = await TransactionUtils.extractRemoveSDAExchangeOffer(
+              removeSdaExchangeOfferTx
+            );
+          const removeSdaExchangeOfferFormat = tempData as InnerSdaExchangeTransaction;
+          const infos: TxnDetails[] = [];
+          const offers = []
+
+          for (
+            let i = 0;
+            i < removeSdaExchangeOfferFormat.sdaExchange.length;
+            ++i
+          ) {
+            let offerDetail = <{
+              sdaIdGet: string,
+              sdaIdGive: string,
+            }>{}
+            const offer = removeSdaExchangeOfferFormat.sdaExchange[i];
+            offerDetail.sdaIdGet = offer.sdaIdGet
+            offerDetail.sdaIdGive = offer.sdaIdGive
+            offers.push(offerDetail)
+          }
+
+          const offerInfo: TxnDetails = {
+            type: MsgType.RED,
+            value: offers
+          };
+          infos.push(offerInfo);
+
+          transactionDetails = {
+            signer: removeSdaExchangeOfferFormat.signer,
+            signerAddressPlain: removeSdaExchangeOfferFormat.signerAddress,
+            signerAddressPretty: Address.createFromRawAddress(
+              removeSdaExchangeOfferFormat.signerAddress
+            ).pretty(),
+            infos: infos,
+            sdas: [],
+            legendType: InnerTxnLegendType.ADD_REMOVE,
+            typeName: removeSdaExchangeOfferFormat.type,
+          };
+        }
+        break;
       default:
         transactionDetails = null;
         break;
     }
-    console.log(transactionDetails)
     return transactionDetails;
   }
 
@@ -3874,6 +3930,52 @@ export class TransactionUtils {
           }
           return txnDetails;
   }
+
+  // --------------------------------------end------------------------------------------------------------------
+
+  // ----------------------------------extract Remove Sda Exchange Offer only------------------------------------
+
+  static async extractRemoveSDAExchangeOffer(
+      removeSdaExchangeOfferTxn: RemoveSdaExchangeOfferTransaction
+    ): Promise<InnerSdaExchangeTransaction> {
+      if (!removeSdaExchangeOfferTxn.signer) {
+        throw new Error("Service Unavailable");
+      }
+      const txnDetails = new InnerSdaExchangeTransaction();
+      txnDetails.signer = removeSdaExchangeOfferTxn.signer.publicKey;
+      txnDetails.signerAddress = removeSdaExchangeOfferTxn.signer.address.plain();
+      txnDetails.type = removeSdaExchangeOfferTxn.transactionName;
+
+      for (let i = 0; i < removeSdaExchangeOfferTxn.offers.length; ++i) {
+        const tempSdaExchangeOffer = removeSdaExchangeOfferTxn.offers[i];
+
+        const sdaIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
+        const sdaIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
+
+        const newTxnSdaExchangeOffer: TxnSdaExchange = {
+          sdaIdGet: sdaIdGet,
+          sdaIdGive: sdaIdGive,
+        };
+
+        try {
+          const sdaGetName = await TransactionUtils.getAssetName(sdaIdGet);
+
+          if (sdaGetName.names.length) {
+            newTxnSdaExchangeOffer.sdaGetNamespace = sdaGetName.names[0].name;
+          }
+
+          const sdaGiveName = await TransactionUtils.getAssetName(sdaIdGive);
+
+          if (sdaGiveName.names.length) {
+            newTxnSdaExchangeOffer.sdaGiveNamespace = sdaGiveName.names[0].name;
+          }
+        } catch (error) {}
+          if(newTxnSdaExchangeOffer){
+            txnDetails.sdaExchange.push(newTxnSdaExchangeOffer);
+          }
+        }
+        return txnDetails;
+    }
 
   // --------------------------------------end------------------------------------------------------------------
 

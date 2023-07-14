@@ -173,12 +173,111 @@
         >
           Allow
         </div>
-        <div v-if="item.type == TransactionType.PLACE_SDA_EXCHANGE_OFFER" class="break w-40 py-1 px-2 my-1 mx-1 rounded">
-          {{
-            innerTxnExtractedData[index].infoGreenList
-              .map((info) => (info.short ? info.short : info.value))
-              .join("\n")
-          }}
+        <div v-if="item.type == TransactionType.PLACE_SDA_EXCHANGE_OFFER">
+          <div v-for="(offers, index) in innerTxnExtractedData[index].infoGreenList"
+            :key="index">
+            <div v-for="offer in offers.value" class="bg-blue-100 w-64 py-1 px-2 my-1 mx-1 rounded">
+              <div v-if="offer.amountGet">
+                <span class="text-muted">Get: </span>
+                <span>{{
+                  Helper.convertToCurrency(
+                    formatCurrency(offer.amountGet)[0],
+                    0
+                  )
+                }}</span>
+                <span class="text-xxs" v-if="formatCurrency(offer.amountGet)[1]"
+                  >.{{ formatCurrency(offer.amountGet)[1] }}</span
+                >
+                <div
+                  v-if="offer.sdaGetNamespace"
+                  class="text-blue-600 hover:text-gray-700 duration-300 transition-all inline-block ml-2"
+                >
+                  <router-link
+                    :to="{
+                      name: 'ViewAsset',
+                      params: { id: offer.sdaIdGet },
+                    }"
+                    class="hover:text-blue-primary hover:underline"
+                  >
+                    {{ offer.sdaGetNamespace }}
+                  </router-link>
+                </div>
+                <div v-else
+                  class="text-blue-600 hover:text-gray-700 duration-300 transition-all inline-block ml-2"
+                >
+                  <router-link
+                    :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGet } }"
+                    class="hover:text-blue-primary hover:underline"
+                  >
+                    {{ offer.sdaIdGet }}
+                  </router-link>
+                </div>
+              </div>
+              <div v-else>
+                <span class="text-muted">SDA ID Get:</span>
+                <div class="text-blue-600 inline-block">
+                  <router-link
+                    :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGet } }"
+                    class="hover:text-blue-primary hover:underline text-blue-600"
+                  >
+                    {{ offer.sdaIdGet }}
+                  </router-link>
+                </div>
+              </div>
+              <div v-if="offer.amountGive">
+                <span class="text-muted">Give: </span>
+                <span>{{
+                  Helper.convertToCurrency(
+                    formatCurrency(offer.amountGive)[0],
+                    0
+                  )
+                }}</span>
+                <span
+                  class="text-xxs"
+                  v-if="formatCurrency(offer.amountGive)[1]"
+                  >.{{ formatCurrency(offer.amountGive)[1] }}</span
+                >
+                <div v-if="offer.sdaGiveNamespace"
+                  class="text-blue-600 hover:text-gray-700 duration-300 transition-all inline-block ml-2"
+                >
+                  <router-link
+                    :to="{
+                      name: 'ViewAsset',
+                      params: { id: offer.sdaIdGive },
+                    }"
+                    class="hover:text-blue-primary hover:underline"
+                  >
+                    {{ offer.sdaGiveNamespace }}
+                  </router-link>
+                </div>
+                <div v-else
+                  class="text-blue-600 hover:text-gray-700 duration-300 transition-all inline-block ml-2"
+                >
+                  <router-link
+                    :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGive } }"
+                    class="hover:text-blue-primary hover:underline"
+                  >
+                    {{ offer.sdaIdGive }}
+                  </router-link>
+                </div>
+              </div>
+              <div v-else>
+                <span class="text-muted">SDA ID Give:</span>
+                <div class="text-blue-600 inline-block">
+                  <router-link
+                    :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGive } }"
+                    class="hover:text-blue-primary hover:underline text-blue-600"
+                  >
+                    {{ offer.sdaIdGive }}
+                  </router-link>
+                </div>
+              </div>
+              <div v-if="offer.deadline">
+                <span class="text-muted"> Deadline: </span>
+                <span>{{ offer.deadline }} </span>
+              </div>
+            </div>
+          </div>
         </div>
         <div v-else>
           {{
@@ -221,11 +320,34 @@
         >
           Block
         </div>
-        <div v-if="item.type == TransactionType.PLACE_SDA_EXCHANGE_OFFER">
-          {{
-            innerTxnExtractedData[index].infoRedList
-              .map((info) => (info.short ? info.short : info.value))
-          }}
+        <div v-if="item.type == TransactionType.REMOVE_SDA_EXCHANGE_OFFER">
+          <div v-for="(offers, index) in innerTxnExtractedData[index].infoRedList"
+            :key="index">
+            <div v-for="offer in offers.value" class="bg-blue-100 w-56 py-1 px-2 my-1 mx-1 rounded">
+              <div v-if="offer.sdaIdGet">
+                <span class="text-muted">SDA ID Get:</span>
+                <div class="text-blue-600 inline-block">
+                  <router-link
+                    :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGet } }"
+                    class="hover:text-blue-primary hover:underline text-blue-600"
+                  >
+                    {{ offer.sdaIdGet }}
+                  </router-link>
+                </div>
+              </div>
+              <div v-if="offer.sdaIdGive">
+                <span class="text-muted">SDA ID Give:</span>
+                <div class="text-blue-600 inline-block">
+                  <router-link
+                    :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGive } }"
+                    class="hover:text-blue-primary hover:underline text-blue-600"
+                  >
+                    {{ offer.sdaIdGive }}
+                  </router-link>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <div v-else>
           {{
@@ -577,8 +699,8 @@ onBeforeMount(() => {
     @apply bg-gray-100;
   }
 }
-.break{
-  white-space: pre-line;
-  background-color: rgba(173,181,189,0.1);
+
+.text-muted{
+  color: #6c757d;
 }
 </style>
