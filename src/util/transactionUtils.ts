@@ -2529,10 +2529,14 @@ export class TransactionUtils {
             let offerDetail = <{
               sdaIdGet: string,
               sdaIdGive: string,
+              sdaGetNamespace?: string,
+              sdaGiveNamespace?: string,
             }>{}
             const offer = removeSdaExchangeOfferFormat.sdaExchange[i];
             offerDetail.sdaIdGet = offer.sdaIdGet
             offerDetail.sdaIdGive = offer.sdaIdGive
+            offerDetail.sdaGetNamespace = offer.sdaGetNamespace
+            offerDetail.sdaGiveNamespace = offer.sdaGiveNamespace
             offers.push(offerDetail)
           }
 

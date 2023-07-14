@@ -53,7 +53,15 @@
             <div>
               <div>
                 <span class="text-muted">SDA ID Give:</span>
-                <div class="text-blue-600 inline-block">
+                <div v-if="offer.sdaGiveNamespace" class="text-blue-600 inline-block">
+                  <router-link
+                    :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGive } }"
+                    class="hover:text-blue-primary hover:underline text-blue-600"
+                  >
+                    {{ offer.sdaGiveNamespace }}
+                  </router-link>
+                </div>
+                <div v-else class="text-blue-600 inline-block">
                   <router-link
                     :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGive } }"
                     class="hover:text-blue-primary hover:underline text-blue-600"
@@ -108,7 +116,15 @@
             <div>
               <div>
                 <span class="text-muted">SDA ID Get:</span>
-                <div class="text-blue-600 inline-block">
+                <div v-if="offer.sdaGetNamespace" class="text-blue-600 inline-block">
+                  <router-link
+                    :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGet } }"
+                    class="hover:text-blue-primary hover:underline text-blue-600"
+                  >
+                    {{ offer.sdaGetNamespace }}
+                  </router-link>
+                </div>
+                <div v-else class="text-blue-600 inline-block">
                   <router-link
                     :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGet } }"
                     class="hover:text-blue-primary hover:underline text-blue-600"
