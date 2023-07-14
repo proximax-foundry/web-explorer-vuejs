@@ -176,7 +176,7 @@
         <div v-if="item.type == TransactionType.PLACE_SDA_EXCHANGE_OFFER">
           <div v-for="(offers, index) in innerTxnExtractedData[index].infoGreenList"
             :key="index">
-            <div v-for="offer in offers.value" class="bg-blue-100 w-64 py-1 px-2 my-1 mx-1 rounded">
+            <div v-for="offer in offers.value" class="bg-blue-100 w-48 py-1 px-2 my-1 mx-1 rounded">
               <div v-if="offer.amountGet">
                 <span class="text-muted">Get: </span>
                 <span>{{
@@ -272,9 +272,9 @@
                   </router-link>
                 </div>
               </div>
-              <div v-if="offer.deadline">
-                <span class="text-muted"> Deadline: </span>
-                <span>{{ offer.deadline }} </span>
+              <div v-if="offer.duration">
+                <span class="text-muted"> Duration: </span>
+                <span>{{ offer.duration }} blocks</span>
               </div>
             </div>
           </div>

@@ -143,7 +143,6 @@ import type {
   TxnList,
 } from "@/models/transactions/transaction";
 import { HashType as myHashType } from "@/models/const/hashType";
-import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
 export enum MsgType {
   NONE = 0,
   GREEN = 1,
@@ -2442,23 +2441,6 @@ export class TransactionUtils {
           const infos: TxnDetails[] = [];
           const offers = []
 
-          const currentHeight = await AppState.chainAPI!.chainAPI.getBlockchainHeight()
-
-          let chainConfig = new ChainProfileConfig(networkState.chainNetworkName);
-          chainConfig.init();
-          let blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
-
-          const durationTime = (block: number) => {
-            let durationByHour = block / ((60 / blockTargetTime) * 60);
-            let durationByDay = durationByHour / 24;
-            return durationByDay;
-           };
-
-          const addDays = (date:Date, days: number) => {
-            date.setDate(date.getDate() + days);
-            return date;
-          }
-
           const knownToken = [{
             namespace: "prx.xpx",
             name: "XPX"
@@ -2482,7 +2464,7 @@ export class TransactionUtils {
               sdaIdGive: string,
               amountGet: number,
               amountGive: number,
-              deadline: string,
+              duration: number,
               sdaGetNamespace?: string,
               sdaGiveNamespace?: string,
             }>{}
@@ -2491,10 +2473,7 @@ export class TransactionUtils {
             offerDetail.amountGive = offer.amountGive!
             offerDetail.sdaIdGet = offer.sdaIdGet
             offerDetail.sdaIdGive = offer.sdaIdGive
-
-            const currentDate = new Date(Date.now() + ((addSdaExchangeOfferTx.transactionInfo!.height.compact() - currentHeight) * 15000))
-            const deadline = Helper.convertDisplayDateTimeFormat24(addDays(currentDate,durationTime(offer.duration!)).toJSON())
-            offerDetail.deadline = deadline
+            offerDetail.duration = offer.duration!
 
             const findGetToken = knownToken.find(token => token.namespace == offer.sdaGetNamespace)
             const findGiveToken = knownToken.find(token => token.namespace == offer.sdaGiveNamespace)
