@@ -134,6 +134,7 @@ import {
   InnerSecretTransaction,
   InnerTransaction as MyInnerTxn,
   InnerTransferTransaction,
+  InnerSdaExchangeTransaction,
 } from "@/models/transactions/transaction";
 import type {
   TxnExchangeOffer,
@@ -142,6 +143,8 @@ import type {
   TxnList,
 } from "@/models/transactions/transaction";
 import { HashType as myHashType } from "@/models/const/hashType";
+import { ChainProfileConfig } from "@/models/stores/chainProfileConfig";
+import { BlockUtils } from "./blockUtil";
 export enum MsgType {
   NONE = 0,
   GREEN = 1,
@@ -1222,6 +1225,93 @@ export class TransactionUtils {
             sdas: [],
             legendType: InnerTxnLegendType.BUY_SELL,
             typeName: addExchangeOfferFormat.type,
+          };
+        }
+        break;
+
+      case TransactionType.PLACE_SDA_EXCHANGE_OFFER:
+        {
+          const addSdaExchangeOfferTx = innerTransaction as PlaceSdaExchangeOfferTransaction;
+          console.log(addSdaExchangeOfferTx)
+          let getBlock = await BlockUtils.getBlockByHeight(addSdaExchangeOfferTx.transactionInfo!.height.compact())
+          console.log(getBlock)
+          tempData = await TransactionUtils.extractAddSDAExchangeOffer(
+            addSdaExchangeOfferTx
+          );
+          const addSdaExchangeOfferFormat = tempData as InnerSdaExchangeTransaction;
+          console.log(addSdaExchangeOfferFormat)
+          const infos: TxnDetails[] = [];
+
+          let chainConfig = new ChainProfileConfig(networkState.chainNetworkName);
+          chainConfig.init();
+          let blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
+
+          const durationTime = (block: number) => {
+            let durationByHour = block / ((60 / blockTargetTime) * 60);
+            let durationByDay = durationByHour / 24;
+            return durationByDay;
+           };
+
+          const knownToken = [{
+            namespace: "prx.xpx",
+            name: "XPX"
+          },
+          {
+            namespace: "prx.metx",
+            name: "METX"
+          }, 
+          {
+            namespace: "xarcade.xar",
+            name: "XAR"
+          }];
+
+          for (
+            let i = 0;
+            i < addSdaExchangeOfferFormat.sdaExchange.length;
+            ++i
+          ) {
+            const offer = addSdaExchangeOfferFormat.sdaExchange[i];
+            const findGetToken = knownToken.find(token => token.namespace == offer.sdaGetNamespace)
+            const findGiveToken = knownToken.find(token => token.namespace == offer.sdaGiveNamespace)
+            const getOfferingAssetString =
+                findGetToken
+                ? ` ${findGetToken.name}`
+                : ` ${offer.sdaIdGet}`;
+            const giveOfferingAssetString =
+                findGiveToken
+                ? ` ${findGiveToken.name}`
+                : ` ${offer.sdaIdGive}`;
+            const getOfferInfo: TxnDetails = {
+              type: MsgType.GREEN,
+              value:
+              `Get: ` + `${offer.amountGet} ` + getOfferingAssetString
+            };
+            infos.push(getOfferInfo);
+
+            const giveOfferInfo: TxnDetails = {
+              type: MsgType.GREEN,
+              value:
+              `Give: ` + `${offer.amountGive} ` + giveOfferingAssetString
+            };
+            infos.push(giveOfferInfo);
+
+            const durationOfferInfo: TxnDetails = {
+              type: MsgType.GREEN,
+              value:
+              `Duration: ${offer.duration}`
+            };
+            infos.push(durationOfferInfo);
+          }
+          transactionDetails = {
+            signer: addSdaExchangeOfferFormat.signer,
+            signerAddressPlain: addSdaExchangeOfferFormat.signerAddress,
+            signerAddressPretty: Address.createFromRawAddress(
+              addSdaExchangeOfferFormat.signerAddress
+            ).pretty(),
+            infos: infos,
+            sdas: [],
+            legendType: InnerTxnLegendType.ADD_REMOVE,
+            typeName: addSdaExchangeOfferFormat.type,
           };
         }
         break;
@@ -2433,7 +2523,7 @@ export class TransactionUtils {
         transactionDetails = null;
         break;
     }
-
+    console.log(transactionDetails)
     return transactionDetails;
   }
 
@@ -3721,6 +3811,70 @@ export class TransactionUtils {
       return await TransactionUtils.extractPartialSecretLock(secretLockTxn);
     }
   }
+  
+  // --------------------------------------end------------------------------------------------------------------
+
+  // ----------------------------------extract Place Sda Exchange Offer only------------------------------------
+
+  static async extractAddSDAExchangeOffer(
+    addSdaExchangeOfferTxn: PlaceSdaExchangeOfferTransaction
+  ): Promise<InnerSdaExchangeTransaction> {
+    if (!addSdaExchangeOfferTxn.signer) {
+      throw new Error("Service Unavailable");
+    }
+    const txnDetails = new InnerSdaExchangeTransaction();
+    txnDetails.signer = addSdaExchangeOfferTxn.signer.publicKey;
+    txnDetails.signerAddress = addSdaExchangeOfferTxn.signer.address.plain();
+    txnDetails.type = addSdaExchangeOfferTxn.transactionName;
+          for (let i = 0; i < addSdaExchangeOfferTxn.offers.length; ++i) {
+            const tempSdaExchangeOffer = addSdaExchangeOfferTxn.offers[i];
+      
+            const sdaIdGet = tempSdaExchangeOffer.mosaicIdGet.toHex();
+            const sdaIdGive = tempSdaExchangeOffer.mosaicIdGive.toHex();
+            const amountGet = tempSdaExchangeOffer.mosaicAmountGet.compact();
+            const amountGive = tempSdaExchangeOffer.mosaicAmountGive.compact();
+            const duration = tempSdaExchangeOffer.duration.compact();
+
+          const newTxnSdaExchangeOffer: TxnSdaExchange = {
+            sdaIdGet: sdaIdGet,
+            sdaIdGive: sdaIdGive,
+            amountGet: amountGet,
+            amountGive: amountGive,
+            duration: duration,
+          };
+      
+          try {
+            const sdaGetInfo = await TransactionUtils.getAssetInfo(sdaIdGet);
+            const SdaGiveInfo = await TransactionUtils.getAssetInfo(sdaIdGive);
+      
+            newTxnSdaExchangeOffer.amountGet = TransactionUtils.convertToExactAmount(
+              amountGet,
+              sdaGetInfo.divisibility
+            );
+            newTxnSdaExchangeOffer.amountGive = TransactionUtils.convertToExactAmount(
+              amountGive,
+              SdaGiveInfo.divisibility
+            );
+      
+            const sdaGetName = await TransactionUtils.getAssetName(sdaIdGet);
+      
+            if (sdaGetName.names.length) {
+              newTxnSdaExchangeOffer.sdaGetNamespace = sdaGetName.names[0].name;
+            }
+      
+            const sdaGiveName = await TransactionUtils.getAssetName(sdaIdGive);
+      
+            if (sdaGiveName.names.length) {
+              newTxnSdaExchangeOffer.sdaGiveNamespace = sdaGiveName.names[0].name;
+            }
+          } catch (error) {}
+            if(newTxnSdaExchangeOffer){
+              txnDetails.sdaExchange.push(newTxnSdaExchangeOffer);
+            }
+          }
+          return txnDetails;
+  }
+
   // --------------------------------------end------------------------------------------------------------------
 
   static async extractUnconfirmedTransfer(

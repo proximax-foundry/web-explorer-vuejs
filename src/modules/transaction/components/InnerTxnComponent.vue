@@ -173,7 +173,14 @@
         >
           Allow
         </div>
-        <div>
+        <div v-if="item.type == TransactionType.PLACE_SDA_EXCHANGE_OFFER" class="break w-40 py-1 px-2 my-1 mx-1 rounded">
+          {{
+            innerTxnExtractedData[index].infoGreenList
+              .map((info) => (info.short ? info.short : info.value))
+              .join("\n")
+          }}
+        </div>
+        <div v-else>
           {{
             innerTxnExtractedData[index].infoGreenList
               .map((info) => (info.short ? info.short : info.value))
@@ -214,7 +221,13 @@
         >
           Block
         </div>
-        <div>
+        <div v-if="item.type == TransactionType.PLACE_SDA_EXCHANGE_OFFER">
+          {{
+            innerTxnExtractedData[index].infoRedList
+              .map((info) => (info.short ? info.short : info.value))
+          }}
+        </div>
+        <div v-else>
           {{
             innerTxnExtractedData[index].infoRedList
               .map((info) => (info.short ? info.short : info.value))
@@ -563,5 +576,9 @@ onBeforeMount(() => {
   > div:nth-child(2n + 1) {
     @apply bg-gray-100;
   }
+}
+.break{
+  white-space: pre-line;
+  background-color: rgba(173,181,189,0.1);
 }
 </style>
