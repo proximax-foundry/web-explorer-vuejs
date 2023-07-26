@@ -1,149 +1,122 @@
 <template>
-  <div v-if="toggleTransform">
-    <div v-if="!detectError">
-      <div v-for="item in formattedAssetId">
-        <div :class="[checkTxnType(txnType) ? 'table_div' : 'txn-div']">
-          <div v-if="item.amount">
-            <div>Amount</div>
-            <div>
-              <span class="font-bold">{{
-                formatCurrency(item.amount)[0]
-              }}</span>
-              <span class="text-xxs" v-if="formatCurrency(item.amount)[1]"
-                >.{{ formatCurrency(item.amount)[1] }}</span
-              >
-              <div v-if="item.targetIdName" class="font-bold inline-block ml-1">
-                {{ item.targetIdName }}
-              </div>
-              <div v-else class="font-bold inline-block ml-1">
-                {{ nativeTokenNamespace }}
-              </div>
-            </div>
-          </div>
-          <div v-else-if="item.targetIdName && txnDetail && !(txnType == TransactionType.MOSAIC_ALIAS)">
-            <div>Asset Name</div>
-            <div>
-              <router-link
-                :to="{ name: 'ViewAsset', params: { id: txnDetail.value } }"
-                class="hover:text-blue-primary hover:underline text-blue-600"
-                >{{ item.targetIdName }}
-              </router-link>
-              <span
-                class="text-xxs text-gray-500"
-                v-if="txnDetail.secondaryValue"
-                >({{ txnDetail.secondaryValue }})</span
-              >
-            </div>
-          </div>
-          <div v-else>
-            <div>{{ txnDetail!.name }}</div>
-            <div>
-              <router-link
-                :to="{ name: 'ViewAsset', params: { id: txnDetail!.value } }"
-                class="hover:text-blue-primary hover:underline text-blue-600"
-                >{{ txnDetail?.value }}
-              </router-link>
-              <span
-                class="text-xxs text-gray-500"
-                v-if="txnDetail!.secondaryValue"
-                >({{ txnDetail!.secondaryValue }})</span
-              >
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div v-else :class="[checkTxnType(txnType) ? 'table_div' : 'txn-div']">
-      <div v-if="txnDetail">
-        <div>{{ txnDetail.name }}</div>
-        <div>
-          <router-link
-            :to="{ name: 'ViewAsset', params: { id: txnDetail.value } }"
-            class="hover:text-blue-primary hover:underline text-blue-600"
-            >{{ txnDetail.value }}
-          </router-link>
-          <span class="text-xxs text-gray-500" v-if="txnDetail.secondaryValue"
-            >({{ txnDetail.secondaryValue }})</span
-          >
-          <span class="text-red-600 pl-2">(SDA Name Not Found)</span>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div v-else :class="[checkTxnType(txnType) ? 'table_div' : 'txn-div']">
-    <div v-if="txnDetail">
-      <div>{{ txnDetail.name }}</div>
+  <div :class="styleClass">
+    <div>
+      <div>{{ label }}</div>
       <div>
+        
         <router-link
-          :to="{ name: 'ViewAsset', params: { id: txnDetail.value } }"
+          :to="{
+            name: 'ViewAsset',
+            params: { id: displayValue },
+          }"
           class="hover:text-blue-primary hover:underline text-blue-600"
-          >{{ txnDetail.value }}
+          >{{ displayValue }} 
         </router-link>
-        <span class="text-xxs text-gray-500" v-if="txnDetail.secondaryValue"
-          >({{ txnDetail.secondaryValue }})</span
-        >
+
+        <span v-if="alias"> 
+          (alias of 
+          <router-link
+          :to="{
+            name: 'ViewNamespace',
+            params: { namespaceParam: alias },
+          }"
+          class="hover:text-blue-primary hover:underline text-blue-600"
+          >{{ alias }}
+          </router-link>
+          )
+        </span>
+        <div v-if="isResolving" class="inline-block animate-spin rounded-full h-3 w-3 border-b-2 border-navy-primary mr-2"></div>
+        <span class="text-sm text-red-300 px-2" v-if="errorMsg">{{ errorMsg }}</span>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, computed, watch } from "vue";
 import { AppState } from "@/state/appState";
-import { TransactionUtils } from "@/util/transactionUtils";
-import { TransactionType } from "tsjs-xpx-chain-sdk";
-import { ref } from "vue";
+import { UInt64, MosaicId } from "tsjs-xpx-chain-sdk";
+
+const displayValue = ref("");
+const errorMsg = ref("");
+const alias = ref("");
+const isResolving = ref(false);
 
 const props = defineProps({
-  txnDetail: Object,
-  toggleTransform: Boolean,
-  txnType: Number,
+  label: String,
+  value: String,
+  styleClass: String,
+  toggleResolve: Boolean,
+  secondaryValue: {
+    type: String,
+    required: true
+  }
 });
 
-const formattedAssetId = ref<any>([]);
-const detectError = ref(false);
-const nativeTokenNamespace = AppState.nativeToken.label;
+const initAssign = ()=>{
+  displayValue.value = props.value || "";
+}
 
-const checkTxnType = (type: any) => {
-  if (
-    type == TransactionType.AGGREGATE_BONDED_V1 ||
-    type == TransactionType.AGGREGATE_COMPLETE_V1
-  ) {
-    return true;
-  } else {
-    return false;
+initAssign();
+
+const resolve = async ()=>{
+
+  if(displayValue.value !== ""){
+
+    isResolving.value = true;
+    errorMsg.value = "";
+
+    try {
+      let assetId = new MosaicId(displayValue.value);
+
+      let assetInfo = await AppState.chainAPI!.assetAPI.getMosaic(assetId);
+
+      let tokenDecimalPlace = assetInfo.divisibility;
+      let divider = Math.pow(10, tokenDecimalPlace);
+      let quotient = BigInt(props.secondaryValue)/ BigInt(divider);
+      let remainder = displayValue.value.slice(-tokenDecimalPlace);
+      
+      let remainderInteger = parseInt(remainder);
+
+      let amountWithDecimal = remainderInteger ? remainderInteger / divider: 0;
+      let adjustedDecimalAmount = remainderInteger ? amountWithDecimal.toString().split(".")[1].toString(): "";
+
+      displayValue.value = quotient.toString() + (remainderInteger ? "." + adjustedDecimalAmount :"");
+
+      let names = await AppState.chainAPI!.assetAPI.getMosaicsNames([assetId]);
+      
+      displayValue.value = displayValue.value + " " + props.value;
+
+      if(names[0] && names[0].names[0]){
+        alias.value = names[0].names[0].name;
+      }
+      else{
+        alias.value = "";
+      }
+      
+    } catch (error) {
+      errorMsg.value = "unable to resolve";
+    } 
   }
-};
+  isResolving.value = false;
+}
 
-const formatSdaID = async (data: any, type: any) => {
-  let txn = <
-    {
-      amount: number;
-      targetIdName: string;
+if(props.toggleResolve){
+  resolve();
+}
+
+watch(
+  () => props.toggleResolve,
+  (isToggleResolve) => {
+    if(isToggleResolve){
+      resolve();
     }
-  >{};
-  if (type == TransactionType.HASH_LOCK || TransactionType.SECRET_LOCK) {
-    const amount = data.secondaryValue;
-    txn.amount = AppState.nativeToken.divisibility
-      ? amount / Math.pow(10, AppState.nativeToken.divisibility)
-      : amount;
-  }
-  try {
-    const assetId = data.value;
-    const assetName = await TransactionUtils.getAssetName(assetId);
-    if (assetName.names.length) {
-      txn.targetIdName = assetName.names[0].name;
+    else{
+      initAssign(); 
     }
-  } catch (error) {
-    detectError.value = true;
   }
-  formattedAssetId.value.push(txn);
-};
+)
 
-const formatCurrency = (cost: any) => {
-  return cost.toString().split(".");
-};
-
-formatSdaID(props.txnDetail, props.txnType);
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

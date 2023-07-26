@@ -18,7 +18,7 @@
         <SdaAmountHandler :label="label" :value="value" :secondary-value="secondaryValue || ''" :style-class="styleClass" :toggle-resolve="toggleResolve" ></SdaAmountHandler>
     </template>
     <template v-else-if="handlerType === ComponentNames.asset">
-        <SdaNewHandler :label="label" :value="value" :secondary-value="secondaryValue || ''" :style-class="styleClass" :toggle-resolve="toggleResolve" ></SdaNewHandler>
+        <SdaHandler :label="label" :value="value" :secondary-value="secondaryValue || ''" :style-class="styleClass" :toggle-resolve="toggleResolve" ></SdaHandler>
     </template>
     <template v-else-if="handlerType === ComponentNames.metadata">
         <MetadataHandler :label="label" :value="value" :secondary-value="secondaryValue || ''" :style-class="styleClass" :toggle-resolve="toggleResolve" ></MetadataHandler>
@@ -30,7 +30,7 @@
 
 import { computed, ref } from "vue";
 import NamespaceHandler from "./NamespaceHandler.vue";
-import SdaNewHandler from "./SdaNewHandler.vue";
+import SdaHandler from "./SdaHandler.vue";
 import AddressHandler from "./AddressHandler.vue";
 import SdaIdHandler from "./SdaIdHandler.vue";
 import SdaAmountHandler from "./SdaAmountHandler.vue";

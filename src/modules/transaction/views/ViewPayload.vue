@@ -193,10 +193,6 @@ MosaicLevyType,
 MosaicLevy
 } from "tsjs-xpx-chain-sdk";
 import { computed, ref } from "vue";
-import SdasHandler from "../components/payloadDetails/SdasHandler.vue";
-import NamespaceIdHandler from "../components/payloadDetails/NamespaceIdHandler.vue";
-import SdaHandler from "../components/payloadDetails/SdaHandler.vue";
-import PublicKeyHandler from "../components/payloadDetails/PublicKeyHandler.vue";
 import HandlerControl from "../components/payloadDetails/HandlerControl.vue";
 import {ComponentNames} from "../componentEnum";
 
