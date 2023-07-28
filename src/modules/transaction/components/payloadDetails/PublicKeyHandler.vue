@@ -2,7 +2,7 @@
   <div :class="styleClass">
     <div>
       <div>{{ label }}</div>
-      <div class="overflow-hidden">
+      <div>
         <router-link
           :to="{
             name: 'ViewAccount',
@@ -35,11 +35,11 @@ const props = defineProps({
     @apply flex items-center border-b border-gray-100 py-4;
 
     > div:first-child {
-      @apply w-40 text-xs pl-4;
+      @apply flex-none w-40 text-xs pl-4;
     }
 
     > div:nth-child(2) {
-      @apply text-xs;
+      @apply grow break-normal text-xs ;
     }
 
     > div:last-child {

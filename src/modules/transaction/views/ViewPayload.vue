@@ -59,16 +59,14 @@
     </div>
 
     <div class="flex">
-      <p class="text-gray-500 mb-5 text-sm font-bold w-full">
+      <p class="text-gray-500 mb-5 text-sm font-bold w-1/2">
         Transaction Details
       </p>
-      <button
-        class="bg-blue-500 hover:bg-blue-70 font-bold py-2 px-4 rounded-full"
-        title="Resolve data in this network"
-        @click="toggleResolve = !toggleResolve"
-      >
-        <img src="@/assets/img/transform_icon.svg" class="w-7" />
-      </button>
+      <div class="w-1/2">
+        <div class="flex justify-end text-xs py-2">Resolve data in this network</div>
+        <div class="flex justify-end"><InputSwitch v-model="toggleResolve" /></div>
+      </div>
+      
     </div>
 
     <div>
@@ -77,86 +75,12 @@
         <div v-for="(data, index) of innerTxns" class="mt-3 border border-gray-200 p-3">
           <div>Transaction {{ index + 1 }}</div>
           <div v-for="item of data" > 
-            <div v-if="Array.isArray(item.value)">
-              <div class="table_div">
-              <div>
-                <div class="flex-none">{{ item.name }}</div>
-                <div class="grow">
-                  <div v-for="childItem in item.value" class="table_div">
-                    <div v-if="childItem.handlerType && typeof childItem.value == 'string'">
-                      <HandlerControl :label="childItem.name" style-class="table_div" 
-                        :value="childItem.value" :secondary-value="childItem.secondaryValue" :toggle-resolve="toggleResolve" :handler-type="childItem.handlerType" >
-                      </HandlerControl>
-                    </div>
-                    <div v-else class="table_div">
-                      <div class="flex-none">{{ childItem.name }}</div>
-                      <div class="grow">{{ childItem.value }} 
-                        <span v-if="childItem.secondaryValue" class="text-xxs text-gray-500">
-                          ({{ childItem.secondaryValue }})
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                </div>
-              </div>
-              
-            </div>
-            <div v-else>
-              <div v-if="item.handlerType">
-                <HandlerControl :label="item.name" style-class="table_div" 
-                  :value="item.value" :secondary-value="item.secondaryValue" :toggle-resolve="toggleResolve" :handler-type="item.handlerType" >
-                </HandlerControl>
-              </div>
-              <div v-else class="table_div">
-                <div>
-                  <div>{{ item.name }}</div>
-                  <div>{{ item.value }} 
-                    <span v-if="item.secondaryValue" class="text-xxs text-gray-500">
-                      ({{ item.secondaryValue }})
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <DisplayValue style-class="table_div" :toggle-resolve="toggleResolve" :value="item"></DisplayValue>
           </div>
         </div>
 
         <div v-for="data in txnDetails">
-          <div v-if="Array.isArray(data.value)">
-            <div v-if="data.handlerType && typeof data.value == 'string'">
-              <HandlerControl :label="data.name" style-class="txn-div" 
-                :value="data.value" :secondary-value="data.secondaryValue" :toggle-resolve="toggleResolve" :handler-type="data.handlerType" >
-              </HandlerControl>
-            </div>
-            <div v-else class="txn-div">
-              <div>
-                <div>{{ data.name }}</div>
-                <div>{{ data.value }} 
-                  <span v-if="data.secondaryValue" class="text-xxs text-gray-500">
-                    ({{ data.secondaryValue }})
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div v-else>
-            <div v-if="data.handlerType">
-              <HandlerControl :label="data.name" style-class="txn-div" 
-                :value="data.value" :secondary-value="data.secondaryValue" :toggle-resolve="toggleResolve" :handler-type="data.handlerType" >
-              </HandlerControl>
-            </div>
-            <div v-else class="txn-div">
-              <div>
-                <div>{{ data.name }}</div>
-                <div>{{ data.value }} 
-                  <span v-if="data.secondaryValue" class="text-xxs text-gray-500">
-                    ({{ data.secondaryValue }})
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <DisplayValue style-class="txn-div" :toggle-resolve="toggleResolve" :value="data"></DisplayValue>
         </div>
       </div>
     </div>
@@ -189,12 +113,17 @@ import {
   DerivationScheme,
   MosaicNonce,
   MosaicProperties,
-MosaicLevyType,
-MosaicLevy
+  MosaicLevyType,
+  MosaicLevy
 } from "tsjs-xpx-chain-sdk";
-import { computed, ref } from "vue";
+import { computed, ref, toRefs, watch } from "vue";
+import InputSwitch from 'primevue/inputswitch';
+import "primevue/resources/themes/lara-light-blue/theme.css";
 import HandlerControl from "../components/payloadDetails/HandlerControl.vue";
 import {ComponentNames} from "../componentEnum";
+import { TransactionUtils } from "@/util/transactionUtils";
+import type { RowData } from "../../transaction/components/payloadDetails/IRowData";
+import DisplayValue from "../../transaction/components/payloadDetails/DisplayValue.vue";
 
 const props = defineProps({
   payload: {
@@ -203,10 +132,9 @@ const props = defineProps({
   },
 });
 
-const txn = ref();
-const innerTxns = ref(<rowData[][]>[]);
-const txnDetails = ref(<rowData[]>[]);
-const commonTxnDetails = ref(<rowData[]>[]);
+const innerTxns = ref(<RowData[][]>[]);
+const txnDetails = ref(<RowData[]>[]);
+const commonTxnDetails = ref(<RowData[]>[]);
 const innerTxnType = ref();
 const toggleResolve = ref(false);
 const payloadNamespaceId = ref();
@@ -215,18 +143,7 @@ const signature = ref("");
 const signer = ref("");
 const innerTxnsCount = ref(0);
 
-const convertPayload = props.payload;
-
-if (convertPayload) {
-  txn.value = TransactionMapping.createFromPayload(convertPayload);
-
-  signature.value = convertPayload.substring(8, 136);
-  signer.value = convertPayload.substring(136, 200);
-
-  if(signature.value !== "0".repeat(128) && signer.value !== "0".repeat(64)){
-    isSignedTransaction.value = true;
-  }
-}
+const {payload} = toRefs(props);
 
 type configData = {
   key: string;
@@ -249,13 +166,6 @@ let populateInnerTransactionConfig = (config: any) => {
   }
 };
 
-interface rowData {
-  name: string;
-  value: string | rowData[];
-  secondaryValue?: string;
-  handlerType?: string;
-}
-
 let txnHeaderProp = ["Type", "Deadline", "MaxFee", "Version"];
 let ignoreList = [
   "transactionName",
@@ -269,7 +179,8 @@ let ignoreList = [
 ];
 
 let globalConfig = {
-  "version.networkType": { value: (data: any) => NetworkType[data], secondaryValue: (data: any) => data },
+  "version.networkType": { value: (data: any) => NetworkType[data], secondaryValue: (data: any) => data.toString() },
+  "version.txnTypeVersion": { value: (data: any) => data.toString() },
   "message.type": { value: (data: any) => MessageType[data] },
   "offers.type": { value: (data: any) => ExchangeOfferType[data] },
   "offers.offerType": { value: (data: any) => ExchangeOfferType[data] },
@@ -293,14 +204,14 @@ populateInnerTransactionConfig(globalConfig);
 
 // console.log(globalConfig);
 
-let extractTxnDataBasedOnClass = (data: any, key: string): rowData | null => {
+let extractTxnDataBasedOnClass = (data: any, key: string): RowData | null => {
   let classType = data.constructor.name;
   let typeOfData = typeof data;
 
   let finalData: string = "";
   let handlerType: string = "";
 
-  // let displayData: rowData;
+  // let displayData: RowData;
 
   if (classType === UInt64.name) {
     let d = data as UInt64;
@@ -345,6 +256,7 @@ let extractTxnDataBasedOnClass = (data: any, key: string): rowData | null => {
     return {
       name: key,
       value: finalData,
+      handlerType: ComponentNames.address
     };
   } else if (classType === NamespaceId.name) {
     let d = data as NamespaceId;
@@ -361,6 +273,10 @@ let extractTxnDataBasedOnClass = (data: any, key: string): rowData | null => {
     let d = data as MosaicId;
     finalData = d.toHex();
     handlerType = ComponentNames.assetID;
+
+    if(TransactionUtils.isNamespaceWithString(finalData)){
+      handlerType = ComponentNames.namespace;
+    }
 
     return {
       name: key,
@@ -402,7 +318,7 @@ let getPropData = (
   key: string,
   fullKey: string,
   wholeData: any
-): rowData | null => {
+): RowData | null => {
   let finalData: string = "";
   let secondaryValue: string = "";
 
@@ -557,8 +473,8 @@ let getData = (
   classData: any,
   parent: string = "",
   globalConfig: any
-): rowData[] => {
-  let displayData: rowData[] = [];
+): RowData[] => {
+  let displayData: RowData[] = [];
   // console.log("Parent: " + parent);
 
   for (const key in classData) {
@@ -608,7 +524,7 @@ let getData = (
 
           for (let innerData of data) {
 
-            let groupedPropData: rowData[] = [];
+            let groupedPropData: RowData[] = [];
 
             let row = extractTxnDataBasedOnClass(innerData, keyName);
 
@@ -636,7 +552,7 @@ let getData = (
               globalConfig[currentPropString].handlerType
                 ? globalConfig[currentPropString].handlerType : "";
 
-          let row: rowData = {
+          let row: RowData = {
             name: keyName,
             value: allGroupedPropData,
             handlerType: handlerType,
@@ -649,11 +565,6 @@ let getData = (
           let row = extractTxnDataBasedOnClass(data, keyName);
 
           if (row) {
-            // let row: rowData = {
-            //     name: keyName,
-            //     value: finalData,
-            //     handlerType: handlerType
-            // };
 
             displayData.push(row);
 
@@ -669,7 +580,7 @@ let getData = (
 
           displayData.push(row);
         } else {
-          let row: rowData = {
+          let row: RowData = {
             name: keyName,
             value: data,
           };
@@ -697,47 +608,67 @@ let getData = (
   return displayData;
 };
 
-let allData = getData(txn.value, "", globalConfig);
-
-console.log(allData);
-
 const getInnerTxns = (data: any[]) => {
   
   innerTxnsCount.value = 0;
   let temp = data.find((r)=> r.name === "InnerTransactions") ? data.find((r)=> r.name === "InnerTransactions").value: [];
-  console.log(temp);
+  // console.log(temp);
   return temp;
 };
 
-const addCount = ()=>{
-  innerTxnsCount.value =  innerTxnsCount.value + 1;
+const getTxnDetails = (data: RowData[])=>{
 
-  return innerTxnsCount.value;
+  return data.filter((RowData)=> !txnHeaderProp.includes(RowData.name) && RowData.name !== "InnerTransactions")
 }
 
-const getTxnDetails = (data: rowData[])=>{
+const getCommonDetails = (data: RowData[])=>{
 
-  return data.filter((rowData)=> !txnHeaderProp.includes(rowData.name) && rowData.name !== "InnerTransactions")
+return data.filter((RowData)=> txnHeaderProp.includes(RowData.name))
 }
 
-const getCommonDetails = (data: rowData[])=>{
+// const txnType = computed<any>(() => {
+//   for (let item in allData) {
+//     if (allData[item].name === "Type") {
+//       return allData[item].secondaryValue;
+//     }
+//   }
+// });
 
-return data.filter((rowData)=> txnHeaderProp.includes(rowData.name))
-}
+const decodePayload = (payload: string)=>{
 
-//console.log(allData);
+  if (payload) {
+    let txn= TransactionMapping.createFromPayload(payload);
 
-const txnType = computed<any>(() => {
-  for (let item in allData) {
-    if (allData[item].name === "Type") {
-      return allData[item].secondaryValue;
+    signature.value = payload.substring(8, 136);
+    signer.value = payload.substring(136, 200);
+
+    if(signature.value !== "0".repeat(128) && signer.value !== "0".repeat(64)){
+      isSignedTransaction.value = true;
     }
-  }
-});
+    else{
+      isSignedTransaction.value = false;
+    }
 
-commonTxnDetails.value = getCommonDetails(allData);
-innerTxns.value = getInnerTxns(allData);
-txnDetails.value = getTxnDetails(allData);
+    let allData = getData(txn, "", globalConfig);
+    // console.log(allData);
+
+    commonTxnDetails.value = getCommonDetails(allData);
+    innerTxns.value = getInnerTxns(allData);
+    txnDetails.value = getTxnDetails(allData);
+
+    // console.log(txnDetails.value);
+  }
+}
+
+decodePayload(payload.value);
+
+watch(
+  () => payload.value,
+  (payload) => {
+    decodePayload(payload);
+  }
+)
+
 </script>
 
 <style scoped lang="scss">
@@ -749,11 +680,11 @@ txnDetails.value = getTxnDetails(allData);
     @apply flex items-center border-b border-gray-100 py-4;
 
     > div:first-child {
-      @apply w-40 text-xs pl-4;
+      @apply w-40 text-xs pl-4 flex-none;
     }
 
     > div:nth-child(2) {
-      @apply text-xs;
+      @apply text-xs grow;
     }
 
     > div:last-child {
@@ -777,12 +708,21 @@ txnDetails.value = getTxnDetails(allData);
     }
 
     > div:nth-child(2) {
-      @apply break-all col-span-3;
+      @apply col-span-3;
     }
   }
 
   > div:nth-child(2n + 1) {
     @apply bg-gray-100;
+  }
+}
+
+</style>
+
+<style lang="scss">
+.p-inputswitch .p-hidden-accessible{ 
+  > input{
+    transform: scale(0) !important;
   }
 }
 </style>

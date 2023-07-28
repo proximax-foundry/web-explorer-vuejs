@@ -13,8 +13,8 @@
           >{{ displayValue }} 
         </router-link>
 
-        <span v-if="alias"> 
-          (alias of 
+        <div v-if="alias && !isNamespace"> 
+          (alias of  
           <router-link
           :to="{
             name: 'ViewNamespace',
@@ -24,7 +24,20 @@
           >{{ alias }}
           </router-link>
           )
-        </span>
+        </div>
+
+        <div v-if="alias && isNamespace"> 
+          (
+          <router-link
+          :to="{
+            name: 'ViewNamespace',
+            params: { namespaceParam: alias },
+          }"
+          class="hover:text-blue-primary hover:underline text-blue-600"
+          >{{ alias }}
+          </router-link>
+          )
+        </div>
         <div v-if="isResolving" class="inline-block animate-spin rounded-full h-3 w-3 border-b-2 border-navy-primary mr-2"></div>
         <span class="text-sm text-red-300 px-2" v-if="errorMsg">{{ errorMsg }}</span>
       </div>
@@ -35,16 +48,21 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
 import { AppState } from "@/state/appState";
-import { UInt64, MosaicId } from "tsjs-xpx-chain-sdk";
+import { UInt64, MosaicId, NamespaceId, MosaicInfo, Convert } from "tsjs-xpx-chain-sdk";
+import { TransactionUtils } from "@/util/transactionUtils";
 
 const displayValue = ref("");
 const errorMsg = ref("");
 const alias = ref("");
 const isResolving = ref(false);
+const isNamespace = ref(false);
 
 const props = defineProps({
   label: String,
-  value: String,
+  value: {
+    type: String,
+    required: true
+  },
   styleClass: String,
   toggleResolve: Boolean,
   secondaryValue: {
@@ -54,7 +72,8 @@ const props = defineProps({
 });
 
 const initAssign = ()=>{
-  displayValue.value = props.value || "";
+  displayValue.value = props.secondaryValue + " " + props.value;
+  alias.value = "";
 }
 
 initAssign();
@@ -67,14 +86,32 @@ const resolve = async ()=>{
     errorMsg.value = "";
 
     try {
-      let assetId = new MosaicId(displayValue.value);
+      let assetId = new MosaicId(props.value);
+      let usingAssetId = assetId;
 
-      let assetInfo = await AppState.chainAPI!.assetAPI.getMosaic(assetId);
+      if(TransactionUtils.isNamespaceWithString(assetId.toHex())){
+        isNamespace.value = true;
+      }
+      else{
+        isNamespace.value = false;
+      }
+
+      if(isNamespace.value){
+        let linkedAssetId = await AppState.chainAPI!.namespaceAPI.getLinkedMosaicId(new NamespaceId(assetId.toDTO().id));
+
+        if(!linkedAssetId){
+          throw new Error("Linked SDA not found");
+        }
+
+        usingAssetId = linkedAssetId;
+      }
+
+      let assetInfo: MosaicInfo = await AppState.chainAPI!.assetAPI.getMosaic(usingAssetId);
 
       let tokenDecimalPlace = assetInfo.divisibility;
       let divider = Math.pow(10, tokenDecimalPlace);
       let quotient = BigInt(props.secondaryValue)/ BigInt(divider);
-      let remainder = displayValue.value.slice(-tokenDecimalPlace);
+      let remainder = props.secondaryValue.slice(-tokenDecimalPlace);
       
       let remainderInteger = parseInt(remainder);
 
@@ -83,15 +120,27 @@ const resolve = async ()=>{
 
       displayValue.value = quotient.toString() + (remainderInteger ? "." + adjustedDecimalAmount :"");
 
-      let names = await AppState.chainAPI!.assetAPI.getMosaicsNames([assetId]);
-      
       displayValue.value = displayValue.value + " " + props.value;
 
-      if(names[0] && names[0].names[0]){
-        alias.value = names[0].names[0].name;
+      if(isNamespace.value){
+        let nsName = await AppState.chainAPI!.namespaceAPI.getNamespacesName([new NamespaceId(assetId.toDTO().id)]);
+
+        if(nsName[0] && nsName[0].name){
+          alias.value = nsName[0].name;
+        }
+        else{
+          throw new Error("Namespace name not found");
+        }
       }
       else{
-        alias.value = "";
+        let names = await AppState.chainAPI!.assetAPI.getMosaicsNames([assetId]);
+      
+        if(names[0] && names[0].names[0]){
+          alias.value = names[0].names[0].name;
+        }
+        else{
+          alias.value = "";
+        }
       }
       
     } catch (error) {
@@ -129,11 +178,11 @@ watch(
     @apply flex items-center border-b border-gray-100 py-4;
 
     > div:first-child {
-      @apply w-40 text-xs pl-4;
+      @apply w-40 text-xs pl-4 flex-none;
     }
 
     > div:nth-child(2) {
-      @apply text-xs;
+      @apply text-xs grow;
     }
 
     > div:last-child {
@@ -157,7 +206,7 @@ watch(
     }
 
     > div:nth-child(2) {
-      @apply break-all col-span-3;
+      @apply col-span-3;
     }
   }
 

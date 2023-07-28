@@ -18,7 +18,7 @@
         <SdaAmountHandler :label="label" :value="value" :secondary-value="secondaryValue || ''" :style-class="styleClass" :toggle-resolve="toggleResolve" ></SdaAmountHandler>
     </template>
     <template v-else-if="handlerType === ComponentNames.asset">
-        <SdaHandler :label="label" :value="value" :secondary-value="secondaryValue || ''" :style-class="styleClass" :toggle-resolve="toggleResolve" ></SdaHandler>
+        <SdaHandler :label="label" :value="value || ''" :secondary-value="secondaryValue || ''" :style-class="styleClass" :toggle-resolve="toggleResolve" ></SdaHandler>
     </template>
     <template v-else-if="handlerType === ComponentNames.metadata">
         <MetadataHandler :label="label" :value="value" :secondary-value="secondaryValue || ''" :style-class="styleClass" :toggle-resolve="toggleResolve" ></MetadataHandler>
