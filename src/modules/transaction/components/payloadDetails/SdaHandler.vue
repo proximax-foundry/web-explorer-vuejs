@@ -4,10 +4,19 @@
       <div>{{ label }}</div>
       <div>
         
-        <router-link
+        <router-link v-if="!isNamespace"
           :to="{
             name: 'ViewAsset',
-            params: { id: displayValue },
+            params: { id: value },
+          }"
+          class="hover:text-blue-primary hover:underline text-blue-600"
+          >{{ displayValue }} 
+        </router-link>
+
+        <router-link v-else
+          :to="{
+            name: 'ViewNamespace',
+            params: { namespaceParam: value },
           }"
           class="hover:text-blue-primary hover:underline text-blue-600"
           >{{ displayValue }} 
@@ -74,6 +83,13 @@ const props = defineProps({
 const initAssign = ()=>{
   displayValue.value = props.secondaryValue + " " + props.value;
   alias.value = "";
+
+  if(TransactionUtils.isNamespaceWithString(props.value)){
+    isNamespace.value = true;
+  }
+  else{
+    isNamespace.value = false;
+  }
 }
 
 initAssign();
@@ -88,13 +104,6 @@ const resolve = async ()=>{
     try {
       let assetId = new MosaicId(props.value);
       let usingAssetId = assetId;
-
-      if(TransactionUtils.isNamespaceWithString(assetId.toHex())){
-        isNamespace.value = true;
-      }
-      else{
-        isNamespace.value = false;
-      }
 
       if(isNamespace.value){
         let linkedAssetId = await AppState.chainAPI!.namespaceAPI.getLinkedMosaicId(new NamespaceId(assetId.toDTO().id));
