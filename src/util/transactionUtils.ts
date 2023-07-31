@@ -1019,6 +1019,29 @@ export class TransactionUtils {
     return Convert.decodeHexToUtf8(Convert.uint8ArrayToHex(valueUint8Array));
   }
 
+  /**
+   * @param oldHexValue - hex string
+   * @param valueChangeHex - hex string
+   * @param sizeDelta - number
+   */
+  static applyHexValueChange(
+    oldHexValue: string,
+    valueChangeHex: string,
+    sizeDelta: number
+  ): string {
+    const newSize = (oldHexValue.length / 2) + sizeDelta;
+    const oldValueBytes = Convert.hexToUint8(oldHexValue);
+    const valueChangeBytes = Convert.hexToUint8(valueChangeHex);
+
+    const valueUint8Array = new Uint8Array(newSize);
+
+    for (let i = 0; i < valueUint8Array.length; ++i) {
+      valueUint8Array[i] = oldValueBytes[i] ^ valueChangeBytes[i];
+    }
+
+    return Convert.uint8ArrayToHex(valueUint8Array);
+  }
+
   static convertToExactNativeAmount(amount: number) {
     if (AppState.nativeToken.divisibility === 0) {
       return amount;
