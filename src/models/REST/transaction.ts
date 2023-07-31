@@ -1,4 +1,4 @@
-import { firstValueFrom } from "rxjs";
+import { lastValueFrom } from "rxjs";
 import {
   TransactionHttp,
   SignedTransaction,
@@ -23,20 +23,20 @@ export class TransactionAPI {
   announce(
     signedTransaction: SignedTransaction
   ): Promise<TransactionAnnounceResponse> {
-    return firstValueFrom(this.transactionHttp.announce(signedTransaction));
+    return lastValueFrom(this.transactionHttp.announce(signedTransaction));
   }
 
   announceAggregateBonded(
     signedTransaction: SignedTransaction
   ): Promise<TransactionAnnounceResponse> {
-    return firstValueFrom(this.transactionHttp
+    return lastValueFrom(this.transactionHttp
       .announceAggregateBonded(signedTransaction));
   }
 
   announceAggregateBondedCosignature(
     cosignatureSignedTransaction: CosignatureSignedTransaction
   ): Promise<TransactionAnnounceResponse> {
-    return firstValueFrom(this.transactionHttp
+    return lastValueFrom(this.transactionHttp
       .announceAggregateBondedCosignature(cosignatureSignedTransaction));
   }
 
@@ -45,7 +45,7 @@ export class TransactionAPI {
    * @param transactionId - Transaction id or hash.
    */
   getTransaction(transactionId: string): Promise<Transaction> {
-    return firstValueFrom(this.transactionHttp.getTransaction(transactionId));
+    return lastValueFrom(this.transactionHttp.getTransaction(transactionId));
   }
 
   /**
@@ -53,7 +53,7 @@ export class TransactionAPI {
    * @param transactionId - Transaction id or hash.
    */
   getUnconfirmedTransaction(transactionId: string): Promise<Transaction> {
-    return firstValueFrom(this.transactionHttp
+    return lastValueFrom(this.transactionHttp
       .getUnconfirmedTransaction(transactionId));
   }
 
@@ -62,7 +62,7 @@ export class TransactionAPI {
    * @param transactionId - Transaction id or hash.
    */
   getPartialTransaction(transactionId: string): Promise<Transaction> {
-    return firstValueFrom(this.transactionHttp
+    return lastValueFrom(this.transactionHttp
       .getPartialTransaction(transactionId));
   }
 
@@ -72,7 +72,7 @@ export class TransactionAPI {
    *
    */
   getTransactions(transactionIds: string[]): Promise<Transaction[]> {
-    return firstValueFrom(this.transactionHttp.getTransactions(transactionIds));
+    return lastValueFrom(this.transactionHttp.getTransactions(transactionIds));
   }
 
   /**
@@ -80,19 +80,19 @@ export class TransactionAPI {
    * @param transactionId - Transaction id or hash.
    */
   getTransactionEffectiveFee(transactionId: string): Promise<number> {
-    return firstValueFrom(this.transactionHttp
+    return lastValueFrom(this.transactionHttp
       .getTransactionEffectiveFee(transactionId));
   }
 
   getTransactionStatus(transactionHash: string): Promise<TransactionStatus> {
-    return firstValueFrom(this.transactionHttp
+    return lastValueFrom(this.transactionHttp
       .getTransactionStatus(transactionHash));
   }
 
   getTransactionsStatuses(
     transactionHashes: string[]
   ): Promise<TransactionStatus[]> {
-    return firstValueFrom(this.transactionHttp
+    return lastValueFrom(this.transactionHttp
       .getTransactionsStatuses(transactionHashes));
   }
 
@@ -100,7 +100,7 @@ export class TransactionAPI {
     transactionGroupType: TransactionGroupType,
     transactionQueryParams?: TransactionQueryParams
   ): Promise<TransactionSearch> {
-    return firstValueFrom(this.transactionHttp
+    return lastValueFrom(this.transactionHttp
       .searchTransactions(transactionGroupType, transactionQueryParams));
   }
 
@@ -108,7 +108,7 @@ export class TransactionAPI {
     transactionTypes: TransactionType[],
     transactionGroupType: TransactionGroupType
   ): Promise<TransactionCount[]> {
-    return firstValueFrom(this.transactionHttp
+    return lastValueFrom(this.transactionHttp
       .getTransactionsCount(transactionTypes, transactionGroupType));
   }
 }

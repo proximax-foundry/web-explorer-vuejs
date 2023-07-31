@@ -1,4 +1,4 @@
-import { firstValueFrom } from "rxjs";
+import { lastValueFrom } from "rxjs";
 import { ChainConfigHttp, ChainConfig } from "tsjs-xpx-chain-sdk";
 
 export class ChainConfigAPI {
@@ -9,6 +9,6 @@ export class ChainConfigAPI {
   }
 
   getChainConfig(height: number): Promise<ChainConfig> {
-    return firstValueFrom(this.chainConfigHttp.getChainConfig(height));
+    return lastValueFrom(this.chainConfigHttp.getChainConfig(height));
   }
 }

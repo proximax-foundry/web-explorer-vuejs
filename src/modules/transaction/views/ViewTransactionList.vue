@@ -115,6 +115,12 @@
         :selectedGroupType="transactionGroupType.CONFIRMED"
         v-else-if="selectedTxnType === TransactionFilterType.CHAIN"
       />
+      <SdaExchangeTxnDataTable
+        :transactions="sdaExchangeTransactions"
+        :pages="pages"
+        :selectedGroupType="transactionGroupType.CONFIRMED"
+        v-else-if="selectedTxnType === TransactionFilterType['SDA EXCHANGE']"
+      />
       <div
         class="sm:flex sm:justify-between my-5 mb-15"
         v-if="totalPages > 1 && transactions.length > 0"
@@ -223,6 +229,7 @@ import LinkTxnDataTable from "@/modules/transaction/components/txnDataTables/Lin
 import RestrictionTxnDataTable from "@/modules/transaction/components/txnDataTables/RestrictionTxnDataTable.vue";
 import SecretTxnDataTable from "@/modules/transaction/components/txnDataTables/SecretTxnDataTable.vue";
 import ChainTxnDataTable from "@/modules/transaction/components/txnDataTables/ChainTxnDataTable.vue";
+import SdaExchangeTxnDataTable from "../components/txnDataTables/SdaExchangeTxnDataTable.vue";
 import ExportCSVComponent from "@/modules/transaction/components/ExportCSVComponent.vue";
 import type { Transaction } from "tsjs-xpx-chain-sdk";
 
@@ -295,6 +302,7 @@ const linkTransactions = ref<any[]>([]);
 const restrictionTransactions = ref<any[]>([]);
 const secretTransactions = ref<any[]>([]);
 const chainTransactions = ref<any[]>([]);
+const sdaExchangeTransactions = ref<any[]>([]);
 const QueryParamsType = ref<number[] | undefined>(undefined);
 let transactionGroupType = Helper.getTransactionGroupType();
 let blockDescOrderSortingField = Helper.createTransactionFieldOrder(
@@ -383,6 +391,9 @@ let loadRecentTransactions = async () => {
     if(selectedTxnType.value == TransactionFilterType.CHAIN){
       chainTransactions.value = formattedTxns
     }
+    if(selectedTxnType.value == TransactionFilterType['SDA EXCHANGE']){
+      sdaExchangeTransactions.value = formattedTxns
+    }
     totalPages.value = transactionSearchResult.pagination.totalPages;
   } else {
     transactions.value = [];
@@ -434,6 +445,9 @@ const changeSearchTxnType = () => {
       break;
     case TransactionFilterType.RESTRICTION:
       QueryParamsType.value = TransactionFilterTypes.getRestrictionTypes();
+      break;
+    case TransactionFilterType['SDA EXCHANGE']:
+      QueryParamsType.value = TransactionFilterTypes.getSdaExchangeTypes();
       break;
     default:
       QueryParamsType.value = undefined;
@@ -512,6 +526,12 @@ const formatConfirmedTransaction = async (transactions: Transaction[]) => {
     case TransactionFilterType.NAMESPACE:
       formattedTxns =
         await TransactionUtils.formatConfirmedNamespaceTransaction(
+          transactions
+        );
+      break;
+    case TransactionFilterType['SDA EXCHANGE']:
+      formattedTxns =
+        await TransactionUtils.formatConfirmedSdaExchangeTransaction(
           transactions
         );
       break;

@@ -1,4 +1,4 @@
-import { firstValueFrom } from "rxjs";
+import { lastValueFrom } from "rxjs";
 import { NodeHttp, NodeInfo, NodeTime } from "tsjs-xpx-chain-sdk";
 
 export class NodeAPI {
@@ -9,10 +9,10 @@ export class NodeAPI {
   }
 
   getNodeInfo(): Promise<NodeInfo> {
-    return firstValueFrom(this.nodeHttp.getNodeInfo());
+    return lastValueFrom(this.nodeHttp.getNodeInfo());
   }
 
   getNodeTime(): Promise<NodeTime> {
-    return firstValueFrom(this.nodeHttp.getNodeTime());
+    return lastValueFrom(this.nodeHttp.getNodeTime());
   }
 }

@@ -11,3 +11,4 @@ export * from "./secret";
 export * from "./restriction";
 export * from "./link";
 export * from "./exchange";
+export * from "./sdaExchange";
