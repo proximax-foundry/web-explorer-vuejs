@@ -1,3 +1,4 @@
+import { lastValueFrom } from "rxjs";
 import {
   AccountHttp,
   NetworkHttp,
@@ -21,81 +22,75 @@ export class AccountAPI {
   }
 
   getAccountInfo(address: Address): Promise<AccountInfo> {
-    return this.accountHttp.getAccountInfo(address).toPromise();
+    return lastValueFrom(this.accountHttp.getAccountInfo(address));
   }
 
   aggregateBondedTransactions(
     publicAccount: PublicAccount,
     queryParams?: TransactionQueryParams
   ): Promise<AggregateTransaction[]> {
-    return this.accountHttp
-      .aggregateBondedTransactions(publicAccount, queryParams)
-      .toPromise();
+    return lastValueFrom(this.accountHttp
+      .aggregateBondedTransactions(publicAccount, queryParams));
   }
 
   getAccountRestrictions(address: Address): Promise<AccountRestrictionsInfo> {
-    return this.accountHttp.getAccountRestrictions(address).toPromise();
+    return lastValueFrom(this.accountHttp.getAccountRestrictions(address));
   }
 
   getAccountRestrictionsFromAccounts(
     addresses: Address[]
   ): Promise<AccountRestrictionsInfo[]> {
-    return this.accountHttp
-      .getAccountRestrictionsFromAccounts(addresses)
-      .toPromise();
+    return lastValueFrom(this.accountHttp
+      .getAccountRestrictionsFromAccounts(addresses));
   }
 
   getAccountsInfo(addresses: Address[]): Promise<AccountInfo[]> {
-    return this.accountHttp.getAccountsInfo(addresses).toPromise();
+    return lastValueFrom(this.accountHttp.getAccountsInfo(addresses));
   }
 
   getAccountsNames(addresses: Address[]): Promise<AccountNames[]> {
-    return this.accountHttp.getAccountsNames(addresses).toPromise();
+    return lastValueFrom(this.accountHttp.getAccountsNames(addresses));
   }
 
   getMultisigAccountGraphInfo(
     address: Address
   ): Promise<MultisigAccountGraphInfo> {
-    return this.accountHttp.getMultisigAccountGraphInfo(address).toPromise();
+    return lastValueFrom(this.accountHttp.getMultisigAccountGraphInfo(address));
   }
 
   getMultisigAccountInfo(address: Address): Promise<MultisigAccountInfo> {
-    return this.accountHttp.getMultisigAccountInfo(address).toPromise();
+    return lastValueFrom(this.accountHttp.getMultisigAccountInfo(address));
   }
 
   transactions(
     publicAccount: PublicAccount,
     queryParams?: TransactionQueryParams
   ): Promise<Transaction[]> {
-    return this.accountHttp
-      .transactions(publicAccount, queryParams)
-      .toPromise();
+    return lastValueFrom(this.accountHttp
+      .transactions(publicAccount, queryParams));
   }
 
   incomingTransactions(
     accountId: Address | PublicAccount,
     queryParams?: TransactionQueryParams
   ): Promise<Transaction[]> {
-    return this.accountHttp
-      .incomingTransactions(accountId, queryParams)
-      .toPromise();
+    return lastValueFrom(this.accountHttp
+      .incomingTransactions(accountId, queryParams));
   }
 
   outgoingTransactions(
     publicAccount: PublicAccount,
     queryParams?: TransactionQueryParams
   ): Promise<Transaction[]> {
-    return this.accountHttp
-      .outgoingTransactions(publicAccount, queryParams)
-      .toPromise();
+    return lastValueFrom(this.accountHttp
+      .outgoingTransactions(publicAccount, queryParams));
   }
 
   unconfirmedTransactions(
     publicAccount: PublicAccount,
     queryParams?: TransactionQueryParams
   ): Promise<Transaction[]> {
-    return this.accountHttp
-      .unconfirmedTransactions(publicAccount, queryParams)
-      .toPromise();
+    return lastValueFrom(this.accountHttp
+      .unconfirmedTransactions(publicAccount, queryParams));
   }
 }

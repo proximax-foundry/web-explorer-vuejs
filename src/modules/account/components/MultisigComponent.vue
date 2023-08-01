@@ -105,7 +105,18 @@
               >
                 Collapse All
               </button>
-              <Tree v-model:expandedKeys="expandedKeys" :value="multisigAccountsList" :filter="true" filterMode="strict" @node-select="onNodeSelect" selectionMode="single" class="pt-1.5"></Tree>
+              <Tree v-if="multisigAccountsList.length"  v-model:expandedKeys="expandedKeys" :value="multisigAccountsList" :filter="true" filterMode="strict"
+                @node-select="onNodeSelect" selectionMode="single" class="w-full pt-1.5 ">
+                <template #default="slotProps">
+                    <div>{{ slotProps.node.label }}</div>
+                </template>
+                <template #child="slotProps" class="w-full">
+                    <div class="border rounded-md p-3 flex flex-col shadow-lg filter mb-2 w-full">
+                        <div class="text-blue-primary font-semibold text-xs">{{ slotProps.node.label }}</div>
+                    </div>
+                </template>
+
+              </Tree>
             </div>
             <div
               v-if="!multisigLength"
@@ -182,7 +193,16 @@ const cosignerLength = computed(() => {
 });
 
 const multisigAccountsList = computed(() => {
-  return props.multisig;
+  let multisigAccounts: { key: string, label: string, selectable: boolean, children: { key: string, label: string, selectable: boolean, data: string }[] }[] = [];
+  if (!props.multisig) {
+      return multisigAccounts
+    }
+    for(let i = 0; i < props.multisig.length; ++i){
+      if(props.multisig[i].children.length > 0){
+        multisigAccounts.push(props.multisig[i])
+      }
+    }
+    return multisigAccounts
 });
 
 const cosignerAccountsList = computed(() => {

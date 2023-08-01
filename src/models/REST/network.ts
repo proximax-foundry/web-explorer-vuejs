@@ -1,3 +1,4 @@
+import { lastValueFrom } from "rxjs";
 import { NetworkHttp, NetworkType } from "tsjs-xpx-chain-sdk";
 
 export class NetworkAPI {
@@ -8,6 +9,6 @@ export class NetworkAPI {
   }
 
   getNetworkType(): Promise<NetworkType> {
-    return this.networkHttp.getNetworkType().toPromise();
+    return lastValueFrom(this.networkHttp.getNetworkType());
   }
 }

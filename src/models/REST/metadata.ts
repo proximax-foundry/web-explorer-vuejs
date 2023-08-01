@@ -1,3 +1,4 @@
+import { lastValueFrom } from "rxjs";
 import {
   MetadataHttp,
   NetworkHttp,
@@ -19,16 +20,16 @@ export class MetadataAPI {
    *
    */
   getMetadata(compositeHash: string): Promise<MetadataEntry> {
-    return this.metadataHttp.getMetadata(compositeHash).toPromise();
+    return lastValueFrom(this.metadataHttp.getMetadata(compositeHash));
   }
 
   getMetadatas(compositeHashes: string[]): Promise<MetadataEntry[]> {
-    return this.metadataHttp.getMetadatas(compositeHashes).toPromise();
+    return lastValueFrom(this.metadataHttp.getMetadatas(compositeHashes));
   }
 
   searchMetadatas(
     metadataQueryParams: MetadataQueryParams
   ): Promise<MetadataSearch> {
-    return this.metadataHttp.searchMetadata(metadataQueryParams).toPromise();
+    return lastValueFrom(this.metadataHttp.searchMetadata(metadataQueryParams));
   }
 }

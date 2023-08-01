@@ -257,7 +257,7 @@
           </div>
         </template>
       </Column>
-      <Column header="AMOUNT" headerStyle="width:110px" v-if="wideScreen">
+      <Column :header="'AMOUNT(' + nativeTokenName + ')'" headerStyle="width:110px" v-if="wideScreen">
         <template #body="{ data }">
           <div class="text-xs" v-if="data.amountTransfer">
             {{
@@ -273,20 +273,6 @@
       </Column>
       <Column header="SDA" headerStyle="width:150px" v-if="wideScreen">
         <template #body="{ data }">
-          <div v-if="data.amountTransfer">
-            <span v-if="data.amountTransfer">
-              <router-link
-                :to="{
-                  name: 'ViewNamespace',
-                  params: {
-                    namespaceParam: AppState.nativeToken.fullNamespace,
-                  },
-                }"
-                class="text-blue-600 hover:text-blue-primary hover:underline"
-                >{{ nativeTokenName }}</router-link
-              >
-            </span>
-          </div>
           <div v-if="checkOtherAsset(data.sda)">
             <span
               v-for="(sdaName, index) in displaySDAs(data.sda)"
