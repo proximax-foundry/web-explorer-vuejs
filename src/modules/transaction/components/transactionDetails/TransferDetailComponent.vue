@@ -51,39 +51,7 @@
       <div>Amount</div>
       <div class="relative">
         <div v-for="(sda, index) in txnDetail.detail.sda" :key="index">
-          <span class="font-bold">{{ sdaAmount[index][0] }}</span
-          >{{ sdaAmount[index][1] > 0 ? "." : ""
-          }}<span class="text-xxs">{{ sdaAmount[index][1] }}</span>
-          <img
-            v-if="
-              sda.currentAlias[0] && sda.currentAlias[0].name == 'xarcade.xar'
-            "
-            src="@/modules/account/img/xarcade-logo.svg"
-            class="inline-block h-7 w-7 mr-2 ml-2 border-2 rounded-3xl"
-          />
-          <img
-            v-else-if="
-              sda.currentAlias[0] && sda.currentAlias[0].name == 'prx.metx'
-            "
-            src="@/modules/account/img/metx-logo.svg"
-            class="inline-block h-7 w-7 mr-2 ml-2 border-2 rounded-3xl"
-          />
-          <img
-            v-else
-            src="@/modules/transaction/img/proximax-logo-gray.svg"
-            class="inline-block h-6 w-6 mr-2 ml-2"
-          />
-          <div
-            class="inline-block text-gray-400 text-txs hover:text-gray-700 duration-300 transition-all"
-          >
-            <!-- <router-link v-if="sda.currentAlias[0]" :to="{ name: 'ViewAsset', params: { id: sda.id }}" class="hover:text-blue-primary hover:underline">{{ sda.label }}</router-link> -->
-            <!-- {{ sda.name?' / ':'' }} -->
-            <router-link
-              :to="{ name: 'ViewAsset', params: { id: sda.id } }"
-              class="hover:text-blue-primary hover:underline"
-              >{{ sda.label }}</router-link
-            >
-          </div>
+          <SdaHandler :label="'SDAs'" :value="sda.id || ''" :secondary-value="sda.amount || ''" :style-class="'txn-div'" :toggle-resolve="true" ></SdaHandler>
         </div>
         <!-- <div v-if="txnDetail.detail.amount.length == 0">-</div> -->
       </div>
@@ -101,6 +69,7 @@ import { useToast } from "primevue/usetoast";
 import { AppState } from "@/state/appState";
 import { Helper } from "@/util/typeHelper";
 import { copyToClipboard } from "@/util/functions";
+import SdaHandler from "./SdaHandler.vue";
 
 const props = defineProps({
   txnDetail: Object,
