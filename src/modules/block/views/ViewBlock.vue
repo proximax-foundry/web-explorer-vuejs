@@ -328,7 +328,7 @@ const loadBlock = async () => {
         const { type,artifactId } = artifactExpiryReceipt
         return {  
           type,
-          artiactId:artifactId instanceof MosaicId? artifactId.toHex(): artifactId?.fullName?? artifactId.toHex() + '/'
+          artifactId:artifactId instanceof MosaicId? artifactId.toHex(): artifactId?.fullName?? artifactId.toHex() + '/'
         }
     }})
    
@@ -344,9 +344,9 @@ const loadBlock = async () => {
       const namespaceName = await AppState.chainAPI!.namespaceAPI.getNamespacesName([ new NamespaceId(txnStatement[i].recipient!.replace('/','')) ])
       txnStatement[i].recipient = namespaceName[0].name
     }
-    if(txnStatement[i].artiactId?.includes('/')){
+    if(txnStatement[i].artifactId?.includes('/')){
       const namespaceName = await AppState.chainAPI!.namespaceAPI.getNamespacesName([ new NamespaceId(txnStatement[i].recipient!.replace('/','')) ])
-      txnStatement[i].artiactId = namespaceName[0].name
+      txnStatement[i].artifactId = namespaceName[0].name
     }
   }
 
