@@ -165,65 +165,85 @@
           </div>
         </div>
       </div>
-      <div class="text-gray-500 mb-5 text-sm font-bold" v-if="txnStatements.length" >Block Receipts</div>
-      <DataTable :value="txnStatements" :paginator="true" :rows="10" dataKey="id" class="mb-10"
-                    :rowsPerPageOptions="[10, 20, 30, 40, 50]"
-                    paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink  RowsPerPageDropdown"
-                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-                    responsiveLayout="scroll">
-                    <template #empty>
-                        No assets found.
-                    </template>
+      <div
+        class="text-gray-500 mb-5 text-sm font-bold"
+        v-if="Object.entries(txnStatements).length"
+      >
+        Block Receipts
+      </div>
+      <div v-for="(value, index) in Object.entries(txnStatements)" :key="index" class="mb-6">
+        <div :class="tabIndex==index? 'border-b-2 w-fit border-blue-primary' : ''">{{ value[0] }}</div>
+       
+      </div>
+      
+      <DataTable
+        :value="( Object.entries(txnStatements)[tabIndex][1] as [])"
+        :paginator="true"
+        :rows="10"
+        dataKey="id"
+        class="mb-10"
+        :rowsPerPageOptions="[10, 20, 30, 40, 50]"
+        paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink  RowsPerPageDropdown"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+        responsiveLayout="scroll"
+      >
+        <template #empty> No assets found. </template>
 
-                    <Column field="type" header="Type"  headerClass="uppercase">
-                        <template #body="{ data }" >
-                                <div
-                                    class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7 ">
-                                    {{ data.type }}</div>
-                        </template>
-                    </Column>
-                    <Column field="mosaicId" header="Asset ID"  headerClass="uppercase">
-                        <template #body="{ data }" >
-                                <div
-                                    class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7 ">
-                                    {{ data?.mosaicId }}</div>
-                        </template>
-                    </Column>
-                    <Column field="account" header="Account"  headerClass="uppercase">
-                        <template #body="{ data }" >
-                                <div
-                                    class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7 ">
-                                    {{ data?.account }}</div>
-                        </template>
-                    </Column>
-                    <Column field="amount" header="Amount"  headerClass="uppercase">
-                        <template #body="{ data }" >
-                                <div
-                                    class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7 ">
-                                    {{ data?.amount }}</div>
-                        </template>
-                    </Column>
-                    <Column field="sender" header="Sender"  headerClass="uppercase">
-                        <template #body="{ data }" >
-                                <div
-                                    class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7 ">
-                                    {{ data?.sender }}</div>
-                        </template>
-                    </Column>
-                    <Column field="recipient" header="Recipient"  headerClass="uppercase">
-                        <template #body="{ data }" >
-                                <div
-                                    class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7 ">
-                                    {{ data?.recipient }}</div>
-                        </template>
-                    </Column>
-                    <Column field="artifactId" header="Artifact Id"  headerClass="uppercase">
-                        <template #body="{ data }" >
-                                <div
-                                    class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7 ">
-                                    {{ data?.artifactId }}</div>
-                        </template>
-                    </Column>
+      
+        <Column field="mosaicId" header="Asset ID" headerClass="uppercase">
+          <template #body="{ data }">
+            <div
+              class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7"
+            >
+              {{ data?.mosaicId }}
+            </div>
+          </template>
+        </Column>
+        <Column field="account" header="Account" headerClass="uppercase">
+          <template #body="{ data }">
+            <div
+              class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7"
+            >
+              {{ data?.account }}
+            </div>
+          </template>
+        </Column>
+        <Column field="amount" header="Amount" headerClass="uppercase">
+          <template #body="{ data }">
+            <div
+              class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7"
+            >
+              {{ data?.amount }}
+            </div>
+          </template>
+        </Column>
+        <Column field="sender" header="Sender" headerClass="uppercase">
+          <template #body="{ data }">
+            <div
+              class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7"
+            >
+              {{ data?.sender }}
+            </div>
+          </template>
+        </Column>
+        <Column field="recipient" header="Recipient" headerClass="uppercase">
+          <template #body="{ data }">
+            <div
+              class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7"
+            >
+              {{ data?.recipient }}
+            </div>
+          </template>
+        </Column>
+        <Column field="artifactId" header="Artifact Id" headerClass="uppercase">
+          <template #body="{ data }">
+            <div
+              class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7"
+            >
+              {{ data?.artifactId }}
+            </div>
+          </template>
+        </Column>
       </DataTable>
     </div>
   </div>
@@ -239,27 +259,27 @@ import { TransactionUtils } from "@/util/transactionUtils";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import {
-Address,
-ArtifactExpiryReceipt,
-BalanceChangeReceipt,
-BalanceTransferReceipt,
+  Address,
+  ArtifactExpiryReceipt,
+  BalanceChangeReceipt,
+  BalanceTransferReceipt,
   InflationReceipt,
   MosaicId,
   NamespaceId,
   ReceiptType,
   TransactionGroupType,
   TransactionQueryParams,
-UInt64,
+  UInt64,
 } from "tsjs-xpx-chain-sdk";
 import { copyToClipboard } from "@/util/functions";
 import { useToast } from "primevue/usetoast";
 import type { ConfirmedTransferTransaction } from "@/models/transactions/transaction";
 
 const p = defineProps({
-  blockHeight: Number,
+  blockHeight: String,
 });
 
-const txnStatements = ref<any[]>([])
+const txnStatements = ref<any>({});
 const toast = useToast();
 const internalInstance = getCurrentInstance();
 const emitter = internalInstance?.appContext.config.globalProperties.emitter;
@@ -284,75 +304,104 @@ const copy = (id: string) => {
   }
 };
 
+const tabIndex = ref(0)
+
 const loadBlock = async () => {
   if (!p.blockHeight) {
     return;
   }
-  const block = await BlockUtils.getBlockByHeight(p.blockHeight);
-  const blockReceipts =await  AppState.chainAPI!.blockAPI.getBlockReceipts(p.blockHeight)
-  const {  transactionStatements } = blockReceipts
-  const txnStatement = transactionStatements.map((statement)=>{
-    return statement.receipts.map((receipt)=>{
-
-      if(receipt instanceof BalanceChangeReceipt){
-        const {type,version,size,...val } = receipt
-        return {
-          type,
-          account: val.account.address.pretty(),
-          mosaicId: val.mosaicId.toHex(),
-          amount: val.amount.compact(),
+  const block = await BlockUtils.getBlockByHeight(parseInt(p.blockHeight));
+  const blockReceipts = await AppState.chainAPI!.blockAPI.getBlockReceipts(
+    parseInt(p.blockHeight)
+  );
+  const { transactionStatements } = blockReceipts;
+  const txnStatement = transactionStatements
+    .map((statement) => {
+      return statement.receipts.map((receipt) => {
+        if (receipt instanceof BalanceChangeReceipt) {
+          const { type, version, size, ...val } = receipt;
+          return {
+            type,
+            account: val.account.address.pretty(),
+            mosaicId: val.mosaicId.toHex(),
+            amount: val.amount.compact(),
+          };
+        } else if (receipt instanceof BalanceTransferReceipt) {
+          const { type, version, size, ...val } = receipt;
+          return {
+            type,
+            mosaicId: val.mosaicId.toHex(),
+            amount: val.amount.compact(),
+            sender: val.sender.address.pretty(),
+            recipient:
+              val.recipient instanceof Address
+                ? val.recipient.pretty()
+                : val.recipient?.fullName ?? val.recipient.toHex() + "/",
+          };
+        } else if (receipt instanceof InflationReceipt) {
+          const { type, version, size, ...val } = receipt;
+          return {
+            type,
+            mosaicId: val.mosaicId.toHex(),
+            amount: val.amount.compact(),
+          };
+          //pending sdk: add support for sda exchange receipt
+        } else {
+          const artifactExpiryReceipt = receipt as ArtifactExpiryReceipt;
+          const { type, artifactId } = artifactExpiryReceipt;
+          return {
+            type,
+            artifactId:
+              artifactId instanceof MosaicId
+                ? artifactId.toHex()
+                : artifactId?.fullName ?? artifactId.toHex() + "/",
+          };
         }
-        
-      }else if(receipt instanceof BalanceTransferReceipt){
-        const {type,version,size,...val} = receipt
-        return {
-          type,
-          mosaicId: val.mosaicId.toHex(),
-          amount: val.amount.compact(),
-          sender: val.sender.address.pretty(),
-          recipient : val.recipient instanceof Address ? val.recipient.pretty() : val.recipient?.fullName?? val.recipient.toHex() + '/'
-        }
+      });
+    })
+    .flat();
 
-
-      }else if(receipt instanceof InflationReceipt){
-        const {type,version,size,...val} = receipt
-        return {
-          type,
-          mosaicId: val.mosaicId.toHex(),
-          amount: val.amount.compact()
-        }
-        //pending sdk: add support for sda exchange receipt 
-
-      }else{
-        const artifactExpiryReceipt = receipt as ArtifactExpiryReceipt
-        const { type,artifactId } = artifactExpiryReceipt
-        return {  
-          type,
-          artifactId:artifactId instanceof MosaicId? artifactId.toHex(): artifactId?.fullName?? artifactId.toHex() + '/'
-        }
-    }})
-   
-  }).flat()
-
-  for(let i = 0 ; i < txnStatement.length ; i ++){
-    if(txnStatement[i].mosaicId){
-      const { divisibility } = await AppState.chainAPI!.assetAPI.getMosaic(new MosaicId(txnStatement[i].mosaicId!))
-      txnStatement[i].amount! = txnStatement[i].amount! / Math.pow(10,divisibility)
+  for (let i = 0; i < txnStatement.length; i++) {
+    if (txnStatement[i].mosaicId) {
+      const { divisibility } = await AppState.chainAPI!.assetAPI.getMosaic(
+        new MosaicId(txnStatement[i].mosaicId!)
+      );
+      txnStatement[i].amount! =
+        txnStatement[i].amount! / Math.pow(10, divisibility);
     }
 
-    if(txnStatement[i].recipient?.includes('/') ){
-      const namespaceName = await AppState.chainAPI!.namespaceAPI.getNamespacesName([ new NamespaceId(txnStatement[i].recipient!.replace('/','')) ])
-      txnStatement[i].recipient = namespaceName[0].name
+    if (txnStatement[i].recipient?.includes("/")) {
+      const namespaceName =
+        await AppState.chainAPI!.namespaceAPI.getNamespacesName([
+          new NamespaceId(txnStatement[i].recipient!.replace("/", "")),
+        ]);
+      txnStatement[i].recipient = namespaceName[0].name;
     }
-    if(txnStatement[i].artifactId?.includes('/')){
-      const namespaceName = await AppState.chainAPI!.namespaceAPI.getNamespacesName([ new NamespaceId(txnStatement[i].recipient!.replace('/','')) ])
-      txnStatement[i].artifactId = namespaceName[0].name
+    if (txnStatement[i].artifactId?.includes("/")) {
+      const namespaceName =
+        await AppState.chainAPI!.namespaceAPI.getNamespacesName([
+          new NamespaceId(txnStatement[i].recipient!.replace("/", "")),
+        ]);
+      txnStatement[i].artifactId = namespaceName[0].name;
     }
   }
 
-  txnStatements.value = txnStatement
+  
+  type StatementWithoutType = Omit<(typeof txnStatement)[0], "type">;
 
+  // Create an object to store the grouped arrays dynamically
+  const groupedStatements: { [key in ReceiptType]: StatementWithoutType[] } =
+    txnStatement.reduce((acc, statement) => {
+      const { type, ...statementWithoutType } = statement;
+      if (!acc[type]) {
+        acc[type] = [];
+      }
+      acc[type].push(statementWithoutType);
+      return acc;
+    }, {} as { [key in ReceiptType]: StatementWithoutType[] });
 
+    console.log(groupedStatements)
+  txnStatements.value = groupedStatements;
 
   if (!AppState.isReady) {
     setTimeout(loadBlock, 1000);
@@ -427,7 +476,7 @@ emitter.on("CHANGE_NETWORK", (payload: boolean) => {
 const getTransactions = async () => {
   if (p.blockHeight != null) {
     let txnQueryParams = new TransactionQueryParams();
-    txnQueryParams.height = p.blockHeight;
+    txnQueryParams.height = parseInt(p.blockHeight);
     txnQueryParams.pageSize = pages.value;
     txnQueryParams.pageNumber = currentPage.value;
     let txns = await TransactionUtils.searchTxns(
