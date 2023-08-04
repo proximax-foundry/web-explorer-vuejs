@@ -171,11 +171,23 @@
       >
         Block Receipts
       </div>
-      <div v-for="(value, index) in Object.entries(txnStatements)" :key="index" class="mb-6">
-        <div :class="tabIndex==index? 'border-b-2 w-fit border-blue-primary' : ''">{{ value[0] }}</div>
-       
+      <div class="flex gap-4">
+        <div
+          v-for="(value, index) in Object.entries(txnStatements)"
+          :key="index"
+          class="mb-6"
+        >
+          <div
+            @click="tabIndex = index"
+            :class="
+              tabIndex == index ? 'border-b-2 w-fit border-blue-primary' : ''
+            "
+          >
+            {{ value[0] }}
+          </div>
+        </div>
       </div>
-      
+
       <DataTable
         :value="( Object.entries(txnStatements)[tabIndex][1] as [])"
         :paginator="true"
@@ -189,7 +201,6 @@
       >
         <template #empty> No assets found. </template>
 
-      
         <Column field="mosaicId" header="Asset ID" headerClass="uppercase">
           <template #body="{ data }">
             <div
@@ -304,7 +315,7 @@ const copy = (id: string) => {
   }
 };
 
-const tabIndex = ref(0)
+const tabIndex = ref(0);
 
 const loadBlock = async () => {
   if (!p.blockHeight) {
@@ -386,7 +397,6 @@ const loadBlock = async () => {
     }
   }
 
-  
   type StatementWithoutType = Omit<(typeof txnStatement)[0], "type">;
 
   // Create an object to store the grouped arrays dynamically
@@ -400,7 +410,7 @@ const loadBlock = async () => {
       return acc;
     }, {} as { [key in ReceiptType]: StatementWithoutType[] });
 
-    console.log(groupedStatements)
+  console.log(groupedStatements);
   txnStatements.value = groupedStatements;
 
   if (!AppState.isReady) {
