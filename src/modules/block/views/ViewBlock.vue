@@ -171,7 +171,7 @@
       >
         Block Receipts
       </div>
-      <div class="flex gap-4">
+      <div class="flex gap-4 flex-wrap">
         <div
           v-for="(value, index) in Object.entries(txnStatements)"
           :key="index"
