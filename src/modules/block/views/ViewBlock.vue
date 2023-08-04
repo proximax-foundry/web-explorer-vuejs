@@ -165,6 +165,66 @@
           </div>
         </div>
       </div>
+      <div class="text-gray-500 mb-5 text-sm font-bold" v-if="txnStatements.length" >Block Receipts</div>
+      <DataTable :value="txnStatements" :paginator="true" :rows="10" dataKey="id" class="mb-10"
+                    :rowsPerPageOptions="[10, 20, 30, 40, 50]"
+                    paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink  RowsPerPageDropdown"
+                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                    responsiveLayout="scroll">
+                    <template #empty>
+                        No assets found.
+                    </template>
+
+                    <Column field="type" header="Type"  headerClass="uppercase">
+                        <template #body="{ data }" >
+                                <div
+                                    class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7 ">
+                                    {{ data.type }}</div>
+                        </template>
+                    </Column>
+                    <Column field="mosaicId" header="Asset ID"  headerClass="uppercase">
+                        <template #body="{ data }" >
+                                <div
+                                    class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7 ">
+                                    {{ data?.mosaicId }}</div>
+                        </template>
+                    </Column>
+                    <Column field="account" header="Account"  headerClass="uppercase">
+                        <template #body="{ data }" >
+                                <div
+                                    class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7 ">
+                                    {{ data?.account }}</div>
+                        </template>
+                    </Column>
+                    <Column field="amount" header="Amount"  headerClass="uppercase">
+                        <template #body="{ data }" >
+                                <div
+                                    class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7 ">
+                                    {{ data?.amount }}</div>
+                        </template>
+                    </Column>
+                    <Column field="sender" header="Sender"  headerClass="uppercase">
+                        <template #body="{ data }" >
+                                <div
+                                    class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7 ">
+                                    {{ data?.sender }}</div>
+                        </template>
+                    </Column>
+                    <Column field="recipient" header="Recipient"  headerClass="uppercase">
+                        <template #body="{ data }" >
+                                <div
+                                    class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7 ">
+                                    {{ data?.recipient }}</div>
+                        </template>
+                    </Column>
+                    <Column field="artifactId" header="Artifact Id"  headerClass="uppercase">
+                        <template #body="{ data }" >
+                                <div
+                                    class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7 ">
+                                    {{ data?.artifactId }}</div>
+                        </template>
+                    </Column>
+      </DataTable>
     </div>
   </div>
 </template>
@@ -176,9 +236,20 @@ import { AppState } from "@/state/appState";
 import { networkState } from "@/state/networkState";
 import MixedTxnDataTable from "@/modules/transaction/components/txnDataTables/MixedTxnDataTable.vue";
 import { TransactionUtils } from "@/util/transactionUtils";
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
 import {
+Address,
+ArtifactExpiryReceipt,
+BalanceChangeReceipt,
+BalanceTransferReceipt,
+  InflationReceipt,
+  MosaicId,
+  NamespaceId,
+  ReceiptType,
   TransactionGroupType,
   TransactionQueryParams,
+UInt64,
 } from "tsjs-xpx-chain-sdk";
 import { copyToClipboard } from "@/util/functions";
 import { useToast } from "primevue/usetoast";
@@ -187,6 +258,8 @@ import type { ConfirmedTransferTransaction } from "@/models/transactions/transac
 const p = defineProps({
   blockHeight: Number,
 });
+
+const txnStatements = ref<any[]>([])
 const toast = useToast();
 const internalInstance = getCurrentInstance();
 const emitter = internalInstance?.appContext.config.globalProperties.emitter;
@@ -216,6 +289,71 @@ const loadBlock = async () => {
     return;
   }
   const block = await BlockUtils.getBlockByHeight(p.blockHeight);
+  const blockReceipts =await  AppState.chainAPI!.blockAPI.getBlockReceipts(p.blockHeight)
+  const {  transactionStatements } = blockReceipts
+  const txnStatement = transactionStatements.map((statement)=>{
+    return statement.receipts.map((receipt)=>{
+
+      if(receipt instanceof BalanceChangeReceipt){
+        const {type,version,size,...val } = receipt
+        return {
+          type,
+          account: val.account.address.pretty(),
+          mosaicId: val.mosaicId.toHex(),
+          amount: val.amount.compact(),
+        }
+        
+      }else if(receipt instanceof BalanceTransferReceipt){
+        const {type,version,size,...val} = receipt
+        return {
+          type,
+          mosaicId: val.mosaicId.toHex(),
+          amount: val.amount.compact(),
+          sender: val.sender.address.pretty(),
+          recipient : val.recipient instanceof Address ? val.recipient.pretty() : val.recipient?.fullName?? val.recipient.toHex() + '/'
+        }
+
+
+      }else if(receipt instanceof InflationReceipt){
+        const {type,version,size,...val} = receipt
+        return {
+          type,
+          mosaicId: val.mosaicId.toHex(),
+          amount: val.amount.compact()
+        }
+        //pending sdk: add support for sda exchange receipt 
+
+      }else{
+        const artifactExpiryReceipt = receipt as ArtifactExpiryReceipt
+        const { type,artifactId } = artifactExpiryReceipt
+        return {  
+          type,
+          artiactId:artifactId instanceof MosaicId? artifactId.toHex(): artifactId?.fullName?? artifactId.toHex() + '/'
+        }
+    }})
+   
+  }).flat()
+
+  for(let i = 0 ; i < txnStatement.length ; i ++){
+    if(txnStatement[i].mosaicId){
+      const { divisibility } = await AppState.chainAPI!.assetAPI.getMosaic(new MosaicId(txnStatement[i].mosaicId!))
+      txnStatement[i].amount! = txnStatement[i].amount! / Math.pow(10,divisibility)
+    }
+
+    if(txnStatement[i].recipient?.includes('/') ){
+      const namespaceName = await AppState.chainAPI!.namespaceAPI.getNamespacesName([ new NamespaceId(txnStatement[i].recipient!.replace('/','')) ])
+      txnStatement[i].recipient = namespaceName[0].name
+    }
+    if(txnStatement[i].artiactId?.includes('/')){
+      const namespaceName = await AppState.chainAPI!.namespaceAPI.getNamespacesName([ new NamespaceId(txnStatement[i].recipient!.replace('/','')) ])
+      txnStatement[i].artiactId = namespaceName[0].name
+    }
+  }
+
+  txnStatements.value = txnStatement
+
+
+
   if (!AppState.isReady) {
     setTimeout(loadBlock, 1000);
     return;
