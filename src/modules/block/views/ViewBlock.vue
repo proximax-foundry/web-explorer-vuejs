@@ -210,7 +210,16 @@
             </div>
           </template>
         </Column>
-        <Column field="account" header="Account" headerClass="uppercase">
+        <Column field="namespaceId" header="Namespace ID" headerClass="uppercase" v-if=" Object.entries(txnStatements)[tabIndex][0] ==('Asset Resolution Statement' || 'Address Resolution Statement' )" >
+          <template #body="{ data }">
+            <div
+              class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7"
+            >
+              {{ data?.namespaceId }}
+            </div>
+          </template>
+        </Column>
+        <Column field="account" header="Account" headerClass="uppercase" v-if=" Object.entries(txnStatements)[tabIndex][0] !=('Asset Resolution Statement' || 'Address Resolution Statement' )"  >
           <template #body="{ data }">
             <div
               class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7"
@@ -219,7 +228,7 @@
             </div>
           </template>
         </Column>
-        <Column field="amount" header="Amount" headerClass="uppercase">
+        <Column field="amount" header="Amount" headerClass="uppercase" v-if=" Object.entries(txnStatements)[tabIndex][0] !=('Asset Resolution Statement' || 'Address Resolution Statement' )" >
           <template #body="{ data }">
             <div
               class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7"
@@ -228,7 +237,7 @@
             </div>
           </template>
         </Column>
-        <Column field="sender" header="Sender" headerClass="uppercase">
+        <Column field="sender" header="Sender" headerClass="uppercase" v-if=" Object.entries(txnStatements)[tabIndex][0] !=('Asset Resolution Statement' || 'Address Resolution Statement' )" >
           <template #body="{ data }">
             <div
               class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7"
@@ -237,7 +246,7 @@
             </div>
           </template>
         </Column>
-        <Column field="recipient" header="Recipient" headerClass="uppercase">
+        <Column field="recipient" header="Recipient" headerClass="uppercase" v-if=" Object.entries(txnStatements)[tabIndex][0] !=('Asset Resolution Statement' || 'Address Resolution Statement' )" >
           <template #body="{ data }">
             <div
               class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7"
@@ -246,7 +255,7 @@
             </div>
           </template>
         </Column>
-        <Column field="artifactId" header="Artifact Id" headerClass="uppercase">
+        <Column field="artifactId" header="Artifact Id" headerClass="uppercase" v-if=" Object.entries(txnStatements)[tabIndex][0] !=('Asset Resolution Statement' || 'Address Resolution Statement' )" >
           <template #body="{ data }">
             <div
               class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7"
@@ -271,16 +280,17 @@ import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import {
   Address,
+  AddressAlias,
   ArtifactExpiryReceipt,
   BalanceChangeReceipt,
   BalanceTransferReceipt,
   InflationReceipt,
+  MosaicAlias,
   MosaicId,
   NamespaceId,
   ReceiptType,
   TransactionGroupType,
   TransactionQueryParams,
-  UInt64,
 } from "tsjs-xpx-chain-sdk";
 import { copyToClipboard } from "@/util/functions";
 import { useToast } from "primevue/usetoast";
@@ -325,14 +335,50 @@ const loadBlock = async () => {
   const blockReceipts = await AppState.chainAPI!.blockAPI.getBlockReceipts(
     parseInt(p.blockHeight)
   );
-  const { transactionStatements } = blockReceipts;
+  const {
+    transactionStatements,
+    addressResolutionStatements,
+    mosaicResolutionStatements,
+  } = blockReceipts;
+
+  const addressStatement = addressResolutionStatements.map((x) => {
+    const unresolved = x.unresolved as NamespaceId
+    return x.resolutionEntries.map((y) => {
+
+          const addressAlias = y.resolved as AddressAlias;
+          return {
+            namespaceId: unresolved.toHex(),
+            address: addressAlias.address.pretty(),
+          };
+    });
+  }).flat();
+
+  const formatAddressStatement = addressStatement.length? {
+    'Address Resolution Statement': addressStatement
+  }: {}
+
+  const mosaicStatement = mosaicResolutionStatements.map((x) => {
+    const unresolved = x.unresolved as NamespaceId
+    return x.resolutionEntries.map((y) => {
+          const mosaicAlias = y.resolved as MosaicAlias;
+          return {
+            namespaceId: unresolved.toHex(),
+            mosaicId: mosaicAlias.toHex(),
+          };
+    });
+  }).flat();
+
+  const formatMosaicStatement = mosaicStatement.length? {
+    'Asset Resolution Statement': mosaicStatement
+  }:{}
+
   const txnStatement = transactionStatements
     .map((statement) => {
       return statement.receipts.map((receipt) => {
         if (receipt instanceof BalanceChangeReceipt) {
           const { type, version, size, ...val } = receipt;
           return {
-            type,
+            type: ReceiptType[type],
             account: val.account.address.pretty(),
             mosaicId: val.mosaicId.toHex(),
             amount: val.amount.compact(),
@@ -340,7 +386,7 @@ const loadBlock = async () => {
         } else if (receipt instanceof BalanceTransferReceipt) {
           const { type, version, size, ...val } = receipt;
           return {
-            type,
+            type: ReceiptType[type],
             mosaicId: val.mosaicId.toHex(),
             amount: val.amount.compact(),
             sender: val.sender.address.pretty(),
@@ -352,7 +398,7 @@ const loadBlock = async () => {
         } else if (receipt instanceof InflationReceipt) {
           const { type, version, size, ...val } = receipt;
           return {
-            type,
+            type: ReceiptType[type],
             mosaicId: val.mosaicId.toHex(),
             amount: val.amount.compact(),
           };
@@ -361,7 +407,7 @@ const loadBlock = async () => {
           const artifactExpiryReceipt = receipt as ArtifactExpiryReceipt;
           const { type, artifactId } = artifactExpiryReceipt;
           return {
-            type,
+            type: ReceiptType[type],
             artifactId:
               artifactId instanceof MosaicId
                 ? artifactId.toHex()
@@ -397,21 +443,18 @@ const loadBlock = async () => {
     }
   }
 
-  type StatementWithoutType = Omit<(typeof txnStatement)[0], "type">;
+  const groupedStatements: { [key: string]: Omit<typeof txnStatement[0], 'type'>[] } = {};
 
   // Create an object to store the grouped arrays dynamically
-  const groupedStatements: { [key in ReceiptType]: StatementWithoutType[] } =
-    txnStatement.reduce((acc, statement) => {
-      const { type, ...statementWithoutType } = statement;
-      if (!acc[type]) {
-        acc[type] = [];
-      }
-      acc[type].push(statementWithoutType);
-      return acc;
-    }, {} as { [key in ReceiptType]: StatementWithoutType[] });
+  txnStatement.forEach((statement) => {
+  const { type, ...statementWithoutType } = statement;
+  if (!groupedStatements[type]) {
+    groupedStatements[type] = [];
+  }
+  groupedStatements[type].push(statementWithoutType);
+});
 
-  console.log(groupedStatements);
-  txnStatements.value = groupedStatements;
+  txnStatements.value = { ...groupedStatements, ...formatAddressStatement,...formatMosaicStatement };
 
   if (!AppState.isReady) {
     setTimeout(loadBlock, 1000);
