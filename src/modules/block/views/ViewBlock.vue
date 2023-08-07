@@ -165,119 +165,20 @@
           </div>
         </div>
       </div>
-      <div
-        class="text-gray-500 mb-5 text-sm font-bold"
-        v-if="Object.entries(txnStatements).length"
-      >
-        Block Receipts
-      </div>
-      <div class="flex gap-4 flex-wrap">
-        <div
-          v-for="(value, index) in Object.entries(txnStatements)"
-          :key="index"
-          class="mb-6"
-        >
-          <div
-            @click="tabIndex = index"
-            :class="
-              tabIndex == index ? 'border-b-2 w-fit border-blue-primary' : ''
-            "
-          >
-            {{ value[0] }}
-          </div>
-        </div>
-      </div>
-
-      <DataTable
-        :value="( Object.entries(txnStatements)[tabIndex][1] as [])"
-        :paginator="true"
-        :rows="10"
-        dataKey="id"
-        class="mb-10"
-        :rowsPerPageOptions="[10, 20, 30, 40, 50]"
-        paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink  RowsPerPageDropdown"
-        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-        responsiveLayout="scroll"
-      >
-        <template #empty> No assets found. </template>
-
-        <Column field="mosaicId" header="Asset ID" headerClass="uppercase">
-          <template #body="{ data }">
-            <div
-              class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7"
-            >
-              {{ data?.mosaicId }}
-            </div>
-          </template>
-        </Column>
-        <Column field="namespaceId" header="Namespace ID" headerClass="uppercase" v-if=" Object.entries(txnStatements)[tabIndex][0] ==('Asset Resolution Statement' || 'Address Resolution Statement' )" >
-          <template #body="{ data }">
-            <div
-              class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7"
-            >
-              {{ data?.namespaceId }}
-            </div>
-          </template>
-        </Column>
-        <Column field="account" header="Account" headerClass="uppercase" v-if=" Object.entries(txnStatements)[tabIndex][0] !=('Asset Resolution Statement' || 'Address Resolution Statement' )"  >
-          <template #body="{ data }">
-            <div
-              class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7"
-            >
-              {{ data?.account }}
-            </div>
-          </template>
-        </Column>
-        <Column field="amount" header="Amount" headerClass="uppercase" v-if=" Object.entries(txnStatements)[tabIndex][0] !=('Asset Resolution Statement' || 'Address Resolution Statement' )" >
-          <template #body="{ data }">
-            <div
-              class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7"
-            >
-              {{ data?.amount }}
-            </div>
-          </template>
-        </Column>
-        <Column field="sender" header="Sender" headerClass="uppercase" v-if=" Object.entries(txnStatements)[tabIndex][0] !=('Asset Resolution Statement' || 'Address Resolution Statement' )" >
-          <template #body="{ data }">
-            <div
-              class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7"
-            >
-              {{ data?.sender }}
-            </div>
-          </template>
-        </Column>
-        <Column field="recipient" header="Recipient" headerClass="uppercase" v-if=" Object.entries(txnStatements)[tabIndex][0] !=('Asset Resolution Statement' || 'Address Resolution Statement' )" >
-          <template #body="{ data }">
-            <div
-              class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7"
-            >
-              {{ data?.recipient }}
-            </div>
-          </template>
-        </Column>
-        <Column field="artifactId" header="Artifact Id" headerClass="uppercase" v-if=" Object.entries(txnStatements)[tabIndex][0] !=('Asset Resolution Statement' || 'Address Resolution Statement' )" >
-          <template #body="{ data }">
-            <div
-              class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7"
-            >
-              {{ data?.artifactId }}
-            </div>
-          </template>
-        </Column>
-      </DataTable>
+      <BlockReceipt :txn-statements="txnStatements" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import BlockReceipt from '@/modules/block/components/BlockReceipt.vue'
 import { computed, getCurrentInstance, ref } from "vue";
 import { BlockUtils, type BlockObj } from "@/util/blockUtil";
 import { AppState } from "@/state/appState";
 import { networkState } from "@/state/networkState";
 import MixedTxnDataTable from "@/modules/transaction/components/txnDataTables/MixedTxnDataTable.vue";
 import { TransactionUtils } from "@/util/transactionUtils";
-import DataTable from "primevue/datatable";
-import Column from "primevue/column";
+
 import {
   Address,
   AddressAlias,
@@ -296,11 +197,25 @@ import { copyToClipboard } from "@/util/functions";
 import { useToast } from "primevue/usetoast";
 import type { ConfirmedTransferTransaction } from "@/models/transactions/transaction";
 
+
+
+interface blockReceipt{
+    class?: string,
+    type?: string,
+    namespaceId?: string,
+    mosaicId?: string,
+    account?: string,
+    amount?: number,
+    recipient?: string,
+    sender?: string,
+    artifactId? : string
+}
+
 const p = defineProps({
   blockHeight: String,
 });
 
-const txnStatements = ref<any>({});
+const txnStatements = ref<Record<string, blockReceipt[]>>({});
 const toast = useToast();
 const internalInstance = getCurrentInstance();
 const emitter = internalInstance?.appContext.config.globalProperties.emitter;
@@ -325,7 +240,7 @@ const copy = (id: string) => {
   }
 };
 
-const tabIndex = ref(0);
+
 
 const loadBlock = async () => {
   if (!p.blockHeight) {
@@ -341,36 +256,43 @@ const loadBlock = async () => {
     mosaicResolutionStatements,
   } = blockReceipts;
 
-  const addressStatement = addressResolutionStatements.map((x) => {
-    const unresolved = x.unresolved as NamespaceId
-    return x.resolutionEntries.map((y) => {
+  const addressStatement = addressResolutionStatements
+    .map((x) => {
+      const unresolved = x.unresolved as NamespaceId;
+      return x.resolutionEntries.map((y) => {
+        const addressAlias = y.resolved as AddressAlias;
+        return {
+          namespaceId: unresolved.toHex(),
+          address: addressAlias.address.pretty(),
+        };
+      });
+    })
+    .flat();
 
-          const addressAlias = y.resolved as AddressAlias;
-          return {
-            namespaceId: unresolved.toHex(),
-            address: addressAlias.address.pretty(),
-          };
-    });
-  }).flat();
+  const formatAddressStatement: Record<string, {namespaceId: string, address:string}[]> = addressStatement.length
+    ? {
+        "Address Resolution Statement": addressStatement,
+      }
+    : {};
 
-  const formatAddressStatement = addressStatement.length? {
-    'Address Resolution Statement': addressStatement
-  }: {}
+  const mosaicStatement = mosaicResolutionStatements
+    .map((x) => {
+      const unresolved = x.unresolved as NamespaceId;
+      return x.resolutionEntries.map((y) => {
+        const mosaicAlias = y.resolved as MosaicAlias;
+        return {
+          namespaceId: unresolved.toHex(),
+          mosaicId: mosaicAlias.toHex(),
+        };
+      });
+    })
+    .flat();
 
-  const mosaicStatement = mosaicResolutionStatements.map((x) => {
-    const unresolved = x.unresolved as NamespaceId
-    return x.resolutionEntries.map((y) => {
-          const mosaicAlias = y.resolved as MosaicAlias;
-          return {
-            namespaceId: unresolved.toHex(),
-            mosaicId: mosaicAlias.toHex(),
-          };
-    });
-  }).flat();
-
-  const formatMosaicStatement = mosaicStatement.length? {
-    'Asset Resolution Statement': mosaicStatement
-  }:{}
+  const formatMosaicStatement: Record<string, {namespaceId: string, mosaicId: string }[]> = mosaicStatement.length
+    ? {
+        "Asset Resolution Statement": mosaicStatement,
+      }
+    : {};
 
   const txnStatement = transactionStatements
     .map((statement) => {
@@ -378,6 +300,7 @@ const loadBlock = async () => {
         if (receipt instanceof BalanceChangeReceipt) {
           const { type, version, size, ...val } = receipt;
           return {
+            class: "Balance Change",
             type: ReceiptType[type],
             account: val.account.address.pretty(),
             mosaicId: val.mosaicId.toHex(),
@@ -386,6 +309,7 @@ const loadBlock = async () => {
         } else if (receipt instanceof BalanceTransferReceipt) {
           const { type, version, size, ...val } = receipt;
           return {
+            class: "Balance Transfer",
             type: ReceiptType[type],
             mosaicId: val.mosaicId.toHex(),
             amount: val.amount.compact(),
@@ -393,11 +317,12 @@ const loadBlock = async () => {
             recipient:
               val.recipient instanceof Address
                 ? val.recipient.pretty()
-                : val.recipient?.fullName ?? val.recipient.toHex() + "/",
+                : val.recipient?.fullName ?? val.recipient.toHex(),
           };
         } else if (receipt instanceof InflationReceipt) {
           const { type, version, size, ...val } = receipt;
           return {
+            class: "Inflation",
             type: ReceiptType[type],
             mosaicId: val.mosaicId.toHex(),
             amount: val.amount.compact(),
@@ -407,11 +332,12 @@ const loadBlock = async () => {
           const artifactExpiryReceipt = receipt as ArtifactExpiryReceipt;
           const { type, artifactId } = artifactExpiryReceipt;
           return {
+            class: "Artifact Expiry",
             type: ReceiptType[type],
             artifactId:
               artifactId instanceof MosaicId
                 ? artifactId.toHex()
-                : artifactId?.fullName ?? artifactId.toHex() + "/",
+                : artifactId?.fullName ?? artifactId.toHex(),
           };
         }
       });
@@ -427,14 +353,18 @@ const loadBlock = async () => {
         txnStatement[i].amount! / Math.pow(10, divisibility);
     }
 
-    if (txnStatement[i].recipient?.includes("/")) {
+    if (
+      TransactionUtils.isNamespaceWithString(txnStatement[i].recipient ?? "")
+    ) {
       const namespaceName =
         await AppState.chainAPI!.namespaceAPI.getNamespacesName([
           new NamespaceId(txnStatement[i].recipient!.replace("/", "")),
         ]);
       txnStatement[i].recipient = namespaceName[0].name;
     }
-    if (txnStatement[i].artifactId?.includes("/")) {
+    if (
+      TransactionUtils.isNamespaceWithString(txnStatement[i].artifactId ?? "")
+    ) {
       const namespaceName =
         await AppState.chainAPI!.namespaceAPI.getNamespacesName([
           new NamespaceId(txnStatement[i].recipient!.replace("/", "")),
@@ -443,18 +373,23 @@ const loadBlock = async () => {
     }
   }
 
-  const groupedStatements: { [key: string]: Omit<typeof txnStatement[0], 'type'>[] } = {};
+  const groupedStatements: {
+    [key: string]: Omit<(typeof txnStatement)[0], "class">[];
+  } = {};
 
   // Create an object to store the grouped arrays dynamically
   txnStatement.forEach((statement) => {
-  const { type, ...statementWithoutType } = statement;
-  if (!groupedStatements[type]) {
-    groupedStatements[type] = [];
-  }
-  groupedStatements[type].push(statementWithoutType);
-});
-
-  txnStatements.value = { ...groupedStatements, ...formatAddressStatement,...formatMosaicStatement };
+    const { class: statementClass, ...statementWithoutClass } = statement;
+    if (!groupedStatements[statementClass]) {
+      groupedStatements[statementClass] = [];
+    }
+    groupedStatements[statementClass].push(statementWithoutClass);
+  });
+  txnStatements.value = {
+    ...groupedStatements,
+    ...formatAddressStatement,
+    ...formatMosaicStatement,
+  };
 
   if (!AppState.isReady) {
     setTimeout(loadBlock, 1000);
