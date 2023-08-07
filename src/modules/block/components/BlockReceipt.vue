@@ -14,7 +14,7 @@
       <div
         @click="tabIndex = index"
         class="cursor-pointer"
-        :class="tabIndex == index ? 'border-b-2 w-fit border-blue-primary' : ''"
+        :class="tabIndex == index ? 'border-b-2 w-fit border-blue-primary' : 'hover-underline-animation '"
       >
         {{ value[0] }}
       </div>
@@ -22,7 +22,7 @@
   </div>
   <div class="filter shadow-xl border border-gray-50 p-5 mb-15">
     <DataTable
-      :value="( Object.entries(txnStatements)[tabIndex][1] as [])"
+      :value="selectedTabData"
       :paginator="false"
       :rows="Number(pages)"
       scrollDirection="horizontal"
@@ -539,6 +539,11 @@ const selectedTabName = computed(
   () => Object.entries(txnStatements)[tabIndex.value][0]
 );
 
+const selectedTabData = computed(
+  () => Object.entries(txnStatements)[tabIndex.value][1]
+);
+
+
 const tabIndex = ref(0);
 
 const pages = ref(20);
@@ -581,3 +586,28 @@ const changeRows = () => {
   currentPage.value = 1;
 };
 </script>
+
+
+<style>
+.hover-underline-animation {
+  position: relative;
+}
+
+.hover-underline-animation:after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  transform: scaleX(0);
+  height: 2px;
+  bottom: 0;
+  left: 0;
+  background-color: #007cff;
+  transform-origin: bottom right;
+  transition: transform 0.25s ease-out;
+}
+
+.hover-underline-animation:hover:after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
+</style>
