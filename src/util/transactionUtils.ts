@@ -712,7 +712,7 @@ export class TransactionUtils {
         }
         deadline = txn.deadline.adjustedValue.compact();
       }
-
+      txn.status = txnStatus.group 
       if (txnStatus.group == "partial" || txnStatus.group == "unconfirmed") {
         // txn.deadline = deadline;
         txn.timestamp = Helper.formatDeadline(deadline);
@@ -746,6 +746,7 @@ export class TransactionUtils {
             txn,
             txnStatus.group
           );
+          txn.txnList = txn.detail.txnList
           break;
         case TransactionType.CHAIN_CONFIGURE:
         case TransactionType.CHAIN_UPGRADE:
@@ -773,6 +774,7 @@ export class TransactionUtils {
             txn,
             txnStatus.group
           );
+          txn.isRefunded = txn.detail.isRefunded
           break;
         case TransactionType.MODIFY_ACCOUNT_METADATA:
           break;
@@ -802,6 +804,10 @@ export class TransactionUtils {
             txn,
             txnStatus.group
           );
+          txn.supplyDelta = [{
+            value: txn.detail.supplyDelta,
+            secondaryValue: txn.detail.supplyDirection
+          }]
           break;
         case TransactionType.REGISTER_NAMESPACE:
           txn.detail = await TransactionUtils.formatNamespaceTransaction(

@@ -8,5 +8,8 @@ export enum ComponentNames{
     address = "address",
     namespace = "namespace",
     metadata = "metadata",
-    transactionHash = "transactionHash"
+    transactionHash = "transactionHash",
+    block = "block",
+    status = "status",
+    supplyDelta = "supplyDelta"
 }

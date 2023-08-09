@@ -1,515 +1,7 @@
 <template>
-  <div
-    class="mt-3 border border-gray-200 p-3"
-    v-for="(item, index) in allInnerTransactions"
-    :key="index"
-  >
-    <div class="table_div">
-      <div>
-        <div>Type</div>
-        <div>
-          {{ item.transactionName }}
-          <span class="text-xxs text-gray-500">
-            (Version: {{ item.version.txnTypeVersion }})
-          </span>
-        </div>
-      </div>
-      <div>
-        <div>Public Key</div>
-        <div class="flex items-center">
-          <router-link
-            id="publicKey"
-            :to="{
-              name: 'ViewAccount',
-              params: { accountParam: item.signer.publicKey },
-            }"
-            class="hover:text-blue-primary hover:underline text-blue-600"
-            :copyValue="item.signer.publicKey"
-            copySubject="Public Key"
-          >
-            {{ item.signer.publicKey }}
-          </router-link>
-          <img
-            src="@/assets/img/icon-copy.svg"
-            @click="copy('publicKey')"
-            class="ml-2 w-4 h-4 cursor-pointer"
-          />
-        </div>
-      </div>
-      <div>
-        <div>From</div>
-        <div class="flex items-center">
-          <router-link
-            id="signerAddress"
-            :to="{
-              name: 'ViewAccount',
-              params: { accountParam: item.signer.address.address },
-            }"
-            class="hover:text-blue-primary hover:underline text-blue-600"
-            :copyValue="
-              Helper.createAddress(item.signer.address.address).pretty()
-            "
-            copySubject="Address"
-          >
-            {{ Helper.createAddress(item.signer.address.address).pretty() }}
-          </router-link>
-          <img
-            src="@/assets/img/icon-copy.svg"
-            @click="copy('signerAddress')"
-            class="ml-2 w-4 h-4 cursor-pointer"
-          />
-        </div>
-      </div>
-      <div>
-        <div>Fully signed</div>
-        <div>
-          {{
-            !innerSignedList[index] && innerSignedList[index] === false
-              ? "No"
-              : "Yes"
-          }}
-        </div>
-      </div>
-      <div v-if="item.unknownData && Object.keys(item.unknownData).length">
-        <UnknownDataDetailComponent :txnDetail="item" />
-      </div>
-    </div>
-    <div class="table_div" v-if="innerTxnExtractedData[index] != undefined">
-      <div
-        v-for="(info, infoListindex) in innerTxnExtractedData[index].infoList"
-        :key="infoListindex"
-      >
-        <div>{{ info.label ? info.label : "" }}</div>
-        <div v-if="info.label.toLowerCase() == 'effective height'">
-          <router-link
-            :to="{ name: 'ViewBlock', params: { blockHeight: info.value } }"
-            class="text-xs text-blue-600 hover:text-blue-primary hover:underline"
-            >{{ info.value }}</router-link
-          >
-        </div>
-        <div v-else-if="info.label.toLowerCase() == 'namespace'">
-          <div>
-            <router-link
-              :to="{
-                name: 'ViewNamespace',
-                params: {
-                  namespaceParam: info.short ? info.short : info.value,
-                },
-              }"
-              class="text-blue-600 hover:text-blue-primary hover:underline"
-            >
-              {{ info.short ? info.short : info.value }}
-            </router-link>
-          </div>
-        </div>
-        <div v-else-if="info.label.toLowerCase() == 'asset'">
-          <router-link
-            :to="{
-              name: 'ViewAsset',
-              params: { id: info.short ? info.short : info.value },
-            }"
-            class="text-blue-600 hover:text-blue-primary hover:underline"
-          >
-            {{ info.short ? info.short : info.value }}
-          </router-link>
-        </div>
-        <div
-          v-else-if="
-            info.label.toLowerCase() == 'account' ||
-            info.label.toLowerCase() == 'recipient'
-          "
-          class="flex items-center"
-        >
-          <router-link
-            id="metadataAccount"
-            :to="{
-              name: 'ViewAccount',
-              params: { accountParam: info.short ? info.short : info.value },
-            }"
-            class="text-blue-600 hover:text-blue-primary hover:underline"
-            :copyValue="info.short ? info.short : info.value"
-            copySubject="Address"
-          >
-            {{ info.short ? info.short : info.value }}
-          </router-link>
-          <img
-            src="@/assets/img/icon-copy.svg"
-            @click="copy('metadataAccount')"
-            class="ml-2 w-4 h-4 cursor-pointer"
-          />
-        </div>
-        <div v-else>{{ info.short ? info.short : info.value }}</div>
-      </div>
-      <div v-if="innerTxnExtractedData[index].infoGreenList.length > 0">
-        <div
-          v-if="
-            innerTxnExtractedData[index].legendType ===
-            InnerTxnLegendType.ADD_REMOVE
-          "
-        >
-          Add
-        </div>
-        <div
-          v-else-if="
-            innerTxnExtractedData[index].legendType ===
-            InnerTxnLegendType.TRUE_FALSE
-          "
-        >
-          True
-        </div>
-        <div
-          v-else-if="
-            innerTxnExtractedData[index].legendType ===
-            InnerTxnLegendType.BUY_SELL
-          "
-        >
-          Buy
-        </div>
-        <div
-          v-else-if="
-            innerTxnExtractedData[index].legendType ===
-            InnerTxnLegendType.ALLOW_BLOCK
-          "
-        >
-          Allow
-        </div>
-        <div v-if="item.type == TransactionType.PLACE_SDA_EXCHANGE_OFFER">
-          <div v-for="(offers, index) in innerTxnExtractedData[index].infoGreenList"
-            :key="index">
-            <div v-for="offer in offers.value" class="bg-blue-100 w-48 py-1 px-2 my-1 mx-1 rounded">
-              <div v-if="offer.amountGive">
-                <span class="text-muted">Give: </span>
-                <span>{{
-                  Helper.convertToCurrency(
-                    formatCurrency(offer.amountGive)[0],
-                    0
-                  )
-                }}</span>
-                <span
-                  class="text-xxs"
-                  v-if="formatCurrency(offer.amountGive)[1]"
-                  >.{{ formatCurrency(offer.amountGive)[1] }}</span
-                >
-                <div v-if="offer.sdaGiveNamespace"
-                  class="text-blue-600 hover:text-gray-700 duration-300 transition-all inline-block ml-2"
-                >
-                  <router-link
-                    :to="{
-                      name: 'ViewAsset',
-                      params: { id: offer.sdaIdGive },
-                    }"
-                    class="hover:text-blue-primary hover:underline"
-                  >
-                    {{ offer.sdaGiveNamespace }}
-                  </router-link>
-                </div>
-                <div v-else
-                  class="text-blue-600 hover:text-gray-700 duration-300 transition-all inline-block ml-2"
-                >
-                  <router-link
-                    :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGive } }"
-                    class="hover:text-blue-primary hover:underline"
-                  >
-                    {{ offer.sdaIdGive }}
-                  </router-link>
-                </div>
-              </div>
-              <div v-else>
-                <span class="text-muted">SDA ID Give:</span>
-                <div v-if="offer.sdaGiveNamespace" class="text-blue-600 inline-block">
-                  <router-link
-                    :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGive } }"
-                    class="hover:text-blue-primary hover:underline text-blue-600"
-                  >
-                    {{ offer.sdaGiveNamespace }}
-                  </router-link>
-                </div>
-                <div v-else class="text-blue-600 inline-block">
-                  <router-link
-                    :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGive } }"
-                    class="hover:text-blue-primary hover:underline text-blue-600"
-                  >
-                    {{ offer.sdaIdGive }}
-                  </router-link>
-                </div>
-              </div>
-              <div v-if="offer.amountGet">
-                <span class="text-muted">Get: </span>
-                <span>{{
-                  Helper.convertToCurrency(
-                    formatCurrency(offer.amountGet)[0],
-                    0
-                  )
-                }}</span>
-                <span class="text-xxs" v-if="formatCurrency(offer.amountGet)[1]"
-                  >.{{ formatCurrency(offer.amountGet)[1] }}</span
-                >
-                <div
-                  v-if="offer.sdaGetNamespace"
-                  class="text-blue-600 hover:text-gray-700 duration-300 transition-all inline-block ml-2"
-                >
-                  <router-link
-                    :to="{
-                      name: 'ViewAsset',
-                      params: { id: offer.sdaIdGet },
-                    }"
-                    class="hover:text-blue-primary hover:underline"
-                  >
-                    {{ offer.sdaGetNamespace }}
-                  </router-link>
-                </div>
-                <div v-else
-                  class="text-blue-600 hover:text-gray-700 duration-300 transition-all inline-block ml-2"
-                >
-                  <router-link
-                    :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGet } }"
-                    class="hover:text-blue-primary hover:underline"
-                  >
-                    {{ offer.sdaIdGet }}
-                  </router-link>
-                </div>
-              </div>
-              <div v-else>
-                <span class="text-muted">SDA ID Get:</span>
-                <div v-if="offer.sdaGetNamespace" class="text-blue-600 inline-block">
-                  <router-link
-                    :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGet } }"
-                    class="hover:text-blue-primary hover:underline text-blue-600"
-                  >
-                    {{ offer.sdaGetNamespace }}
-                  </router-link>
-                </div>
-                <div v-else class="text-blue-600 inline-block">
-                  <router-link
-                    :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGet } }"
-                    class="hover:text-blue-primary hover:underline text-blue-600"
-                  >
-                    {{ offer.sdaIdGet }}
-                  </router-link>
-                </div>
-              </div>
-              <div v-if="offer.duration">
-                <span class="text-muted"> Duration: </span>
-                <span>{{ offer.duration }} blocks</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div v-else>
-          {{
-            innerTxnExtractedData[index].infoGreenList
-              .map((info) => (info.short ? info.short : info.value))
-              .join(", ")
-          }}
-        </div>
-      </div>
-      <div v-if="innerTxnExtractedData[index].infoRedList.length > 0">
-        <div
-          v-if="
-            innerTxnExtractedData[index].legendType ===
-            InnerTxnLegendType.ADD_REMOVE
-          "
-        >
-          Remove
-        </div>
-        <div
-          v-else-if="
-            innerTxnExtractedData[index].legendType ===
-            InnerTxnLegendType.TRUE_FALSE
-          "
-        >
-          False
-        </div>
-        <div
-          v-else-if="
-            innerTxnExtractedData[index].legendType ===
-            InnerTxnLegendType.BUY_SELL
-          "
-        >
-          Sell
-        </div>
-        <div
-          v-else-if="
-            innerTxnExtractedData[index].legendType ===
-            InnerTxnLegendType.ALLOW_BLOCK
-          "
-        >
-          Block
-        </div>
-        <div v-if="item.type == TransactionType.REMOVE_SDA_EXCHANGE_OFFER">
-          <div v-for="(offers, index) in innerTxnExtractedData[index].infoRedList"
-            :key="index">
-            <div v-for="offer in offers.value" class="bg-blue-100 w-56 py-1 px-2 my-1 mx-1 rounded">
-              <div v-if="offer.sdaIdGive">
-                <span class="text-muted">SDA ID Give:</span>
-                <div v-if="offer.sdaGiveNamespace" class="text-blue-600 inline-block">
-                  <router-link
-                    :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGive } }"
-                    class="hover:text-blue-primary hover:underline text-blue-600"
-                  >
-                    {{ offer.sdaGiveNamespace }}
-                  </router-link>
-                </div>
-                <div v-else class="text-blue-600 inline-block">
-                  <router-link
-                    :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGive } }"
-                    class="hover:text-blue-primary hover:underline text-blue-600"
-                  >
-                    {{ offer.sdaIdGive }}
-                  </router-link>
-                </div>
-              </div>
-              <div v-if="offer.sdaIdGet">
-                <span class="text-muted">SDA ID Get:</span>
-                <div v-if="offer.sdaGetNamespace" class="text-blue-600 inline-block">
-                  <router-link
-                    :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGet } }"
-                    class="hover:text-blue-primary hover:underline text-blue-600"
-                  >
-                    {{ offer.sdaGetNamespace }}
-                  </router-link>
-                </div>
-                <div v-else class="text-blue-600 inline-block">
-                  <router-link
-                    :to="{ name: 'ViewAsset', params: { id: offer.sdaIdGet } }"
-                    class="hover:text-blue-primary hover:underline text-blue-600"
-                  >
-                    {{ offer.sdaIdGet }}
-                  </router-link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div v-else>
-          {{
-            innerTxnExtractedData[index].infoRedList
-              .map((info) => (info.short ? info.short : info.value))
-              .join(", ")
-          }}
-        </div>
-      </div>
-      <div
-        v-if="
-          innerTxnExtractedData[index].infoInfoList.length > 0 &&
-          item.type == supplyChangeTxnType ">
-        <div>Supply Delta</div>
-        <div>
-          {{
-            innerTxnExtractedData[index].infoInfoList
-              .map((info) =>
-                info.label == "Supply Direction" ? info.value : ""
-              )
-              .join("")
-          }}
-          {{
-            innerTxnExtractedData[index].infoInfoList
-              .map((info) =>
-                info.label == "Supply Delta"
-                  ? Helper.toCurrencyFormat(info.value, 0)
-                  : ""
-              )
-              .join("")
-          }}
-        </div>
-      </div>
-      <div
-        v-if="
-          innerTxnExtractedData[index].infoInfoList.length > 0 &&
-          item.type == supplyDefinitionTxnType ">
-        <div>Transferable</div>
-        <div>
-          {{
-            innerTxnExtractedData[index].infoInfoList
-              .map((info) => (info.label == "Transferable" ? info.value : ""))
-              .join("")
-          }}
-        </div>
-      </div>
-      <div
-        v-if="
-          innerTxnExtractedData[index].infoInfoList.length > 0 &&
-          item.type == supplyDefinitionTxnType ">
-        <div>Supply Mutable</div>
-        <div>
-          {{
-            innerTxnExtractedData[index].infoInfoList
-              .map((info) => (info.label == "Supply Mutable" ? info.value : ""))
-              .join("")
-          }}
-        </div>
-      </div>
-      <div
-        v-if="
-          innerTxnExtractedData[index].infoInfoList.length > 0 &&
-          item.type == supplyDefinitionTxnType ">
-        <div>Divisibility</div>
-        <div>
-          {{
-            innerTxnExtractedData[index].infoInfoList
-              .map((info) => (info.label == "Divisibility" ? info.value : ""))
-              .join("")
-          }}
-        </div>
-      </div>
-      <div v-if="innerTxnExtractedData[index].sdas.length > 0">
-        <div>SDAs</div>
-        <div>
-          <div
-            v-for="(sda, index) in innerTxnExtractedData[index].sdas"
-            :key="index"
-          >
-            <div class="inline-block">
-              <span class="font-bold text-xs">{{
-                Helper.toCurrencyFormat(formatCurrency(sda.amount)[0], 0)
-              }}</span>
-              <span class="text-xxs">{{
-                formatCurrency(sda.amount)[1]
-                  ? "." + formatCurrency(sda.amount)[1]
-                  : ""
-              }}</span>
-            </div>
-            <div v-if="sda.namespace" class="inline-block ml-2">
-              <img
-                v-if="sda.namespace == nativeTokenNamespace"
-                src="@/modules/account/img/proximax-logo.svg"
-                class="inline-block h-7 w-7 mr-2 border-2 rounded-3xl"
-              />
-              <img
-                v-else-if="sda.namespace == 'xarcade.xar'"
-                src="@/modules/account/img/xarcade-logo.svg"
-                class="inline-block h-7 w-7 mr-2 border-2 rounded-3xl"
-              />
-              <img
-                v-else-if="sda.namespace == 'prx.metx'"
-                src="@/modules/account/img/metx-logo.svg"
-                class="inline-block h-7 w-7 mr-2 border-2 rounded-3xl"
-              />
-              <img
-                v-else
-                src="@/modules/transaction/img/proximax-logo-gray.svg"
-                class="inline-block h-7 w-7 mr-2 border-2 rounded-3xl"
-              />
-              <router-link
-                :to="{ name: 'ViewAsset', params: { id: sda.assetId } }"
-                class="text-blue-600 hover:text-blue-primary hover:underline"
-                >{{ sda.label }}</router-link
-              >
-            </div>
-            <div
-              v-else
-              class="text-gray-400 hover:text-gray-700 duration-300 transition-all inline-block ml-2"
-            >
-              <router-link
-                :to="{ name: 'ViewAsset', params: { id: sda.assetId } }"
-                class="hover:text-blue-primary hover:underline"
-              >
-                {{ sda.assetId }}
-              </router-link>
-            </div>
-          </div>
-        </div>
-      </div>
+  <div v-for="(data, index) of innerTxns" class="mt-3 border border-gray-200 p-3">
+    <div v-for="item of data" > 
+      <DisplayValue style-class="table_div" :toggle-resolve="true" :value="item"></DisplayValue>
     </div>
   </div>
 </template>
@@ -529,10 +21,13 @@ import { copyToClipboard } from "@/util/functions";
 import { useToast } from "primevue/usetoast";
 import { AppState } from "@/state/appState";
 import UnknownDataDetailComponent from "@/modules/transaction/components/transactionDetails/UnknownDataDetailComponent.vue";
+import DisplayValue from "./transactionDetails/DisplayValue.vue";
+import { string } from "mathjs";
 
 const props = defineProps({
   innerTxn: Object,
   txn: Object,
+  txnData: Array,
   txnGroup: String,
 });
 
@@ -561,7 +56,7 @@ let allCosigners = []; // hold all the final cosigners public Keys
 let cosignedSigner = []; // all the cosigned final signers, include multisig account (calculated)
 let oriSignedSigners = []; // all the cosigned final signers + initiator
 let signedSigners = []; // all the cosigned final signers + initiator, include multisig account (calculated)
-const innerSignedList = ref([]);
+const innerSignedList = ref({});
 let currentInnerSigners = [];
 
 const allInnerTransactions = ref(props.innerTxn);
@@ -573,6 +68,20 @@ const innerTxnExtractedData = ref([
     sdas: {},
   },
 ]);
+
+const innerTxns = ref([]);
+const innerTxnsCount = ref(0);
+let txnHeaderProp = ["Type", "Public Key", "Signer", "Fully signed"];
+
+const getInnerTxns = (data) => {
+  
+  innerTxnsCount.value = 0;
+  let temp = data.find((r)=> r.name === "InnerTransactions") ? data.find((r)=> r.name === "InnerTransactions").value: [];
+  console.log(temp);
+  return temp;
+};
+
+innerTxns.value = getInnerTxns(props.txnData);
 
 onBeforeMount(() => {
   if (props.innerTxn.length > 0) {
@@ -657,7 +166,10 @@ onBeforeMount(() => {
         let isSigned = flatCosigners.every((val) =>
           signedSigners.includes(val)
         );
-        innerSignedList.value.push(isSigned);
+        innerSignedList.value = {
+          name: 'Fully signed',
+          value: isSigned ? 'Yes' : 'No'
+        };
       } else {
         try {
           let accountMultisigGraphInfo =
@@ -697,13 +209,39 @@ onBeforeMount(() => {
           currentInnerSigners = [innerSigner.publicKey];
           //console.log(error);
         }
-        innerSignedList.value.push(
-          signedSigners.includes(innerSigner.publicKey)
-        );
+        innerSignedList.value = {
+          name: 'Fully signed',
+          value: signedSigners.includes(innerSigner.publicKey) ? 'Yes' : 'No'
+        };
       }
+        for(let i=0; i<innerTxns.value.length; ++i){
+          if(innerSignedList.value){
+            innerTxns.value[i].push(innerSignedList.value)
+          }
+          let filterCommonData = innerTxns.value[i].filter((RowData)=> txnHeaderProp.includes(RowData.name))
+          console.log(filterCommonData)
+          let filterDataDetail = innerTxns.value[i].filter((RowData)=> !txnHeaderProp.includes(RowData.name))
+          console.log(filterDataDetail)
+            filterCommonData.sort(
+                function(a, b){
+                    if(a.name == b.name){
+                        return a.name.value.name.localeCompare(b.name.value.name);
+                    }
+                    else{
+                        return txnHeaderProp.indexOf(a.name) - txnHeaderProp.indexOf(b.name);
+                    }
+                }
+            );
+          let innerDetailData = filterCommonData.concat(filterDataDetail)
+          innerTxns.value[i] = innerDetailData
+          innerTxns.value[i] = innerTxns.value[i].filter((obj, index) =>
+            innerTxns.value[i].findIndex((item) => item.name === obj.name) === index
+          );
+        }
     });
   }
 });
+
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

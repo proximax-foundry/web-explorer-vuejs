@@ -42,7 +42,7 @@ const resolve = ()=>{
 
     displayValue.value = quotient.toString() + (remainderInteger ? "." + adjustedDecimalAmount :"");
   }
-
+  
   displayValue.value = displayValue.value + " " + AppState.nativeToken.label;
 }
 
