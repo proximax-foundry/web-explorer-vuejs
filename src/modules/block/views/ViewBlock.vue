@@ -246,6 +246,10 @@ const loadBlock = async () => {
   if (!p.blockHeight) {
     return;
   }
+  if (!AppState.isReady && !networkName.value) {
+    setTimeout(loadBlock, 1000);
+    return;
+  }
   const block = await BlockUtils.getBlockByHeight(parseInt(p.blockHeight));
   const blockReceipts = await AppState.chainAPI!.blockAPI.getBlockReceipts(
     parseInt(p.blockHeight)
