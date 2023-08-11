@@ -332,9 +332,8 @@ const loadBlock = async () => {
             amount: val.amount.compact(),
           };
           //pending sdk: add support for sda exchange receipt
-        } else {
-          const artifactExpiryReceipt = receipt as ArtifactExpiryReceipt;
-          const { type, artifactId } = artifactExpiryReceipt;
+        } else  if (receipt instanceof ArtifactExpiryReceipt) {
+          const { type, artifactId } = receipt;
           return {
             class: "Artifact Expiry",
             type: ReceiptType[type],
@@ -343,6 +342,11 @@ const loadBlock = async () => {
                 ? artifactId.toHex()
                 : artifactId?.fullName ?? artifactId.toHex(),
           };
+        }else{
+          return{
+            class:"Unknown",
+            type: "Unknown"
+          }
         }
       });
     })
