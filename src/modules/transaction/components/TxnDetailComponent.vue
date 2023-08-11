@@ -164,7 +164,7 @@ const signedSigners = ref([])
 const commonTxnDetails = ref([]);
 const txnDetails = ref([]);
 
-let txnHeaderProp = ["TX HASH", "Status", "Timestamp", "Block", "Tx Type", "TX FEE", "Signature", "Signer"];
+let txnHeaderProp = ["TX HASH", "Status", "Timestamp", "Block", "Tx Type", "TX FEE", "Signature", "From"];
 
 const getCommonDetails = (data)=>{
   for(let i=0; i < data.length; ++i){
@@ -183,21 +183,17 @@ const getCommonDetails = (data)=>{
 let filterData = data.filter((RowData)=> txnHeaderProp.includes(RowData.name))
 filterData.sort(
     function(a, b){
-        if(a.name == b.name){
-            return a.name.value.name.localeCompare(b.name.value.name);
-        }else{
-            return txnHeaderProp.indexOf(a.name) - txnHeaderProp.indexOf(b.name);
-        }
+        return txnHeaderProp.indexOf(a.name) - txnHeaderProp.indexOf(b.name);
     }
 );
-console.log(filterData)
+
 return filterData
 }
 
 const getTxnDetails = (data)=>{
   
 
-return data.filter((RowData)=> !txnHeaderProp.includes(RowData.name) && RowData.name !== "InnerTransactions" && RowData.name !== "Deadline")
+return data.filter((RowData)=> !txnHeaderProp.includes(RowData.name) && RowData.name !== "InnerTransactions" && RowData.name !== "Deadline" && RowData.name !== "Public Key")
 }
 
 commonTxnDetails.value = getCommonDetails(props.txnData);

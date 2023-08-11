@@ -151,6 +151,9 @@ let ignoreList = [
   "innerTransactions.oldValue",
   "innerTransactions.transactionInfo",
   "innerTransactions.version",
+  "innerTransactions.targetPublicKey",
+  "innerTransactions.namespaceId",
+  "innerTransactions.mosaicNonce",
 ];
 
 let globalConfig = {
@@ -165,7 +168,7 @@ let globalConfig = {
   linkAction: { name: "Action", value: (data: any) => LinkAction[data] },
   hashType: { value: (data: any) => HashType[data] },
   mosaics: { name: "SDAs" },
-  mosaicId: { name: "Asset", handlerType: ComponentNames.assetID },
+  mosaicId: { name: "Asset ID", handlerType: ComponentNames.assetID },
   "modifications.type": { value: (data: any) => MultisigCosignatoryModificationType[data] },
   restrictionType: { value: (data: any) => RestrictionType[data] },
   direction: { value: (data: any) => MosaicSupplyType[data] },
@@ -182,10 +185,13 @@ let globalConfig = {
   isRefunded : { name: "Refunded", value: (data: any) => data ? 'Yes' : 'No'},
   remoteAccountKey : { name: "Remote Public Key" },
   txnList : { name: "Transactions"},
+  mosaicNonce: { name: "Nonce"},
   supplyDelta : { name: "Supply Delta" },
-  "innerTransactions.targetPublicKey" : { name: "Public Key"},
+  publicKey : { name: "Public Key"},
   "innerTransactions.scopedMetadataKey" : { name: "Scoped Metadata Key"},
   "innerTransactions.targetMosaicId" : { name: "Asset"},
+  "innerTransactions.namespaceName" : { name: "Name"},
+  "innerTransactions.namespaceType" : { name: "Namespace Type", value: (data: any) => data === 0? " (Extend)" : " (Register)"},
 
 };
 
@@ -321,9 +327,6 @@ let extractTxnDataBasedOnClass = (data: any, key: string): RowData | null => {
     let d = data as UInt64;
     // finalData = d.toHex();
     finalData = BigInt("0x" +d.toHex()).toString();
-    if(key === "Duration"){
-      finalData = finalData + " Blocks"
-    }
 
     return {
       name: key,
@@ -476,13 +479,12 @@ let getPropData = (
     finalData = d.address.pretty();
 
     return {
-      name: key,
+      name: "From",
       value: finalData,
       handlerType: ComponentNames.address
     };
-  } else if (fullKey === "innerTransactions.targetPublicKey") {
-    let d = data as PublicAccount;
-      finalData = d.publicKey;
+  } else if (fullKey === "publicKey") {
+      finalData = data;
 
     return {
       name: key,
@@ -631,7 +633,9 @@ let getPropData = (
     };
   } else if(
     fullKey === "mosaicProperties.duration" ||
-    fullKey === "innerTransactions.mosaicProperties.duration"
+    fullKey === "innerTransactions.mosaicProperties.duration" || 
+    fullKey === "duration" || 
+    fullKey === "innerTransactions.duration"
   ) {
     let value = data as UInt64;
     if(!value || value.toBigInt() === BigInt(0)){

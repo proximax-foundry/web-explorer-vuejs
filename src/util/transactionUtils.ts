@@ -747,6 +747,7 @@ export class TransactionUtils {
             txnStatus.group
           );
           txn.txnList = txn.detail.txnList
+          txn.publicKey = txn.detail.signer
           break;
         case TransactionType.CHAIN_CONFIGURE:
         case TransactionType.CHAIN_UPGRADE:
@@ -804,10 +805,12 @@ export class TransactionUtils {
             txn,
             txnStatus.group
           );
-          txn.supplyDelta = [{
-            value: txn.detail.supplyDelta,
-            secondaryValue: txn.detail.supplyDirection
-          }]
+          if(txn.detail.supplyDelta && txn.detail.supplyDirection){
+            txn.supplyDelta = [{
+              value: txn.detail.supplyDelta,
+              secondaryValue: txn.detail.supplyDirection
+            }]
+          }
           break;
         case TransactionType.REGISTER_NAMESPACE:
           txn.detail = await TransactionUtils.formatNamespaceTransaction(

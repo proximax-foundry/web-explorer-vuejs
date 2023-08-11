@@ -71,12 +71,21 @@ const innerTxnExtractedData = ref([
 
 const innerTxns = ref([]);
 const innerTxnsCount = ref(0);
-let txnHeaderProp = ["Type", "Public Key", "Signer", "Fully signed"];
+let txnHeaderProp = ["Type", "Public Key", "From", "Fully signed"];
 
 const getInnerTxns = (data) => {
   
   innerTxnsCount.value = 0;
   let temp = data.find((r)=> r.name === "InnerTransactions") ? data.find((r)=> r.name === "InnerTransactions").value: [];
+  for(let i=0; i<temp.length; ++i){
+    let tempNameArray = temp[i].map((data) => { return data.name })
+
+    for(const item in data){
+      if(data[item].name === "Public Key" && !tempNameArray.includes(data[item].name)){
+        temp[i].push(data[item])
+      }
+    }
+  }
   console.log(temp);
   return temp;
 };
@@ -216,28 +225,24 @@ onBeforeMount(() => {
       }
         for(let i=0; i<innerTxns.value.length; ++i){
           if(innerSignedList.value){
-            innerTxns.value[i].push(innerSignedList.value)
+            let innerNameArray = innerTxns.value[i].map((data) => { return data.name })
+
+            if(!innerNameArray.includes(innerSignedList.value.name)){
+              innerTxns.value[i].push(innerSignedList.value)
+            }
           }
-          let filterCommonData = innerTxns.value[i].filter((RowData)=> txnHeaderProp.includes(RowData.name))
+        let filterCommonData = innerTxns.value[i].filter((RowData)=> txnHeaderProp.includes(RowData.name))
           console.log(filterCommonData)
-          let filterDataDetail = innerTxns.value[i].filter((RowData)=> !txnHeaderProp.includes(RowData.name))
+        let filterDataDetail = innerTxns.value[i].filter((RowData)=> !txnHeaderProp.includes(RowData.name))
           console.log(filterDataDetail)
-            filterCommonData.sort(
-                function(a, b){
-                    if(a.name == b.name){
-                        return a.name.value.name.localeCompare(b.name.value.name);
-                    }
-                    else{
-                        return txnHeaderProp.indexOf(a.name) - txnHeaderProp.indexOf(b.name);
-                    }
-                }
-            );
-          let innerDetailData = filterCommonData.concat(filterDataDetail)
-          innerTxns.value[i] = innerDetailData
-          innerTxns.value[i] = innerTxns.value[i].filter((obj, index) =>
-            innerTxns.value[i].findIndex((item) => item.name === obj.name) === index
+          filterCommonData.sort(
+              function(a, b){
+                  return txnHeaderProp.indexOf(a.name) - txnHeaderProp.indexOf(b.name);
+              }
           );
-        }
+        let innerDetailData = filterCommonData.concat(filterDataDetail)
+        innerTxns.value[i] = innerDetailData
+      }
     });
   }
 });
