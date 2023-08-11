@@ -14,7 +14,11 @@
       <div
         @click="tabIndex = index"
         class="cursor-pointer"
-        :class="tabIndex == index ? 'border-b-2 w-fit border-blue-primary' : 'hover-underline-animation '"
+        :class="
+          tabIndex == index
+            ? 'border-b-2 w-fit border-blue-primary'
+            : 'hover-underline-animation '
+        "
       >
         {{ value[0] }}
       </div>
@@ -35,73 +39,53 @@
 
       <Column class="lg:hidden w-[200px]">
         <template #body="{ data }">
-          <div
-            v-if="
-              selectedTabName !=
-              ('Asset Resolution Statement' || 'Address Resolution Statement')
-            "
-          >
+          <div v-if="showReceiptType()">
             <div
               class="uppercase text-xs text-gray-300 font-bold mb-1 break-all"
             >
               Receipt Type
             </div>
             <span class="uppercase font-bold text-xs mr-2">{{
-              data?.type
+              data.type
             }}</span>
           </div>
-          <div>
+          <div v-if="showAssetId()">
             <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">
               Asset ID
             </div>
             <div class="flex items-center">
-              <span v-if="!data?.mosaicId">-</span>
               <router-link
-                v-else
                 :to="{ name: 'ViewAsset', params: { id: data.mosaicId } }"
                 class="uppercase font-bold text-xs mr-2 text-blue-600 hover:underline hover:text-blue-primary"
               >
-                {{ data?.mosaicId ?? "-" }}
+                {{ data.mosaicId }}
               </router-link>
             </div>
           </div>
-          <div
-            v-if="
-              selectedTabName !=
-              ('Asset Resolution Statement' || 'Address Resolution Statement')
-            "
-          >
+          <div v-if="showSenderOrRecipient()">
             <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">
               Sender
             </div>
             <div class="uppercase font-bold text-xs">
-              <span v-if="!data?.sender">-</span>
               <router-link
                 :to="{
                   name: 'ViewAccount',
                   params: { accountParam: data.sender },
                 }"
-                v-tooltip.right="data?.sender"
-                v-else
+                v-tooltip.right="data.sender"
                 class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-40"
                 ><span class="text-ellipsis overflow-hidden">{{
-                  data?.sender
+                  data.sender
                 }}</span
                 >...</router-link
               >
             </div>
           </div>
-          <div
-            v-if="
-              selectedTabName !=
-              ('Asset Resolution Statement' || 'Address Resolution Statement')
-            "
-          >
+          <div v-if="showSenderOrRecipient()">
             <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">
               Recipient
             </div>
             <div class="uppercase font-bold text-xs">
-              <span v-if="!data?.recipient">-</span>
               <router-link
                 :to="{
                   name: TransactionUtils.isNamespaceWithString(data.recipient)
@@ -112,10 +96,9 @@
                     : { accountParam: data.recipient },
                 }"
                 v-tooltip.right="data?.recipient"
-                v-else
                 class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-40"
                 ><span class="text-ellipsis overflow-hidden">{{
-                  data?.recipient
+                  data.recipient
                 }}</span
                 >{{
                   TransactionUtils.isNamespaceWithString(data.recipient)
@@ -129,27 +112,20 @@
       </Column>
       <Column class="lg:hidden w-[200px]">
         <template #body="{ data }">
-          <div
-            v-if="
-              selectedTabName !=
-              ('Asset Resolution Statement' || 'Address Resolution Statement')
-            "
-          >
+          <div v-if="showAccount()">
             <div class="uppercase text-xs text-gray-300 font-bold mb-1">
               Account
             </div>
             <div class="uppercase font-bold text-xs">
-              <span v-if="!data?.account">-</span>
               <router-link
                 :to="{
                   name: 'ViewAccount',
                   params: { accountParam: data.account },
                 }"
-                v-tooltip.right="data?.account"
-                v-else
+                v-tooltip.right="data.account"
                 class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-40"
                 ><span class="text-ellipsis overflow-hidden">{{
-                  data?.account
+                  data.account
                 }}</span
                 >...</router-link
               >
@@ -157,8 +133,8 @@
           </div>
           <div
             v-if="
-              selectedTabName ==
-              ('Asset Resolution Statement' || 'Address Resolution Statement')
+              selectedTabName == 'Asset Resolution Statement' ||
+              selectedTabName == 'Address Resolution Statement'
             "
           >
             <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">
@@ -182,29 +158,26 @@
           </div>
           <div
             v-if="
-              selectedTabName !=
-              ('Asset Resolution Statement' || 'Address Resolution Statement')
+             showAmount()
             "
           >
             <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">
               Amount
             </div>
             <div class="text-xs uppercase font-bold">
-              {{ data?.amount ?? "-" }}
-              <b v-if="data?.amount">{{ AppState.nativeToken.label }}</b>
+              {{ data.amount  }}
+              <b >{{ AppState.nativeToken.label }}</b>
             </div>
           </div>
           <div
             v-if="
-              selectedTabName !=
-              ('Asset Resolution Statement' || 'Address Resolution Statement')
+              showArtifactId()
             "
           >
             <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">
               Artifact ID
             </div>
             <div class="uppercase font-bold text-xs">
-              <span v-if="!data?.recipient">-</span>
               <router-link
                 :to="{
                   name: TransactionUtils.isNamespaceWithString(data.artifactId)
@@ -217,10 +190,9 @@
                     : { id: data.artifactId },
                 }"
                 v-tooltip.right="data?.artifactId"
-                v-else
                 class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-40"
                 ><span class="text-ellipsis overflow-hidden">{{
-                  data?.artifactId
+                  data.artifactId
                 }}</span></router-link
               >
             </div>
@@ -233,10 +205,7 @@
         header="Receipt Type"
         headerClass="uppercase"
         class="hidden lg:table-cell"
-        v-if="
-          selectedTabName !=
-          ('Asset Resolution Statement' || 'Address Resolution Statement')
-        "
+        v-if="showReceiptType()"
       >
         <template #body="{ data }">
           <div class="uppercase font-bold text-xs mr-2">
@@ -249,15 +218,14 @@
         header="Asset ID"
         headerClass="uppercase"
         class="hidden lg:table-cell"
+        v-if="showAssetId()"
       >
         <template #body="{ data }">
-          <span v-if="!data?.mosaicId">-</span>
           <router-link
-            v-else
             :to="{ name: 'ViewAsset', params: { id: data.mosaicId } }"
             class="uppercase font-bold text-xs mr-2 text-blue-600 hover:underline hover:text-blue-primary"
           >
-            {{ data?.mosaicId ?? "-" }}
+            {{ data.mosaicId }}
           </router-link>
         </template>
       </Column>
@@ -267,8 +235,8 @@
         header="Namespace ID"
         headerClass="uppercase"
         v-if="
-          selectedTabName ==
-          ('Asset Resolution Statement' || 'Address Resolution Statement')
+          selectedTabName == 'Asset Resolution Statement' ||
+          selectedTabName == 'Address Resolution Statement'
         "
       >
         <template #body="{ data }">
@@ -294,24 +262,19 @@
         field="account"
         header="Account"
         headerClass="uppercase"
-        v-if="
-          selectedTabName !=
-          ('Asset Resolution Statement' || 'Address Resolution Statement')
-        "
+        v-if="showAccount()"
       >
         <template #body="{ data }">
           <div class="uppercase font-bold text-xs">
-            <span v-if="!data?.account">-</span>
             <router-link
               :to="{
                 name: 'ViewAccount',
                 params: { accountParam: data.account },
               }"
-              v-tooltip.right="data?.account"
-              v-else
+              v-tooltip.right="data.account"
               class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-40"
               ><span class="text-ellipsis overflow-hidden">{{
-                data?.account
+                data.account
               }}</span
               >...</router-link
             >
@@ -324,14 +287,13 @@
         header="Amount"
         headerClass="uppercase"
         v-if="
-          selectedTabName !=
-          ('Asset Resolution Statement' || 'Address Resolution Statement')
-        "
+             showAmount()
+            "
       >
         <template #body="{ data }">
           <div class="text-xs uppercase font-bold">
-            {{ data?.amount ?? "-" }}
-            <b v-if="data?.amount">{{ AppState.nativeToken.label }}</b>
+            {{ data.amount  }}
+            <b v-if="data.amount">{{ AppState.nativeToken.label }}</b>
           </div>
         </template>
       </Column>
@@ -340,24 +302,19 @@
         field="sender"
         header="Sender"
         headerClass="uppercase"
-        v-if="
-          selectedTabName !=
-          ('Asset Resolution Statement' || 'Address Resolution Statement')
-        "
+        v-if="showSenderOrRecipient()"
       >
         <template #body="{ data }">
           <div class="uppercase font-bold text-xs">
-            <span v-if="!data?.sender">-</span>
             <router-link
               :to="{
                 name: 'ViewAccount',
                 params: { accountParam: data.sender },
               }"
-              v-tooltip.right="data?.sender"
-              v-else
+              v-tooltip.right="data.sender"
               class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-40"
               ><span class="text-ellipsis overflow-hidden">{{
-                data?.sender
+                data.sender
               }}</span
               >...</router-link
             >
@@ -369,14 +326,10 @@
         field="recipient"
         header="Recipient"
         headerClass="uppercase"
-        v-if="
-          selectedTabName !=
-          ('Asset Resolution Statement' || 'Address Resolution Statement')
-        "
+        v-if="showSenderOrRecipient()"
       >
         <template #body="{ data }">
           <div class="uppercase font-bold text-xs">
-            <span v-if="!data?.recipient">-</span>
             <router-link
               :to="{
                 name: TransactionUtils.isNamespaceWithString(data.recipient)
@@ -386,11 +339,10 @@
                   ? { namespaceParam: data.recipient }
                   : { accountParam: data.recipient },
               }"
-              v-tooltip.right="data?.recipient"
-              v-else
+              v-tooltip.right="data.recipient"
               class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-40"
               ><span class="text-ellipsis overflow-hidden">{{
-                data?.recipient
+                data.recipient
               }}</span
               >{{
                 TransactionUtils.isNamespaceWithString(data.recipient)
@@ -407,13 +359,11 @@
         header="Artifact Id"
         headerClass="uppercase"
         v-if="
-          selectedTabName !=
-          ('Asset Resolution Statement' || 'Address Resolution Statement')
+          showArtifactId()
         "
       >
         <template #body="{ data }">
           <div class="uppercase font-bold text-xs">
-            <span v-if="!data?.recipient">-</span>
             <router-link
               :to="{
                 name: TransactionUtils.isNamespaceWithString(data.artifactId)
@@ -423,11 +373,10 @@
                   ? { namespaceParam: data.artifactId }
                   : { id: data.artifactId },
               }"
-              v-tooltip.right="data?.artifactId"
-              v-else
+              v-tooltip.right="data.artifactId"
               class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-40"
               ><span class="text-ellipsis overflow-hidden">{{
-                data?.artifactId
+                data.artifactId
               }}</span></router-link
             >
           </div>
@@ -543,6 +492,21 @@ const selectedTabData = computed(
   () => Object.entries(txnStatements)[tabIndex.value][1]
 );
 
+const showReceiptType = () =>
+  selectedTabName.value != "Asset Resolution Statement" &&
+  selectedTabName.value != "Address Resolution Statement";
+
+const showAssetId = () =>
+  selectedTabName.value != "Address Resolution Statement" &&
+  selectedTabName.value != "Inflation";
+
+const showSenderOrRecipient = () => selectedTabName.value == "Balance Transfer";
+
+const showAccount = () => selectedTabName.value == "Balance Change";
+
+const showAmount = () => selectedTabName.value == "Balance Transfer" || selectedTabName.value == "Balance Change" || selectedTabName.value == "Inflation"
+
+const showArtifactId = () => selectedTabName.value == "Artifact Expiry"
 
 const tabIndex = ref(0);
 
@@ -587,14 +551,13 @@ const changeRows = () => {
 };
 </script>
 
-
 <style>
 .hover-underline-animation {
   position: relative;
 }
 
 .hover-underline-animation:after {
-  content: '';
+  content: "";
   position: absolute;
   width: 100%;
   transform: scaleX(0);
