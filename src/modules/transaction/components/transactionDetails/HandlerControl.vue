@@ -9,7 +9,7 @@
         <BlockHandler :label="label" :value="value" :style-class="styleClass"></BlockHandler>
     </template>
     <template v-else-if="handlerType === ComponentNames.publicKey">
-        <PublicKeyHandler :label="label" :value="value" :style-class="styleClass" ></PublicKeyHandler>
+        <PublicKeyHandler :label="label" :value="value" :style-class="styleClass" :isArray="isArray" ></PublicKeyHandler>
     </template>
     <template v-else-if="handlerType === ComponentNames.supplyDelta">
         <SupplyDeltaHandler :label="label" :value="value" :secondary-value="secondaryValue" :style-class="styleClass" ></SupplyDeltaHandler>
@@ -18,7 +18,7 @@
         <FeeHandler :label="label" :value="value" :style-class="styleClass" :toggle-resolve="toggleResolve" ></FeeHandler>
     </template>
     <template v-else-if="handlerType === ComponentNames.address">
-        <AddressHandler :label="label" :value="value" :style-class="styleClass" ></AddressHandler>
+        <AddressHandler :label="label" :value="value" :style-class="styleClass" :isArray="isArray" ></AddressHandler>
     </template>
     <template v-else-if="handlerType === ComponentNames.asset">
         <SdaHandler :label="label" :value="value || ''" :secondary-value="secondaryValue || ''" :style-class="styleClass" :toggle-resolve="toggleResolve" :isArray="isArray" ></SdaHandler>

@@ -38,7 +38,24 @@ const props = withDefaults(defineProps<IRow>(),{});
 .txn-div{
   @apply text-gray-800 text-xs;
 
-  .isArrayClass {
+  > div {
+    @apply flex items-center border-b border-gray-100 py-4;
+
+    > div:first-child {
+      @apply w-40 text-xs pl-4 mr-1;
+    }
+
+    > div:nth-child(2) {
+      @apply text-xs w-full;
+    }
+
+    > div:last-child {
+      @apply border-none;
+    }
+  }
+}
+
+.isArrayClass {
     > div {
       @apply flex items-center py-1;
   
@@ -56,23 +73,6 @@ const props = withDefaults(defineProps<IRow>(),{});
     }
 
   }
-
-  > div {
-    @apply flex items-center border-b border-gray-100 py-4;
-
-    > div:first-child {
-      @apply w-40 text-xs pl-4 mr-1;
-    }
-
-    > div:nth-child(2) {
-      @apply text-xs w-full;
-    }
-
-    > div:last-child {
-      @apply border-none;
-    }
-  }
-}
 
 .data-details {
 

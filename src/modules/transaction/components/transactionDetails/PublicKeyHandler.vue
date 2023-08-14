@@ -1,5 +1,5 @@
 <template>
-    <div :class="styleClass">
+    <div :class="[isArray ? 'isArrayClass' : styleClass]">
       <div>
         <div>{{ label }}</div>
         <div class="flex">
@@ -29,7 +29,8 @@
   const props = defineProps({
     label: String,
     value: String,
-    styleClass: String
+    styleClass: String,
+    isArray: Boolean
   });
 
   const copy = (id: any) => {
@@ -71,6 +72,25 @@
         @apply border-none;
       }
     }
+  }
+
+  .isArrayClass {
+    > div {
+      @apply flex items-center py-1;
+  
+      > div:first-child {
+        @apply w-40 text-xs;
+      }
+  
+      > div:nth-child(2) {
+        @apply text-xs w-full;
+      }
+  
+      > div:last-child {
+        @apply border-none;
+      }
+    }
+
   }
   
   .table_div {

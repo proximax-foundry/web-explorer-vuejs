@@ -746,8 +746,6 @@ export class TransactionUtils {
             txn,
             txnStatus.group
           );
-          txn.txnList = txn.detail.txnList
-          txn.publicKey = txn.detail.signer
           break;
         case TransactionType.CHAIN_CONFIGURE:
         case TransactionType.CHAIN_UPGRADE:
@@ -775,7 +773,6 @@ export class TransactionUtils {
             txn,
             txnStatus.group
           );
-          txn.isRefunded = txn.detail.isRefunded
           break;
         case TransactionType.MODIFY_ACCOUNT_METADATA:
           break;
@@ -805,12 +802,6 @@ export class TransactionUtils {
             txn,
             txnStatus.group
           );
-          if(txn.detail.supplyDelta && txn.detail.supplyDirection){
-            txn.supplyDelta = [{
-              value: txn.detail.supplyDelta,
-              secondaryValue: txn.detail.supplyDirection
-            }]
-          }
           break;
         case TransactionType.REGISTER_NAMESPACE:
           txn.detail = await TransactionUtils.formatNamespaceTransaction(

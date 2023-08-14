@@ -105,7 +105,6 @@ PlainMessage
 } from "tsjs-xpx-chain-sdk";
 import { ComponentNames } from "../componentEnum";
 import type { RowData } from "../components/payloadDetails/IRowData";
-import { isArray } from "mathjs";
 
 const props = defineProps({
   hash: {
@@ -154,6 +153,7 @@ let ignoreList = [
   "innerTransactions.targetPublicKey",
   "innerTransactions.namespaceId",
   "innerTransactions.mosaicNonce",
+  "unknownPayload",
 ];
 
 let globalConfig = {
@@ -187,7 +187,6 @@ let globalConfig = {
   txnList : { name: "Transactions"},
   mosaicNonce: { name: "Nonce"},
   supplyDelta : { name: "Supply Delta" },
-  publicKey : { name: "Public Key"},
   "innerTransactions.scopedMetadataKey" : { name: "Scoped Metadata Key"},
   "innerTransactions.targetMosaicId" : { name: "Asset"},
   "innerTransactions.namespaceName" : { name: "Name"},
@@ -350,12 +349,11 @@ let extractTxnDataBasedOnClass = (data: any, key: string): RowData | null => {
     };
   } else if (classType === PublicAccount.name) {
     let d = data as PublicAccount;
-      finalData = d.publicKey;
-      handlerType = ComponentNames.publicKey;
 
     return {
-      name: key,
-      value: finalData,
+      name: '',
+      value: [{ name: "Public Key", value: d.publicKey, handlerType: ComponentNames.publicKey}, 
+              { name: "From", value: d.address.pretty(), handlerType: ComponentNames.address}],
       handlerType: handlerType
     };
   } else if (classType === Address.name) {
@@ -473,23 +471,6 @@ let getPropData = (
       name: key,
       value: finalData,
       handlerType: ComponentNames.block,
-    };
-  } else if (fullKey === "innerTransactions.signer" || fullKey === "signer") {
-    let d = data as PublicAccount;
-    finalData = d.address.pretty();
-
-    return {
-      name: "From",
-      value: finalData,
-      handlerType: ComponentNames.address
-    };
-  } else if (fullKey === "publicKey") {
-      finalData = data;
-
-    return {
-      name: key,
-      value: finalData,
-      handlerType: ComponentNames.publicKey
     };
   } else if (fullKey === "message") {
     let d = data as PlainMessage;

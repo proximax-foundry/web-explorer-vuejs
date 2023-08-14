@@ -1,8 +1,8 @@
 <template>
     <template v-if="value.value && Array.isArray(value.value)">
-      <div :class="styleClass">
+      <div :class="[value.name === '' || value.name === 'UnknownData' ? 'isNoNameClass' : styleClass]">
         <div>
-          <div>{{ value.name }}</div>
+          <div v-if="value.name !== '' && value.name !== 'UnknownData' ">{{ value.name }}</div>
           <div>
             <div v-for="item of value.value">
               <DisplayValue :style-class="styleClass" :toggle-resolve="toggleResolve" :value="item" :isArray="true">
@@ -62,6 +62,25 @@
         @apply border-none;
       }
     }
+  }
+
+  .isNoNameClass {
+    > div {
+      @apply flex items-center border-b border-gray-100 py-4;
+  
+      > div:first-child {
+        @apply text-xs pl-4;
+      }
+  
+      > div:nth-child(2) {
+        @apply text-xs w-full;
+      }
+  
+      > div:last-child {
+        @apply border-none;
+      }
+    }
+
   }
   
   .table_div {
