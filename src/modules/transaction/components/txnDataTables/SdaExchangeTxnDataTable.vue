@@ -61,20 +61,59 @@
             </div>
             <div>
             <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">
-              Duration
+              OFFERS(GIVE/GET/DURATION)
             </div>
             <div class="flex items-center">
               <span
-                class="text-xs font-bold"
-                v-tooltip.left="
-                  { value: `<tiptext>Approximately ${durationTime(data.duration)} Day${(durationTime(data.duration) > 1 ? 's' : '')}</tiptext>` , escape: true }
-                "
-                >{{
-                  data.duration
-                    ? data.duration + " Block" + (data.duration > 1 ? "s" : "")
+              class="inline-block bg-blue-100 font-bold text-xs py-1 px-2 my-1 mx-1 rounded"
+              v-for="(item, index) in data.sdaExchange"
+              :key="index"
+              v-tooltip.left="
+                { value: `<tiptext>Approximately ${durationTime(item.duration)} Day${(durationTime(item.duration) > 1 ? 's' : '')}</tiptext>`, disabled:Boolean(item.duration === undefined) , escape: true }
+              "
+            >
+              <div>
+                <span v-if="item.amountGive" class="mr-2">{{ item.amountGive }}</span>
+                <div class="inline-block">
+                  <router-link
+                    v-if="item.sdaGiveNamespace"
+                    :to="{ name: 'ViewAsset', params: { id: item.sdaIdGive } }"
+                    class="text-blue-600 hover:text-blue-primary flex hover:underline"
+                    >{{ item.sdaGiveNamespace }}</router-link
+                  >
+                  <router-link
+                    v-else
+                    :to="{ name: 'ViewAsset', params: { id: item.sdaIdGive } }"
+                    class="text-blue-600 hover:text-blue-primary flex hover:underline"
+                    >{{ item.sdaIdGive }}</router-link
+                  >
+                </div>
+              </div>
+              <div>
+                <span v-if="item.amountGet" class="mr-2">{{ item.amountGet }}</span>
+                <div class="inline-block">
+                  <router-link
+                    v-if="item.sdaGetNamespace"
+                    :to="{ name: 'ViewAsset', params: { id: item.sdaIdGet } }"
+                    class="text-blue-600 hover:text-blue-primary flex hover:underline"
+                    >{{ item.sdaGetNamespace }}</router-link
+                  >
+                  <router-link
+                    v-else
+                    :to="{ name: 'ViewAsset', params: { id: item.sdaIdGet } }"
+                    class="text-blue-600 hover:text-blue-primary flex hover:underline"
+                    >{{ item.sdaIdGet }}</router-link
+                  >
+                </div>
+              </div>
+              <div v-if="item.duration">
+                {{
+                  item.duration
+                    ? item.duration + " Block" + (item.duration > 1 ? "s" : "")
                     : "-"
-                }}</span
-              >
+                }}
+              </div>
+            </span>
             </div>
           </div>
           </template>
