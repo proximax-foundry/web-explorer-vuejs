@@ -171,7 +171,7 @@
 </template>
 
 <script setup lang="ts">
-import BlockReceipt from '@/modules/block/components/BlockReceipt.vue'
+import BlockReceipt from "@/modules/block/components/BlockReceipt.vue";
 import { computed, getCurrentInstance, ref } from "vue";
 import { BlockUtils, type BlockObj } from "@/util/blockUtil";
 import { AppState } from "@/state/appState";
@@ -185,10 +185,12 @@ import {
   ArtifactExpiryReceipt,
   BalanceChangeReceipt,
   BalanceTransferReceipt,
-  InflationReceipt,
   MosaicAlias,
   MosaicId,
   NamespaceId,
+  OfferCreationReceipt,
+  OfferExchangeReceipt,
+  OfferRemovalReceipt,
   ReceiptType,
   TransactionGroupType,
   TransactionQueryParams,
@@ -197,18 +199,22 @@ import { copyToClipboard } from "@/util/functions";
 import { useToast } from "primevue/usetoast";
 import type { ConfirmedTransferTransaction } from "@/models/transactions/transaction";
 
-
-
-interface blockReceipt{
-    class?: string,
-    type?: string,
-    namespaceId?: string,
-    mosaicId?: string,
-    account?: string,
-    amount?: number,
-    recipient?: string,
-    sender?: string,
-    artifactId? : string
+interface blockReceipt {
+  class?: string;
+  type?: string;
+  namespaceId?: string;
+  mosaicId?: string;
+  account?: string;
+  amount?: number;
+  recipient?: string;
+  sender?: string;
+  artifactId?: string;
+  mosaicIdGive?: string;
+  mosaicIdGet?: string;
+  mosaicIdGiveAmount?: number;
+  mosaicIdGetAmount?: number;
+  mosaicAmountGiveReturned?: number;
+  address?: string
 }
 
 const p = defineProps({
@@ -239,8 +245,6 @@ const copy = (id: string) => {
     }
   }
 };
-
-
 
 const loadBlock = async () => {
   if (!p.blockHeight) {
@@ -273,7 +277,10 @@ const loadBlock = async () => {
     })
     .flat();
 
-  const formatAddressStatement: Record<string, {namespaceId: string, address:string}[]> = addressStatement.length
+  const formatAddressStatement: Record<
+    string,
+    { namespaceId: string; address: string }[]
+  > = addressStatement.length
     ? {
         "Address Resolution Statement": addressStatement,
       }
@@ -292,7 +299,10 @@ const loadBlock = async () => {
     })
     .flat();
 
-  const formatMosaicStatement: Record<string, {namespaceId: string, mosaicId: string }[]> = mosaicStatement.length
+  const formatMosaicStatement: Record<
+    string,
+    { namespaceId: string; mosaicId: string }[]
+  > = mosaicStatement.length
     ? {
         "Asset Resolution Statement": mosaicStatement,
       }
@@ -323,16 +333,8 @@ const loadBlock = async () => {
                 ? val.recipient.pretty()
                 : val.recipient?.fullName ?? val.recipient.toHex(),
           };
-        } else if (receipt instanceof InflationReceipt) {
-          const { type, version, size, ...val } = receipt;
-          return {
-            class: "Inflation",
-            type: ReceiptType[type],
-            mosaicId: val.mosaicId.toHex(),
-            amount: val.amount.compact(),
-          };
-          //pending sdk: add support for sda exchange receipt
-        } else  if (receipt instanceof ArtifactExpiryReceipt) {
+        } 
+         else if (receipt instanceof ArtifactExpiryReceipt) {
           const { type, artifactId } = receipt;
           return {
             class: "Artifact Expiry",
@@ -342,17 +344,99 @@ const loadBlock = async () => {
                 ? artifactId.toHex()
                 : artifactId?.fullName ?? artifactId.toHex(),
           };
-        }else{
-          return{
-            class:"Unknown",
-            type: "Unknown"
-          }
+        } else if (receipt instanceof OfferCreationReceipt) {
+          const { type, version, size, ...val } = receipt;
+          return {
+            class: "SDA Offer Creation",
+            type: ReceiptType[type],
+            sender: val.sender.address.pretty(),
+            mosaicIdGive: val.mosaicIdGive.toHex(),
+            mosaicIdGet: val.mosaicIdGet.toHex(),
+            mosaicIdGiveAmount: val.mosaicAmountGive.compact(),
+            mosaicIdGetAmount: val.mosaicAmountGet.compact(),
+          };
+        } else if (receipt instanceof OfferExchangeReceipt) {
+          const { type, version, size, ...val } = receipt;
+          console.log(val)
+          return {
+            class: "SDA Offer Exchange",
+            type: ReceiptType[type],
+            sender: val.sender.address.pretty(),
+            mosaicIdGive: val.mosaicIdGive.toHex(),
+            mosaicIdGet: val.mosaicIdGet.toHex(),
+            exchangeDetails: val.exchangeDetails.map((z) => {
+              return {
+                recipient: z.recipient.pretty(),
+                mosaicIdGive: z.mosaicIdGive.toHex(),
+                mosaicIdGet: z.mosaicIdGet.toHex(),
+                mosaicAmountGive: z.mosaicAmountGive.compact(),
+                mosaicAmountGet: z.mosaicAmountGet.compact(),
+              };
+            }),
+          };
+        } else if (receipt instanceof OfferRemovalReceipt) {
+          const { type, version, size, ...val } = receipt;
+          return {
+            class: "SDA Offer Removal",
+            type: ReceiptType[type],
+            sender: val.sender.address.pretty(),
+            mosaicIdGive: val.mosaicIdGive.toHex(),
+            mosaicIdGet: val.mosaicIdGet.toHex(),
+            mosaicAmountGiveReturned: val.mosaicAmountGiveReturned.compact(),
+          };
+        } else {
+          return {
+            class: "Unknown",
+            type: "Unknown",
+          };
         }
       });
     })
     .flat();
 
   for (let i = 0; i < txnStatement.length; i++) {
+ 
+    if (txnStatement[i].mosaicIdGet) {
+      const { divisibility } = await AppState.chainAPI!.assetAPI.getMosaic(
+        new MosaicId(txnStatement[i].mosaicIdGet!)
+      );
+      if(txnStatement[i].mosaicIdGetAmount){
+
+        txnStatement[i].mosaicIdGetAmount! =
+          txnStatement[i].mosaicIdGetAmount! / Math.pow(10, divisibility);
+      }
+    }
+
+    if (txnStatement[i].mosaicIdGive) {
+      const { divisibility } = await AppState.chainAPI!.assetAPI.getMosaic(
+        new MosaicId(txnStatement[i].mosaicIdGive!)
+      );
+      if(txnStatement[i].mosaicIdGiveAmount){
+
+        txnStatement[i].mosaicIdGiveAmount! =
+          txnStatement[i].mosaicIdGiveAmount! / Math.pow(10, divisibility);
+      }
+      if(txnStatement[i].mosaicAmountGiveReturned){
+        txnStatement[i].mosaicAmountGiveReturned! =
+          txnStatement[i].mosaicAmountGiveReturned! / Math.pow(10, divisibility);
+      }
+    }
+
+    if(txnStatement[i].exchangeDetails?.length){
+      for (let j = 0; j < txnStatement[i].exchangeDetails!.length; j++) {
+        const getMosaicInfo = await AppState.chainAPI!.assetAPI.getMosaic(
+          new MosaicId(txnStatement[i].exchangeDetails![j].mosaicIdGet )
+        );
+        const giveMosaicInfo = await AppState.chainAPI!.assetAPI.getMosaic(
+          new MosaicId(txnStatement[i].exchangeDetails![j].mosaicIdGive )
+        );
+
+        txnStatement[i].exchangeDetails![j].mosaicAmountGet = txnStatement[i].exchangeDetails![j].mosaicAmountGet / Math.pow(10,getMosaicInfo.divisibility)
+        txnStatement[i].exchangeDetails![j].mosaicAmountGive = txnStatement[i].exchangeDetails![j].mosaicAmountGive / Math.pow(10,giveMosaicInfo.divisibility)
+      }
+    }
+
+
     if (txnStatement[i].mosaicId) {
       const { divisibility } = await AppState.chainAPI!.assetAPI.getMosaic(
         new MosaicId(txnStatement[i].mosaicId!)

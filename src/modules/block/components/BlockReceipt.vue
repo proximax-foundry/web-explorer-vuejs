@@ -25,365 +25,14 @@
     </div>
   </div>
   <div class="filter shadow-xl border border-gray-50 p-5 mb-15">
-    <DataTable
-      :value="selectedTabData"
-      :paginator="false"
-      :rows="Number(pages)"
-      scrollDirection="horizontal"
-      :alwaysShowPaginator="false"
-      responsiveLayout="scroll"
-      paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-      currentPageReportTemplate=""
-    >
-      <template #empty> No assets found. </template>
-
-      <Column class="lg:hidden w-[200px]">
-        <template #body="{ data }">
-          <div v-if="showReceiptType()">
-            <div
-              class="uppercase text-xs text-gray-300 font-bold mb-1 break-all"
-            >
-              Receipt Type
-            </div>
-            <span class="uppercase font-bold text-xs mr-2">{{
-              data.type
-            }}</span>
-          </div>
-          <div v-if="showAssetId()">
-            <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">
-              Asset ID
-            </div>
-            <div class="flex items-center">
-              <router-link
-                :to="{ name: 'ViewAsset', params: { id: data.mosaicId } }"
-                class="uppercase font-bold text-xs mr-2 text-blue-600 hover:underline hover:text-blue-primary"
-              >
-                {{ data.mosaicId }}
-              </router-link>
-            </div>
-          </div>
-          <div v-if="showSenderOrRecipient()">
-            <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">
-              Sender
-            </div>
-            <div class="uppercase font-bold text-xs">
-              <router-link
-                :to="{
-                  name: 'ViewAccount',
-                  params: { accountParam: data.sender },
-                }"
-                v-tooltip.right="data.sender"
-                class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-40"
-                ><span class="text-ellipsis overflow-hidden">{{
-                  data.sender
-                }}</span
-                >...</router-link
-              >
-            </div>
-          </div>
-          <div v-if="showSenderOrRecipient()">
-            <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">
-              Recipient
-            </div>
-            <div class="uppercase font-bold text-xs">
-              <router-link
-                :to="{
-                  name: TransactionUtils.isNamespaceWithString(data.recipient)
-                    ? 'ViewNamespace'
-                    : 'ViewAccount',
-                  params: TransactionUtils.isNamespaceWithString(data.recipient)
-                    ? { namespaceParam: data.recipient }
-                    : { accountParam: data.recipient },
-                }"
-                v-tooltip.right="data?.recipient"
-                class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-40"
-                ><span class="text-ellipsis overflow-hidden">{{
-                  data.recipient
-                }}</span
-                >{{
-                  TransactionUtils.isNamespaceWithString(data.recipient)
-                    ? "..."
-                    : ""
-                }}</router-link
-              >
-            </div>
-          </div>
-        </template>
-      </Column>
-      <Column class="lg:hidden w-[200px]">
-        <template #body="{ data }">
-          <div v-if="showAccount()">
-            <div class="uppercase text-xs text-gray-300 font-bold mb-1">
-              Account
-            </div>
-            <div class="uppercase font-bold text-xs">
-              <router-link
-                :to="{
-                  name: 'ViewAccount',
-                  params: { accountParam: data.account },
-                }"
-                v-tooltip.right="data.account"
-                class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-40"
-                ><span class="text-ellipsis overflow-hidden">{{
-                  data.account
-                }}</span
-                >...</router-link
-              >
-            </div>
-          </div>
-          <div
-            v-if="
-              selectedTabName == 'Asset Resolution Statement' ||
-              selectedTabName == 'Address Resolution Statement'
-            "
-          >
-            <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">
-              Namespace ID
-            </div>
-            <div class="uppercase font-bold text-xs">
-              <div class="flex items-center">
-                <span v-if="!data?.namespaceId">-</span>
-                <router-link
-                  v-else
-                  :to="{
-                    name: 'ViewNamespace',
-                    params: { namespaceParam: data.namespaceId },
-                  }"
-                  class="uppercase font-bold text-xs mr-2 text-blue-600 hover:underline hover:text-blue-primary"
-                >
-                  {{ data?.namespaceId }}
-                </router-link>
-              </div>
-            </div>
-          </div>
-          <div
-            v-if="
-             showAmount()
-            "
-          >
-            <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">
-              Amount
-            </div>
-            <div class="text-xs uppercase font-bold">
-              {{ data.amount  }}
-              <b >{{ AppState.nativeToken.label }}</b>
-            </div>
-          </div>
-          <div
-            v-if="
-              showArtifactId()
-            "
-          >
-            <div class="uppercase text-xs text-gray-300 font-bold mb-1 mt-5">
-              Artifact ID
-            </div>
-            <div class="uppercase font-bold text-xs">
-              <router-link
-                :to="{
-                  name: TransactionUtils.isNamespaceWithString(data.artifactId)
-                    ? 'ViewNamespace'
-                    : 'ViewAsset',
-                  params: TransactionUtils.isNamespaceWithString(
-                    data.artifactId
-                  )
-                    ? { namespaceParam: data.artifactId }
-                    : { id: data.artifactId },
-                }"
-                v-tooltip.right="data?.artifactId"
-                class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-40"
-                ><span class="text-ellipsis overflow-hidden">{{
-                  data.artifactId
-                }}</span></router-link
-              >
-            </div>
-          </div>
-        </template>
-      </Column>
-
-      <Column
-        field="type"
-        header="Receipt Type"
-        headerClass="uppercase"
-        class="hidden lg:table-cell"
-        v-if="showReceiptType()"
-      >
-        <template #body="{ data }">
-          <div class="uppercase font-bold text-xs mr-2">
-            {{ data?.type }}
-          </div>
-        </template>
-      </Column>
-      <Column
-        field="mosaicId"
-        header="Asset ID"
-        headerClass="uppercase"
-        class="hidden lg:table-cell"
-        v-if="showAssetId()"
-      >
-        <template #body="{ data }">
-          <router-link
-            :to="{ name: 'ViewAsset', params: { id: data.mosaicId } }"
-            class="uppercase font-bold text-xs mr-2 text-blue-600 hover:underline hover:text-blue-primary"
-          >
-            {{ data.mosaicId }}
-          </router-link>
-        </template>
-      </Column>
-      <Column
-        class="hidden lg:table-cell"
-        field="namespaceId"
-        header="Namespace ID"
-        headerClass="uppercase"
-        v-if="
-          selectedTabName == 'Asset Resolution Statement' ||
-          selectedTabName == 'Address Resolution Statement'
-        "
-      >
-        <template #body="{ data }">
-          <div class="uppercase font-bold text-xs">
-            <div class="flex items-center">
-              <span v-if="!data?.namespaceId">-</span>
-              <router-link
-                v-else
-                :to="{
-                  name: 'ViewNamespace',
-                  params: { namespaceParam: data.namespaceId },
-                }"
-                class="uppercase font-bold text-xs mr-2 text-blue-600 hover:underline hover:text-blue-primary"
-              >
-                {{ data?.namespaceId }}
-              </router-link>
-            </div>
-          </div>
-        </template>
-      </Column>
-      <Column
-        class="hidden lg:table-cell"
-        field="account"
-        header="Account"
-        headerClass="uppercase"
-        v-if="showAccount()"
-      >
-        <template #body="{ data }">
-          <div class="uppercase font-bold text-xs">
-            <router-link
-              :to="{
-                name: 'ViewAccount',
-                params: { accountParam: data.account },
-              }"
-              v-tooltip.right="data.account"
-              class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-40"
-              ><span class="text-ellipsis overflow-hidden">{{
-                data.account
-              }}</span
-              >...</router-link
-            >
-          </div>
-        </template>
-      </Column>
-      <Column
-        class="hidden lg:table-cell"
-        field="amount"
-        header="Amount"
-        headerClass="uppercase"
-        v-if="
-             showAmount()
-            "
-      >
-        <template #body="{ data }">
-          <div class="text-xs uppercase font-bold">
-            {{ data.amount  }}
-            <b v-if="data.amount">{{ AppState.nativeToken.label }}</b>
-          </div>
-        </template>
-      </Column>
-      <Column
-        class="hidden lg:table-cell"
-        field="sender"
-        header="Sender"
-        headerClass="uppercase"
-        v-if="showSenderOrRecipient()"
-      >
-        <template #body="{ data }">
-          <div class="uppercase font-bold text-xs">
-            <router-link
-              :to="{
-                name: 'ViewAccount',
-                params: { accountParam: data.sender },
-              }"
-              v-tooltip.right="data.sender"
-              class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-40"
-              ><span class="text-ellipsis overflow-hidden">{{
-                data.sender
-              }}</span
-              >...</router-link
-            >
-          </div>
-        </template>
-      </Column>
-      <Column
-        class="hidden lg:table-cell"
-        field="recipient"
-        header="Recipient"
-        headerClass="uppercase"
-        v-if="showSenderOrRecipient()"
-      >
-        <template #body="{ data }">
-          <div class="uppercase font-bold text-xs">
-            <router-link
-              :to="{
-                name: TransactionUtils.isNamespaceWithString(data.recipient)
-                  ? 'ViewNamespace'
-                  : 'ViewAccount',
-                params: TransactionUtils.isNamespaceWithString(data.recipient)
-                  ? { namespaceParam: data.recipient }
-                  : { accountParam: data.recipient },
-              }"
-              v-tooltip.right="data.recipient"
-              class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-40"
-              ><span class="text-ellipsis overflow-hidden">{{
-                data.recipient
-              }}</span
-              >{{
-                TransactionUtils.isNamespaceWithString(data.recipient)
-                  ? "..."
-                  : ""
-              }}</router-link
-            >
-          </div>
-        </template>
-      </Column>
-      <Column
-        class="hidden lg:table-cell"
-        field="artifactId"
-        header="Artifact Id"
-        headerClass="uppercase"
-        v-if="
-          showArtifactId()
-        "
-      >
-        <template #body="{ data }">
-          <div class="uppercase font-bold text-xs">
-            <router-link
-              :to="{
-                name: TransactionUtils.isNamespaceWithString(data.artifactId)
-                  ? 'ViewNamespace'
-                  : 'ViewAsset',
-                params: TransactionUtils.isNamespaceWithString(data.artifactId)
-                  ? { namespaceParam: data.artifactId }
-                  : { id: data.artifactId },
-              }"
-              v-tooltip.right="data.artifactId"
-              class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-40"
-              ><span class="text-ellipsis overflow-hidden">{{
-                data.artifactId
-              }}</span></router-link
-            >
-          </div>
-        </template>
-      </Column>
-    </DataTable>
-  </div>
+    <AssetResolutionDt v-if="selectedTabName== receiptClass.assetResolution" :data="selectedTabData as assetResolution[]" :pages="pages"/>
+    <AddressResolutionDt v-else-if="selectedTabName== receiptClass.addressResolution " :data="selectedTabData as addressResolution[]" :pages="pages" />
+    <ArtifactExpiryDt   v-else-if="selectedTabName==receiptClass.artifactExpiry "  :data="selectedTabData as artifactExpiry[]" :pages="pages"/>
+    <BalanceChangeDt   v-else-if="selectedTabName==receiptClass.balanceChange"  :data="selectedTabData as balanceChange[]" :pages="pages"/>
+    <BalanceTransferDt v-else-if="selectedTabName==receiptClass.balanceTransfer"  :data="selectedTabData as balanceTransfer[]" :pages="pages" />
+    <SdaOfferCreationDt  v-else-if="selectedTabName==receiptClass.sdaOfferCreation"  :data="selectedTabData as sdaOfferCreation[]"  :pages="pages" />
+    <SdaOfferRemovalDt  v-else-if="selectedTabName==receiptClass.sdaOfferRemoval"  :data="selectedTabData as sdaOfferRemoval[]"  :pages="pages"/>
+    <SdaofferExchangeDt  v-else-if="selectedTabName==receiptClass.sdaOfferExchange"  :data="selectedTabData as sdaOfferExchange[]"  :pages="pages" />
   <div class="sm:flex sm:justify-between my-5 mb-15" v-if="totalPages > 1">
     <div class="text-xs text-gray-700 mb-3 sm:mb-0 text-center sm:text-left">
       Show
@@ -459,14 +108,28 @@
       </div>
     </div>
   </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import DataTable from "primevue/datatable";
-import Column from "primevue/column";
-import { AppState } from "@/state/appState";
-import { TransactionUtils } from "@/util/transactionUtils";
+import AddressResolutionDt from "./AddressResolutionDt.vue";
+import type { addressResolution } from "./AddressResolutionDt.vue";
+import  ArtifactExpiryDt from "./ArtifactExpiryDt.vue";
+import type { artifactExpiry } from "./ArtifactExpiryDt.vue";
+import BalanceChangeDt from "./BalanceChangeDt.vue";
+import type { balanceChange } from "./BalanceChangeDt.vue";
+import BalanceTransferDt from "./BalanceTransfer.Dt.vue";
+import type { balanceTransfer } from "./BalanceTransfer.Dt.vue";
+import AssetResolutionDt  from "./AssetResolutionDt.vue";
+import type { assetResolution } from "./AssetResolutionDt.vue";
+import  SdaOfferCreationDt from "./SdaOfferCreationDt.vue";
+import type { sdaOfferCreation } from "./SdaOfferCreationDt.vue";
+import  SdaOfferRemovalDt from "./SdaOfferRemovalDt.vue";
+import  type{sdaOfferRemoval} from "./SdaOfferRemovalDt.vue";
+import SdaofferExchangeDt from "./SdaofferExchangeDt.vue";
+import type {sdaOfferExchange} from "./SdaofferExchangeDt.vue";
+
 
 interface blockReceipt {
   class?: string;
@@ -478,6 +141,23 @@ interface blockReceipt {
   recipient?: string;
   sender?: string;
   artifactId?: string;
+  mosaicIdGive?: string;
+  mosaicIdGet?: string;
+  mosaicIdGiveAmount?: number;
+  mosaicIdGetAmount?: number;
+  mosaicAmountGiveReturned?: number;
+  address?: string
+}
+
+enum receiptClass {
+  addressResolution = "Address Resolution Statement",
+  assetResolution = "Asset Resolution Statement",
+  balanceTransfer = "Balance Transfer",
+  balanceChange = "Balance Change",
+  artifactExpiry = "Artifact Expiry",
+  sdaOfferCreation = "SDA Offer Creation",
+  sdaOfferRemoval = "SDA Offer Removal",
+  sdaOfferExchange = "SDA Offer Exchange"
 }
 
 const { txnStatements } = defineProps<{
@@ -491,22 +171,6 @@ const selectedTabName = computed(
 const selectedTabData = computed(
   () => Object.entries(txnStatements)[tabIndex.value][1]
 );
-
-const showReceiptType = () =>
-  selectedTabName.value != "Asset Resolution Statement" &&
-  selectedTabName.value != "Address Resolution Statement";
-
-const showAssetId = () =>
-  selectedTabName.value != "Address Resolution Statement" &&
-  selectedTabName.value != "Inflation";
-
-const showSenderOrRecipient = () => selectedTabName.value == "Balance Transfer";
-
-const showAccount = () => selectedTabName.value == "Balance Change";
-
-const showAmount = () => selectedTabName.value == "Balance Transfer" || selectedTabName.value == "Balance Change" || selectedTabName.value == "Inflation"
-
-const showArtifactId = () => selectedTabName.value == "Artifact Expiry"
 
 const tabIndex = ref(0);
 
