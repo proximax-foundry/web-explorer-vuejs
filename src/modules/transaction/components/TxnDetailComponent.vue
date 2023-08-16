@@ -1,5 +1,5 @@
 <template>
-  <div v-for="data in commonTxnDetails">
+  <!-- <div v-for="data in commonTxnDetails">
     <div v-if="Array.isArray(data.value)">
       <div class="txn-div">
         <div>
@@ -37,8 +37,8 @@
         </div>
       </template>
     </template>
-  </div>
-  <!--<div class="txn-div">
+  </div> -->
+  <div class="txn-div">
     <div>
       <div>TX HASH</div>
       <div class="flex items-center break-all">
@@ -125,8 +125,7 @@
             Helper.createAddress(txnDetail.signer).pretty() }}</router-link>
         <img src="@/assets/img/icon-copy.svg" @click="copy('signerAddress')" class="cursor-pointer" />
       </div>
-    </div> -->
-  <div class="txn-div">
+    </div>
     <div v-if="txnDetail.cosigners.length > 0">
       <div>Cosigner{{ txnDetail.cosigners.length > 1 ? "s" : "" }}</div>
       <div>
@@ -153,52 +152,52 @@
       </div>
     </div>
 
-
   </div>
 
-  <TransferDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.TRANSFER" />
-  <AliasDetailComponent :txnDetail="txnDetail" v-else-if="txnType == TransactionType.ADDRESS_ALIAS ||
+  <div v-for="data in txnDetails">
+    <DisplayValue style-class="txn-div" :toggle-resolve="true" :value="data"></DisplayValue>
+  </div>
+
+  <!--<TransferDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.TRANSFER" />
+  <AliasDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.ADDRESS_ALIAS ||
     txnType == TransactionType.MOSAIC_ALIAS
     " />
-  <AggregateDetailComponent :txnDetail="txnDetail" v-else-if="txnType == TransactionType.AGGREGATE_BONDED_V1 ||
+  <AggregateDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.AGGREGATE_BONDED_V1 ||
     txnType == TransactionType.AGGREGATE_COMPLETE_V1
     " />
-  <NamespaceDetailComponent :txnDetail="txnDetail" v-else-if="txnType == TransactionType.REGISTER_NAMESPACE" />
+  <NamespaceDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.REGISTER_NAMESPACE" />
 
-  <ExchangeDetailComponent :txnDetail="txnDetail" v-else-if="txnType == TransactionType.EXCHANGE_OFFER ||
+  <ExchangeDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.EXCHANGE_OFFER ||
     txnType == TransactionType.ADD_EXCHANGE_OFFER ||
     txnType == TransactionType.REMOVE_EXCHANGE_OFFER
     " />
-  <LockDetailComponent :txnDetail="txnDetail" v-else-if="txnType == TransactionType.HASH_LOCK" />
-  <LinkAccountDetailComponent :txnDetail="txnDetail" v-else-if="txnType == TransactionType.LINK_ACCOUNT" />
-  <RestrictionDetailComponent :txnDetail="txnDetail" :txnGroup="txnType" v-else-if="txnType == TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS ||
+  <LockDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.HASH_LOCK" />
+  <LinkAccountDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.LINK_ACCOUNT" />
+  <RestrictionDetailComponent :txnDetail="txnDetail" :txnGroup="txnType" v-if="txnType == TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS ||
     txnType == TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC ||
     txnType == TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION
     " />
-  <SecretDetailComponent :txnDetail="txnDetail" :txnGroup="txnType" v-else-if="txnType == TransactionType.SECRET_PROOF ||
+  <SecretDetailComponent :txnDetail="txnDetail" :txnGroup="txnType" v-if="txnType == TransactionType.SECRET_PROOF ||
     txnType == TransactionType.SECRET_LOCK
     " />
-  <AssetDetailComponent :txnDetail="txnDetail" :txnGroup="txnType" v-else-if="txnType == TransactionType.MOSAIC_DEFINITION ||
+  <AssetDetailComponent :txnDetail="txnDetail" :txnGroup="txnType" v-if="txnType == TransactionType.MOSAIC_DEFINITION ||
     txnType == TransactionType.MOSAIC_SUPPLY_CHANGE ||
     txnType == TransactionType.MODIFY_MOSAIC_LEVY ||
     txnType == TransactionType.REMOVE_MOSAIC_LEVY
     " />
-  <ChainDetailComponent :txnDetail="txnDetail" v-else-if="txnType == TransactionType.MOSAIC_DEFINITION ||
+  <ChainDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.MOSAIC_DEFINITION ||
     txnType == TransactionType.MOSAIC_SUPPLY_CHANGE ||
     txnType == TransactionType.CHAIN_CONFIGURE ||
     txnType == TransactionType.CHAIN_UPGRADE
     " />
-  <AccountDetailComponent :txnDetail="txnDetail" v-else-if="txnType == TransactionType.MODIFY_MULTISIG_ACCOUNT" />
-  <MetadataDetailComponent :txnDetail="txnDetail" v-else-if="txnType == TransactionType.MOSAIC_METADATA_V2 ||
+  <AccountDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.MODIFY_MULTISIG_ACCOUNT" />
+  <MetadataDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.MOSAIC_METADATA_V2 ||
     txnType == TransactionType.NAMESPACE_METADATA_V2 ||
     txnType == TransactionType.CHAIN_CONFIGURE ||
     txnType == TransactionType.ACCOUNT_METADATA_V2
     " />
-  <SdaExchangeDetailComponent :txnDetail="txnDetail" v-else-if="txnType == TransactionType.PLACE_SDA_EXCHANGE_OFFER ||
-    txnType == TransactionType.REMOVE_SDA_EXCHANGE_OFFER" />
-  <div v-else v-for="data in txnDetails">
-    <DisplayValue style-class="txn-div" :toggle-resolve="true" :value="data"></DisplayValue>
-  </div>
+  <SdaExchangeDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.PLACE_SDA_EXCHANGE_OFFER ||
+    txnType == TransactionType.REMOVE_SDA_EXCHANGE_OFFER" /> -->
   <div class="cosignerDetails " v-if="txnDetail.group == 'partial'">
     <div>
       <div>Cosigner List</div>
@@ -265,12 +264,12 @@ const maxFee = computed(() => {
 const allCosigners = ref([])
 const pendingCosigners = ref([])
 const signedSigners = ref([])
-const commonTxnDetails = ref([]);
+//const commonTxnDetails = ref([]);
 const txnDetails = ref([]);
 
 let txnHeaderProp = ["TX HASH", "Status", "Timestamp", "Block", "Tx Type", "TX FEE", "Signature", "From"];
 
-const getCommonDetails = (data)=>{
+/*const getCommonDetails = (data)=>{
   for(let i=0; i < data.length; ++i){
     if(data[i].name === "TransactionInfo"){
       let index = data.indexOf(data[i])
@@ -308,17 +307,42 @@ filterData.sort(
 );
 
 return filterData
-}
+}*/
 
 const getTxnDetails = (data)=>{
+  let filterData = data.filter((RowData)=> !txnHeaderProp.includes(RowData.name) && RowData.name !== "InnerTransactions" && RowData.name !== "Deadline" && RowData.name !== "Signer")
+  let temp = data.find((r)=> r.name === "InnerTransactions") ? data.find((r)=> r.name === "InnerTransactions").value: [];
+  let txns = []
   
+  for(let i=0; i<temp.length; ++i){
+    txns.push(temp[i].filter((RowData) => RowData.name == "Type").map((data) => data.value ))
+  }
 
-return data.filter((RowData)=> !txnHeaderProp.includes(RowData.name) && RowData.name !== "InnerTransactions" && RowData.name !== "Deadline" && RowData.name !== "Public Key")
+  let flatTxns = txns.flat();
+  let txnList =  {name: 'Transactions', value: []}
+  const elementCounts = [];
+  flatTxns.forEach(element => {
+    elementCounts[element] = (elementCounts[element] || 0) + 1;
+  });
+
+  for(const txn in elementCounts){
+    txnList.value.push({
+      name: ' ',
+      value: txn,
+      secondaryValue: elementCounts[txn]
+    })
+  }
+
+  if(txnList.value.length > 0){
+    filterData.push(txnList)
+  }
+
+return filterData
 }
 
-commonTxnDetails.value = getCommonDetails(props.txnData);
+//commonTxnDetails.value = getCommonDetails(props.txnData);
 txnDetails.value = getTxnDetails(props.txnData)
-
+console.log(txnDetails.value)
 onMounted(async () => {
   if (props.txnDetail.group == 'partial') {
 

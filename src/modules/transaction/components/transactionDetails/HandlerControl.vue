@@ -11,9 +11,6 @@
     <template v-else-if="handlerType === ComponentNames.publicKey">
         <PublicKeyHandler :label="label" :value="value" :style-class="styleClass" :isArray="isArray" ></PublicKeyHandler>
     </template>
-    <template v-else-if="handlerType === ComponentNames.supplyDelta">
-        <SupplyDeltaHandler :label="label" :value="value" :secondary-value="secondaryValue" :style-class="styleClass" ></SupplyDeltaHandler>
-    </template>
     <template v-if="handlerType === ComponentNames.fee">
         <FeeHandler :label="label" :value="value" :style-class="styleClass" :toggle-resolve="toggleResolve" ></FeeHandler>
     </template>
@@ -43,16 +40,15 @@ import SdaHandler from "./SdaHandler.vue";
 import NamespaceHandlerVue from "./NamespaceHandler.vue";
 import SdaIdHandler from "./SdaIdHandler.vue";
 import PublicKeyHandler from "./PublicKeyHandler.vue";
-import SupplyDeltaHandler from "./SupplyDeltaHandler.vue";
 
 interface IRow {
   label: string;
   value: string;
   secondaryValue: string;
   handlerType: string;
-  styleClass: string,
-  toggleResolve: boolean,
-  isArray?: boolean
+  styleClass: string;
+  toggleResolve: boolean;
+  isArray?: boolean;
 }
 
 const props = withDefaults(defineProps<IRow>(),{});

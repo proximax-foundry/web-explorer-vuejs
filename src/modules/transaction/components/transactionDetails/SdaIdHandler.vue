@@ -9,8 +9,21 @@
               params: { id: displayValue },
             }"
             class="hover:text-blue-primary hover:underline text-blue-600"
-            >{{ displayValue.toUpperCase() }} 
+            >{{ displayValue.toUpperCase()  }} 
           </router-link>
+
+          <span v-if="alias"> 
+          (alias of 
+          <router-link
+          :to="{
+            name: 'ViewNamespace',
+            params: { namespaceParam: alias },
+          }"
+          class="hover:text-blue-primary hover:underline text-blue-600"
+          >{{ alias }}
+          </router-link>
+          )
+        </span>
 
           <div v-if="isResolving" class="inline-block animate-spin rounded-full h-3 w-3 border-b-2 border-navy-primary mr-2"></div>
           <span class="text-sm text-red-300" v-if="errorMsg"></span></div>
@@ -53,7 +66,7 @@
         let sdaId = new MosaicId(displayValue.value);
   
         let names = await AppState.chainAPI!.assetAPI.getMosaicsNames([sdaId]);
-        
+
         if(names.length){
           alias.value = names[0].names[0].name;
         }

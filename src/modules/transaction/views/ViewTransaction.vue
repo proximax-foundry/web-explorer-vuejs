@@ -135,15 +135,11 @@ let ignoreList = [
   "mosaicProperties.flags",
   "innerTransactions.mosaicProperties.flags",
   "detail",
-  "transactionInfo.id",
-  "transactionInfo.index",
-  "transactionInfo.merkleComponentHash",
-  "transactionInfo.size",
+  "transactionInfo",
   "version",
   "fee",
+  "cosignatures",
   "namespaceName",
-  "delta",
-  "direction",
   "innerTransactions.valueSize",
   "innerTransactions.valueSizeDelta",
   "innerTransactions.value",
@@ -153,6 +149,7 @@ let ignoreList = [
   "innerTransactions.targetPublicKey",
   "innerTransactions.namespaceId",
   "innerTransactions.mosaicNonce",
+  "innerTransactions.valueDifferences",
   "unknownPayload",
 ];
 
@@ -171,7 +168,8 @@ let globalConfig = {
   mosaicId: { name: "Asset ID", handlerType: ComponentNames.assetID },
   "modifications.type": { value: (data: any) => MultisigCosignatoryModificationType[data] },
   restrictionType: { value: (data: any) => RestrictionType[data] },
-  direction: { value: (data: any) => MosaicSupplyType[data] },
+  direction: { name: "Action", value: (data: any) => MosaicSupplyType[data] },
+  delta: { name: "Supply Delta"},
   signatureDScheme: { value: (data: any) => DerivationScheme[data] },
   "cosignatures.signatureDScheme": { value: (data: any) => DerivationScheme[data] },
   "mosaicLevy.type": { value: (data: any) => MosaicLevyType[data] },
@@ -182,16 +180,18 @@ let globalConfig = {
   namespaceId : { name: "Namespace" },
   parentId : { name: "Parent" },
   hash : { name: "Lock Hash" },
-  isRefunded : { name: "Refunded", value: (data: any) => data ? 'Yes' : 'No'},
   remoteAccountKey : { name: "Remote Public Key" },
-  txnList : { name: "Transactions"},
   mosaicNonce: { name: "Nonce"},
-  supplyDelta : { name: "Supply Delta" },
-  "innerTransactions.scopedMetadataKey" : { name: "Scoped Metadata Key"},
-  "innerTransactions.targetMosaicId" : { name: "Asset"},
-  "innerTransactions.namespaceName" : { name: "Name"},
-  "innerTransactions.namespaceType" : { name: "Namespace Type", value: (data: any) => data === 0? " (Extend)" : " (Register)"},
-
+  mosaicProperties : { name: " "},
+  "mosaicProperties.supplyMutable" : { name: "Supply Mutable", value: (data: any) => data ? 'Yes' : 'No'},
+  "mosaicProperties.transferable" : { name: "Transferable", value: (data: any) => data ? 'Yes' : 'No'},
+  "innerTransactions.mosaicProperties" : { name: " "},
+  "innerTransactions.mosaicProperties.supplyMutable" : { name: "Supply Mutable", value: (data: any) => data ? 'Yes' : 'No'},
+  "innerTransactions.mosaicProperties.transferable" : { name: "Transferable", value: (data: any) => data ? 'Yes' : 'No'},
+  "innerTransactions.mosaicId": { name: "Asset ID", handlerType: ComponentNames.assetID },
+  "innerTransactions.delta": { name: "Supply Delta"},
+  "innerTransactions.direction": { name: "Action", value: (data: any) => MosaicSupplyType[data] },
+  "innerTransactions.targetMosaicId": { name: "Asset", handlerType: ComponentNames.assetID },
 };
 
 const networkName = computed(() => {
@@ -349,11 +349,11 @@ let extractTxnDataBasedOnClass = (data: any, key: string): RowData | null => {
     };
   } else if (classType === PublicAccount.name) {
     let d = data as PublicAccount;
+    handlerType = ComponentNames.publicKey;
 
     return {
-      name: '',
-      value: [{ name: "Public Key", value: d.publicKey, handlerType: ComponentNames.publicKey}, 
-              { name: "From", value: d.address.pretty(), handlerType: ComponentNames.address}],
+      name: key,
+      value: d.publicKey,
       handlerType: handlerType
     };
   } else if (classType === Address.name) {
@@ -516,27 +516,6 @@ let getPropData = (
       value: finalData,
       handlerType: ComponentNames.publicKey,
     };
-  } else if (fullKey === "txnList") {
-    finalData = data.map(function(row: { name: any; total: any; }) {
-      return { name : row.name, value : `( ${row.total} )` }
-    })
-
-    return {
-      name: key,
-      value: finalData,
-    };
-  } else if (fullKey === "supplyDelta") {
-    for(const item of data) {
-      item.handlerType = ComponentNames.supplyDelta;
-      item.value = item.value.toString();
-      item.secondaryValue = MosaicSupplyType[item.secondaryValue]
-    }
-    finalData = data;
-
-    return {
-      name: key,
-      value: finalData,
-    };
   } else if (
     fullKey === "scopedMetadataKey" ||
     fullKey === "innerTransactions.scopedMetadataKey"
@@ -624,7 +603,7 @@ let getPropData = (
     }else{
       return {
         name: key,
-        value: `${value.toBigInt().toString()} blocks`
+        value: `${value.toBigInt().toString()} Blocks`
       };
     }
   } else if(

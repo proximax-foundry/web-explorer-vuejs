@@ -1,8 +1,9 @@
 <template>
     <template v-if="value.value && Array.isArray(value.value)">
-      <div :class="[value.name === '' || value.name === 'UnknownData' ? 'isNoNameClass' : styleClass]">
+      <div :class="[value.name === ' ' ? 'isNoNameClass-' + styleClass : styleClass]">
         <div>
-          <div v-if="value.name !== '' && value.name !== 'UnknownData' ">{{ value.name }}</div>
+          <div v-if="value.name !== ' '" class="w-40">{{ value.name }}</div>
+          <div v-else class="w-0"></div>
           <div>
             <div v-for="item of value.value">
               <DisplayValue :style-class="styleClass" :toggle-resolve="toggleResolve" :value="item" :isArray="true">
@@ -51,7 +52,7 @@
       @apply flex items-center border-b border-gray-100 py-4;
   
       > div:first-child {
-        @apply w-40 text-xs pl-4;
+        @apply text-xs pl-4;
       }
   
       > div:nth-child(2) {
@@ -64,9 +65,11 @@
     }
   }
 
-  .isNoNameClass {
+  .isNoNameClass-txn-div {
+    @apply text-gray-800 text-xs;
+
     > div {
-      @apply flex items-center border-b border-gray-100 py-4;
+      @apply flex items-center py-1;
   
       > div:first-child {
         @apply text-xs pl-4;
@@ -81,6 +84,25 @@
       }
     }
 
+  }
+
+  .isNoNameClass-table_div {
+    @apply text-xs;
+
+    > div {
+  
+      > div:first-child {
+        @apply text-blue-primary font-bold;
+      }
+  
+      > div:nth-child(2) {
+        @apply col-span-3;
+      }
+    }
+  
+    > div:nth-child(2n + 1) {
+      @apply bg-gray-100;
+    }
   }
   
   .table_div {

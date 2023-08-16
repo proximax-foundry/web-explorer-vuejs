@@ -11,5 +11,4 @@ export enum ComponentNames{
     transactionHash = "transactionHash",
     block = "block",
     status = "status",
-    supplyDelta = "supplyDelta"
 }

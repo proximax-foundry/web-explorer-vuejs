@@ -512,11 +512,11 @@
       </div>
     </div>
   </div>
-  <!--<div v-for="(data, index) of innerTxns" class="mt-3 border border-gray-200 p-3">
+  <div v-for="(data, index) of innerTxns" class="mt-3 border border-gray-200 p-3">
     <div v-for="item of data" > 
       <DisplayValue style-class="table_div" :toggle-resolve="true" :value="item"></DisplayValue>
     </div>
-  </div> -->
+  </div> 
 </template>
 
 <script setup>
@@ -590,7 +590,7 @@ const getInnerTxns = (data) => {
   
   innerTxnsCount.value = 0;
   let temp = data.find((r)=> r.name === "InnerTransactions") ? data.find((r)=> r.name === "InnerTransactions").value: [];
-  for(let i=0; i < temp.length; ++i){
+  /*for(let i=0; i < temp.length; ++i){
     let txnProperty = temp[i]
     for(let k=0; k < txnProperty.length; ++k){
       if(txnProperty[k].name === ''){
@@ -608,7 +608,7 @@ const getInnerTxns = (data) => {
         }
       }
     }
-  }
+  }*/
   console.log(temp);
   return temp;
 };
@@ -755,7 +755,6 @@ onBeforeMount(() => {
             }
           }
         let filterCommonData = innerTxns.value[i].filter((RowData)=> txnHeaderProp.includes(RowData.name))
-          console.log(filterCommonData)
         let filterDataDetail = innerTxns.value[i].filter((RowData)=> !txnHeaderProp.includes(RowData.name))
           console.log(filterDataDetail)
           filterCommonData.sort(
