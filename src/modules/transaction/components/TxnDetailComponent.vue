@@ -320,16 +320,16 @@ const getTxnDetails = (data)=>{
 
   let flatTxns = txns.flat();
   let txnList =  {name: 'Transactions', value: []}
-  const elementCounts = [];
+  const txnCounts = [];
   flatTxns.forEach(element => {
-    elementCounts[element] = (elementCounts[element] || 0) + 1;
+    txnCounts[element] = (txnCounts[element] || 0) + 1;
   });
 
-  for(const txn in elementCounts){
+  for(const txn in txnCounts){
     txnList.value.push({
       name: ' ',
       value: txn,
-      secondaryValue: elementCounts[txn]
+      secondaryValue: txnCounts[txn]
     })
   }
 

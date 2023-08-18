@@ -146,7 +146,6 @@ let ignoreList = [
   "innerTransactions.oldValue",
   "innerTransactions.transactionInfo",
   "innerTransactions.version",
-  "innerTransactions.targetPublicKey",
   "innerTransactions.namespaceId",
   "innerTransactions.mosaicNonce",
   "innerTransactions.valueDifferences",
@@ -181,17 +180,30 @@ let globalConfig = {
   parentId : { name: "Parent" },
   hash : { name: "Lock Hash" },
   remoteAccountKey : { name: "Remote Public Key" },
-  mosaicNonce: { name: "Nonce"},
-  mosaicProperties : { name: " "},
+  mosaicNonce: { name: "Nonce" },
+  mosaicProperties : { name: " " },
   "mosaicProperties.supplyMutable" : { name: "Supply Mutable", value: (data: any) => data ? 'Yes' : 'No'},
   "mosaicProperties.transferable" : { name: "Transferable", value: (data: any) => data ? 'Yes' : 'No'},
-  "innerTransactions.mosaicProperties" : { name: " "},
+  "innerTransactions.mosaicProperties" : { name: " " },
   "innerTransactions.mosaicProperties.supplyMutable" : { name: "Supply Mutable", value: (data: any) => data ? 'Yes' : 'No'},
   "innerTransactions.mosaicProperties.transferable" : { name: "Transferable", value: (data: any) => data ? 'Yes' : 'No'},
   "innerTransactions.mosaicId": { name: "Asset ID", handlerType: ComponentNames.assetID },
-  "innerTransactions.delta": { name: "Supply Delta"},
+  "innerTransactions.delta": { name: "Supply Delta" },
   "innerTransactions.direction": { name: "Action", value: (data: any) => MosaicSupplyType[data] },
   "innerTransactions.targetMosaicId": { name: "Asset", handlerType: ComponentNames.assetID },
+  "innerTransactions.targetPublicKey": { name: "Account" },
+  "innerTransactions.mosaics": { name: "SDAs" },
+  "innerTransactions.namespaceType" : { name: "Namespace Type", value: (data: any) => data === 0? " (Extend)" : " (Register)"},
+  "innerTransactions.namespaceName" : { name: "Namespace Name" },
+  "innerTransactions.scopedMetadataKey" : { name: "Scoped Metadata Key" },
+  "offers.mosaicIdGive" : {name: "Asset ID Give" },
+  "offers.mosaicIdGet" : {name: "Asset ID Get" },
+  "offers.mosaicAmountGive" : {name: "Give Amount" },
+  "offers.mosaicAmountGet" : {name: "Get Amount" },
+  "innerTransactions.offers.mosaicIdGive" : {name: "Asset ID Give" },
+  "innerTransactions.offers.mosaicIdGet" : {name: "Asset ID Get" },
+  "innerTransactions.offers.mosaicAmountGive" : {name: "Give Amount" },
+  "innerTransactions.offers.mosaicAmountGet" : {name: "Get Amount" },
 };
 
 const networkName = computed(() => {
@@ -472,7 +484,10 @@ let getPropData = (
       value: finalData,
       handlerType: ComponentNames.block,
     };
-  } else if (fullKey === "message") {
+  } else if (
+    fullKey === "message" || 
+    fullKey === "innerTransactions.message"
+    ) {
     let d = data as PlainMessage;
     finalData = d.message;
     switch(d.type) {
@@ -566,6 +581,15 @@ let getPropData = (
       secondaryValue: refAssetId.toHex(),
       handlerType: ComponentNames.assetAmount
     };
+  } else if(fullKey === "innerTransactions.targetPublicKey") {
+    let d = data as PublicAccount
+    finalData = d.address.pretty();
+
+    return {
+      name: key,
+      value: finalData,
+      handlerType: ComponentNames.address
+    };
   } else if(
     fullKey === "valueDifferences" ||
     fullKey === "innerTransactions.valueDifferences"
@@ -595,7 +619,8 @@ let getPropData = (
     fullKey === "mosaicProperties.duration" ||
     fullKey === "innerTransactions.mosaicProperties.duration" || 
     fullKey === "duration" || 
-    fullKey === "innerTransactions.duration"
+    fullKey === "innerTransactions.duration" ||
+    fullKey === "offers.duration"
   ) {
     let value = data as UInt64;
     if(!value || value.toBigInt() === BigInt(0)){

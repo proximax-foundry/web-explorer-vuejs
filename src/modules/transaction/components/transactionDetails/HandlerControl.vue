@@ -24,7 +24,10 @@
         <NamespaceHandlerVue :label="label" :value="value" :style-class="styleClass" :toggle-resolve="toggleResolve" ></NamespaceHandlerVue>
     </template>
     <template v-else-if="handlerType === ComponentNames.assetID">
-        <SdaIdHandler :label="label" :value="value" :style-class="styleClass" :toggle-resolve="toggleResolve" ></SdaIdHandler>
+        <SdaIdHandler :label="label" :value="value" :style-class="styleClass" :toggle-resolve="toggleResolve" :isArray="isArray" ></SdaIdHandler>
+    </template>
+    <template v-else-if="handlerType === ComponentNames.assetAmount">
+        <SdaAmountHandler :label="label" :value="value" :secondary-value="secondaryValue || ''" :style-class="styleClass" :toggle-resolve="toggleResolve" :isArray="isArray" ></SdaAmountHandler>
     </template>
 
 </template>
@@ -40,6 +43,7 @@ import SdaHandler from "./SdaHandler.vue";
 import NamespaceHandlerVue from "./NamespaceHandler.vue";
 import SdaIdHandler from "./SdaIdHandler.vue";
 import PublicKeyHandler from "./PublicKeyHandler.vue";
+import SdaAmountHandler from "./SdaAmountHandler.vue"
 
 interface IRow {
   label: string;

@@ -4,6 +4,7 @@
       <div v-if="!isArray">{{ label }}</div>
       <div>
         <span class="font-bold">{{ displayValue }}</span>
+        <span v-if="remainderValue" class="text-xxs">{{ remainderValue }}</span>
         <img
           v-if="
             alias == 'xarcade.xar'
@@ -88,7 +89,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
 import { AppState } from "@/state/appState";
-import { UInt64, MosaicId, NamespaceId, MosaicInfo, Convert } from "tsjs-xpx-chain-sdk";
+import { UInt64, MosaicId, NamespaceId, MosaicInfo, Convert, NamespaceName } from "tsjs-xpx-chain-sdk";
 import { TransactionUtils } from "@/util/transactionUtils";
 
 const displayValue = ref("");
@@ -97,6 +98,7 @@ const alias = ref("");
 const isResolving = ref(false);
 const isNamespace = ref(false);
 const nativeTokenLabel = AppState.nativeToken.label;
+const remainderValue = ref("");
 
 const props = defineProps({
   label: String,
@@ -149,18 +151,20 @@ const resolve = async ()=>{
       }
 
       let assetInfo: MosaicInfo = await AppState.chainAPI!.assetAPI.getMosaic(usingAssetId);
-      console.log(assetInfo)
+
       let tokenDecimalPlace = assetInfo.divisibility;
-      let divider = Math.pow(10, tokenDecimalPlace);
-      let quotient = BigInt(props.secondaryValue)/ BigInt(divider);
-      let remainder = props.secondaryValue.slice(-tokenDecimalPlace);
-      
-      let remainderInteger = parseInt(remainder);
+      if(tokenDecimalPlace !== 0){
+        let divider = Math.pow(10, tokenDecimalPlace);
+        let quotient = BigInt(props.secondaryValue)/ BigInt(divider);
+        let remainder = props.secondaryValue.slice(-tokenDecimalPlace);
+        let remainderInteger = parseInt(remainder);
 
-      let amountWithDecimal = remainderInteger ? remainderInteger / divider: 0;
-      let adjustedDecimalAmount = remainderInteger ? amountWithDecimal.toString().split(".")[1].toString(): "";
+        let amountWithDecimal = remainderInteger ? remainderInteger / divider: 0;
+        let adjustedDecimalAmount = remainderInteger ? amountWithDecimal.toString().split(".")[1].toString(): "";
 
-      displayValue.value = quotient.toString() + (remainderInteger ? "." + adjustedDecimalAmount :"");
+        displayValue.value = quotient.toString()
+        remainderValue.value = remainderInteger ? "." + adjustedDecimalAmount :""
+      }
 
       if(isNamespace.value){
         let nsName = await AppState.chainAPI!.namespaceAPI.getNamespacesName([new NamespaceId(assetId.toDTO().id)]);
@@ -174,7 +178,7 @@ const resolve = async ()=>{
       }
       else{
         let names = await AppState.chainAPI!.assetAPI.getMosaicsNames([assetId]);
-        console.log(names)
+
         if(names[0] && names[0].names[0]){
           alias.value = names[0].names[0].name;
         }

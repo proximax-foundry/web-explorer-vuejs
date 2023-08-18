@@ -3,83 +3,100 @@
       <div>
         <div>{{ label }}</div>
         <div>
-          <router-link
-            :to="{
-              name: 'ViewAsset',
-              params: { id: displayValue },
-            }"
-            class="hover:text-blue-primary hover:underline text-blue-600"
-            >{{ displayValue.toUpperCase()  }} 
-          </router-link>
-
-          <span v-if="alias"> 
-          (alias of 
-          <router-link
-          :to="{
-            name: 'ViewNamespace',
-            params: { namespaceParam: alias },
-          }"
-          class="hover:text-blue-primary hover:underline text-blue-600"
-          >{{ alias }}
-          </router-link>
-          )
-        </span>
-
+          {{ displayValue }} 
           <div v-if="isResolving" class="inline-block animate-spin rounded-full h-3 w-3 border-b-2 border-navy-primary mr-2"></div>
-          <span class="text-sm text-red-300" v-if="errorMsg"></span></div>
+          <span class="text-sm text-red-300 px-2" v-if="errorMsg">{{ errorMsg }}</span>
+        </div>
       </div>
     </div>
   </template>
   
   <script setup lang="ts">
-  import { ref } from "vue";
+  import { ref, computed, watch } from "vue";
   import { AppState } from "@/state/appState";
-  import { MosaicId } from "tsjs-xpx-chain-sdk";
+  import { UInt64, MosaicId } from "tsjs-xpx-chain-sdk";
   
   const displayValue = ref("");
   const errorMsg = ref("");
-  const alias = ref("");
   const isResolving = ref(false);
+  const isSameData = ref(false);
+  const oldValue = ref("");
+  const cachedDecimal = ref(0); 
   
   const props = defineProps({
     label: String,
     value: String,
     styleClass: String,
     toggleResolve: Boolean,
+    secondaryValue: {
+      type: String,
+      required: true
+    },
     isArray: Boolean
   });
   
   const initAssign = ()=>{
     displayValue.value = props.value || "";
-    alias.value = "";
+    checkDataNotChanged();
+    oldValue.value = props.value || "";
+  }
+  
+  const checkDataNotChanged = ()=>{
+    if(oldValue.value == props.value){
+      isSameData.value = true;
+    }
+    else{
+      isSameData.value = false;
+    }
   }
   
   initAssign();
   
   const resolve = async ()=>{
   
-    if(displayValue.value !== ""){
+    if(isSameData.value){
+      displayValue.value = calcValue(oldValue.value, cachedDecimal.value);
+      return;
+    }
+  
+    if(displayValue.value !== "0"){
   
       isResolving.value = true;
       errorMsg.value = "";
   
       try {
-        let sdaId = new MosaicId(displayValue.value);
+        let assetId = new MosaicId(props.secondaryValue);
   
-        let names = await AppState.chainAPI!.assetAPI.getMosaicsNames([sdaId]);
-
-        if(names.length){
-          alias.value = names[0].names[0].name;
-        }
-        else{
-          alias.value = "";
-        }
+        let assetInfo = await AppState.chainAPI!.assetAPI.getMosaic(assetId);
+  
+        cachedDecimal.value = assetInfo.divisibility;
+        displayValue.value = calcValue(displayValue.value, cachedDecimal.value);
         
       } catch (error) {
+        console.log(error)
         errorMsg.value = "unable to resolve";
-      }
+      } 
     }
     isResolving.value = false;
+  }
+  
+  const calcValue = (value: string, decimal: number)=>{
+    let tokenDecimalPlace = decimal;
+    if(tokenDecimalPlace !== 0){
+        let divider = Math.pow(10, decimal);
+        let quotient = BigInt(value)/ BigInt(divider);
+        let remainder = value.slice(-tokenDecimalPlace);
+        
+        let remainderInteger = parseInt(remainder);
+    
+        let amountWithDecimal = remainderInteger ? remainderInteger / divider: 0;
+        let adjustedDecimalAmount = remainderInteger ? amountWithDecimal.toString().split(".")[1].toString(): "";
+    
+        return quotient.toString() + (remainderInteger ? "." + adjustedDecimalAmount :"");
+    }
+    else{
+        return displayValue.value
+    }
   }
   
   if(props.toggleResolve){
@@ -102,7 +119,7 @@
       }
   
       > div:nth-child(2) {
-        @apply text-xs w-full;
+        @apply text-xs;
       }
   
       > div:last-child {
@@ -180,3 +197,4 @@
     }
   }
   </style>
+  
