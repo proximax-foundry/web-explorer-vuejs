@@ -53,7 +53,6 @@
         </div>
         <div class="text-xs uppercase font-bold">
           {{ data.amount }}
-          <b>{{ AppState.nativeToken.label }}</b>
         </div>
       </template>
     </Column>
@@ -119,7 +118,6 @@
         <template #body="{ data } : { data: balanceChange }">
           <div class="text-xs uppercase font-bold">
             {{ data.amount  }}
-            <b >{{ AppState.nativeToken.label }}</b>
           </div>
         </template>
       </Column>

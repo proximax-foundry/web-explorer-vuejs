@@ -206,7 +206,7 @@
                   :to="{ name: 'ViewAsset', params: { id: data.mosaicIdGive } }"
                   class="uppercase font-bold text-xs mr-2 text-blue-600 hover:underline hover:text-blue-primary"
                 >
-                  {{ data.mosaicIdGive }}
+                  {{ details.mosaicIdGive }}
                 </router-link>
               </div>
               <div class="flex gap-2">
@@ -215,7 +215,7 @@
                   :to="{ name: 'ViewAsset', params: { id: data.mosaicIdGet } }"
                   class="uppercase font-bold text-xs mr-2 text-blue-600 hover:underline hover:text-blue-primary"
                 >
-                  {{ data.mosaicIdGet }}
+                  {{ details.mosaicIdGet }}
                 </router-link>
               </div>
             </div>

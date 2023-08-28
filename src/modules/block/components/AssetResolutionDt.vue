@@ -68,8 +68,8 @@
     </Column>
     <Column
       class="hidden lg:table-cell"
-      field="address"
-      header="Address"
+      field="asset"
+      header="Asset"
       headerClass="uppercase"
     >
       <template #body="{ data }: { data: assetResolution }">

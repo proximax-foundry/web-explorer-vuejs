@@ -221,6 +221,11 @@ const p = defineProps({
   blockHeight: String,
 });
 
+const networkName = computed(() => {
+  return networkState.chainNetworkName;
+});
+
+
 const txnStatements = ref<Record<string, blockReceipt[]>>({});
 const toast = useToast();
 const internalInstance = getCurrentInstance();
@@ -250,7 +255,7 @@ const loadBlock = async () => {
   if (!p.blockHeight) {
     return;
   }
-  if (!AppState.isReady && !networkName.value) {
+  if (!AppState.isReady || !networkName.value) {
     setTimeout(loadBlock, 1000);
     return;
   }
@@ -543,10 +548,6 @@ const changeRows = () => {
   getTransactions();
 };
 
-const networkName = computed(() => {
-  return networkState.chainNetworkName;
-});
-
 emitter.on("CHANGE_NETWORK", (payload: boolean) => {
   if (payload) {
     loadBlock();
@@ -571,7 +572,6 @@ const getTransactions = async () => {
     }
   }
 };
-getTransactions();
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
