@@ -155,7 +155,7 @@
   </div>
 
   <div v-for="data in txnDetails">
-    <DisplayValue style-class="txn-div" :toggle-resolve="true" :value="data"></DisplayValue>
+    <DisplayValue style-class="txn-div" :toggle-resolve="true" :value="data" :isOffers="data.name === 'Offers' ? true : false"></DisplayValue>
   </div>
 
   <!--<TransferDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.TRANSFER" />

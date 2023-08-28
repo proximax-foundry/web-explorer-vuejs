@@ -514,7 +514,7 @@
   </div>
   <div v-for="(data, index) of innerTxns" class="mt-3 border border-gray-200 p-3">
     <div v-for="item of data" > 
-      <DisplayValue style-class="table_div" :toggle-resolve="true" :value="item"></DisplayValue>
+      <DisplayValue style-class="table_div" :toggle-resolve="true" :value="item" :isOffers="item.name === 'Offers' ? true : false"></DisplayValue>
     </div>
   </div> 
 </template>
@@ -569,7 +569,7 @@ let allCosigners = []; // hold all the final cosigners public Keys
 let cosignedSigner = []; // all the cosigned final signers, include multisig account (calculated)
 let oriSignedSigners = []; // all the cosigned final signers + initiator
 let signedSigners = []; // all the cosigned final signers + initiator, include multisig account (calculated)
-const innerSignedList = ref({});
+const innerSignedList = ref([]);
 let currentInnerSigners = [];
 
 const allInnerTransactions = ref(props.innerTxn);
@@ -698,10 +698,7 @@ onBeforeMount(() => {
         let isSigned = flatCosigners.every((val) =>
           signedSigners.includes(val)
         );
-        innerSignedList.value = {
-          name: 'Fully signed',
-          value: isSigned ? 'Yes' : 'No'
-        };
+        innerSignedList.value.push(isSigned);
       } else {
         try {
           let accountMultisigGraphInfo =
@@ -741,30 +738,23 @@ onBeforeMount(() => {
           currentInnerSigners = [innerSigner.publicKey];
           //console.log(error);
         }
-        innerSignedList.value = {
-          name: 'Fully signed',
-          value: signedSigners.includes(innerSigner.publicKey) ? 'Yes' : 'No'
-        };
+        innerSignedList.value.push(
+          signedSigners.includes(innerSigner.publicKey)
+        );
       }
         for(let i=0; i<innerTxns.value.length; ++i){
-          if(innerSignedList.value){
-            let innerNameArray = innerTxns.value[i].map((data) => { return data.name })
 
-            if(!innerNameArray.includes(innerSignedList.value.name)){
-              innerTxns.value[i].push(innerSignedList.value)
-            }
-          }
-        let filterCommonData = innerTxns.value[i].filter((RowData)=> txnHeaderProp.includes(RowData.name))
-        let filterDataDetail = innerTxns.value[i].filter((RowData)=> !txnHeaderProp.includes(RowData.name))
-          console.log(filterDataDetail)
-          filterCommonData.sort(
-              function(a, b){
-                  return txnHeaderProp.indexOf(a.name) - txnHeaderProp.indexOf(b.name);
-              }
-          );
-        let innerDetailData = filterCommonData.concat(filterDataDetail)
-        innerTxns.value[i] = innerDetailData
-      }
+          let filterCommonData = innerTxns.value[i].filter((RowData)=> txnHeaderProp.includes(RowData.name))
+          let filterDataDetail = innerTxns.value[i].filter((RowData)=> !txnHeaderProp.includes(RowData.name))
+            console.log(filterDataDetail)
+            filterCommonData.sort(
+                function(a, b){
+                    return txnHeaderProp.indexOf(a.name) - txnHeaderProp.indexOf(b.name);
+                }
+            );
+          let innerDetailData = filterCommonData.concat(filterDataDetail)
+          innerTxns.value[i] = innerDetailData
+        }
     });
   }
 });

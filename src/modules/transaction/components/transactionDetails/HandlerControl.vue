@@ -24,10 +24,10 @@
         <NamespaceHandlerVue :label="label" :value="value" :style-class="styleClass" :toggle-resolve="toggleResolve" ></NamespaceHandlerVue>
     </template>
     <template v-else-if="handlerType === ComponentNames.assetID">
-        <SdaIdHandler :label="label" :value="value" :style-class="styleClass" :toggle-resolve="toggleResolve" :isArray="isArray" ></SdaIdHandler>
+        <SdaIdHandler :label="label" :value="value" :style-class="styleClass" :toggle-resolve="toggleResolve" :isArray="isArray" :isOffers="isOffers" ></SdaIdHandler>
     </template>
     <template v-else-if="handlerType === ComponentNames.assetAmount">
-        <SdaAmountHandler :label="label" :value="value" :secondary-value="secondaryValue || ''" :style-class="styleClass" :toggle-resolve="toggleResolve" :isArray="isArray" ></SdaAmountHandler>
+        <SdaAmountHandler :label="label" :value="value" :secondary-value="secondaryValue || ''" :style-class="styleClass" :toggle-resolve="toggleResolve" :isArray="isArray" :isOffers="isOffers"></SdaAmountHandler>
     </template>
 
 </template>
@@ -53,6 +53,7 @@ interface IRow {
   styleClass: string;
   toggleResolve: boolean;
   isArray?: boolean;
+  isOffers?: boolean;
 }
 
 const props = withDefaults(defineProps<IRow>(),{});

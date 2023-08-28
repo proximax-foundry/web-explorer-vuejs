@@ -1,5 +1,5 @@
 <template>
-  <div :class="[isArray ? 'isArrayClass' : styleClass]">
+  <div :class="[isArray ? 'isArrayClass-' + styleClass : styleClass]">
     <div>
       <div v-if="!isArray">{{ label }}</div>
       <div>
@@ -30,7 +30,7 @@
         <img
           v-else
           src="@/modules/transaction/img/proximax-logo-gray.svg"
-          class="inline-block h-6 w-6 mr-2 ml-2"
+          class="inline-block h-6 w-6 mr-2 ml-2 rounded-full"
         />
         <span v-if="alias == 'prx.xpx'" class="font-bold ml-2">{{ nativeTokenLabel }}</span>
         <span v-else>
@@ -162,7 +162,7 @@ const resolve = async ()=>{
         let amountWithDecimal = remainderInteger ? remainderInteger / divider: 0;
         let adjustedDecimalAmount = remainderInteger ? amountWithDecimal.toString().split(".")[1].toString(): "";
 
-        displayValue.value = quotient.toString()
+        displayValue.value = quotient.toLocaleString()
         remainderValue.value = remainderInteger ? "." + adjustedDecimalAmount :""
       }
 
@@ -205,20 +205,6 @@ if(props.toggleResolve){
 .txn-div,
 .details {
   @apply text-gray-800 text-xs;
-  .isArrayClass {
-    > div {
-      @apply flex items-center py-1;
-  
-      > div:first-child {
-        @apply text-xs w-full;
-      }  
- 
-      > div:last-child {
-        @apply border-none;
-      }
-    }
-
-  }
 
   > div {
       @apply flex items-center border-b border-gray-100 py-4;
@@ -235,6 +221,39 @@ if(props.toggleResolve){
         @apply border-none;
       }
     }
+}
+
+.isArrayClass-txn-div {
+  @apply text-gray-800 text-xs;
+
+    > div {
+      @apply flex items-center py-1;
+  
+      > div:first-child {
+        @apply text-xs w-full;
+      }  
+ 
+      > div:last-child {
+        @apply border-none;
+      }
+    }
+
+  }
+.isArrayClass-table_div {
+  @apply text-xs;
+
+  > div {
+    @apply grid grid-cols-4;
+
+    > div:nth-child(2) {
+      @apply col-span-3;
+    }
+  }
+
+  > div:nth-child(2n + 1) {
+    @apply bg-gray-100;
+  }
+
 }
 
 

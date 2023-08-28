@@ -712,7 +712,6 @@ export class TransactionUtils {
         }
         deadline = txn.deadline.adjustedValue.compact();
       }
-      txn.status = txnStatus.group 
       if (txnStatus.group == "partial" || txnStatus.group == "unconfirmed") {
         // txn.deadline = deadline;
         txn.timestamp = Helper.formatDeadline(deadline);

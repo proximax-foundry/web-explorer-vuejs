@@ -1,5 +1,5 @@
 <template>
-    <div :class="[isArray ? 'isArrayClass' : styleClass]">
+    <div :class="[isArray ? 'isArrayClass-' + styleClass : styleClass]">
       <div>
         <div>{{ label }}</div>
         <div v-if="isValidAddress" class="flex justify-start overflow-hidden">
@@ -101,7 +101,7 @@
     }
   }
 
-  .isArrayClass {
+  .isArrayClass-txn-div {
     > div {
       @apply flex items-center py-1;
   
@@ -118,6 +118,30 @@
       }
     }
 
+  }
+
+  .isArrayClass-table_div{
+    @apply text-xs;
+  
+    > div {
+      @apply grid grid-cols-4;
+  
+      > div {
+        @apply p-2;
+      }
+  
+      > div:first-child {
+        @apply text-blue-primary font-bold;
+      }
+  
+      > div:nth-child(2) {
+        @apply break-all col-span-3;
+      }
+    }
+  
+    > div:nth-child(2n + 1) {
+      @apply bg-gray-100;
+    }
   }
   
   .table_div {

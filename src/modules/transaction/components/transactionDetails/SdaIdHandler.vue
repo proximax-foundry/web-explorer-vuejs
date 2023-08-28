@@ -1,5 +1,5 @@
 <template>
-    <div :class="[isArray ? 'isArrayClass-' +  styleClass : styleClass]">
+    <div :class="[isArray ? isOffers ? 'offerClass-' +  styleClass : 'isArrayClass-' +  styleClass : styleClass]">
       <div>
         <div>{{ label }}</div>
         <div>
@@ -12,7 +12,7 @@
             >{{ displayValue.toUpperCase()  }} 
           </router-link>
 
-          <span v-if="alias"> 
+          <span v-if="alias && label !== 'Asset ID'"> 
           (alias of 
           <router-link
           :to="{
@@ -46,9 +46,10 @@
     value: String,
     styleClass: String,
     toggleResolve: Boolean,
-    isArray: Boolean
+    isArray: Boolean,
+    isOffers: Boolean,
   });
-  
+
   const initAssign = ()=>{
     displayValue.value = props.value || "";
     alias.value = "";
@@ -153,6 +154,49 @@
 
     > div:nth-child(2n + 1) {
       @apply bg-gray-100;
+    }
+  }
+
+  .offerClass-txn-div{
+    @apply text-gray-800 text-xs pl-4;
+
+    > div {
+      @apply flex items-center py-4;
+
+      > div:first-child {
+        @apply w-40 text-xs;
+      }
+
+      > div:nth-child(2) {
+        @apply text-xs w-full;
+      }
+
+      > div:last-child {
+        @apply border-none;
+      }
+    }
+  }
+  .offerClass-table_div{
+    @apply text-xs;
+
+    > div {
+    @apply grid grid-cols-4;
+
+    > div {
+      @apply p-2;
+    }
+
+    > div:first-child {
+      @apply text-blue-primary font-bold;
+    }
+
+    > div:nth-child(2) {
+      @apply overflow-hidden col-span-3;
+    }
+    }
+
+    > div:nth-child(2n + 1) {
+      @apply bg-blue-100;
     }
   }
   

@@ -1,11 +1,11 @@
 <template>
     <template v-if="handlerType && typeof value == 'string'">
       <HandlerControl :label="name" :style-class="styleClass" 
-        :value="value" :secondary-value="secondaryValue" :toggle-resolve="toggleResolve" :handler-type="handlerType" :isArray="isArray" >
+        :value="value" :secondary-value="secondaryValue" :toggle-resolve="toggleResolve" :handler-type="handlerType" :isArray="isArray" :isOffers="isOffers">
       </HandlerControl>
     </template>
-    <div v-else :class="[isArray ? 'isArrayClass-' + styleClass : styleClass]">
-      <div class="data-details">
+    <div v-else :class="[isArray ? isOffers ? 'offerClass-' +  styleClass : 'isArrayClass-' +  styleClass : styleClass]">
+      <div>
         <div v-if="name !== ' '" class="w-40">{{ name }}</div>
         <div v-else class="w-0"></div>
         <div>{{ value }} 
@@ -27,7 +27,8 @@ interface IRow {
   handlerType: string;
   styleClass: string,
   toggleResolve: boolean,
-  isArray?: boolean
+  isArray?: boolean,
+  isOffers?: boolean
 }
 
 const props = withDefaults(defineProps<IRow>(),{});
@@ -100,12 +101,48 @@ const props = withDefaults(defineProps<IRow>(),{});
     }
   }
 
-.data-details {
+  .offerClass-txn-div{
+    @apply text-gray-800 text-xs pl-4;
 
-  > div:nth-child(2) {
-    @apply w-full;
+    > div {
+      @apply flex items-center border-b border-gray-100 py-4;
+  
+      > div:first-child {
+      @apply text-xs;
+      }
+
+      > div:nth-child(2) {
+        @apply text-xs w-full;
+      }
+ 
+      > div:last-child {
+        @apply border-none;
+      }
+    }
   }
-}
+  .offerClass-table_div{
+    @apply text-xs;
+
+    > div {
+    @apply grid grid-cols-4;
+
+    > div {
+      @apply p-2;
+    }
+
+    > div:first-child {
+      @apply text-blue-primary font-bold;
+    }
+
+    > div:nth-child(2) {
+      @apply overflow-hidden col-span-3;
+    }
+    }
+
+    > div:nth-child(2n + 1) {
+      @apply bg-blue-100;
+    }
+  }
 
 .table_div {
   @apply text-xs;

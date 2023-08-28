@@ -101,7 +101,8 @@ import {
   MosaicLevyType,
   MosaicLevy,
 TransactionVersion,
-PlainMessage
+PlainMessage,
+CreateLiquidityProviderTransaction,
 } from "tsjs-xpx-chain-sdk";
 import { ComponentNames } from "../componentEnum";
 import type { RowData } from "../components/payloadDetails/IRowData";
@@ -134,7 +135,6 @@ let ignoreList = [
   "innerTransactions.maxFee",
   "mosaicProperties.flags",
   "innerTransactions.mosaicProperties.flags",
-  "detail",
   "transactionInfo",
   "version",
   "fee",
@@ -149,6 +149,50 @@ let ignoreList = [
   "innerTransactions.namespaceId",
   "innerTransactions.mosaicNonce",
   "innerTransactions.valueDifferences",
+  "detail.hash",
+  "detail.type",
+  "detail.typeName",
+  "detail.timestamp",
+  "detail.signerName",
+  "detail.signerAddress",
+  "detail.signer",
+  "detail.maxFee",
+  "detail.deadline",
+  "detail.unknownData",
+  "detail.block",
+  "detail.fee",
+  "detail.groupType",
+  "detail.lockHash",
+  "detail.duration",
+  "detail.amountLocking",
+  "detail.sda",
+  "detail.sender",
+  "detail.recipient",
+  "detail.amountTransfer",
+  "detail.messageTypeTitle",
+  "detail.message",
+  "detail.aggregateLength",
+  "detail.txnList",
+  "detail.cosigners",
+  "detail.aliasName",
+  "detail.aliasTypeName",
+  "detail.assetId",
+  "detail.aliasType",
+  "detail.address",
+  "detail.divisibility",
+  "detail.supplyMutable",
+  "detail.nonce",
+  "detail.supplyDelta",
+  "detail.supplyDirection",
+  "detail.namespaceId",
+  "detail.namespaceName",
+  "detail.registerType",
+  "detail.registerTypeName",
+  "detail.parentId",
+  "detail.parentName",
+  "detail.action",
+  "detail.remotePublicKey",
+  "detail.sdaExchange",
   "unknownPayload",
 ];
 
@@ -196,15 +240,41 @@ let globalConfig = {
   "innerTransactions.namespaceType" : { name: "Namespace Type", value: (data: any) => data === 0? " (Extend)" : " (Register)"},
   "innerTransactions.namespaceName" : { name: "Namespace Name" },
   "innerTransactions.scopedMetadataKey" : { name: "Scoped Metadata Key" },
-  "offers.mosaicIdGive" : {name: "Asset ID Give" },
-  "offers.mosaicIdGet" : {name: "Asset ID Get" },
-  "offers.mosaicAmountGive" : {name: "Give Amount" },
-  "offers.mosaicAmountGet" : {name: "Get Amount" },
-  "innerTransactions.offers.mosaicIdGive" : {name: "Asset ID Give" },
-  "innerTransactions.offers.mosaicIdGet" : {name: "Asset ID Get" },
-  "innerTransactions.offers.mosaicAmountGive" : {name: "Give Amount" },
-  "innerTransactions.offers.mosaicAmountGet" : {name: "Get Amount" },
+  "offers.mosaicIdGive" : { name: "Asset ID Give" },
+  "offers.mosaicIdGet" : { name: "Asset ID Get" },
+  "offers.mosaicAmountGive" : { name: "Give Amount" },
+  "offers.mosaicAmountGet" : { name: "Get Amount" },
+  "innerTransactions.offers.mosaicIdGive" : { name: "Asset ID Give" },
+  "innerTransactions.offers.mosaicIdGet" : { name: "Asset ID Get" },
+  "innerTransactions.offers.mosaicAmountGive" : { name: "Give Amount" },
+  "innerTransactions.offers.mosaicAmountGet" : { name: "Get Amount" },
+  "innerTransactions.minApprovalDelta" : { name: "Minimum Approval" },
+  "innerTransactions.minRemovalDelta" : { name: "Minimum Removal" },
+  "innerTransactions.modifications" : { name: " " },
+  "innerTransactions.modifications.type" : { value: (data: any) => MultisigCosignatoryModificationType[data] },
+  "innerTransactions.modifications.cosignatoryPublicAccount" : { name: "Cosignatory Address" },
+   detail : { name: " " },
+  "detail.isRefunded" : { name: "Refunded", value: (data: any) =>  data ? "Yes" : "No"},
 };
+
+const aliceMosaicId = new MosaicId([3205233868, 173793843]);
+const publicAccount = PublicAccount.createFromPublicKey(
+    '73472A2E9DCEA5C2A36EB7F6A34A634010391EC89E883D67360DB16F28B9443C', 
+    NetworkType.TEST_NET
+  );
+
+const createLiquidityProviderTxn = CreateLiquidityProviderTransaction.create(
+    Deadline.create(),
+    aliceMosaicId,
+    UInt64.fromUint(100),
+    UInt64.fromUint(100),
+    1000,
+    64,
+    publicAccount,
+    5,
+    4,
+    NetworkType.TEST_NET,
+  )
 
 const networkName = computed(() => {
   return networkState.chainNetworkName;
@@ -237,7 +307,7 @@ const loadTxn = async () => {
   if(isTxnFailed.value === false){
   let transaction = await TransactionUtils.getTransaction(props.hash);
   console.log(transaction)
-  allData.value = getData(transaction.txn, "", globalConfig);
+  allData.value = getData(createLiquidityProviderTxn, "", globalConfig);
   console.log(allData.value);
   if (transaction.isFound == "error") {
     formattedTransaction.value = transaction;
@@ -400,7 +470,7 @@ let extractTxnDataBasedOnClass = (data: any, key: string): RowData | null => {
     return {
       name: key,
       value: finalData,
-      handlerType: handlerType
+      handlerType: handlerType,
     };
   } else if (classType === Uint8Array.name) {
     let d = data as Uint8Array;
@@ -542,6 +612,26 @@ let getPropData = (
       name: key,
       value: finalData,
     };
+  } else if (
+    fullKey === "delta" ||
+    fullKey === "innerTransactions.delta"
+  ) {
+    let d = data as UInt64
+    finalData = d.compact().toLocaleString()
+
+    return {
+      name: key,
+      value: finalData,
+    };
+  } else if (
+    fullKey === "mosaicProperties.divisibility" ||
+    fullKey === "innerTransactions.mosaicProperties.divisibility"
+  ) {
+
+    return {
+      name: key,
+      value: data.toString(),
+    };
   } else if(
     fullKey === "offers.mosaicAmount" ||
     fullKey === "innerTransactions.offers.mosaicAmount"
@@ -557,7 +647,9 @@ let getPropData = (
     };
   } else if(
     fullKey === "offers.mosaicAmountGive" ||
-    fullKey === "innerTransactions.offers.mosaicAmountGive"
+    fullKey === "offers.mosaicAmountGet" ||
+    fullKey === "innerTransactions.offers.mosaicAmountGive" ||
+    fullKey === "innerTransactions.offers.mosaicAmountGet"
   ) {
     let refAssetId = wholeData.mosaicIdGive as MosaicId;
     let d = data as UInt64;
@@ -569,19 +661,9 @@ let getPropData = (
       handlerType: ComponentNames.assetAmount
     };
   } else if(
-    fullKey === "offers.mosaicAmountGet" ||
-    fullKey === "innerTransactions.offers.mosaicAmountGet"
+    fullKey === "innerTransactions.targetPublicKey" ||
+    fullKey === "innerTransactions.modifications.cosignatoryPublicAccount" 
   ) {
-    let refAssetId = wholeData.mosaicIdGet as MosaicId;
-    let d = data as UInt64;
-
-    return {
-      name: key,
-      value: d.toBigInt().toString(),
-      secondaryValue: refAssetId.toHex(),
-      handlerType: ComponentNames.assetAmount
-    };
-  } else if(fullKey === "innerTransactions.targetPublicKey") {
     let d = data as PublicAccount
     finalData = d.address.pretty();
 
@@ -697,7 +779,7 @@ let getData = (
         keyName = globalConfig[currentPropString].name;
       }
 
-      if (data !== undefined) {
+      if (data !== undefined && data !== null) {
         let rowInnerData = getPropData(
           data,
           keyName,
