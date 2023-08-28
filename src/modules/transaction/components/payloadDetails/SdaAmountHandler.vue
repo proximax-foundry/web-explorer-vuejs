@@ -83,13 +83,18 @@ const calcValue = (value: string, decimal: number)=>{
   let divider = Math.pow(10, decimal);
   let quotient = BigInt(value)/ BigInt(divider);
   let remainder = value.slice(-tokenDecimalPlace);
-  
-  let remainderInteger = parseInt(remainder);
 
-  let amountWithDecimal = remainderInteger ? remainderInteger / divider: 0;
-  let adjustedDecimalAmount = remainderInteger ? amountWithDecimal.toString().split(".")[1].toString(): "";
+  if(tokenDecimalPlace){
+    let remainderInteger = parseInt(remainder);
 
-  return quotient.toString() + (remainderInteger ? "." + adjustedDecimalAmount :"");
+    let amountWithDecimal = remainderInteger ? remainderInteger / divider: 0;
+    let adjustedDecimalAmount = remainderInteger ? amountWithDecimal.toString().split(".")[1].toString(): "";
+
+    return quotient.toString() + (remainderInteger ? "." + adjustedDecimalAmount :"");
+  }
+  else{
+    return value;
+  }
 }
 
 if(props.toggleResolve){

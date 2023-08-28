@@ -35,12 +35,14 @@ const resolve = ()=>{
     let quotient = BigInt(displayValue.value)/ BigInt(divider);
     let remainder = displayValue.value.slice(-tokenDecimalPlace);
     
-    let remainderInteger = parseInt(remainder);
+    if(tokenDecimalPlace){
+      let remainderInteger = parseInt(remainder);
 
-    let amountWithDecimal = remainderInteger ? remainderInteger / divider: 0;
-    let adjustedDecimalAmount = remainderInteger ? amountWithDecimal.toString().split(".")[1].toString(): "";
+      let amountWithDecimal = remainderInteger ? remainderInteger / divider: 0;
+      let adjustedDecimalAmount = remainderInteger ? amountWithDecimal.toString().split(".")[1].toString(): "";
 
-    displayValue.value = quotient.toString() + (remainderInteger ? "." + adjustedDecimalAmount :"");
+      displayValue.value = quotient.toString() + (remainderInteger ? "." + adjustedDecimalAmount :"");
+    }
   }
 
   displayValue.value = displayValue.value + " " + AppState.nativeToken.label;
