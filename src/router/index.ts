@@ -149,6 +149,17 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
+    path: "/payload/:payload",
+    name: "ViewPayloadDirect",
+    props: true,
+    component: () => import("@/modules/transaction/views/ViewPayloadDirect.vue"),
+    meta: {
+      title: "View Payload",
+    },
+  },
+
+
+  {
     path: "/searchInvalid/:type/:param",
     name: "ViewInvalidSearch",
     props: true,
