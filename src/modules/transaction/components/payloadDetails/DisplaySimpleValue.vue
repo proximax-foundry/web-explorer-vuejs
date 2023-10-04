@@ -21,7 +21,7 @@ import HandlerControl from "./HandlerControl.vue";
 
 interface IRow {
   name: string;
-  value: string;
+  value: any;
   secondaryValue: string;
   handlerType: string;
   styleClass: string,
