@@ -124,6 +124,12 @@ import {ComponentNames} from "../componentEnum";
 import { TransactionUtils } from "@/util/transactionUtils";
 import type { RowData } from "../../transaction/components/payloadDetails/IRowData";
 import DisplayValue from "../../transaction/components/payloadDetails/DisplayValue.vue";
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+const initialToggleResolveValue = route.query["resolveData"] ? 
+                          route.query["resolveData"] as string : '';
+const initialToggleResolve = initialToggleResolveValue.trim().toLowerCase() === "true";
 
 const props = defineProps({
   payload: {
@@ -136,7 +142,7 @@ const innerTxns = ref(<RowData[][]>[]);
 const txnDetails = ref(<RowData[]>[]);
 const commonTxnDetails = ref(<RowData[]>[]);
 const innerTxnType = ref();
-const toggleResolve = ref(false);
+const toggleResolve = ref(initialToggleResolve);
 const payloadNamespaceId = ref();
 const isSignedTransaction = ref(false);
 const signature = ref("");
