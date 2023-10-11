@@ -7,9 +7,15 @@ export class MultisigUtils {
 
         let cosigners: string[] = [];
     
-        for (let i = 0; i < multisigAccountsInfo.length; ++i) {
+        /*for (let i = 0; i < multisigAccountsInfo.length; ++i) {
           if (multisigAccountsInfo[i].minApproval === 0 && multisigAccountsInfo[i].minRemoval === 0) {
             cosigners.push(multisigAccountsInfo[i].account.publicKey);
+          }
+        }*/
+
+        if (multisigAccountsInfo[0].cosignatories.length > 0) {
+          for(let j = 0; j < multisigAccountsInfo[0].cosignatories.length; ++j){
+            cosigners.push(multisigAccountsInfo[0].cosignatories[j].publicKey);
           }
         }
     
