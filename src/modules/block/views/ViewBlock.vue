@@ -165,28 +165,69 @@
           </div>
         </div>
       </div>
+      <BlockReceipt :txn-statements="txnStatements" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import BlockReceipt from "@/modules/block/components/BlockReceipt.vue";
 import { computed, getCurrentInstance, ref } from "vue";
 import { BlockUtils, type BlockObj } from "@/util/blockUtil";
 import { AppState } from "@/state/appState";
 import { networkState } from "@/state/networkState";
 import MixedTxnDataTable from "@/modules/transaction/components/txnDataTables/MixedTxnDataTable.vue";
 import { TransactionUtils } from "@/util/transactionUtils";
+
 import {
+  Address,
+  AddressAlias,
+  ArtifactExpiryReceipt,
+  BalanceChangeReceipt,
+  BalanceTransferReceipt,
+  MosaicAlias,
+  MosaicId,
+  NamespaceId,
+  OfferCreationReceipt,
+  OfferExchangeReceipt,
+  OfferRemovalReceipt,
+  ReceiptType,
   TransactionGroupType,
   TransactionQueryParams,
 } from "tsjs-xpx-chain-sdk";
 import { copyToClipboard } from "@/util/functions";
 import { useToast } from "primevue/usetoast";
 import type { ConfirmedTransferTransaction } from "@/models/transactions/transaction";
+import { Helper } from "@/util/typeHelper";
+
+interface blockReceipt {
+  class?: string;
+  type?: string;
+  namespaceId?: string;
+  mosaicId?: string;
+  account?: string;
+  amount?: number;
+  recipient?: string;
+  sender?: string;
+  artifactId?: string;
+  mosaicIdGive?: string;
+  mosaicIdGet?: string;
+  mosaicIdGiveAmount?: number;
+  mosaicIdGetAmount?: number;
+  mosaicAmountGiveReturned?: number;
+  address?: string
+}
 
 const p = defineProps({
-  blockHeight: Number,
+  blockHeight: String,
 });
+
+const networkName = computed(() => {
+  return networkState.chainNetworkName;
+});
+
+
+const txnStatements = ref<Record<string, blockReceipt[]>>({});
 const toast = useToast();
 const internalInstance = getCurrentInstance();
 const emitter = internalInstance?.appContext.config.globalProperties.emitter;
@@ -211,11 +252,246 @@ const copy = (id: string) => {
   }
 };
 
+const alterReceiptTypeName = (name: string)=>{
+  return Helper.ucwordsNoUnderscoreReplace(name, "mosaic", "asset");
+}
+
 const loadBlock = async () => {
   if (!p.blockHeight) {
     return;
   }
-  const block = await BlockUtils.getBlockByHeight(p.blockHeight);
+  if (!AppState.isReady || !networkName.value) {
+    setTimeout(loadBlock, 1000);
+    return;
+  }
+  const block = await BlockUtils.getBlockByHeight(parseInt(p.blockHeight));
+  const blockReceipts = await AppState.chainAPI!.blockAPI.getBlockReceipts(
+    parseInt(p.blockHeight)
+  );
+  const {
+    transactionStatements,
+    addressResolutionStatements,
+    mosaicResolutionStatements,
+  } = blockReceipts;
+
+  const addressStatement = addressResolutionStatements
+    .map((x) => {
+      const unresolved = x.unresolved as NamespaceId;
+      return x.resolutionEntries.map((y) => {
+        const addressAlias = y.resolved as AddressAlias;
+        return {
+          namespaceId: unresolved.toHex(),
+          address: addressAlias.address.pretty(),
+        };
+      });
+    })
+    .flat();
+
+  const formatAddressStatement: Record<
+    string,
+    { namespaceId: string; address: string }[]
+  > = addressStatement.length
+    ? {
+        "Address Resolution Statement": addressStatement,
+      }
+    : {};
+
+  const mosaicStatement = mosaicResolutionStatements
+    .map((x) => {
+      const unresolved = x.unresolved as NamespaceId;
+      return x.resolutionEntries.map((y) => {
+        const mosaicAlias = y.resolved as MosaicAlias;
+        return {
+          namespaceId: unresolved.toHex(),
+          mosaicId: mosaicAlias.toHex(),
+        };
+      });
+    })
+    .flat();
+
+  const formatMosaicStatement: Record<
+    string,
+    { namespaceId: string; mosaicId: string }[]
+  > = mosaicStatement.length
+    ? {
+        "Asset Resolution Statement": mosaicStatement,
+      }
+    : {};
+
+  const txnStatement = transactionStatements
+    .map((statement) => {
+      return statement.receipts.map((receipt) => {
+        if (receipt instanceof BalanceChangeReceipt) {
+          const { type, version, size, ...val } = receipt;
+          return {
+            class: "Balance Change",
+            type: alterReceiptTypeName(ReceiptType[type]),
+            account: val.account.address.pretty(),
+            mosaicId: val.mosaicId.toHex(),
+            amount: val.amount.compact(),
+          };
+        } else if (receipt instanceof BalanceTransferReceipt) {
+          const { type, version, size, ...val } = receipt;
+          return {
+            class: "Balance Transfer",
+            type: alterReceiptTypeName(ReceiptType[type]),
+            mosaicId: val.mosaicId.toHex(),
+            amount: val.amount.compact(),
+            sender: val.sender.address.pretty(),
+            recipient:
+              val.recipient instanceof Address
+                ? val.recipient.pretty()
+                : val.recipient?.fullName ?? val.recipient.toHex(),
+          };
+        } 
+         else if (receipt instanceof ArtifactExpiryReceipt) {
+          const { type, artifactId } = receipt;
+          return {
+            class: "Artifact Expiry",
+            type: alterReceiptTypeName(ReceiptType[type]),
+            artifactId:
+              artifactId instanceof MosaicId
+                ? artifactId.toHex()
+                : artifactId?.fullName ?? artifactId.toHex(),
+          };
+        } else if (receipt instanceof OfferCreationReceipt) {
+          const { type, version, size, ...val } = receipt;
+          return {
+            class: "SDA Offer Creation",
+            type: alterReceiptTypeName(ReceiptType[type]),
+            sender: val.sender.address.pretty(),
+            mosaicIdGive: val.mosaicIdGive.toHex(),
+            mosaicIdGet: val.mosaicIdGet.toHex(),
+            mosaicIdGiveAmount: val.mosaicAmountGive.compact(),
+            mosaicIdGetAmount: val.mosaicAmountGet.compact(),
+          };
+        } else if (receipt instanceof OfferExchangeReceipt) {
+          const { type, version, size, ...val } = receipt;
+          return {
+            class: "SDA Offer Exchange",
+            type: alterReceiptTypeName(ReceiptType[type]),
+            sender: val.sender.address.pretty(),
+            mosaicIdGive: val.mosaicIdGive.toHex(),
+            mosaicIdGet: val.mosaicIdGet.toHex(),
+            exchangeDetails: val.exchangeDetails.map((z) => {
+              return {
+                recipient: z.recipient.pretty(),
+                mosaicIdGive: z.mosaicIdGive.toHex(),
+                mosaicIdGet: z.mosaicIdGet.toHex(),
+                mosaicAmountGive: z.mosaicAmountGive.compact(),
+                mosaicAmountGet: z.mosaicAmountGet.compact(),
+              };
+            }),
+          };
+        } else if (receipt instanceof OfferRemovalReceipt) {
+          const { type, version, size, ...val } = receipt;
+          return {
+            class: "SDA Offer Removal",
+            type: alterReceiptTypeName(ReceiptType[type]),
+            sender: val.sender.address.pretty(),
+            mosaicIdGive: val.mosaicIdGive.toHex(),
+            mosaicIdGet: val.mosaicIdGet.toHex(),
+            mosaicAmountGiveReturned: val.mosaicAmountGiveReturned.compact(),
+          };
+        } else {
+          return {
+            class: "Unknown",
+            type: "Unknown",
+          };
+        }
+      });
+    })
+    .flat();
+
+  for (let i = 0; i < txnStatement.length; i++) {
+ 
+    if (txnStatement[i].mosaicIdGet) {
+      const { divisibility } = await AppState.chainAPI!.assetAPI.getMosaic(
+        new MosaicId(txnStatement[i].mosaicIdGet!)
+      );
+      if(txnStatement[i].mosaicIdGetAmount){
+
+        txnStatement[i].mosaicIdGetAmount! =
+          txnStatement[i].mosaicIdGetAmount! / Math.pow(10, divisibility);
+      }
+    }
+
+    if (txnStatement[i].mosaicIdGive) {
+      const { divisibility } = await AppState.chainAPI!.assetAPI.getMosaic(
+        new MosaicId(txnStatement[i].mosaicIdGive!)
+      );
+      if(txnStatement[i].mosaicIdGiveAmount){
+
+        txnStatement[i].mosaicIdGiveAmount! =
+          txnStatement[i].mosaicIdGiveAmount! / Math.pow(10, divisibility);
+      }
+      if(txnStatement[i].mosaicAmountGiveReturned){
+        txnStatement[i].mosaicAmountGiveReturned! =
+          txnStatement[i].mosaicAmountGiveReturned! / Math.pow(10, divisibility);
+      }
+    }
+
+    if(txnStatement[i].exchangeDetails?.length){
+      for (let j = 0; j < txnStatement[i].exchangeDetails!.length; j++) {
+        const getMosaicInfo = await AppState.chainAPI!.assetAPI.getMosaic(
+          new MosaicId(txnStatement[i].exchangeDetails![j].mosaicIdGet )
+        );
+        const giveMosaicInfo = await AppState.chainAPI!.assetAPI.getMosaic(
+          new MosaicId(txnStatement[i].exchangeDetails![j].mosaicIdGive )
+        );
+
+        txnStatement[i].exchangeDetails![j].mosaicAmountGet = txnStatement[i].exchangeDetails![j].mosaicAmountGet / Math.pow(10,getMosaicInfo.divisibility)
+        txnStatement[i].exchangeDetails![j].mosaicAmountGive = txnStatement[i].exchangeDetails![j].mosaicAmountGive / Math.pow(10,giveMosaicInfo.divisibility)
+      }
+    }
+
+
+    if (txnStatement[i].mosaicId) {
+      const { divisibility } = await AppState.chainAPI!.assetAPI.getMosaic(
+        new MosaicId(txnStatement[i].mosaicId!)
+      );
+      txnStatement[i].amount! =
+        txnStatement[i].amount! / Math.pow(10, divisibility);
+    }
+
+    if (
+      TransactionUtils.isNamespaceWithString(txnStatement[i].recipient ?? "")
+    ) {
+      const namespaceName =
+        await AppState.chainAPI!.namespaceAPI.getNamespacesName([
+          new NamespaceId(txnStatement[i].recipient!.replace("/", "")),
+        ]);
+      txnStatement[i].recipient = namespaceName[0].name;
+    }
+    if (
+      TransactionUtils.isNamespaceWithString(txnStatement[i].artifactId ?? "")
+    ) {
+      const namespaceName =
+        await AppState.chainAPI!.namespaceAPI.getNamespacesName([
+          new NamespaceId(txnStatement[i].recipient!.replace("/", "")),
+        ]);
+      txnStatement[i].artifactId = namespaceName[0].name;
+    }
+  }
+
+  const groupedStatements: {
+    [key: string]: Omit<(typeof txnStatement)[0], "class">[];
+  } = {};
+
+  // Create an object to store the grouped arrays dynamically
+  txnStatement.forEach((statement) => {
+    const { class: statementClass, ...statementWithoutClass } = statement;
+    if (!groupedStatements[statementClass]) {
+      groupedStatements[statementClass] = [];
+    }
+    groupedStatements[statementClass].push(statementWithoutClass);
+  });
+  txnStatements.value = {
+    ...groupedStatements,
+    ...formatAddressStatement,
+    ...formatMosaicStatement,
+  };
+
   if (!AppState.isReady) {
     setTimeout(loadBlock, 1000);
     return;
@@ -276,10 +552,6 @@ const changeRows = () => {
   getTransactions();
 };
 
-const networkName = computed(() => {
-  return networkState.chainNetworkName;
-});
-
 emitter.on("CHANGE_NETWORK", (payload: boolean) => {
   if (payload) {
     loadBlock();
@@ -289,7 +561,7 @@ emitter.on("CHANGE_NETWORK", (payload: boolean) => {
 const getTransactions = async () => {
   if (p.blockHeight != null) {
     let txnQueryParams = new TransactionQueryParams();
-    txnQueryParams.height = p.blockHeight;
+    txnQueryParams.height = parseInt(p.blockHeight);
     txnQueryParams.pageSize = pages.value;
     txnQueryParams.pageNumber = currentPage.value;
     let txns = await TransactionUtils.searchTxns(
@@ -304,7 +576,6 @@ const getTransactions = async () => {
     }
   }
 };
-getTransactions();
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
