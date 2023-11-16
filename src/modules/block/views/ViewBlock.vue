@@ -198,6 +198,7 @@ import {
 import { copyToClipboard } from "@/util/functions";
 import { useToast } from "primevue/usetoast";
 import type { ConfirmedTransferTransaction } from "@/models/transactions/transaction";
+import { Helper } from "@/util/typeHelper";
 
 interface blockReceipt {
   class?: string;
@@ -250,6 +251,10 @@ const copy = (id: string) => {
     }
   }
 };
+
+const alterReceiptTypeName = (name: string)=>{
+  return Helper.ucwordsNoUnderscoreReplace(name, "mosaic", "asset");
+}
 
 const loadBlock = async () => {
   if (!p.blockHeight) {
@@ -320,7 +325,7 @@ const loadBlock = async () => {
           const { type, version, size, ...val } = receipt;
           return {
             class: "Balance Change",
-            type: ReceiptType[type],
+            type: alterReceiptTypeName(ReceiptType[type]),
             account: val.account.address.pretty(),
             mosaicId: val.mosaicId.toHex(),
             amount: val.amount.compact(),
@@ -329,7 +334,7 @@ const loadBlock = async () => {
           const { type, version, size, ...val } = receipt;
           return {
             class: "Balance Transfer",
-            type: ReceiptType[type],
+            type: alterReceiptTypeName(ReceiptType[type]),
             mosaicId: val.mosaicId.toHex(),
             amount: val.amount.compact(),
             sender: val.sender.address.pretty(),
@@ -343,7 +348,7 @@ const loadBlock = async () => {
           const { type, artifactId } = receipt;
           return {
             class: "Artifact Expiry",
-            type: ReceiptType[type],
+            type: alterReceiptTypeName(ReceiptType[type]),
             artifactId:
               artifactId instanceof MosaicId
                 ? artifactId.toHex()
@@ -353,7 +358,7 @@ const loadBlock = async () => {
           const { type, version, size, ...val } = receipt;
           return {
             class: "SDA Offer Creation",
-            type: ReceiptType[type],
+            type: alterReceiptTypeName(ReceiptType[type]),
             sender: val.sender.address.pretty(),
             mosaicIdGive: val.mosaicIdGive.toHex(),
             mosaicIdGet: val.mosaicIdGet.toHex(),
@@ -362,10 +367,9 @@ const loadBlock = async () => {
           };
         } else if (receipt instanceof OfferExchangeReceipt) {
           const { type, version, size, ...val } = receipt;
-          console.log(val)
           return {
             class: "SDA Offer Exchange",
-            type: ReceiptType[type],
+            type: alterReceiptTypeName(ReceiptType[type]),
             sender: val.sender.address.pretty(),
             mosaicIdGive: val.mosaicIdGive.toHex(),
             mosaicIdGet: val.mosaicIdGet.toHex(),
@@ -383,7 +387,7 @@ const loadBlock = async () => {
           const { type, version, size, ...val } = receipt;
           return {
             class: "SDA Offer Removal",
-            type: ReceiptType[type],
+            type: alterReceiptTypeName(ReceiptType[type]),
             sender: val.sender.address.pretty(),
             mosaicIdGive: val.mosaicIdGive.toHex(),
             mosaicIdGet: val.mosaicIdGet.toHex(),
