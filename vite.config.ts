@@ -21,6 +21,9 @@ export default defineConfig(({command,mode})=>{
           break;
   }
   return{
+    define: {
+      BUILD_YEAR :new Date().getFullYear()
+    },
     base:  publicPath,
     plugins: [
       vue(),

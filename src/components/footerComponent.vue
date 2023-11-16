@@ -8,7 +8,7 @@
           </div>
           <div>
             <div class="text-xxs sm:text-xs text-white mb-5">
-              Copyright © 2023. All Rights Reserved.
+              Copyright © {{ lastActiveYear }}. All Rights Reserved.
             </div>
             <div>
               <p class="media-link">
@@ -122,6 +122,7 @@ library.add(
   faLinkedinIn
 );
 
+const lastActiveYear = BUILD_YEAR;
 const versioning = ref("0.0.1");
 
 versioning.value = packageData.version;
