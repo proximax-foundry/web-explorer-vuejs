@@ -121,84 +121,87 @@
         :selectedGroupType="transactionGroupType.CONFIRMED"
         v-else-if="selectedTxnType === TransactionFilterType['SDA EXCHANGE']"
       />
-      <div
-        class="sm:flex sm:justify-between my-5 mb-15"
-        v-if="totalPages > 1 && transactions.length > 0"
-      >
+      <div class="my-5 mb-15">
         <div
-          class="text-xs text-gray-700 mb-3 sm:mb-0 text-center sm:text-left"
-        >
-          Show
-          <select
-            v-model="pages"
-            class="border border-gray-300 rounded-md p-1"
-            @change="changeRows"
-          >
-            <option value="10">10</option>
-            <option value="20">20</option>
-            <option value="30">30</option>
-            <option value="40">40</option>
-            <option value="50">50</option>
-          </select>
-          Records
+        class="sm:flex sm:justify-center"
+        v-if="totalPages > 1 && transactions.length > 0 && !viewAllTransactions"
+      >
+          <button class="text-sm text-blue-primary py-2 bg-gray-200 w-full" @click="naviFirst">View all transactions</button>
         </div>
-        <div class="sm:flex sm:items-center text-center sm:text-right">
-          <div
-            v-if="enableFirstPage"
-            @click="naviFirst"
-            class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all"
-          >
-            First
+        <div v-else class="sm:flex sm:justify-between">
+          <div class="text-xs text-gray-700 mb-3 sm:mb-0 text-center sm:text-left">
+            Show
+            <select
+              v-model="pages"
+              class="border border-gray-300 rounded-md p-1"
+              @change="changeRows"
+            >
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="40">40</option>
+              <option value="50">50</option>
+            </select>
+            Records
           </div>
-          <div
-            v-else
-            class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1"
-          >
-            First
-          </div>
-          <div
-            v-if="enablePreviousPage"
-            @click="naviPrevious"
-            class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all"
-          >
-            Previous
-          </div>
-          <div
-            v-else
-            class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1"
-          >
-            Previous
-          </div>
-          <div
-            class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs"
-          >
-            Page {{ currentPage }} of {{ totalPages }}
-          </div>
-          <div
-            v-if="enableNextPage"
-            @click="naviNext"
-            class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all"
-          >
-            Next
-          </div>
-          <div
-            v-else
-            class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1"
-          >
-            Next
-          </div>
-          <div
-            v-if="enableLastPage"
-            @click="naviLast"
-            class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs ml-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all"
-          >
-            Last
-          </div>
-          <div
-            v-else
-            class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1"
-          >
-            Last
+          <div class="sm:flex sm:items-center text-center sm:text-right">
+            <div
+              v-if="enableFirstPage"
+              @click="naviFirst"
+              class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all"
+            >
+              First
+            </div>
+            <div
+              v-else
+              class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1"
+            >
+              First
+            </div>
+            <div
+              v-if="enablePreviousPage"
+              @click="naviPrevious"
+              class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all"
+            >
+              Previous
+            </div>
+            <div
+              v-else
+              class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1"
+            >
+              Previous
+            </div>
+            <div
+              class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs"
+            >
+              Page {{ currentPage }} of {{ totalPages }}
+            </div>
+            <div
+              v-if="enableNextPage"
+              @click="naviNext"
+              class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all"
+            >
+              Next
+            </div>
+            <div
+              v-else
+              class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1"
+            >
+              Next
+            </div>
+            <div
+              v-if="enableLastPage"
+              @click="naviLast"
+              class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs ml-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all"
+            >
+              Last
+            </div>
+            <div
+              v-else
+              class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1"
+            >
+              Last
+            </div>
           </div>
         </div>
       </div>
@@ -246,6 +249,7 @@ let txnTypeList = Object.entries(TransactionFilterType).map(
 const pages = ref(20);
 const currentPage = ref(1);
 const totalPages = ref(0);
+const viewAllTransactions = ref(false)
 
 const enableFirstPage = computed(() => {
   return currentPage.value > 1;
@@ -264,6 +268,7 @@ const enableLastPage = computed(() => {
 });
 
 const naviFirst = () => {
+  viewAllTransactions.value = true
   currentPage.value = 1;
   loadRecentTransactions();
 };
