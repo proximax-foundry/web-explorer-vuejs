@@ -121,11 +121,11 @@
         :selectedGroupType="transactionGroupType.CONFIRMED"
         v-else-if="selectedTxnType === TransactionFilterType['SDA EXCHANGE']"
       />
-      <div class="my-5 mb-15">
+      <div class="my-5 mb-15" v-if="totalPages > 1 && transactions.length > 0">
         <div
         class="sm:flex sm:justify-center"
-        v-if="totalPages > 1 && transactions.length > 0 && !viewAllTransactions"
-      >
+        v-if="!viewAllTransactions"
+        >
           <button class="text-sm text-blue-primary py-2 bg-gray-200 w-full" @click="naviFirst">View all transactions</button>
         </div>
         <div v-else class="sm:flex sm:justify-between">
