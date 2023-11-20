@@ -336,7 +336,6 @@
       return;
     }
     let txnQueryParams = Helper.createTransactionQueryParams();
-    let blockHeight = await AppState.chainAPI.chainAPI.getBlockchainHeight();
     txnQueryParams.pageSize = pages.value;
     txnQueryParams.pageNumber = currentPage.value;
     txnQueryParams.address = Helper.createAddress(props.accountParam).plain();
@@ -350,11 +349,7 @@
     } else {
       txnQueryParams.embedded = true;
     }
-    let fromHeight = blockHeight - 200000;
-    if (fromHeight <= 0) {
-      fromHeight = 1;
-    }
-    txnQueryParams.fromHeight = fromHeight;
+
     if (QueryParamsType.value != undefined) {
       txnQueryParams.type = QueryParamsType.value;
     }
