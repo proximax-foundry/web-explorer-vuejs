@@ -121,80 +121,7 @@
       v-else-if="selectedTxnType === TransactionFilterType.CHAIN"
     />
     <div class="sm:flex sm:justify-between my-5 mb-15" v-if="totalPages > 1">
-      <div class="text-xs text-gray-700 mb-3 sm:mb-0 text-center sm:text-left">
-        Show
-        <select
-          v-model="pages"
-          class="border border-gray-300 rounded-md p-1"
-          @change="changeRows"
-        >
-          <option value="10">10</option>
-          <option value="20">20</option>
-          <option value="30">30</option>
-          <option value="40">40</option>
-          <option value="50">50</option>
-        </select>
-        Records
-      </div>
-      <div class="sm:flex sm:items-center text-center sm:text-right">
-        <div
-          v-if="enableFirstPage"
-          @click="naviFirst"
-          class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all"
-        >
-          First
-        </div>
-        <div
-          v-else
-          class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1"
-        >
-          First
-        </div>
-        <div
-          v-if="enablePreviousPage"
-          @click="naviPrevious"
-          class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all"
-        >
-          Previous
-        </div>
-        <div
-          v-else
-          class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1"
-        >
-          Previous
-        </div>
-        <div
-          class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs"
-        >
-          Page {{ currentPage }} of {{ totalPages }}
-        </div>
-        <div
-          v-if="enableNextPage"
-          @click="naviNext"
-          class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all"
-        >
-          Next
-        </div>
-        <div
-          v-else
-          class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1"
-        >
-          Next
-        </div>
-        <div
-          v-if="enableLastPage"
-          @click="naviLast"
-          class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs ml-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all"
-        >
-          Last
-        </div>
-        <div
-          v-else
-          class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1"
-        >
-          Last
-        </div>
-      </div>
+      <button class="text-sm text-blue-primary py-2 bg-gray-200 w-full" @click="showTransactionList">View all transactions</button>
     </div>
   </div>
 </template>
@@ -212,6 +139,7 @@ import {
 import { Helper } from "@/util/typeHelper";
 import { AppState } from "@/state/appState";
 import { TransactionUtils } from "@/util/transactionUtils";
+import { useRouter } from "vue-router";
 import ExportCSVComponent from "@/modules/transaction/components/ExportCSVComponent.vue";
 import MixedTxnDataTable from "@/modules/transaction/components/txnDataTables/MixedTxnDataTable.vue";
 import TransferTxnDataTable from "@/modules/transaction/components/txnDataTables/TransferTxnDataTable.vue";
@@ -243,6 +171,7 @@ const props = defineProps({
     required: true,
   },
 });
+const router = useRouter();
 const internalInstance = getCurrentInstance();
 const emitter = internalInstance?.appContext.config.globalProperties.emitter;
 const invalidPublicKey =
@@ -547,6 +476,10 @@ const formatConfirmedTransaction = async (transactions: Transaction[]) => {
       break;
   }
   return formattedTxns;
+};
+
+const showTransactionList = () => {
+  router.push({ name: "ViewAccountTransactionList", query: {a: props.accountAddress}});
 };
 
 if (AppState.isReady) {
