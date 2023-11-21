@@ -37,7 +37,7 @@
       <span class="text-tsm">Fetching transactions</span>
     </div>
   </div>
-  <div v-else>
+  <div v-else :class="{'my-5 mb-15': totalPages == 1}">
     <MixedTxnDataTable
       :accountAddress="accountAddress"
       :transactions="mixedTransactions"
@@ -122,6 +122,12 @@
       :pages="pages"
       :selectedGroupType="transactionGroupType.CONFIRMED"
       v-else-if="selectedTxnType === TransactionFilterType.CHAIN"
+    />
+    <SdaExchangeTxnDataTable
+        :transactions="sdaExchangeTransactions"
+        :pages="pages"
+        :selectedGroupType="transactionGroupType.CONFIRMED"
+        v-else-if="selectedTxnType === TransactionFilterType['SDA EXCHANGE']"
     />
     <div class="my-5 mb-15" v-if="totalPages > 1">
         <button v-if="viewAllTransactions==false" class="text-sm text-blue-primary py-2 bg-gray-200 w-full" @click="showTransactionList">View all transactions</button>
@@ -233,6 +239,7 @@ import LinkTxnDataTable from "@/modules/transaction/components/txnDataTables/Lin
 import RestrictionTxnDataTable from "@/modules/transaction/components/txnDataTables/RestrictionTxnDataTable.vue";
 import SecretTxnDataTable from "@/modules/transaction/components/txnDataTables/SecretTxnDataTable.vue";
 import ChainTxnDataTable from "@/modules/transaction/components/txnDataTables/ChainTxnDataTable.vue";
+import SdaExchangeTxnDataTable from "@/modules/transaction/components/txnDataTables/SdaExchangeTxnDataTable.vue";
 import {
   TransactionFilterType,
   TransactionFilterTypes,
@@ -371,6 +378,9 @@ const changeSearchTxnType = () => {
     case TransactionFilterType.RESTRICTION:
       QueryParamsType.value = TransactionFilterTypes.getRestrictionTypes();
       break;
+    case TransactionFilterType['SDA EXCHANGE']:
+      QueryParamsType.value = TransactionFilterTypes.getSdaExchangeTypes();
+      break;
     default:
       QueryParamsType.value = undefined;
       break;
@@ -393,6 +403,7 @@ const linkTransactions = ref<any[]>([]);
 const restrictionTransactions = ref<any[]>([]);
 const secretTransactions = ref<any[]>([]);
 const chainTransactions = ref<any[]>([]);
+const sdaExchangeTransactions = ref<any[]>([]);
 let transactionGroupType = Helper.getTransactionGroupType();
 let blockDescOrderSortingField = Helper.createTransactionFieldOrder(
   Helper.getTransactionSortField().BLOCK,
@@ -490,10 +501,13 @@ let loadAccountTransactions = async () => {
     if(selectedTxnType.value == TransactionFilterType.CHAIN){
       chainTransactions.value = formattedTxns
     }
-    totalPages.value = transactionSearchResult.pagination.totalPages;
+    if(selectedTxnType.value == TransactionFilterType['SDA EXCHANGE']){
+      sdaExchangeTransactions.value = formattedTxns
+    }
   } else {
     transactions.value = [];
   }
+  totalPages.value = transactionSearchResult.pagination.totalPages;
   isFetching.value = false;
 };
 loadAccountTransactions();
@@ -567,6 +581,12 @@ const formatConfirmedTransaction = async (transactions: Transaction[]) => {
     case TransactionFilterType.NAMESPACE:
       formattedTxns =
         await TransactionUtils.formatConfirmedNamespaceTransaction(
+          transactions
+        );
+      break;
+    case TransactionFilterType['SDA EXCHANGE']:
+      formattedTxns =
+        await TransactionUtils.formatConfirmedSdaExchangeTransaction(
           transactions
         );
       break;
