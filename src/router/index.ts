@@ -89,23 +89,23 @@ const routes: RouteRecordRaw[] = [
 
   {
     path: "/tx",
+    name: "ViewAccountTransactionList",
+    props: route => ({ accountParam: route.query.a }),
+    component: () =>
+      import("@/modules/transaction/views/ViewTransactionList.vue"),
+    meta: {
+      title: "View Account Transactions",
+    },
+  },
+
+  {
+    path: "/tx",
     name: "ViewTransactionList",
     props: true,
     component: () =>
       import("@/modules/transaction/views/ViewTransactionList.vue"),
     meta: {
       title: "View Transactions",
-    },
-  },
-
-  {
-    path: "/tx/account",
-    name: "ViewAccountTransactionList",
-    props: route => ({ accountParam: route.query.a }),
-    component: () =>
-      import("@/modules/transaction/views/ViewAccountTransactionList.vue"),
-    meta: {
-      title: "View Account Transactions",
     },
   },
 
