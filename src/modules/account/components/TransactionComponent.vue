@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div :class="{ 'flex justify-between': viewAllTransactions, 'bg-gray-50': !viewAllTransactions }">
+    <div :class="{'flex justify-between': viewAllTransactions, 'bg-gray-50': !viewAllTransactions}">
       <div v-if="viewAllTransactions">
           <p class="text-gray-500 mb-1 text-sm font-bold">Transactions</p>
           <p class="text-xs" v-if="strAddress">For <span class="text-blue-primary">{{strAddress}}</span></p>
@@ -37,7 +37,7 @@
       <span class="text-tsm">Fetching transactions</span>
     </div>
   </div>
-  <div v-else :class="{'my-5 mb-15': totalPages == 1}">
+  <div v-else>
     <MixedTxnDataTable
       :accountAddress="strAddress"
       :transactions="mixedTransactions"
