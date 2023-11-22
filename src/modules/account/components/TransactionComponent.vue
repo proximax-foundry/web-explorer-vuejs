@@ -37,7 +37,7 @@
       <span class="text-tsm">Fetching transactions</span>
     </div>
   </div>
-  <div v-else>
+  <div v-else :class="{'mb-15': totalPages == 1}">
     <MixedTxnDataTable
       :accountAddress="strAddress"
       :transactions="mixedTransactions"
