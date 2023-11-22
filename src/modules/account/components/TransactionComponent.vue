@@ -3,7 +3,7 @@
     <div :class="{ 'flex justify-between mb-3': viewAllTransactions }">
       <div v-if="viewAllTransactions">
           <p class="text-gray-500 mb-1 text-sm font-bold">Transactions</p>
-          <p class="text-xs" v-if="acc">For <span class="text-blue-primary">{{acc}}</span></p>
+          <p class="text-xs" v-if="strAddress">For <span class="text-blue-primary">{{strAddress}}</span></p>
       </div>
       <div class="bg-gray-50" :class="{'flex justify-end': viewAllTransactions==false}">
         <ExportCSVComponent
@@ -39,13 +39,13 @@
   </div>
   <div v-else :class="{'my-5 mb-15': totalPages == 1}">
     <MixedTxnDataTable
-      :accountAddress="acc"
+      :accountAddress="strAddress"
       :transactions="mixedTransactions"
       :pages="pages"
       v-if="selectedTxnType == 'all'"
     />
     <TransferTxnDataTable
-      :accountAddress="acc"
+      :accountAddress="strAddress"
       :transactions="transferTransactions"
       :pages="pages"
       v-else-if="selectedTxnType === TransactionFilterType.TRANSFER"
@@ -110,14 +110,14 @@
       v-else-if="selectedTxnType === TransactionFilterType.RESTRICTION"
     />
     <SecretTxnDataTable
-      :accountAddress="acc"
+      :accountAddress="strAddress"
       :transactions="secretTransactions"
       :pages="pages"
       :selectedGroupType="transactionGroupType.CONFIRMED"
       v-else-if="selectedTxnType === TransactionFilterType.SECRET"
     />
     <ChainTxnDataTable
-      :accountAddress="acc"
+      :accountAddress="strAddress"
       :transactions="chainTransactions"
       :pages="pages"
       :selectedGroupType="transactionGroupType.CONFIRMED"
@@ -270,7 +270,7 @@ const wideScreen = ref(false);
 const pages = ref(20);
 const currentPage = ref(1);
 const totalPages = ref(0);
-const acc = ref("")
+const strAddress = ref("")
 const QueryParamsType = ref<number[] | undefined>(undefined);
 const screenResizeHandler = () => {
   if (window.innerWidth < 1024) {
@@ -421,7 +421,7 @@ let loadAccountTransactions = async () => {
   if (props.accountParam !== '' && !isPublicKey) {
     const account = await AccountUtils.getAccountFromAddress(props.accountParam);
     if (account) {
-      acc.value = Helper.createAddress(props.accountParam).pretty();
+      strAddress.value = Helper.createAddress(props.accountParam).pretty();
       txnQueryParams.publicKey = account.publicKey;
     }
   }
@@ -429,12 +429,12 @@ let loadAccountTransactions = async () => {
     const publicKey = props.accountParam
     const address = AccountUtils.getAddressFromPublicKey(publicKey);
     if (address) {
-      acc.value = Helper.createAddress(address).pretty();
+      strAddress.value = Helper.createAddress(address).pretty();
       txnQueryParams.publicKey = publicKey;
     }
   }
 
-  if (!acc.value) {
+  if (!strAddress.value) {
     const blockHeight = await AppState.chainAPI.chainAPI.getBlockchainHeight();
     let fromHeight = blockHeight - 200000;
     if (fromHeight <= 0) {
