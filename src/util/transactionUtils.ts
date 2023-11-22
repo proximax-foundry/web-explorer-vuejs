@@ -313,6 +313,10 @@ export const transactionTypeName = {
     id: TransactionType.PLACE_SDA_EXCHANGE_OFFER,
     name: "Place SDA Exchange",
   },
+  removeSdaExchange: {
+    id: TransactionType.REMOVE_SDA_EXCHANGE_OFFER,
+    name: "Remove SDA Exchange",
+  },
 };
 
 export class TransactionUtils {
@@ -627,7 +631,10 @@ export class TransactionUtils {
       case TransactionType.PLACE_SDA_EXCHANGE_OFFER:
         typeName = transactionTypeName.placeSdaExchange.name;
         break;
-
+      case TransactionType.REMOVE_SDA_EXCHANGE_OFFER:
+        typeName = transactionTypeName.removeSdaExchange.name;
+        break;
+          
       default:
         typeName = "Unknown";
         break;

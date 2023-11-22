@@ -122,12 +122,18 @@ const resolve = async ()=>{
       let quotient = BigInt(props.secondaryValue)/ BigInt(divider);
       let remainder = props.secondaryValue.slice(-tokenDecimalPlace);
       
-      let remainderInteger = parseInt(remainder);
+      if(tokenDecimalPlace){
 
-      let amountWithDecimal = remainderInteger ? remainderInteger / divider: 0;
-      let adjustedDecimalAmount = remainderInteger ? amountWithDecimal.toString().split(".")[1].toString(): "";
+        let remainderInteger = parseInt(remainder);
 
-      displayValue.value = quotient.toString() + (remainderInteger ? "." + adjustedDecimalAmount :"");
+        let amountWithDecimal = remainderInteger ? remainderInteger / divider: 0;
+        let adjustedDecimalAmount = remainderInteger ? amountWithDecimal.toString().split(".")[1].toString(): "";
+
+        displayValue.value = quotient.toString() + (remainderInteger ? "." + adjustedDecimalAmount :"");
+      }
+      else{
+        displayValue.value = quotient.toString();
+      }
 
       displayValue.value = displayValue.value + " " + props.value;
 
