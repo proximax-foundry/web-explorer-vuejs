@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div :class="{ 'flex justify-between mb-3': viewAllTransactions }">
+    <div :class="{ 'flex justify-between': viewAllTransactions, 'bg-gray-50': !viewAllTransactions }">
       <div v-if="viewAllTransactions">
           <p class="text-gray-500 mb-1 text-sm font-bold">Transactions</p>
           <p class="text-xs" v-if="strAddress">For <span class="text-blue-primary">{{strAddress}}</span></p>
