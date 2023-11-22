@@ -3,7 +3,7 @@
     <div :class="{ 'flex justify-between mb-3': viewAllTransactions }">
       <div v-if="viewAllTransactions">
           <p class="text-gray-500 mb-1 text-sm font-bold">Transactions</p>
-          <p class="text-xs" v-if="strAddress">For <span class="text-blue-primary">{{strAddress}}</span></p>
+          <p class="text-xs" v-if="acc">For <span class="text-blue-primary">{{acc}}</span></p>
       </div>
       <div class="bg-gray-50" :class="{'flex justify-end': viewAllTransactions==false}">
         <ExportCSVComponent
@@ -39,13 +39,13 @@
   </div>
   <div v-else :class="{'my-5 mb-15': totalPages == 1}">
     <MixedTxnDataTable
-      :accountAddress="accountAddress"
+      :accountAddress="acc"
       :transactions="mixedTransactions"
       :pages="pages"
       v-if="selectedTxnType == 'all'"
     />
     <TransferTxnDataTable
-      :accountAddress="accountAddress"
+      :accountAddress="acc"
       :transactions="transferTransactions"
       :pages="pages"
       v-else-if="selectedTxnType === TransactionFilterType.TRANSFER"
@@ -110,14 +110,14 @@
       v-else-if="selectedTxnType === TransactionFilterType.RESTRICTION"
     />
     <SecretTxnDataTable
-      :accountAddress="accountAddress"
+      :accountAddress="acc"
       :transactions="secretTransactions"
       :pages="pages"
       :selectedGroupType="transactionGroupType.CONFIRMED"
       v-else-if="selectedTxnType === TransactionFilterType.SECRET"
     />
     <ChainTxnDataTable
-      :accountAddress="accountAddress"
+      :accountAddress="acc"
       :transactions="chainTransactions"
       :pages="pages"
       :selectedGroupType="transactionGroupType.CONFIRMED"
@@ -244,14 +244,11 @@ import {
   TransactionFilterType,
   TransactionFilterTypes,
 } from "@/models/transactions/transaction";
+import { AccountUtils } from "@/util/accountUtil";
 import type { Transaction } from "tsjs-xpx-chain-sdk";
 
 const props = defineProps({
-  accountAddress: {
-    type: String,
-    required: true,
-  },
-  accountPublicKey: {
+  accountParam: {
     type: String,
     required: true,
   },
@@ -264,8 +261,6 @@ const props = defineProps({
 const router = useRouter();
 const internalInstance = getCurrentInstance();
 const emitter = internalInstance?.appContext.config.globalProperties.emitter;
-const invalidPublicKey =
-  "0000000000000000000000000000000000000000000000000000000000000000";
 let selectedTxnType = ref("all");
 let txnTypeList = Object.entries(TransactionFilterType).map(
   ([label, value]) => ({ label, value })
@@ -275,7 +270,7 @@ const wideScreen = ref(false);
 const pages = ref(20);
 const currentPage = ref(1);
 const totalPages = ref(0);
-const strAddress = ref("")
+const acc = ref("")
 const QueryParamsType = ref<number[] | undefined>(undefined);
 const screenResizeHandler = () => {
   if (window.innerWidth < 1024) {
@@ -420,27 +415,36 @@ let loadAccountTransactions = async () => {
     return;
   }
   let txnQueryParams = Helper.createTransactionQueryParams();
-  if (props.accountPublicKey == invalidPublicKey) {
-    txnQueryParams.address = Helper.createAddress(props.accountAddress).plain();
-  } else {
-    if (props.accountAddress !== '') {
-      txnQueryParams.address = Helper.createAddress(props.accountAddress).plain();
-      strAddress.value = Helper.createAddress(props.accountAddress).pretty();
-    }
-    else {
-      txnQueryParams.publicKey = props.accountPublicKey;
-      let blockHeight = await AppState.chainAPI.chainAPI.getBlockchainHeight();
-      let fromHeight = blockHeight - 200000;
-      if (fromHeight <= 0) {
-        fromHeight = 1;
-      }
-      txnQueryParams.fromHeight = fromHeight;
+  txnQueryParams.pageSize = pages.value;
+
+  let isPublicKey = props.accountParam.length === 64;
+  if (props.accountParam !== '' && !isPublicKey) {
+    const account = await AccountUtils.getAccountFromAddress(props.accountParam);
+    if (account) {
+      acc.value = Helper.createAddress(props.accountParam).pretty();
+      txnQueryParams.publicKey = account.publicKey;
     }
   }
-  txnQueryParams.pageSize = pages.value;
+  else {
+    const publicKey = props.accountParam
+    const address = AccountUtils.getAddressFromPublicKey(publicKey);
+    if (address) {
+      acc.value = Helper.createAddress(address).pretty();
+      txnQueryParams.publicKey = publicKey;
+    }
+  }
+
+  if (!acc.value) {
+    const blockHeight = await AppState.chainAPI.chainAPI.getBlockchainHeight();
+    let fromHeight = blockHeight - 200000;
+    if (fromHeight <= 0) {
+      fromHeight = 1;
+    }
+    txnQueryParams.fromHeight = fromHeight;
+  }
   txnQueryParams.pageNumber = currentPage.value;
 
-  if (selectedTxnType.value == undefined || selectedTxnType.value == "all" ) {
+  if (selectedTxnType.value == undefined || selectedTxnType.value == "all") {
     txnQueryParams.embedded = false;
   } else {
     txnQueryParams.embedded = true;
@@ -600,7 +604,7 @@ const formatConfirmedTransaction = async (transactions: Transaction[]) => {
 };
 
 const showTransactionList = () => {
-  router.push({ name: "ViewAccountTransactionList", query: {a: Helper.createAddress(props.accountAddress).plain()}});
+  router.push({ name: "ViewAccountTransactionList", query: {a: Helper.createAddress(props.accountParam).plain()}});
 };
 
 if (AppState.isReady) {

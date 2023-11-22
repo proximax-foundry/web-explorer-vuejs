@@ -1,13 +1,13 @@
 <template>
   <div>
-   <TransactionComponent :key="$route.fullPath" :viewAllTransactions="true" :accountAddress="accountParam === undefined ? '' : accountParam" accountPublicKey=""></TransactionComponent>
+   <TransactionComponent :key="$route.fullPath" :viewAllTransactions="true" :accountParam="accountParam === undefined ? '' : accountParam"></TransactionComponent>
   </div>
 </template>
 
 <script setup lang="ts">
 import TransactionComponent from "@/modules/account/components/TransactionComponent.vue";
 
-const props = defineProps({
+defineProps({
   accountParam: {
     type: String,
     required: true,
