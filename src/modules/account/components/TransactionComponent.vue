@@ -1,11 +1,21 @@
 <template>
   <div>
-    <div :class="{'flex justify-between': viewAllTransactions, 'bg-gray-50': !viewAllTransactions}">
+    <div
+      :class="{
+        'flex justify-between': viewAllTransactions,
+        'bg-gray-50': !viewAllTransactions,
+      }"
+    >
       <div v-if="viewAllTransactions">
-          <p class="text-gray-500 mb-1 text-sm font-bold">Transactions</p>
-          <p class="text-xs" v-if="strAddress">For <span class="text-blue-primary">{{strAddress}}</span></p>
+        <p class="text-gray-500 mb-1 text-sm font-bold">Transactions</p>
+        <p class="text-xs" v-if="strAddress">
+          For <span class="text-blue-primary">{{ strAddress }}</span>
+        </p>
       </div>
-      <div class="bg-gray-50" :class="{'flex justify-end': viewAllTransactions==false}">
+      <div
+        class="bg-gray-50"
+        :class="{ 'flex justify-end': !viewAllTransactions }"
+      >
         <ExportCSVComponent
           :selectedTxnType="selectedTxnType"
           :transactions="transactions"
@@ -37,7 +47,7 @@
       <span class="text-tsm">Fetching transactions</span>
     </div>
   </div>
-  <div v-else :class="{'mb-15': totalPages == 1}">
+  <div v-else :class="{ 'mb-15': totalPages == 1 }">
     <MixedTxnDataTable
       :accountAddress="strAddress"
       :transactions="mixedTransactions"
@@ -124,89 +134,97 @@
       v-else-if="selectedTxnType === TransactionFilterType.CHAIN"
     />
     <SdaExchangeTxnDataTable
-        :transactions="sdaExchangeTransactions"
-        :pages="pages"
-        :selectedGroupType="transactionGroupType.CONFIRMED"
-        v-else-if="selectedTxnType === TransactionFilterType['SDA EXCHANGE']"
+      :transactions="sdaExchangeTransactions"
+      :pages="pages"
+      :selectedGroupType="transactionGroupType.CONFIRMED"
+      v-else-if="selectedTxnType === TransactionFilterType.SDA_EXCHANGE"
     />
     <div class="my-5 mb-15" v-if="totalPages > 1">
-        <button v-if="viewAllTransactions==false" class="text-sm text-blue-primary py-2 bg-gray-200 w-full" @click="showTransactionList">View all transactions</button>
-        <div v-else class="sm:flex sm:justify-between">
-          <div class="text-xs text-gray-700 mb-3 sm:mb-0 text-center sm:text-left">
-              Show
-              <select
-                v-model="pages"
-                class="border border-gray-300 rounded-md p-1"
-                @change="changeRows"
-              >
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="30">30</option>
-                <option value="40">40</option>
-                <option value="50">50</option>
-              </select>
-              Records
-            </div>
-            <div class="sm:flex sm:items-center text-center sm:text-right">
-              <div
-                v-if="enableFirstPage"
-                @click="naviFirst"
-                class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all"
-              >
-                First
-              </div>
-              <div
-                v-else
-                class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1"
-              >
-                First
-              </div>
-              <div
-                v-if="enablePreviousPage"
-                @click="naviPrevious"
-                class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all"
-              >
-                Previous
-              </div>
-              <div
-                v-else
-                class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1"
-              >
-                Previous
-              </div>
-              <div
-                class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs"
-              >
-                Page {{ currentPage }} of {{ totalPages }}
-              </div>
-              <div
-                v-if="enableNextPage"
-                @click="naviNext"
-                class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all"
-              >
-                Next
-              </div>
-              <div
-                v-else
-                class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1"
-              >
-                Next
-              </div>
-              <div
-                v-if="enableLastPage"
-                @click="naviLast"
-                class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs ml-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all"
-              >
-                Last
-              </div>
-              <div
-                v-else
-                class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1"
-              >
-                Last
-              </div>
+      <button
+        v-if="!viewAllTransactions"
+        class="text-sm text-blue-primary py-2 bg-gray-200 w-full"
+        @click="showTransactionList"
+      >
+        View all transactions
+      </button>
+      <div v-else class="sm:flex sm:justify-between">
+        <div
+          class="text-xs text-gray-700 mb-3 sm:mb-0 text-center sm:text-left"
+        >
+          Show
+          <select
+            v-model="pages"
+            class="border border-gray-300 rounded-md p-1"
+            @change="changeRows"
+          >
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="40">40</option>
+            <option value="50">50</option>
+          </select>
+          Records
+        </div>
+        <div class="sm:flex sm:items-center text-center sm:text-right">
+          <div
+            v-if="enableFirstPage"
+            @click="naviFirst"
+            class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all"
+          >
+            First
+          </div>
+          <div
+            v-else
+            class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1"
+          >
+            First
+          </div>
+          <div
+            v-if="enablePreviousPage"
+            @click="naviPrevious"
+            class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all"
+          >
+            Previous
+          </div>
+          <div
+            v-else
+            class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1"
+          >
+            Previous
+          </div>
+          <div
+            class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs"
+          >
+            Page {{ currentPage }} of {{ totalPages }}
+          </div>
+          <div
+            v-if="enableNextPage"
+            @click="naviNext"
+            class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs mx-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all"
+          >
+            Next
+          </div>
+          <div
+            v-else
+            class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1"
+          >
+            Next
+          </div>
+          <div
+            v-if="enableLastPage"
+            @click="naviLast"
+            class="bg-blue-100 inline-block border border-blue-100 rounded-sm px-2 py-1 text-blue-700 text-xs ml-1 cursor-pointer hover:bg-blue-200 duration-300 transition-all"
+          >
+            Last
+          </div>
+          <div
+            v-else
+            class="bg-gray-50 inline-block border border-gray-50 rounded-sm px-2 py-1 text-gray-700 text-xs mx-1"
+          >
+            Last
           </div>
         </div>
+      </div>
     </div>
   </div>
 </template>
@@ -218,7 +236,7 @@ import {
   computed,
   getCurrentInstance,
   onMounted,
-  onUnmounted
+  onUnmounted,
 } from "vue";
 import { Helper } from "@/util/typeHelper";
 import { AppState } from "@/state/appState";
@@ -270,7 +288,7 @@ const wideScreen = ref(false);
 const pages = ref(20);
 const currentPage = ref(1);
 const totalPages = ref(0);
-const strAddress = ref("")
+const strAddress = ref("");
 const QueryParamsType = ref<number[] | undefined>(undefined);
 const screenResizeHandler = () => {
   if (window.innerWidth < 1024) {
@@ -373,7 +391,7 @@ const changeSearchTxnType = () => {
     case TransactionFilterType.RESTRICTION:
       QueryParamsType.value = TransactionFilterTypes.getRestrictionTypes();
       break;
-    case TransactionFilterType['SDA EXCHANGE']:
+    case TransactionFilterType.SDA_EXCHANGE:
       QueryParamsType.value = TransactionFilterTypes.getSdaExchangeTypes();
       break;
     default:
@@ -384,8 +402,8 @@ const changeSearchTxnType = () => {
 };
 
 const transactions = ref<any[]>([]);
-const mixedTransactions  = ref<any[]>([]);
-const transferTransactions  = ref<any[]>([]);
+const mixedTransactions = ref<any[]>([]);
+const transferTransactions = ref<any[]>([]);
 const accountTransactions = ref<any[]>([]);
 const aggregateTransactions = ref<any[]>([]);
 const aliasTransactions = ref<any[]>([]);
@@ -418,15 +436,16 @@ let loadAccountTransactions = async () => {
   txnQueryParams.pageSize = pages.value;
 
   let isPublicKey = props.accountParam.length === 64;
-  if (props.accountParam !== '' && !isPublicKey) {
-    const account = await AccountUtils.getAccountFromAddress(props.accountParam);
+  if (props.accountParam !== "" && !isPublicKey) {
+    const account = await AccountUtils.getAccountFromAddress(
+      props.accountParam
+    );
     if (account) {
       strAddress.value = Helper.createAddress(props.accountParam).pretty();
       txnQueryParams.publicKey = account.publicKey;
     }
-  }
-  else {
-    const publicKey = props.accountParam
+  } else {
+    const publicKey = props.accountParam;
     const address = AccountUtils.getAddressFromPublicKey(publicKey);
     if (address) {
       strAddress.value = Helper.createAddress(address).pretty();
@@ -444,13 +463,13 @@ let loadAccountTransactions = async () => {
   }
   txnQueryParams.pageNumber = currentPage.value;
 
-  if (selectedTxnType.value == undefined || selectedTxnType.value == "all") {
+  if (!selectedTxnType.value || selectedTxnType.value == "all") {
     txnQueryParams.embedded = false;
   } else {
     txnQueryParams.embedded = true;
   }
 
-  if (QueryParamsType.value != undefined) {
+  if (!QueryParamsType.value) {
     txnQueryParams.type = QueryParamsType.value;
   }
   txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
@@ -463,50 +482,50 @@ let loadAccountTransactions = async () => {
       transactionSearchResult.transactions
     );
     transactions.value = formattedTxns;
-    if(selectedTxnType.value == 'all'){
+    if (selectedTxnType.value == "all") {
       mixedTransactions.value = formattedTxns;
     }
-    if(selectedTxnType.value == TransactionFilterType.TRANSFER){
+    if (selectedTxnType.value == TransactionFilterType.TRANSFER) {
       transferTransactions.value = formattedTxns;
     }
-    if(selectedTxnType.value == TransactionFilterType.ACCOUNT){
-      accountTransactions.value = formattedTxns
+    if (selectedTxnType.value == TransactionFilterType.ACCOUNT) {
+      accountTransactions.value = formattedTxns;
     }
-    if(selectedTxnType.value == TransactionFilterType.AGGREGATE){
-      aggregateTransactions.value = formattedTxns
+    if (selectedTxnType.value == TransactionFilterType.AGGREGATE) {
+      aggregateTransactions.value = formattedTxns;
     }
-    if(selectedTxnType.value == TransactionFilterType.ALIAS){
-      aliasTransactions.value = formattedTxns
+    if (selectedTxnType.value == TransactionFilterType.ALIAS) {
+      aliasTransactions.value = formattedTxns;
     }
-    if(selectedTxnType.value == TransactionFilterType.ASSET){
-      assetTransactions.value = formattedTxns
+    if (selectedTxnType.value == TransactionFilterType.ASSET) {
+      assetTransactions.value = formattedTxns;
     }
-    if(selectedTxnType.value == TransactionFilterType.NAMESPACE){
-      namespaceTransactions.value = formattedTxns
+    if (selectedTxnType.value == TransactionFilterType.NAMESPACE) {
+      namespaceTransactions.value = formattedTxns;
     }
-    if(selectedTxnType.value == TransactionFilterType.METADATA){
-      metadataTransactions.value = formattedTxns
+    if (selectedTxnType.value == TransactionFilterType.METADATA) {
+      metadataTransactions.value = formattedTxns;
     }
-    if(selectedTxnType.value == TransactionFilterType.EXCHANGE){
-      exchangeTransactions.value = formattedTxns
+    if (selectedTxnType.value == TransactionFilterType.EXCHANGE) {
+      exchangeTransactions.value = formattedTxns;
     }
-    if(selectedTxnType.value == TransactionFilterType.LOCK){
-      lockTransactions.value = formattedTxns
+    if (selectedTxnType.value == TransactionFilterType.LOCK) {
+      lockTransactions.value = formattedTxns;
     }
-    if(selectedTxnType.value == TransactionFilterType.LINK){
-      linkTransactions.value = formattedTxns
+    if (selectedTxnType.value == TransactionFilterType.LINK) {
+      linkTransactions.value = formattedTxns;
     }
-    if(selectedTxnType.value == TransactionFilterType.RESTRICTION){
-      restrictionTransactions.value = formattedTxns
+    if (selectedTxnType.value == TransactionFilterType.RESTRICTION) {
+      restrictionTransactions.value = formattedTxns;
     }
-    if(selectedTxnType.value == TransactionFilterType.SECRET){
-      secretTransactions.value = formattedTxns
+    if (selectedTxnType.value == TransactionFilterType.SECRET) {
+      secretTransactions.value = formattedTxns;
     }
-    if(selectedTxnType.value == TransactionFilterType.CHAIN){
-      chainTransactions.value = formattedTxns
+    if (selectedTxnType.value == TransactionFilterType.CHAIN) {
+      chainTransactions.value = formattedTxns;
     }
-    if(selectedTxnType.value == TransactionFilterType['SDA EXCHANGE']){
-      sdaExchangeTransactions.value = formattedTxns
+    if (selectedTxnType.value == TransactionFilterType.SDA_EXCHANGE) {
+      sdaExchangeTransactions.value = formattedTxns;
     }
   } else {
     transactions.value = [];
@@ -588,7 +607,7 @@ const formatConfirmedTransaction = async (transactions: Transaction[]) => {
           transactions
         );
       break;
-    case TransactionFilterType['SDA EXCHANGE']:
+    case TransactionFilterType.SDA_EXCHANGE:
       formattedTxns =
         await TransactionUtils.formatConfirmedSdaExchangeTransaction(
           transactions
@@ -604,7 +623,10 @@ const formatConfirmedTransaction = async (transactions: Transaction[]) => {
 };
 
 const showTransactionList = () => {
-  router.push({ name: "ViewAccountTransactionList", query: {a: Helper.createAddress(props.accountParam).plain()}});
+  router.push({
+    name: "ViewAccountTransactionList",
+    query: { a: Helper.createAddress(props.accountParam).plain() },
+  });
 };
 
 if (AppState.isReady) {
