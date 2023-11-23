@@ -99,8 +99,7 @@
         />
         <TransactionComponent
           v-else-if="currentComponent == 'txn'"
-          :accountAddress="strAddress"
-          :accountPublicKey="strPublicKey"
+          :accountParam="strAddress || strPublicKey"
         />
       </div>
     </div>
