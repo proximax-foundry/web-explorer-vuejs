@@ -80,7 +80,7 @@
           <div class="text-white text-xs md:text-tsm mb-4">Company</div>
           <div class="links">
             <a
-              href="https://www.proximax.io/technology/#Architecture"
+              href="https://www.proximax.ltd/en/technology#Architecture"
               target="_new"
               >Platform</a
             >
