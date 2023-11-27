@@ -137,7 +137,7 @@
       :transactions="sdaExchangeTransactions"
       :pages="pages"
       :selectedGroupType="transactionGroupType.CONFIRMED"
-      v-else-if="selectedTxnType === TransactionFilterType.SDA_EXCHANGE"
+      v-else-if="selectedTxnType === TransactionFilterType['SDA EXCHANGE']"
     />
     <div class="my-5 mb-15" v-if="totalPages > 1">
       <button
@@ -391,7 +391,7 @@ const changeSearchTxnType = () => {
     case TransactionFilterType.RESTRICTION:
       QueryParamsType.value = TransactionFilterTypes.getRestrictionTypes();
       break;
-    case TransactionFilterType.SDA_EXCHANGE:
+    case TransactionFilterType['SDA EXCHANGE']:
       QueryParamsType.value = TransactionFilterTypes.getSdaExchangeTypes();
       break;
     default:
@@ -469,7 +469,7 @@ let loadAccountTransactions = async () => {
     txnQueryParams.embedded = true;
   }
 
-  if (!QueryParamsType.value) {
+  if (QueryParamsType.value) {
     txnQueryParams.type = QueryParamsType.value;
   }
   txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
@@ -524,7 +524,7 @@ let loadAccountTransactions = async () => {
     if (selectedTxnType.value == TransactionFilterType.CHAIN) {
       chainTransactions.value = formattedTxns;
     }
-    if (selectedTxnType.value == TransactionFilterType.SDA_EXCHANGE) {
+    if (selectedTxnType.value == TransactionFilterType['SDA EXCHANGE']) {
       sdaExchangeTransactions.value = formattedTxns;
     }
   } else {
@@ -607,7 +607,7 @@ const formatConfirmedTransaction = async (transactions: Transaction[]) => {
           transactions
         );
       break;
-    case TransactionFilterType.SDA_EXCHANGE:
+    case TransactionFilterType['SDA EXCHANGE']:
       formattedTxns =
         await TransactionUtils.formatConfirmedSdaExchangeTransaction(
           transactions
