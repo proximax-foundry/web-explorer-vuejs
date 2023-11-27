@@ -1,8 +1,8 @@
 import { firstValueFrom } from "rxjs";
 import {
   PaginationQueryParams,
-  // LiquidityProviderSearch,
-  // LiquidityProvider,
+  LiquidityProviderSearch,
+  LiquidityProvider,
   LiquidityProviderHttp,
 } from "tsjs-xpx-chain-sdk";
 
@@ -13,21 +13,21 @@ export class LiquidityProviderAPI {
     this.liquidityProviderHttp = new LiquidityProviderHttp(endpoint);
   }
 
-  // /**
-  //  * Get Liquidity Provider info
-  //  * @param providerKey - provider key.
-  //  */
-  // getLiquidityProvider(providerKey: string): Promise<LiquidityProvider> {
-  //   return firstValueFrom(this.liquidityProviderHttp.getLiquidityProvider(providerKey));
-  // }
+  /**
+   * Get Liquidity Provider info
+   * @param providerKey - provider key.
+   */
+  getLiquidityProvider(providerKey: string): Promise<LiquidityProvider> {
+    return firstValueFrom(this.liquidityProviderHttp.getLiquidityProvider(providerKey));
+  }
 
-  // /**
-  //  * Search liquidity provider 
-  //  * @param qp - Drive query params.
-  //  */
-  // searchLiquidityProviders(): Promise<LiquidityProviderSearch> {
-  //   return firstValueFrom(this.liquidityProviderHttp
-  //     .searchLiquidityProviders());
-  // }
+  /**
+   * Search liquidity provider 
+   * @param qp - Drive query params.
+   */
+  searchLiquidityProviders(): Promise<LiquidityProviderSearch> {
+    return firstValueFrom(this.liquidityProviderHttp
+      .searchLiquidityProviders());
+  }
 
 }
