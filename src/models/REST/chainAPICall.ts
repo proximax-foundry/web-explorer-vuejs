@@ -10,6 +10,9 @@ import { NamespaceAPI } from "./namespace";
 import { NetworkAPI } from "./network";
 import { NodeAPI } from "./node";
 import { TransactionAPI } from "./transaction";
+import { StorageAPI } from "./storage";
+import { LiquidityProviderAPI } from "./liquidityProvider";
+import { HarvesterAPI } from "./harvester";
 
 export class ChainAPICall {
   endpoint: string;
@@ -25,6 +28,9 @@ export class ChainAPICall {
   networkAPI: NetworkAPI;
   nodeAPI: NodeAPI;
   transactionAPI: TransactionAPI;
+  storageAPI: StorageAPI;
+  liquidityProviderAPI: LiquidityProviderAPI;
+  harvesterAPI: HarvesterAPI;
 
   constructor(endpoint: string) {
     this.endpoint = endpoint;
@@ -43,5 +49,8 @@ export class ChainAPICall {
     this.diagnosticAPI = new DiagnosticAPI(endpoint);
     this.nodeAPI = new NodeAPI(endpoint);
     this.transactionAPI = new TransactionAPI(endpoint);
+    this.storageAPI = new StorageAPI(endpoint);
+    this.liquidityProviderAPI = new LiquidityProviderAPI(endpoint);
+    this.harvesterAPI = new HarvesterAPI(endpoint);
   }
 }
