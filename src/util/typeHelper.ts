@@ -262,6 +262,18 @@ export class Helper {
     const totalFee = feeTransaction + rental;
     return balanceAccount >= totalFee;
   }
+
+  static ucwordsNoUnderscore(data: string){
+
+    return data.trim().replaceAll("_", " ").toLowerCase().split(" ")
+                .map(word => word.charAt(0).toUpperCase() + word.substring(1)).join(" ");
+  }
+
+  static ucwordsNoUnderscoreReplace(data: string, searchString :string, replaceString :string){
+
+    return data.trim().replaceAll("_", " ").toLowerCase().replace(searchString, replaceString).split(" ")
+                .map(word => word.charAt(0).toUpperCase() + word.substring(1)).join(" ");
+  }
 }
 
 export interface LooseObject {
