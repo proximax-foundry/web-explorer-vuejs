@@ -110,6 +110,21 @@
               MULTISIG
             </p>
           </div>
+          <div
+            v-if="harvester"
+            class="px-2 py-1 flex mt-4 bg-teal-600 rounded-sm items-center"
+          >
+            <img
+              src="@/modules/account/img/icon-harvester.svg"
+              class="h-3 w-3 mr-1"
+            />
+            <p
+              class="font-semibold text-white text-xxs pt-px cursor-default"
+              title="This account is a registered harvesters. It is eligible to get the transaction fees in the block that the node has successfully harvest."
+            >
+              HARVESTER
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -144,6 +159,10 @@ const props = defineProps({
     type: Array<{ name: string }>,
     required: true,
   },
+  harvester: {
+    type: Boolean,
+    required: true,    
+  }
 });
 
 const invalidPublicKey =

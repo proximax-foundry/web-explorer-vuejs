@@ -12,6 +12,7 @@
           :linkAccount="delegatePublicKey"
           :namespace="matchedNamespace"
           :multisig="cosignatoriesLength"
+          :harvester="isHarvester"
           class="mb-10"
         />
       </div>
@@ -142,6 +143,7 @@ const strPublicKey = ref("");
 const multisigLength = ref(0);
 const cosignatoriesLength = ref(0);
 const isFetching = ref(true);
+const isHarvester = ref(false)
 const accountAssets = ref<{ id: string; amount: number }[]>([]);
 const delegatePublicKey = ref("0");
 const multisig = ref<{ cosignatories: string[] }>({
@@ -230,6 +232,12 @@ const loadAccountInfo = async () => {
       cosignatory.address.plain()
     );
     cosignatoriesLength.value = cosignatories.length;
+  }
+
+  const address = Address.createFromRawAddress(strAddress.value);
+  const harvesterInfo = await AppState.chainAPI!.harvesterAPI.getAccountHarvestingHarvesterInfo(address);
+  if (harvesterInfo.length > 0) {
+    isHarvester.value = true;
   }
   isFetching.value = false;
 };
