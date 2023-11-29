@@ -13,12 +13,11 @@
         </p>
       </div>
       <div
-        class="bg-gray-50"
+        class="flex bg-gray-50"
         :class="{ 'flex justify-end': !viewAllTransactions }"
       >
         <ExportCSVComponent
-          :selectedTxnType="selectedTxnType"
-          :transactions="transactions"
+          :accPublicKey="accountParam"
           :disabled="isFetching || transactions.length == 0"
         />
         <select
