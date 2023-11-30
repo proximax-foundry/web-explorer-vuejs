@@ -26,6 +26,12 @@
               </option>
             </select>
           </div>
+          <div v-if="accPublicKey">
+            <div class="py-3">Filter by:</div>
+            <div class="border border-gray-200 px-2 py-1 focus:outline-none">
+              <div>{{ accPublicKey }}</div>
+            </div>
+          </div>
           <div class="py-3">Please enter a range:</div>
           <div class="flex">
             <div class="mr-4">
@@ -43,7 +49,7 @@
           </div>
           <div class="mt-10 text-center">
               <button @click="onExport = !onExport, clearInput()" class="text-black font-bold text-xs mr-1 sm:mr-5 mt-2 focus:outline-none disabled:opacity-50">Cancel</button>
-              <button type="submit" v-if="!checkTransactions" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledValidate" @click="downloadCSV">Confirm</button>
+              <button type="submit" v-if="!checkTransactions" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledValidate" @click="downloadCSV">Download</button>
               <button type="button" v-if="checkTransactions" class="default-btn focus:outline-none disabled:opacity-50" >
                 <div class="flex">
                   <div class="animate-spin rounded-full h-3.5 w-4 border-b-2"></div>
@@ -76,7 +82,7 @@ const props = defineProps({
 
 const onExport = ref(false)
 const checkTransactions = ref(false)
-const isDisabledValidate = ref<boolean>(false)
+const isDisabledValidate = ref<boolean>(true)
 const startBlock = ref<number | null>(null)
 const endBlock = ref<number | null>(null)
 const transactions = ref<any[] | undefined>([]);
@@ -180,9 +186,9 @@ const formatConfirmedTransaction = async (transactions: Transaction[]) => {
   return formattedTxns;
 };
 
-let loadAccountTransactions = async () => {
+let loadTransactions = async () => {
   if (!AppState.isReady) {
-    setTimeout(loadAccountTransactions, 1000);
+    setTimeout(loadTransactions, 1000);
     return;
   }
   if (!AppState.chainAPI) {
@@ -418,7 +424,7 @@ const downloadCSV = async () => {
 };
 
 const exportValue = async () => {
-  await loadAccountTransactions()
+  await loadTransactions()
   let export_Value: any[] = [];
   if (!transactions.value) {
     return "";
