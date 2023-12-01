@@ -11,7 +11,7 @@ export class InnerMetadataTransaction extends InnerTransaction {
   valueChange: string = "";
   oldValue?: string = "";
   newValue?: string = "";
-
+  value: string = "";
   constructor() {
     super();
   }

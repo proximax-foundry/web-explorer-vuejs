@@ -2291,6 +2291,14 @@ export class TransactionUtils {
 
           infos.push(scopedMetadataKeyInfo);
 
+          const valueDifferencesInfo: TxnDetails = {
+            type: MsgType.NONE,
+            label: "Value",
+            value: accMetadataFormat.value,
+          };
+
+          infos.push(valueDifferencesInfo);
+
           if (groupType != "confirmed") {
             if (accMetadataFormat.oldValue) {
               const oldValueInfo: TxnDetails = {
@@ -2358,7 +2366,15 @@ export class TransactionUtils {
 
           infos.push(scopedMetadataKeyInfo);
 
-          if (groupType != "confirmed") {
+          const valueDifferencesInfo: TxnDetails = {
+            type: MsgType.NONE,
+            label: "Value",
+            value: namespaceMetadataFormat.value,
+          };
+
+          infos.push(valueDifferencesInfo);
+
+        if (groupType != "confirmed") {
             if (namespaceMetadataFormat.oldValue) {
               const oldValueInfo: TxnDetails = {
                 type: MsgType.NONE,
@@ -2378,7 +2394,7 @@ export class TransactionUtils {
             };
 
             infos.push(newValueInfo);
-          }
+        }
 
           transactionDetails = {
             signer: namespaceMetadataFormat.signer,
@@ -2424,16 +2440,25 @@ export class TransactionUtils {
           };
 
           infos.push(scopedMetadataKeyInfo);
-          if (groupType != "confirmed") {
-            if (assetMetadataFormat.oldValue) {
-              const oldValueInfo: TxnDetails = {
-                type: MsgType.NONE,
-                label: "Current Value",
-                value: assetMetadataFormat.oldValue,
-              };
 
-              infos.push(oldValueInfo);
-            }
+          const valueDifferencesInfo: TxnDetails = {
+            type: MsgType.NONE,
+            label: "Value",
+            value: assetMetadataFormat.value,
+          };
+          
+          infos.push(valueDifferencesInfo);
+          
+        if (groupType != "confirmed") {
+          if (assetMetadataFormat.oldValue) {
+            const oldValueInfo: TxnDetails = {
+              type: MsgType.NONE,
+              label: "Current Value",
+              value: assetMetadataFormat.oldValue,
+            };
+
+            infos.push(oldValueInfo);
+          }
             if (!assetMetadataFormat.newValue) {
               throw new Error("Service Unavailable");
             }
@@ -2445,7 +2470,7 @@ export class TransactionUtils {
             };
 
             infos.push(newValueInfo);
-          }
+        }
 
           transactionDetails = {
             signer: assetMetadataFormat.signer,
@@ -3261,6 +3286,7 @@ export class TransactionUtils {
     txnDetails.scopedMetadataKey = accMetadataTxn.scopedMetadataKey.toHex();
     txnDetails.targetPublicKey = accMetadataTxn.targetPublicKey.publicKey;
     txnDetails.sizeChanged = accMetadataTxn.valueSizeDelta;
+    txnDetails.value = Convert.uint8ArrayToHex(accMetadataTxn.valueDifferences)
     return txnDetails;
   }
 
@@ -3353,7 +3379,7 @@ export class TransactionUtils {
     txnDetails.targetId = nsId;
     txnDetails.targetPublicKey = nsMetadataTxn.targetPublicKey.publicKey;
     txnDetails.sizeChanged = nsMetadataTxn.valueSizeDelta;
-
+    txnDetails.value = Convert.uint8ArrayToHex(nsMetadataTxn.valueDifferences)
     try {
       const nsName = await TransactionUtils.getNamespacesName([
         NamespaceId.createFromEncoded(nsId),
@@ -3466,7 +3492,7 @@ export class TransactionUtils {
     txnDetails.targetId = assetId;
     txnDetails.targetPublicKey = assetMetadataTxn.targetPublicKey.publicKey;
     txnDetails.sizeChanged = assetMetadataTxn.valueSizeDelta;
-
+    txnDetails.value = Convert.uint8ArrayToHex(assetMetadataTxn.valueDifferences)
     try {
       const assetName = await TransactionUtils.getAssetName(assetId);
 
