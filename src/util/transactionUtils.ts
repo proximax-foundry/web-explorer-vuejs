@@ -2291,16 +2291,24 @@ export class TransactionUtils {
 
           infos.push(scopedMetadataKeyInfo);
 
-          if (accMetadataFormat.oldValue) {
-            const oldValueInfo: TxnDetails = {
-              type: MsgType.NONE,
-              label: "Current Value",
-              value: accMetadataFormat.oldValue,
-            };
+          const valueDifferencesInfo: TxnDetails = {
+            type: MsgType.NONE,
+            label: "Value",
+            value: accMetadataFormat.value,
+          };
 
-            infos.push(oldValueInfo);
-          }
+          infos.push(valueDifferencesInfo);
+
           if (groupType != "confirmed") {
+            if (accMetadataFormat.oldValue) {
+              const oldValueInfo: TxnDetails = {
+                type: MsgType.NONE,
+                label: "Current Value",
+                value: accMetadataFormat.oldValue,
+              };
+
+              infos.push(oldValueInfo);
+            }
             if (!accMetadataFormat.newValue) {
               throw new Error("Service Unavailable");
             }
@@ -2358,16 +2366,24 @@ export class TransactionUtils {
 
           infos.push(scopedMetadataKeyInfo);
 
-          if (namespaceMetadataFormat.oldValue) {
-            const oldValueInfo: TxnDetails = {
-              type: MsgType.NONE,
-              label: "Current Value",
-              value: namespaceMetadataFormat.oldValue,
-            };
+          const valueDifferencesInfo: TxnDetails = {
+            type: MsgType.NONE,
+            label: "Value",
+            value: namespaceMetadataFormat.value,
+          };
 
-            infos.push(oldValueInfo);
-          }
-          if (groupType != "confirmed") {
+          infos.push(valueDifferencesInfo);
+
+        if (groupType != "confirmed") {
+            if (namespaceMetadataFormat.oldValue) {
+              const oldValueInfo: TxnDetails = {
+                type: MsgType.NONE,
+                label: "Current Value",
+                value: namespaceMetadataFormat.oldValue,
+              };
+
+              infos.push(oldValueInfo);
+            }
             if (!namespaceMetadataFormat.newValue) {
               throw new Error("Service Unavailable");
             }
@@ -2378,7 +2394,7 @@ export class TransactionUtils {
             };
 
             infos.push(newValueInfo);
-          }
+        }
 
           transactionDetails = {
             signer: namespaceMetadataFormat.signer,
@@ -2424,7 +2440,16 @@ export class TransactionUtils {
           };
 
           infos.push(scopedMetadataKeyInfo);
+
+          const valueDifferencesInfo: TxnDetails = {
+            type: MsgType.NONE,
+            label: "Value",
+            value: assetMetadataFormat.value,
+          };
           
+          infos.push(valueDifferencesInfo);
+          
+        if (groupType != "confirmed") {
           if (assetMetadataFormat.oldValue) {
             const oldValueInfo: TxnDetails = {
               type: MsgType.NONE,
@@ -2434,7 +2459,6 @@ export class TransactionUtils {
 
             infos.push(oldValueInfo);
           }
-          if (groupType != "confirmed") {
             if (!assetMetadataFormat.newValue) {
               throw new Error("Service Unavailable");
             }
@@ -2446,7 +2470,7 @@ export class TransactionUtils {
             };
 
             infos.push(newValueInfo);
-          }
+        }
 
           transactionDetails = {
             signer: assetMetadataFormat.signer,
@@ -3262,26 +3286,7 @@ export class TransactionUtils {
     txnDetails.scopedMetadataKey = accMetadataTxn.scopedMetadataKey.toHex();
     txnDetails.targetPublicKey = accMetadataTxn.targetPublicKey.publicKey;
     txnDetails.sizeChanged = accMetadataTxn.valueSizeDelta;
-    try {
-      const nsMetadataEntry = await TransactionUtils.getAccountMetadata(
-        accMetadataTxn.targetPublicKey,
-        accMetadataTxn.scopedMetadataKey
-      );
-      if (nsMetadataEntry) {
-        txnDetails.oldValue = nsMetadataEntry.value;
-        txnDetails.newValue = TransactionUtils.applyValueChange(
-          txnDetails.oldValue,
-          txnDetails.valueChange,
-          txnDetails.sizeChanged
-        );
-      } else {
-        txnDetails.newValue = TransactionUtils.applyValueChange(
-          "",
-          txnDetails.valueChange,
-          txnDetails.sizeChanged
-        );
-      }
-    } catch (error) {}
+    txnDetails.value = Convert.uint8ArrayToHex(accMetadataTxn.valueDifferences)
     return txnDetails;
   }
 
@@ -3374,7 +3379,7 @@ export class TransactionUtils {
     txnDetails.targetId = nsId;
     txnDetails.targetPublicKey = nsMetadataTxn.targetPublicKey.publicKey;
     txnDetails.sizeChanged = nsMetadataTxn.valueSizeDelta;
-
+    txnDetails.value = Convert.uint8ArrayToHex(nsMetadataTxn.valueDifferences)
     try {
       const nsName = await TransactionUtils.getNamespacesName([
         NamespaceId.createFromEncoded(nsId),
@@ -3382,24 +3387,6 @@ export class TransactionUtils {
 
       if (nsName.length) {
         txnDetails.targetIdName = nsName[0].name;
-      }
-      const nsMetadataEntry = await TransactionUtils.getNamespaceMetadata(
-        nsMetadataTxn.targetNamespaceId,
-        nsMetadataTxn.scopedMetadataKey
-      );
-      if (nsMetadataEntry) {
-        txnDetails.oldValue = nsMetadataEntry.value;
-        txnDetails.newValue = TransactionUtils.applyValueChange(
-          txnDetails.oldValue,
-          txnDetails.valueChange,
-          txnDetails.sizeChanged
-        );
-      } else {
-        txnDetails.newValue = TransactionUtils.applyValueChange(
-          "",
-          txnDetails.valueChange,
-          txnDetails.sizeChanged
-        );
       }
     } catch (error) {}
     return txnDetails;
@@ -3505,30 +3492,12 @@ export class TransactionUtils {
     txnDetails.targetId = assetId;
     txnDetails.targetPublicKey = assetMetadataTxn.targetPublicKey.publicKey;
     txnDetails.sizeChanged = assetMetadataTxn.valueSizeDelta;
-
+    txnDetails.value = Convert.uint8ArrayToHex(assetMetadataTxn.valueDifferences)
     try {
       const assetName = await TransactionUtils.getAssetName(assetId);
 
       if (assetName.names.length) {
         txnDetails.targetIdName = assetName.names[0].name;
-      }
-      const nsMetadataEntry = await TransactionUtils.getAssetMetadata(
-        assetMetadataTxn.targetMosaicId,
-        assetMetadataTxn.scopedMetadataKey
-      );
-      if (nsMetadataEntry) {
-        txnDetails.oldValue = nsMetadataEntry.value;
-        txnDetails.newValue = TransactionUtils.applyValueChange(
-          txnDetails.oldValue,
-          txnDetails.valueChange,
-          txnDetails.sizeChanged
-        );
-      } else {
-        txnDetails.newValue = TransactionUtils.applyValueChange(
-          "",
-          txnDetails.valueChange,
-          txnDetails.sizeChanged
-        );
       }
     } catch (error) {}
     return txnDetails;
