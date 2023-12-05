@@ -140,6 +140,16 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
+    path: "/harvester",
+    name: "ViewHarvesterList",
+    props: true,
+    component: () => import("@/modules/harvester/views/ViewHarvesterList.vue"),
+    meta: {
+      title: "View Harvesters",
+    },
+  },
+
+  {
     path: "/namespace/:namespaceParam",
     name: "ViewNamespace",
     props: true,
