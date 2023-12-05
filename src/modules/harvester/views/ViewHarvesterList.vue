@@ -109,13 +109,7 @@ const emitter = internalInstance?.appContext.config.globalProperties.emitter;
 
 const loadHarvestersInfo = async () => {
   isFetching.value = true;
-  if (!AppState.isReady) {
-    setTimeout(loadHarvestersInfo, 1000);
-    return;
-  }
-  if (!AppState.chainAPI) {
-    return;
-  }
+
   const pq = new PaginationQueryParams();
   pq.pageSize = pages.value;
   pq.pageNumber = currentPage.value;
@@ -158,16 +152,16 @@ const naviPage = (pageNo: number) => {
   loadHarvestersInfo();
 };
 
-if (AppState.isReady) {
-  loadHarvestersInfo();
-} else {
-  let readyWatcher = watch(AppState, (value) => {
-    if (value.isReady) {
-      loadHarvestersInfo();
-      readyWatcher();
+const stopWatch = watch(
+  [() => AppState.isReady, () => AppState.chainAPI],
+  async (n) => {
+    if (n[0] && n[1]) {
+      await loadHarvestersInfo();
+      stopWatch();
     }
-  });
-}
+  },
+  { immediate: true }
+);
 
 emitter.on("CHANGE_NETWORK", (payload: boolean) => {
   isFetching.value = true;
