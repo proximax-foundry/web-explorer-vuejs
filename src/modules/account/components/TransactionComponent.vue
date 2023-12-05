@@ -642,6 +642,7 @@ if (AppState.isReady) {
 emitter.on("CHANGE_NETWORK", (payload: boolean) => {
   isFetching.value = true;
   if (payload) {
+    currentPage.value = 1;
     loadAccountTransactions();
   }
 });
