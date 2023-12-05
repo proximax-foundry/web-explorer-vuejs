@@ -105,17 +105,28 @@
               >
                 Collapse All
               </button>
-              <Tree v-if="multisigAccountsList.length"  v-model:expandedKeys="expandedKeys" :value="multisigAccountsList" :filter="true" filterMode="strict"
-                @node-select="onNodeSelect" selectionMode="single" class="w-full pt-1.5 ">
+              <Tree
+                v-if="multisigAccountsList.length"
+                v-model:expandedKeys="expandedKeys"
+                :value="multisigAccountsList"
+                :filter="true"
+                filterMode="strict"
+                @node-select="onNodeSelect"
+                selectionMode="single"
+                class="w-full pt-1.5"
+              >
                 <template #default="slotProps">
-                    <div>{{ slotProps.node.label }}</div>
+                  <div>{{ slotProps.node.label }}</div>
                 </template>
-                <template #child="slotProps" class="w-full">
-                    <div class="border rounded-md p-3 flex flex-col shadow-lg filter mb-2 w-full">
-                        <div class="text-blue-primary font-semibold text-xs">{{ slotProps.node.label }}</div>
+                <template #child="slotProps">
+                  <div
+                    class="border rounded-md p-3 flex flex-col shadow-lg filter mb-2 w-full"
+                  >
+                    <div class="text-blue-primary font-semibold text-xs">
+                      {{ slotProps.node.label }}
                     </div>
+                  </div>
                 </template>
-
               </Tree>
             </div>
             <div
@@ -151,11 +162,15 @@ import { useToast } from "primevue/usetoast";
 import { copyToClipboard } from "@/util/functions";
 import { Helper } from "@/util/typeHelper";
 import { useRouter } from "vue-router";
-import Tree from 'primevue/tree';
-import type { TreeNode, TreeExpandedKeys } from "primevue/tree";
+import Tree from "primevue/tree";
+import type { TreeExpandedKeys } from "primevue/tree";
+import type { TreeNode } from "primevue/treenode";
 
-interface multisig {
-  key: string, label: string, selectable: boolean, children: { key: string, label: string, data:string, selectable: boolean }[]
+interface Multisig {
+  key: string;
+  label: string;
+  selectable: boolean;
+  children: { key: string; label: string; data: string; selectable: boolean }[];
 }
 
 const props = defineProps({
@@ -164,7 +179,7 @@ const props = defineProps({
     required: true,
   },
   multisig: {
-    type: Array<multisig>,
+    type: Array<Multisig>,
     required: true,
   },
   address: {
@@ -193,16 +208,26 @@ const cosignerLength = computed(() => {
 });
 
 const multisigAccountsList = computed(() => {
-  let multisigAccounts: { key: string, label: string, selectable: boolean, children: { key: string, label: string, selectable: boolean, data: string }[] }[] = [];
+  let multisigAccounts: {
+    key: string;
+    label: string;
+    selectable: boolean;
+    children: {
+      key: string;
+      label: string;
+      selectable: boolean;
+      data: string;
+    }[];
+  }[] = [];
   if (!props.multisig) {
-      return multisigAccounts
+    return multisigAccounts;
+  }
+  for (let i = 0; i < props.multisig.length; ++i) {
+    if (props.multisig[i].children.length > 0) {
+      multisigAccounts.push(props.multisig[i]);
     }
-    for(let i = 0; i < props.multisig.length; ++i){
-      if(props.multisig[i].children.length > 0){
-        multisigAccounts.push(props.multisig[i])
-      }
-    }
-    return multisigAccounts
+  }
+  return multisigAccounts;
 });
 
 const cosignerAccountsList = computed(() => {
@@ -225,12 +250,12 @@ const copy = (id: string) => {
     }
   }
 };
-const onNodeSelect = (node:TreeNode) => {
+const onNodeSelect = (node: TreeNode) => {
   router.push({
-          name: "ViewAccount",
-          params: { accountParam: node.data},
-        });
-}
+    name: "ViewAccount",
+    params: { accountParam: node.data },
+  });
+};
 
 const setCurrentComponent = (page: string) => {
   currentComponent.value = page;
@@ -238,25 +263,25 @@ const setCurrentComponent = (page: string) => {
 
 const expandedKeys = ref<TreeExpandedKeys>({});
 const expandTree = () => {
-    for (let node of multisigAccountsList.value) {
-        expandNode(node);
-    }
+  for (let node of multisigAccountsList.value) {
+    expandNode(node);
+  }
 
-    expandedKeys.value = { ...expandedKeys.value };
+  expandedKeys.value = { ...expandedKeys.value };
 };
 const collapseTree = () => {
-    expandedKeys.value = {};
+  expandedKeys.value = {};
 };
-const expandNode = (node:TreeNode) => {
-    if (node.children && node.children.length) {
-        expandedKeys.value[node.key as string] = true;
-    }
+const expandNode = (node: TreeNode) => {
+  if (node.children && node.children.length) {
+    expandedKeys.value[node.key as string] = true;
+  }
 };
-expandTree()
+expandTree();
 </script>
 
 <style scoped lang="scss">
-.p-tree:deep{
+.p-tree:deep {
   .p-tree {
     border: 1px solid #495057;
     background: #ffffff;
@@ -275,7 +300,7 @@ expandTree()
     transition: box-shadow 0.2s;
     padding: 0.5rem;
   }
-  .p-treenode-label{
+  .p-treenode-label {
     border: 1px solid rgb(231, 231, 234);
     border-radius: 6px;
     padding: 20px 12px;
@@ -284,14 +309,14 @@ expandTree()
     line-height: 12px;
     font-weight: 700;
   }
-  .p-tree-filter-container{
+  .p-tree-filter-container {
     width: 99%;
     border: 1px solid rgb(231, 231, 234);
     border-radius: 6px;
     padding: 6px 10px;
-    margin: 6px 0px
+    margin: 6px 0px;
   }
-  .p-tree-filter{
+  .p-tree-filter {
     width: 98%;
     outline: none;
     height: 40px;
