@@ -87,6 +87,7 @@
           v-if="currentComponent == 'namespace'"
         />
         <MetadataComponent
+          :publicKey="strPublicKey"
           :accountMetadata="accountMetadata"
           v-if="currentComponent == 'metadata'"
         />

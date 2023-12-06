@@ -88,6 +88,16 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
+    path: "/metadata/:publicKey/:scopedMetadataKeyHex",
+    name: "ViewMetadata",
+    props: true,
+    component: () => import("@/modules/metadata/views/ViewMetadata.vue"),
+    meta: {
+      title: "View Metadata",
+    },
+  },
+
+  {
     path: "/tx",
     name: "ViewAccountTransactionList",
     props: route => ({ accountParam: route.query.a }),

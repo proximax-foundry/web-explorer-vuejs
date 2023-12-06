@@ -21,7 +21,14 @@
       >
         <div class="text-left py-3 col-span-2">
           <div class="flex">
-            <div>{{ metadata.scopedMetadataKeyHex }}</div>
+            <router-link
+                    :to="{
+                      name: 'ViewMetadata',
+                      params: { publicKey: publicKey, scopedMetadataKeyHex: metadata.scopedMetadataKeyHex },
+                    }"
+                    class="text-blue-600 hover:text-blue-primary uppercase hover:underline"
+                    >{{ metadata.scopedMetadataKeyHex }}
+                  </router-link>
             <div
               class="ml-3 text-gray-400 font-semibold"
               v-if="metadata.scopedMetadataKeyUtf8"
@@ -44,7 +51,14 @@
       >
         <div class="px-2 py-3 col-span-4">
           <div class="flex">
-            <div>{{ metadata.scopedMetadataKeyHex }}</div>
+            <router-link
+                    :to="{
+                      name: 'ViewMetadata',
+                      params: { publicKey: publicKey, scopedMetadataKeyHex: metadata.scopedMetadataKeyHex },
+                    }"
+                    class="text-blue-600 hover:text-blue-primary uppercase hover:underline"
+                    >{{ metadata.scopedMetadataKeyHex }}
+                  </router-link>
             <div
               class="ml-3 text-gray-400 font-semibold"
               v-if="metadata.scopedMetadataKeyUtf8"
@@ -67,6 +81,7 @@
 
 <script setup lang="ts">
 defineProps({
+  publicKey: String,
   accountMetadata: {
     type: Array<{
       scopedMetadataKeyUtf8: string | null;
