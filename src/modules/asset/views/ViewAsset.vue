@@ -184,7 +184,7 @@ import { AppState } from "@/state/appState";
 import { AssetUtils } from "@/util/assetUtil";
 import { Helper } from "@/util/typeHelper";
 import { networkState } from "@/state/networkState";
-import { NamespaceId, RichlistEntry } from "tsjs-xpx-chain-sdk";
+import { Address, NamespaceId, RichlistEntry } from "tsjs-xpx-chain-sdk";
 import { NamespaceUtils } from "@/util/namespaceUtil";
 import { MetadataUtils, type MetadataObj } from "@/util/metadataUtil";
 import type { AssetObj } from "@/util/assetUtil";
@@ -202,6 +202,7 @@ const isShowInvalid = ref(false);
 const richList = ref<RichlistEntry[]>([]);
 const metadata = ref<MetadataObj[]>([]);
 const assets = ref<AssetObj | null>(null);
+const accPublicKey= ref<string>('');
 const setCurrentComponent = (page: string) => {
   currentComponent.value = page;
 };
@@ -242,7 +243,6 @@ const loadAsset = async () => {
         if (assetAlias) {
           assets.value = assetAlias;
           richList.value = richlistAlias;
-          
         }
       } else {
         isShowInvalid.value = true;

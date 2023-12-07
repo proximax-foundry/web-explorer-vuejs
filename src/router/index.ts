@@ -88,7 +88,7 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
-    path: "/metadata/:publicKey/:scopedMetadataKeyHex",
+    path: "/metadata/:compositeHash",
     name: "ViewMetadata",
     props: true,
     component: () => import("@/modules/metadata/views/ViewMetadata.vue"),

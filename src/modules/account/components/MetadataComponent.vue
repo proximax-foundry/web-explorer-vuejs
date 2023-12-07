@@ -24,7 +24,7 @@
             <router-link
                     :to="{
                       name: 'ViewMetadata',
-                      params: { publicKey: publicKey, scopedMetadataKeyHex: metadata.scopedMetadataKeyHex },
+                      params: { compositeHash: metadata.compositeHash },
                     }"
                     class="text-blue-600 hover:text-blue-primary uppercase hover:underline"
                     >{{ metadata.scopedMetadataKeyHex }}
@@ -54,7 +54,7 @@
             <router-link
                     :to="{
                       name: 'ViewMetadata',
-                      params: { publicKey: publicKey, scopedMetadataKeyHex: metadata.scopedMetadataKeyHex },
+                      params: { compositeHash: metadata.compositeHash },
                     }"
                     class="text-blue-600 hover:text-blue-primary uppercase hover:underline"
                     >{{ metadata.scopedMetadataKeyHex }}
@@ -81,9 +81,9 @@
 
 <script setup lang="ts">
 defineProps({
-  publicKey: String,
   accountMetadata: {
     type: Array<{
+      compositeHash: string;
       scopedMetadataKeyUtf8: string | null;
       scopedMetadataKeyHex: string;
       value: string;
