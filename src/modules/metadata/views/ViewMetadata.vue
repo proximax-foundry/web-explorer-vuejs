@@ -5,111 +5,95 @@
     </div>
   </div>
   <div v-else>
-    <div class="text-gray-500 mb-1 text-sm font-bold">
-      Metadata History
-    </div>
-      <div v-if="!isShowInvalid && !latestMetadataDetail">
+    <div class="text-gray-500 mb-1 text-sm font-bold">Metadata History</div>
+    <div v-if="!isShowInvalid && !latestMetadataDetail">
+      <div class="flex justify-center items-center border-gray-400 mt-10 mb-20">
         <div
-          class="flex justify-center items-center border-gray-400 mt-10 mb-20"
-        >
-          <div
-            class="animate-spin rounded-full h-5 w-5 border-b-2 border-navy-primary mr-2"
-          ></div>
-          <span class="text-tsm">Fetching Metadata Details</span>
-        </div>
+          class="animate-spin rounded-full h-5 w-5 border-b-2 border-navy-primary mr-2"
+        ></div>
+        <span class="text-tsm">Fetching Metadata Details</span>
       </div>
-      <div v-else-if="latestMetadataDetail" class="mt-3">
-        <div class="md:grid md:grid-cols-2">
-          <div class="filter shadow-xl border border-gray-50 p-5 mb-15 md:mr-2">
-            <div class="text-xs font-bold mb-5 ml-2">Overview</div>
-            <div class="txn-div">
-              <div
-                class="py-4 text-xs grid grid-cols-5 border-b border-gray-100"
-              >
-                <div class="font-bold col-span-2">Scoped Metadata Key</div>
-                <div class="flex flex-col">
-                  <div class="flex flex-row">
-                    <div class="uppercase">
+    </div>
+    <div v-else-if="latestMetadataDetail" class="mt-3">
+      <div class="md:grid md:grid-cols-2">
+        <div class="filter shadow-xl border border-gray-50 p-5 mb-15 md:mr-2">
+          <div class="text-xs font-bold mb-5 ml-2">Overview</div>
+          <div class="txn-div">
+            <div class="py-4 text-xs grid grid-cols-5 border-b border-gray-100">
+              <div class="font-bold col-span-2">Owner's Public Key</div>
+              <div class="break-all col-span-3">
+                {{ latestMetadataDetail.accPublicKey }}
+              </div>
+            </div>
+            <div
+              v-if="isAssetId"
+              class="py-4 text-xs grid grid-cols-5 border-b border-gray-100"
+            >
+              <div class="font-bold col-span-2">Asset Id</div>
+              <div class="col-span-3">
+                {{ latestMetadataDetail.assetId }}
+              </div>
+            </div>
+            <div
+              v-if="isNamespace"
+              class="py-4 text-xs grid grid-cols-5 border-b border-gray-100"
+            >
+              <div class="font-bold col-span-2">Namespace</div>
+              <div class="col-span-3">
+                {{ latestMetadataDetail.namespace }}
+              </div>
+            </div>
+            <div class="py-4 text-xs grid grid-cols-5 border-b border-gray-100">
+              <div class="font-bold col-span-2">Scoped Metadata Key</div>
+              <div class="flex flex-col">
+                <div class="flex flex-row">
+                  <div class="uppercase">
                     {{ latestMetadataDetail.scopedMetadataKeyHex }}
-                    </div>
-                    <div class="inline-block ml-2 font-semibold text-gray-400">
-                      hex
-                    </div>
                   </div>
-                  <div>
-                    {{ latestMetadataDetail.scopedMetadataKeyUtf8 }}
-                    <div class="inline-block ml-2 font-semibold text-gray-400">
-                      utf-8
-                    </div>
+                  <div class="inline-block ml-2 font-semibold text-gray-400">
+                    hex
                   </div>
                 </div>
-              </div>
-              <div
-                class="py-4 text-xs grid grid-cols-5 border-b border-gray-100"
-              >
-                <div class="font-bold col-span-2">Metadata Type</div>
-                <div>{{ latestMetadataDetail.type }}</div>
-              </div>
-              <div
-                class="py-4 text-xs grid grid-cols-5 border-b border-gray-100"
-              >
-                <div class="font-bold col-span-2">Current Value</div>
-                <div>{{ latestMetadataDetail.value }}</div>
+                <div>
+                  {{ latestMetadataDetail.scopedMetadataKeyUtf8 }}
+                  <div class="inline-block ml-2 font-semibold text-gray-400">
+                    utf-8
+                  </div>
+                </div>
               </div>
             </div>
+            <div class="py-4 text-xs grid grid-cols-5 border-b border-gray-100">
+              <div class="font-bold col-span-2">Metadata Type</div>
+              <div>{{ latestMetadataDetail.type }}</div>
+            </div>
+            <div class="py-4 text-xs grid grid-cols-5 border-b border-gray-100">
+              <div class="font-bold col-span-2">Current Value</div>
+              <div>{{ latestMetadataDetail.value }}</div>
+            </div>
           </div>
-          <div class="filter shadow-xl border border-gray-50 p-5 mb-15 sm:ml-2">
-            <div class="text-xs font-bold mb-5 ml-2">More Info</div>
-            <div class="txn-div">
-              <div
-                class="py-4 text-xs grid grid-cols-5 border-b border-gray-100"
-              >
-                <div class="font-bold col-span-2">Owner's Public Key</div>
-                <div class="break-all col-span-3">
-                  {{ latestMetadataDetail.accPublicKey }}
-                </div>
+        </div>
+        <div class="filter shadow-xl border border-gray-50 p-5 mb-15 sm:ml-2">
+          <div class="text-xs font-bold mb-5 ml-2">More Info</div>
+          <div class="txn-div">
+            <div class="py-4 text-xs grid grid-cols-5 border-b border-gray-100">
+              <div class="font-bold col-span-2">Creation Block</div>
+              <div class="col-span-3">
+                {{ latestMetadataDetail.block }}
               </div>
-              <div v-if="isAssetId"
-                class="py-4 text-xs grid grid-cols-5 border-b border-gray-100"
-              >
-                <div class="font-bold col-span-2">Asset Id</div>
-                <div class="col-span-3">
-                  {{ latestMetadataDetail.assetId }}
-                </div>
-              </div>
-              <div v-if="isNamespace"
-                class="py-4 text-xs grid grid-cols-5 border-b border-gray-100"
-              >
-                <div class="font-bold col-span-2">Namespace</div>
-                <div class="col-span-3">
-                  {{ latestMetadataDetail.namespace }}
-                </div>
-              </div>
-              <div
-                class="py-4 text-xs grid grid-cols-5 border-b border-gray-100"
-              >
-                <div class="font-bold col-span-2">Creation Block</div>
-                <div class="col-span-3">
-                  {{ latestMetadataDetail.block }}
-                </div>
-              </div>
-              <div
-                class="py-4 text-xs grid grid-cols-5 border-b border-gray-100"
-              >
-                <div class="font-bold col-span-2">Creation Timestamp</div>
-                <div class="col-span-3">
-                  {{ latestMetadataDetail.timestamp }}
-                </div>
+            </div>
+            <div class="py-4 text-xs grid grid-cols-5 border-b border-gray-100">
+              <div class="font-bold col-span-2">Creation Timestamp</div>
+              <div class="col-span-3">
+                {{ latestMetadataDetail.timestamp }}
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div class="filter shadow-xl border border-gray-50 p-5 mb-15">
-        <MetadataComponent
-          :metadata="displayMetadataTable"
-        />
-      </div>
+    </div>
+    <div class="filter shadow-xl border border-gray-50 p-5 mb-15">
+      <MetadataComponent :metadata="displayMetadataTable" />
+    </div>
   </div>
 </template>
 
@@ -147,7 +131,7 @@ const metadataHistory = ref<any[]>([]);
 const metadata = ref<string | null>(null);
 const allMetadata = ref<string | null>(null);
 const displayMetadataTable = ref<MetadataHistoryObj[]>([]);
-const latestMetadataDetail = ref<MetadataHistoryObj | null>(null)
+const latestMetadataDetail = ref<MetadataHistoryObj | null>(null);
 const metadataHistoryType = ref<string>("");
 const isAssetId = ref<boolean>(false);
 const isNamespace = ref<boolean>(false);
@@ -169,8 +153,7 @@ const checkMetadataDetail = async () => {
   );
   if (metadataDetail) {
     return metadataDetail;
-  }
-  else{
+  } else {
     isShowInvalid.value = true;
   }
 };
@@ -264,8 +247,9 @@ const loadAllMetadataHistory = async () => {
       value: await allValueChangeMetadata(metadataTxn),
     });
   }
-  latestMetadataDetail.value = displayMetadataTable.value[displayMetadataTable.value.length-1]
-  isShowInvalid.value = false
+  latestMetadataDetail.value =
+    displayMetadataTable.value[displayMetadataTable.value.length - 1];
+  isShowInvalid.value = false;
 };
 
 const getMetadataAssetId = (metadataTxn: any) => {
@@ -315,7 +299,6 @@ const init = async () => {
 
 init();
 
-
 emitter.on("CHANGE_NETWORK", (payload: boolean) => {
   if (payload) {
     isShowInvalid.value = true;
@@ -323,7 +306,7 @@ emitter.on("CHANGE_NETWORK", (payload: boolean) => {
     allMetadata.value = null;
     metadataHistory.value = [];
     displayMetadataTable.value = [];
-    latestMetadataDetail.value = null
+    latestMetadataDetail.value = null;
     init();
   }
 });
