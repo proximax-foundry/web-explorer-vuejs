@@ -1,55 +1,14 @@
 <template>
-  <div v-if="isShowInvalid">
-    <div class="p-3 bg-yellow-100 text-yellow-700">
-      Metadata is not available in {{ networkName }}
-    </div>
-  </div>
-  <div v-else-if="selectedMetadataDetail">
+  <div v-if="latestMetadataDetail">
     <div class="text-gray-500 mb-1 text-sm font-bold">
       Metadata History
     </div>
-    <div
-      @click="toggleSelection = !toggleSelection"
-      class="text-txs text-gray-400 font-normal mt-1"
-    >
-      <div class="flex">
-        <div class="text-tsm font-bold">Select Metadata Record</div>
-        <img
-          src="@/assets/img/icon-caret-down-black.svg"
-          class="ml-2 transition-all duration-200"
-          :class="`${toggleSelection ? 'rotate-180 transform' : ''}`"
-        />
+    <div v-if="isShowInvalid">
+      <div class="p-3 bg-yellow-100 text-yellow-700">
+        Metadata is not available in {{ networkName }}
       </div>
     </div>
-    <div class="relative">
-      <div
-        v-if="toggleSelection"
-        class="absolute border border-t-0 z-50 bg-white max-h-52 overflow-auto px-1 filter drop-shadow-xl pb-2"
-      >
-        <div
-          v-if="totalMetadataList.length > 0"
-          class="pl-2 pt-4 text-xxs text-gray-400"
-        ></div>
-        <div v-else class="text-xxs pt-2 pl-2 pb-2">The list is empty.</div>
-        <div
-          v-for="(items, index) in totalMetadataList"
-          :key="index"
-          class="px-2 py-3 flex cursor-pointer items-center hover:bg-gray-50 transition-all duration-300"
-          @click="
-            (selectedMetadata = index), (toggleSelection = !toggleSelection)
-          "
-          :class="`${
-            index != totalMetadataList.length - 1
-              ? 'border-b border-gray-200'
-              : ''
-          }`"
-        >
-          <div>
-            <div class="text-xs font-semibold">{{ items }}</div>
-          </div>
-        </div>
-      </div>
-      <div v-if="!isShowInvalid && !selectedMetadataDetail">
+      <div v-else-if="!isShowInvalid && !latestMetadataDetail">
         <div
           class="flex justify-center items-center border-gray-400 mt-10 mb-20"
         >
@@ -71,14 +30,14 @@
                 <div class="flex flex-col">
                   <div class="flex flex-row">
                     <div class="uppercase">
-                    {{ selectedMetadataDetail.scopedMetadataKeyHex }}
+                    {{ latestMetadataDetail.scopedMetadataKeyHex }}
                     </div>
                     <div class="inline-block ml-2 font-semibold text-gray-400">
                       hex
                     </div>
                   </div>
                   <div>
-                    {{ selectedMetadataDetail.scopedMetadataKeyUtf8 }}
+                    {{ latestMetadataDetail.scopedMetadataKeyUtf8 }}
                     <div class="inline-block ml-2 font-semibold text-gray-400">
                       utf-8
                     </div>
@@ -89,13 +48,13 @@
                 class="py-4 text-xs grid grid-cols-5 border-b border-gray-100"
               >
                 <div class="font-bold col-span-2">Metadata Type</div>
-                <div>{{ selectedMetadataDetail.type }}</div>
+                <div>{{ latestMetadataDetail.type }}</div>
               </div>
               <div
                 class="py-4 text-xs grid grid-cols-5 border-b border-gray-100"
               >
                 <div class="font-bold col-span-2">Creation Value</div>
-                <div>{{ selectedMetadataDetail.value }}</div>
+                <div>{{ latestMetadataDetail.value }}</div>
               </div>
             </div>
           </div>
@@ -107,7 +66,7 @@
               >
                 <div class="font-bold col-span-2">Owner's Public Key</div>
                 <div class="break-all col-span-3">
-                  {{ selectedMetadataDetail.accPublicKey }}
+                  {{ latestMetadataDetail.accPublicKey }}
                 </div>
               </div>
               <div v-if="isAssetId"
@@ -115,7 +74,7 @@
               >
                 <div class="font-bold col-span-2">Asset Id</div>
                 <div class="col-span-3">
-                  {{ selectedMetadataDetail.assetId }}
+                  {{ latestMetadataDetail.assetId }}
                 </div>
               </div>
               <div v-if="isNamespace"
@@ -123,7 +82,7 @@
               >
                 <div class="font-bold col-span-2">Namespace</div>
                 <div class="col-span-3">
-                  {{ selectedMetadataDetail.namespace }}
+                  {{ latestMetadataDetail.namespace }}
                 </div>
               </div>
               <div
@@ -131,7 +90,7 @@
               >
                 <div class="font-bold col-span-2">Creation Block</div>
                 <div class="col-span-3">
-                  {{ selectedMetadataDetail.block }}
+                  {{ latestMetadataDetail.block }}
                 </div>
               </div>
               <div
@@ -139,7 +98,7 @@
               >
                 <div class="font-bold col-span-2">Creation Timestamp</div>
                 <div class="col-span-3">
-                  {{ selectedMetadataDetail.timestamp }}
+                  {{ latestMetadataDetail.timestamp }}
                 </div>
               </div>
             </div>
@@ -151,12 +110,11 @@
           :metadata="displayMetadataTable"
         />
       </div>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, getCurrentInstance, ref, watch } from "vue";
+import { computed, getCurrentInstance, ref } from "vue";
 import { Helper } from "@/util/typeHelper";
 import { networkState } from "@/state/networkState";
 import {
@@ -184,22 +142,17 @@ const props = defineProps({
 
 const internalInstance = getCurrentInstance();
 const emitter = internalInstance?.appContext.config.globalProperties.emitter;
-const isShowInvalid = ref(true);
-const toggleSelection = ref(false);
+const isShowInvalid = ref(false);
 const metadataHistory = ref<any[]>([]);
 const metadata = ref<string | null>(null);
 const allMetadata = ref<string | null>(null);
 const displayMetadataTable = ref<MetadataHistoryObj[]>([]);
-const selectedMetadataDetail = ref<MetadataHistoryObj | null>(null)
+const latestMetadataDetail = ref<MetadataHistoryObj | null>(null)
 const totalMetadataList = ref<any[]>([])
 const selectedMetadata = ref<number>(0)
 const metadataHistoryType = ref<string>("");
 const isAssetId = ref<boolean>(false);
 const isNamespace = ref<boolean>(false);
-
-const handleScroll = () => {
-    toggleSelection.value = false
-};
 
 const networkName = computed(() => {
   return networkState.chainNetworkName;
@@ -282,33 +235,11 @@ const loadMetadataTxns = async () => {
     for(let i = 0; i < getMetadataTxns.length; i++){
       totalMetadataList.value.push(`Metadata ${i + 1}`)
     }
-    isShowInvalid.value = false;
     return getMetadataTxns;
   } else {
     return [];
   }
 };
-
-const loadSelectedMetadataHistory = async () => {
-    let selectedMetadataTxn = metadataHistory.value[selectedMetadata.value]
-    let blockHeight = selectedMetadataTxn.transactionInfo!.height.compact()
-    const blockInfo = await AppState.chainAPI!.blockAPI.getBlockByHeight(
-      blockHeight
-    );
-    selectedMetadataDetail.value = {
-      block: blockInfo.height.compact(),
-      timestamp: Helper.convertDisplayDateTimeFormat24(new Date(blockInfo.timestamp.compact() + Deadline.timestampNemesisBlock * 1000).toISOString()),
-      scopedMetadataKeyHex: selectedMetadataTxn.scopedMetadataKey.toHex(),
-      scopedMetadataKeyUtf8: MetadataUtils.convertUtf8(
-        selectedMetadataTxn.scopedMetadataKey.toHex()
-      ),
-      accPublicKey: selectedMetadataTxn.targetPublicKey.publicKey,
-      assetId: getMetadataAssetId(selectedMetadataTxn),
-      namespace: await getMetadataNamespace(selectedMetadataTxn),
-      type: metadataHistoryType.value,
-      value: await selectedValueChangeMetadata()
-    }
-  }
 
 const loadAllMetadataHistory = async () => {
   let allMetadataTxn = metadataHistory.value;
@@ -335,6 +266,7 @@ const loadAllMetadataHistory = async () => {
       value: await allValueChangeMetadata(metadataTxn),
     });
   }
+  latestMetadataDetail.value = displayMetadataTable.value[displayMetadataTable.value.length-1]
 };
 
 const getMetadataAssetId = (metadataTxn: any) => {
@@ -358,33 +290,6 @@ const getMetadataNamespace = async (metadataTxn: any) => {
   }
 };
 
-const selectedValueChangeMetadata = async () => {
-  let txns = metadataHistory.value
-  for(let i = 0; i<= selectedMetadata.value; i++){
-    if (!metadata.value) {
-      const newValue = TransactionUtils.applyValueChange(
-        "",
-        Convert.uint8ArrayToHex(
-          txns[i].valueDifferences
-        ),
-        txns[i].valueSizeDelta
-      );
-      metadata.value = newValue
-    }
-    else{
-      const newValue = TransactionUtils.applyValueChange(
-        metadata.value,
-        Convert.uint8ArrayToHex(
-          txns[i].valueDifferences
-        ),
-        txns[i].valueSizeDelta
-      );
-      metadata.value = newValue
-    }
-  }
-  return metadata.value? metadata.value : ""
-}
-
 const allValueChangeMetadata = async (metadataTxn: any) => {
   if (!allMetadata.value) {
     const newValue = TransactionUtils.applyValueChange(
@@ -406,19 +311,11 @@ const allValueChangeMetadata = async (metadataTxn: any) => {
 
 const init = async () => {
   metadataHistory.value = await loadMetadataTxns();
-  loadSelectedMetadataHistory()
   loadAllMetadataHistory();
 };
 
 init();
 
-watch(selectedMetadata, (newValue,oldValue)=>{
-    if(newValue !== oldValue){
-      metadata.value = null
-      loadSelectedMetadataHistory()
-    }
-  })
-  window.addEventListener('scroll', handleScroll);
 
 emitter.on("CHANGE_NETWORK", (payload: boolean) => {
   if (payload) {
@@ -429,7 +326,6 @@ emitter.on("CHANGE_NETWORK", (payload: boolean) => {
     totalMetadataList.value = []
     metadataHistory.value = [];
     displayMetadataTable.value = [];
-    selectedMetadataDetail.value = null
     init();
   }
 });
