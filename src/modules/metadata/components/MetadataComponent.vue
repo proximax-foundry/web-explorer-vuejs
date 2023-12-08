@@ -44,29 +44,8 @@
         </Column>
         <Column style="width: 10px" v-if="wideScreen"> </Column>
         <Column
-          field="Scoped Metadata Key"
-          header="Scoped Metadata Key"
-          style="width: 250px; font-size: 12px;"
-          v-if="wideScreen"
-        >
-          <template #body="{ data }">
-            <div class="text-xs" v-if="data.scopedMetadataKeyHex">
-              {{ data.scopedMetadataKeyHex }}
-              <div class="inline-block ml-2 font-semibold text-gray-400">
-                hex
-              </div>
-            </div>
-            <div class="mt-1 text-xs" v-if="data.scopedMetadataKeyUtf8">
-              {{ data.scopedMetadataKeyUtf8 }}
-              <div class="inline-block ml-2 font-semibold text-gray-400">
-                utf-8
-              </div>
-            </div>
-          </template>
-        </Column>
-        <Column
-          field="Creation Block"
-          header="Creation Block"
+          field="Block"
+          header="Block"
           style="width: 130px; font-size: 12px;"
           v-if="wideScreen"
         >
@@ -75,9 +54,9 @@
           </template>
         </Column>
         <Column
-          field="Creation Timestamp"
-          header="Creation Timestamp"
-          style="width: 200px; font-size: 12px;"
+          field="Timestamp"
+          header="Timestamp"
+          style="width: 170px; font-size: 12px;"
           v-if="wideScreen"
         >
           <template #body="{ data }">
@@ -85,48 +64,8 @@
           </template>
         </Column>
         <Column
-          field="Account Public Key"
-          header="Account Public Key"
-          style="width: 700px; font-size: 12px;"
-          v-if="wideScreen"
-        >
-          <template #body="{ data }">
-            <span class="text-xs">{{ data.accPublicKey }}</span>
-          </template>
-        </Column>
-        <Column
-          field="Asset ID"
-          header="Asset ID"
-          style="width: 200px; font-size: 12px;"
-          v-if="wideScreen && isAsset"
-        >
-          <template #body="{ data }">
-            <span class="text-xs">{{ data.assetId }}</span>
-          </template>
-        </Column>
-        <Column
-          field="Namespace"
-          header="Namespace"
-          style="width: 200px; font-size: 12px;"
-          v-if="wideScreen && isNamespace"
-        >
-          <template #body="{ data }">
-            <span class="text-xs">{{ data.namespace }}</span>
-          </template>
-        </Column>
-        <Column
-          field="Metadata Type"
-          header="Metadata Type"
-          style="width: 100px; font-size: 12px;"
-          v-if="wideScreen"
-        >
-          <template #body="{ data }">
-            <span class="text-xs">{{ data.type }}</span>
-          </template>
-        </Column>
-        <Column
-          field="Creation Value"
-          header="Creation Value"
+          field="Value"
+          header="Value"
           style="width: 100px; font-size: 12px;"
           v-if="wideScreen"
         >
@@ -150,8 +89,6 @@ defineProps({
     type: Array<MetadataHistoryObj>,
     required: true,
   },
-  isAsset: Boolean,
-  isNamespace: Boolean,
 });
 const wideScreen = ref(false);
 const screenResizeHandler = () => {
