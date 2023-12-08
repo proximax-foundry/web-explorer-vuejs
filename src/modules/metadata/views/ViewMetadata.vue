@@ -69,8 +69,10 @@
               >
                 <div class="font-bold col-span-2">Scoped Metadata Key</div>
                 <div class="flex flex-col">
-                  <div class="uppercase">
+                  <div class="flex flex-row">
+                    <div class="uppercase">
                     {{ selectedMetadataDetail.scopedMetadataKeyHex }}
+                    </div>
                     <div class="inline-block ml-2 font-semibold text-gray-400">
                       hex
                     </div>
