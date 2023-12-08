@@ -34,7 +34,7 @@
   import { TransactionUtils } from "@/util/transactionUtils";
   import { AppState } from "@/state/appState";
   import MetadataComponent from "@/modules/metadata/components/MetadataComponent.vue";
-import { MetadataUtils } from "@/util/metadataUtil";
+  import { MetadataUtils } from "@/util/metadataUtil";
   
   const props = defineProps({
     compositeHash: {
@@ -43,7 +43,7 @@ import { MetadataUtils } from "@/util/metadataUtil";
     },
   });
 
-  export interface MetadataObj {
+  interface MetadataObj {
     block: number;
     timestamp: string;
     scopedMetadataKeyHex: string;

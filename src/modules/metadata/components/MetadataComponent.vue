@@ -143,7 +143,18 @@
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import { ref, onMounted, onUnmounted } from "vue";
-import type { MetadataObj } from "../views/ViewMetadata.vue";
+
+interface MetadataObj {
+    block: number;
+    timestamp: string;
+    scopedMetadataKeyHex: string;
+    scopedMetadataKeyUtf8: string;
+    accPublicKey: string;
+    assetId: string | null;
+    namespace: string | null;
+    type: string;
+    value: string;
+  }
 
 defineProps({
   metadata: {
