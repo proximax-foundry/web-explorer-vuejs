@@ -1,14 +1,14 @@
 <template>
-  <div v-if="latestMetadataDetail">
+  <div v-if="isShowInvalid">
+    <div class="p-3 bg-yellow-100 text-yellow-700">
+      Metadata is not available in {{ networkName }}
+    </div>
+  </div>
+  <div v-else>
     <div class="text-gray-500 mb-1 text-sm font-bold">
       Metadata History
     </div>
-    <div v-if="isShowInvalid">
-      <div class="p-3 bg-yellow-100 text-yellow-700">
-        Metadata is not available in {{ networkName }}
-      </div>
-    </div>
-      <div v-else-if="!isShowInvalid && !latestMetadataDetail">
+      <div v-if="!isShowInvalid && !latestMetadataDetail">
         <div
           class="flex justify-center items-center border-gray-400 mt-10 mb-20"
         >
@@ -18,7 +18,7 @@
           <span class="text-tsm">Fetching Metadata Details</span>
         </div>
       </div>
-      <div v-else class="mt-3">
+      <div v-else-if="latestMetadataDetail" class="mt-3">
         <div class="md:grid md:grid-cols-2">
           <div class="filter shadow-xl border border-gray-50 p-5 mb-15 md:mr-2">
             <div class="text-xs font-bold mb-5 ml-2">Overview</div>
@@ -148,8 +148,6 @@ const metadata = ref<string | null>(null);
 const allMetadata = ref<string | null>(null);
 const displayMetadataTable = ref<MetadataHistoryObj[]>([]);
 const latestMetadataDetail = ref<MetadataHistoryObj | null>(null)
-const totalMetadataList = ref<any[]>([])
-const selectedMetadata = ref<number>(0)
 const metadataHistoryType = ref<string>("");
 const isAssetId = ref<boolean>(false);
 const isNamespace = ref<boolean>(false);
@@ -171,6 +169,9 @@ const checkMetadataDetail = async () => {
   );
   if (metadataDetail) {
     return metadataDetail;
+  }
+  else{
+    isShowInvalid.value = true;
   }
 };
 
@@ -232,9 +233,6 @@ const loadMetadataTxns = async () => {
   let metadataResult = await checkMetadataDetail();
   if (metadataResult) {
     let getMetadataTxns = await fetchMetadataTxns(metadataResult);
-    for(let i = 0; i < getMetadataTxns.length; i++){
-      totalMetadataList.value.push(`Metadata ${i + 1}`)
-    }
     return getMetadataTxns;
   } else {
     return [];
@@ -267,6 +265,7 @@ const loadAllMetadataHistory = async () => {
     });
   }
   latestMetadataDetail.value = displayMetadataTable.value[displayMetadataTable.value.length-1]
+  isShowInvalid.value = false
 };
 
 const getMetadataAssetId = (metadataTxn: any) => {
@@ -320,12 +319,11 @@ init();
 emitter.on("CHANGE_NETWORK", (payload: boolean) => {
   if (payload) {
     isShowInvalid.value = true;
-    selectedMetadata.value = 0
     metadata.value = null;
     allMetadata.value = null;
-    totalMetadataList.value = []
     metadataHistory.value = [];
     displayMetadataTable.value = [];
+    latestMetadataDetail.value = null
     init();
   }
 });
