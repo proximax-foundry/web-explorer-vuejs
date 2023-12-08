@@ -22,7 +22,14 @@
             <div class="py-4 text-xs grid grid-cols-5 border-b border-gray-100">
               <div class="font-bold col-span-2">Owner's Public Key</div>
               <div class="break-all col-span-3">
-                {{ latestMetadataDetail.accPublicKey }}
+                <router-link
+                  :to="{
+                    name: 'ViewAccount',
+                    params: { accountParam: latestMetadataDetail.accPublicKey },
+                  }"
+                  class="text-blue-600 hover:text-blue-primary hover:underline"
+                  >{{ latestMetadataDetail.accPublicKey }}
+                </router-link>
               </div>
             </div>
             <div
@@ -31,7 +38,14 @@
             >
               <div class="font-bold col-span-2">Asset Id</div>
               <div class="col-span-3">
-                {{ latestMetadataDetail.assetId }}
+                <router-link
+                  :to="{
+                    name: 'ViewAsset',
+                    params: { id: latestMetadataDetail.assetId },
+                  }"
+                  class="uppercase text-blue-600 hover:text-blue-primary hover:underline"
+                  >{{ latestMetadataDetail.assetId }}</router-link
+                >
               </div>
             </div>
             <div
@@ -40,7 +54,14 @@
             >
               <div class="font-bold col-span-2">Namespace</div>
               <div class="col-span-3">
-                {{ latestMetadataDetail.namespace }}
+                <router-link
+                  :to="{
+                    name: 'ViewNamespace',
+                    params: { namespaceParam: latestMetadataDetail.namespace },
+                  }"
+                  class="text-blue-600 hover:text-blue-primary hover:underline"
+                  >{{ latestMetadataDetail.namespace }}</router-link
+                >
               </div>
             </div>
             <div class="py-4 text-xs grid grid-cols-5 border-b border-gray-100">
@@ -78,7 +99,14 @@
             <div class="py-4 text-xs grid grid-cols-5 border-b border-gray-100">
               <div class="font-bold col-span-2">Creation Block</div>
               <div class="col-span-3">
-                {{ latestMetadataDetail.block }}
+                <router-link
+                  :to="{
+                    name: 'ViewBlock',
+                    params: { blockHeight: latestMetadataDetail.block },
+                  }"
+                  class="text-blue-600 hover:text-blue-primary hover:underline"
+                  >{{ latestMetadataDetail.block }}</router-link
+                >
               </div>
             </div>
             <div class="py-4 text-xs grid grid-cols-5 border-b border-gray-100">

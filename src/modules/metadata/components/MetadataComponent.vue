@@ -1,5 +1,5 @@
 <template>
-    <div>
+  <div>
     <div v-if="metadata.length == 0" class="ml-10 text-tsm">
       No record found
     </div>
@@ -24,7 +24,16 @@
                   <div class="uppercase text-xs text-gray-300 font-bold mb-2">
                     Block
                   </div>
-                  <div class="text-xs mb-2">{{ data.block }}</div>
+                  <div class="text-xs mb-2">
+                    <router-link
+                      :to="{
+                        name: 'ViewBlock',
+                        params: { blockHeight: data.block },
+                      }"
+                      class="text-blue-600 hover:text-blue-primary hover:underline"
+                      >{{ data.block }}</router-link
+                    >
+                  </div>
                 </div>
                 <div class="grid-cols-1">
                   <div class="uppercase text-xs text-gray-300 font-bold mb-2">
@@ -34,7 +43,7 @@
                 </div>
                 <div class="grid-cols-1">
                   <div class="uppercase text-xs text-gray-300 font-bold mb-2">
-                     Value
+                    Value
                   </div>
                   <div class="text-xs mb-2">{{ data.value }}</div>
                 </div>
@@ -46,17 +55,26 @@
         <Column
           field="Block"
           header="Block"
-          style="width: 130px; font-size: 12px;"
+          style="width: 130px; font-size: 12px"
           v-if="wideScreen"
         >
           <template #body="{ data }">
-            <span class="text-xs">{{ data.block }}</span>
+            <span class="text-xs"
+              ><router-link
+                :to="{
+                  name: 'ViewBlock',
+                  params: { blockHeight: data.block },
+                }"
+                class="text-blue-600 hover:text-blue-primary hover:underline"
+                >{{ data.block }}</router-link
+              ></span
+            >
           </template>
         </Column>
         <Column
           field="Timestamp"
           header="Timestamp"
-          style="width: 170px; font-size: 12px;"
+          style="width: 170px; font-size: 12px"
           v-if="wideScreen"
         >
           <template #body="{ data }">
@@ -66,7 +84,7 @@
         <Column
           field="Value"
           header="Value"
-          style="width: 100px; font-size: 12px;"
+          style="width: 100px; font-size: 12px"
           v-if="wideScreen"
         >
           <template #body="{ data }">
@@ -75,7 +93,7 @@
         </Column>
       </DataTable>
     </div>
-    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
