@@ -19,34 +19,31 @@
         <Column style="width: 300px" v-if="!wideScreen">
           <template #body="{ data }">
             <div class="mb-2">
-              <div class="grid grid-cols-2">
+              <div class="grid grid-cols-3">
                 <div class="grid-cols-1">
                   <div class="uppercase text-xs text-gray-300 font-bold mb-2">
-                    Scoped Metadata Key
+                    Block
                   </div>
-                  <div class="text-xs" v-if="data.scopedMetadataKeyHex">
+                  <div class="text-xs mb-2">
                     <router-link
-                    :to="{
-                      name: 'ViewMetadata',
-                      params: { compositeHash: data.compositeHash },
-                    }"
-                    class="text-blue-600 hover:text-blue-primary uppercase hover:underline"
-                    >{{ data.scopedMetadataKeyHex }}
-                  </router-link>
-                    <div class="inline-block ml-2 font-semibold text-gray-400">
-                      utf-8
-                    </div>
-                  </div>
-                  <div class="mt-1 text-xs" v-if="data.scopedMetadataKeyUtf8">
-                    {{ data.scopedMetadataKeyUtf8 }}
-                    <div class="inline-block ml-2 font-semibold text-gray-400">
-                      utf-8
-                    </div>
+                      :to="{
+                        name: 'ViewBlock',
+                        params: { blockHeight: data.block },
+                      }"
+                      class="text-blue-600 hover:text-blue-primary hover:underline"
+                      >{{ data.block }}</router-link
+                    >
                   </div>
                 </div>
                 <div class="grid-cols-1">
                   <div class="uppercase text-xs text-gray-300 font-bold mb-2">
-                    Current Value
+                    Timestamp
+                  </div>
+                  <div class="text-xs mb-2">{{ data.timestamp }}</div>
+                </div>
+                <div class="grid-cols-1">
+                  <div class="uppercase text-xs text-gray-300 font-bold mb-2">
+                    Value
                   </div>
                   <div class="text-xs mb-2">{{ data.value }}</div>
                 </div>
@@ -56,38 +53,38 @@
         </Column>
         <Column style="width: 10px" v-if="wideScreen"> </Column>
         <Column
-          field="SCOPED METADATA KEY"
-          header="SCOPED METADATA KEY"
-          style="width: 250px"
+          field="Block"
+          header="Block"
+          style="width: 130px; font-size: 12px"
           v-if="wideScreen"
         >
           <template #body="{ data }">
-            <div class="text-xs" v-if="data.scopedMetadataKeyHex">
-              <router-link
-                    :to="{
-                      name: 'ViewMetadata',
-                      params: { compositeHash: data.compositeHash},
-                    }"
-                    class="text-blue-600 hover:text-blue-primary uppercase hover:underline"
-                    >{{ data.scopedMetadataKeyHex }}
-                  </router-link>
-              <div class="inline-block ml-2 font-semibold text-gray-400">
-                hex
-              </div>
-            </div>
-            <div class="mt-1 text-xs" v-if="data.scopedMetadataKeyUtf8">
-              {{ data.scopedMetadataKeyUtf8 }}
-              <div class="inline-block ml-2 font-semibold text-gray-400">
-                utf-8
-              </div>
-            </div>
-            <!-- <div class="uppercase text-xs pt-1" v-if="data.scopedMetadataKeyUtf8">{{data.scopedMetadataKeyUtf8 + "  (utf-8)"}}</div> -->
+            <span class="text-xs"
+              ><router-link
+                :to="{
+                  name: 'ViewBlock',
+                  params: { blockHeight: data.block },
+                }"
+                class="text-blue-600 hover:text-blue-primary hover:underline"
+                >{{ data.block }}</router-link
+              ></span
+            >
           </template>
         </Column>
         <Column
-          field="CURRENT VALUE"
-          header="CURRENT VALUE"
-          style="width: 150px"
+          field="Timestamp"
+          header="Timestamp"
+          style="width: 170px; font-size: 12px"
+          v-if="wideScreen"
+        >
+          <template #body="{ data }">
+            <span class="text-xs">{{ data.timestamp }}</span>
+          </template>
+        </Column>
+        <Column
+          field="Value"
+          header="Value"
+          style="width: 100px; font-size: 12px"
           v-if="wideScreen"
         >
           <template #body="{ data }">
@@ -103,11 +100,11 @@
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import { ref, onMounted, onUnmounted } from "vue";
-import type { MetadataObj } from "@/util/metadataUtil";
+import type { MetadataHistoryObj } from "@/util/metadataUtil";
 
 defineProps({
   metadata: {
-    type: Array<MetadataObj>,
+    type: Array<MetadataHistoryObj>,
     required: true,
   },
 });
