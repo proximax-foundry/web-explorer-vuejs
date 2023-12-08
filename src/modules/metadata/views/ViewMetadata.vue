@@ -53,7 +53,7 @@
               <div
                 class="py-4 text-xs grid grid-cols-5 border-b border-gray-100"
               >
-                <div class="font-bold col-span-2">Creation Value</div>
+                <div class="font-bold col-span-2">Current Value</div>
                 <div>{{ latestMetadataDetail.value }}</div>
               </div>
             </div>
@@ -187,7 +187,7 @@ const fetchMetadataTxns = async (metadata: MetadataEntry) => {
       break;
     case MetadataType.MOSAIC:
       txnQueryParams.type = [TransactionType.MOSAIC_METADATA_V2];
-      metadataHistoryType.value = "Mosaic";
+      metadataHistoryType.value = "Asset";
       break;
     case MetadataType.NAMESPACE:
       txnQueryParams.type = [TransactionType.NAMESPACE_METADATA_V2];
