@@ -34,7 +34,7 @@
   import { TransactionUtils } from "@/util/transactionUtils";
   import { AppState } from "@/state/appState";
   import MetadataComponent from "@/modules/metadata/components/MetadataComponent.vue";
-  import { MetadataUtils } from "@/util/metadataUtil";
+  import { MetadataUtils, type MetadataHistoryObj } from "@/util/metadataUtil";
   
   const props = defineProps({
     compositeHash: {
@@ -43,24 +43,13 @@
     },
   });
 
-  interface MetadataObj {
-    block: number;
-    timestamp: string;
-    scopedMetadataKeyHex: string;
-    scopedMetadataKeyUtf8: string;
-    accPublicKey: string;
-    assetId: string | null;
-    namespace: string | null;
-    type: string;
-    value: string;
-  }
   const internalInstance = getCurrentInstance();
   const emitter = internalInstance?.appContext.config.globalProperties.emitter;
   const isShowInvalid = ref(true);
   const metadataHistory = ref<any[]>([])
   const metadata = ref<string | null>(null)
   const allMetadata = ref<string | null>(null)
-  const displayMetadataTable = ref<MetadataObj[]>([])
+  const displayMetadataTable = ref<MetadataHistoryObj[]>([])
   const metadataHistoryType = ref<string>("")
   const checkAssetId = ref<boolean>(false)
   const checkNamespace = ref<boolean>(false)

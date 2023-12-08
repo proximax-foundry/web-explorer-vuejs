@@ -16,6 +16,18 @@ export interface MetadataObj {
   value: string;
 }
 
+export interface MetadataHistoryObj {
+  block: number;
+  timestamp: string;
+  scopedMetadataKeyHex: string;
+  scopedMetadataKeyUtf8: string;
+  accPublicKey: string;
+  assetId: string | null;
+  namespace: string | null;
+  type: string;
+  value: string;
+}
+
 export class MetadataUtils {
   static removeDoubleZero(string: string) {
     const isZero = string.endsWith("00");
