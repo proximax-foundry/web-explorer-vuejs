@@ -75,6 +75,19 @@
         >
           Transactions
         </div>
+        <div
+          class="w-18 text-center"
+          :class="`${
+            currentComponent == 'driver'
+              ? 'border-yellow-500 border-b-2'
+              : 'cursor-pointer'
+          }`"
+          @click="setCurrentComponent('driver')"
+          @showAllDrivers="updateBcDrivers"
+          v-if="bcDriversLength > 0"
+        >
+          Drivers
+        </div>
       </div>
       <div class="mb-20" v-if="!isFetching">
         <AssetComponent
@@ -102,6 +115,11 @@
           v-else-if="currentComponent == 'txn'"
           :accountParam="strAddress || strPublicKey"
         />
+        <DriverComponent
+          :publicKey="strPublicKey"
+          v-show="currentComponent == 'driver'"
+          @show-all-drivers="updateBcDrivers"
+        />
       </div>
     </div>
   </div>
@@ -115,6 +133,7 @@ import NamespaceComponent from "@/modules/account/components/NamespaceComponent.
 import MetadataComponent from "@/modules/account/components/MetadataComponent.vue";
 import MultisigComponent from "@/modules/account/components/MultisigComponent.vue";
 import TransactionComponent from "@/modules/account/components/TransactionComponent.vue";
+import DriverComponent from "../components/DriverComponent.vue";
 import { networkState } from "@/state/networkState";
 import { AppState } from "@/state/appState";
 import { Helper } from "@/util/typeHelper";
@@ -126,6 +145,7 @@ import {
 import { MetadataUtils, type MetadataObj } from "@/util/metadataUtil";
 import { AccountInfo, Address } from "tsjs-xpx-chain-sdk";
 import { MultisigInfo } from "@/models/multisigInfo";
+import type { DriveInfo } from "tsjs-xpx-chain-sdk";
 
 interface multisigLayer {
   key: string, label: string, selectable: boolean, children: { key: string, label: string, data:string, selectable: boolean }[]
@@ -142,6 +162,7 @@ const strAddress = ref("");
 const strPublicKey = ref("");
 const multisigLength = ref(0);
 const cosignatoriesLength = ref(0);
+const bcDriversLength = ref(0);
 const isFetching = ref(true);
 const isHarvester = ref(false)
 const accountAssets = ref<{ id: string; amount: number }[]>([]);
@@ -343,6 +364,10 @@ const generateMultisigInfoBelowLevelZero = async (strAddress: string) => {
 };
 
 generateMultisigInfoBelowLevelZero(strAddress.value);
+
+const updateBcDrivers = (data: DriveInfo[]) => {
+  bcDriversLength.value = data.length;
+}
 
 const networkName = computed(() => {
   return networkState.chainNetworkName;
