@@ -1,5 +1,10 @@
 <template>
-  <div v-if="selectedMetadataDetail">
+  <div v-if="isShowInvalid">
+    <div class="p-3 bg-yellow-100 text-yellow-700">
+      Metadata is not available in {{ networkName }}
+    </div>
+  </div>
+  <div v-else-if="selectedMetadataDetail">
       <div class="text-gray-500 mb-1 text-sm font-bold">
         {{ totalMetadataList[selectedMetadata] }}
       </div>
@@ -42,12 +47,7 @@
         </div>
         </div>
     </div>
-    <div v-if="isShowInvalid">
-      <div class="p-3 bg-yellow-100 text-yellow-700">
-        Metadata is not available in {{ networkName }}
-      </div>
-    </div>
-    <div v-else-if="!isShowInvalid  && !selectedMetadataDetail">
+    <div v-if="!isShowInvalid && !selectedMetadataDetail">
       <div class="flex justify-center items-center border-gray-400 mt-10 mb-20">
         <div
           class="animate-spin rounded-full h-5 w-5 border-b-2 border-navy-primary mr-2"
@@ -119,14 +119,19 @@
   }
   const internalInstance = getCurrentInstance();
   const emitter = internalInstance?.appContext.config.globalProperties.emitter;
-  const isShowInvalid = ref(false);
+  const isShowInvalid = ref(true);
   const toggleSelection = ref(false);
   const metadataHistory = ref<any[]>([])
   const metadata = ref<string | null>(null)
-  const selectedMetadataDetail = ref(<MetadataObj>{})
+  const allMetadata = ref<string | null>(null)
+  const selectedMetadataDetail = ref<MetadataObj | null>(null)
   const totalMetadataList = ref<any[]>([])
   const selectedMetadata = ref<number>(0)
   const displayMetadataTable = ref<MetadataObj[]>([])
+
+  const handleScroll = () => {
+    toggleSelection.value = false
+  };
   
   const networkName = computed(() => {
     return networkState.chainNetworkName;
@@ -198,6 +203,7 @@
       for(let i = 0; i < getMetadataTxns.length; i++){
         totalMetadataList.value.push(`Metadata ${i + 1}`)
       }
+      isShowInvalid.value = false
       return getMetadataTxns
     }
     else{
@@ -215,7 +221,7 @@
       block: blockInfo.height.compact(),
       timestamp: Helper.convertDisplayDateTimeFormat24(new Date(blockInfo.timestamp.compact() + Deadline.timestampNemesisBlock * 1000).toISOString()),
       scopedMetadataKeyHex: selectedMetadataTxn.scopedMetadataKey.toHex(),
-      value: await valueChangeMetadata()
+      value: await selectedValueChangeMetadata()
     }
   }
 
@@ -230,12 +236,12 @@
       block: blockInfo.height.compact(),
       timestamp: Helper.convertDisplayDateTimeFormat24(new Date(blockInfo.timestamp.compact() + Deadline.timestampNemesisBlock * 1000).toISOString()),
       scopedMetadataKeyHex: metadataTxn.scopedMetadataKey.toHex(),
-      value: await valueChangeMetadata()
+      value: await allValueChangeMetadata(metadataTxn)
     })
     }
   }
 
-  const valueChangeMetadata = async () => {
+  const selectedValueChangeMetadata = async () => {
     let txns = metadataHistory.value
     for(let i = 0; i<= selectedMetadata.value; i++){
       if (!metadata.value) {
@@ -262,26 +268,58 @@
     return metadata.value? metadata.value : ""
   }
 
-  metadataHistory.value = await loadMetadataTxns()
-  loadSelectedMetadataHistory()
-  loadAllMetadataHistory()
+  const allValueChangeMetadata = async (metadataTxn: any) => {
+      if (!allMetadata.value) {
+        const newValue = TransactionUtils.applyValueChange(
+          "",
+          Convert.uint8ArrayToHex(
+            metadataTxn.valueDifferences
+          ),
+          metadataTxn.valueSizeDelta
+        );
+        allMetadata.value = newValue
+      }
+      else{
+        const newValue = TransactionUtils.applyValueChange(
+          allMetadata.value,
+          Convert.uint8ArrayToHex(
+            metadataTxn.valueDifferences
+          ),
+          metadataTxn.valueSizeDelta
+        );
+        allMetadata.value = newValue
+      }
+    return allMetadata.value? allMetadata.value : ""
+  }
 
+  const init = async () =>{
+    metadataHistory.value = await loadMetadataTxns()
+    loadSelectedMetadataHistory()
+    loadAllMetadataHistory()
+  }
+
+  init()
+  
   watch(selectedMetadata, (newValue,oldValue)=>{
     if(newValue !== oldValue){
       metadata.value = null
-      totalMetadataList.value = []
       loadSelectedMetadataHistory()
     }
   })
 
+  window.addEventListener('scroll', handleScroll);
+
   emitter.on("CHANGE_NETWORK", (payload: boolean) => {
     if (payload) {
-      isShowInvalid.value = false;
+      isShowInvalid.value = true;
       selectedMetadata.value = 0
       metadata.value = null
+      allMetadata.value = null
       totalMetadataList.value = []
-      loadSelectedMetadataHistory();
-      loadAllMetadataHistory();
+      metadataHistory.value = []
+      displayMetadataTable.value = []
+      selectedMetadataDetail.value = null
+      init()
     }
   });
   </script>

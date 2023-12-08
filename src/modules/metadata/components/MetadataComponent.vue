@@ -46,7 +46,7 @@
         <Column
           field="Block"
           header="Block"
-          style="width: 150px"
+          style="width: 130px; font-size: 12px;"
           v-if="wideScreen"
         >
           <template #body="{ data }">
@@ -56,7 +56,7 @@
         <Column
           field="Timestamp"
           header="Timestamp"
-          style="width: 150px"
+          style="width: 170px; font-size: 12px;"
           v-if="wideScreen"
         >
           <template #body="{ data }">
@@ -66,7 +66,7 @@
         <Column
           field="Value"
           header="Value"
-          style="width: 100px"
+          style="width: 100px; font-size: 12px;"
           v-if="wideScreen"
         >
           <template #body="{ data }">
