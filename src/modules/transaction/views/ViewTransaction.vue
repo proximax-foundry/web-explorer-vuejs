@@ -71,6 +71,7 @@ import TxnFailedComponent from "@/modules/transaction/components/TxnFailedCompon
 import { AppState } from "@/state/appState";
 import { Helper } from "@/util/typeHelper";
 import { TransactionUtils } from "@/util/transactionUtils";
+import { format } from "path";
 
 const props = defineProps({
   hash: {
@@ -157,7 +158,6 @@ const loadTxn = async () => {
           isFound: transaction.isFound,
           unknownData: transaction.txn.unknownData ? transaction.txn.unknownData: {} 
         };
-        
         if (transaction.txn.cosignatures != undefined) {
           formattedTransaction.value.cosigners = transaction.txn.cosignatures;
         } else {
@@ -165,10 +165,6 @@ const loadTxn = async () => {
         }
 
         txnType.value = transaction.txn.type;
-
-        // if(transaction.txn.amountTransfer!=undefined){
-        //   formattedTransaction.value.amountTransfer = transaction.txn.amountTransfer;
-        // }
 
         if (transaction.txn.mosaic != undefined) {
           formattedTransaction.value.assetAmount = Helper.convertToExact(
@@ -191,9 +187,47 @@ const loadTxn = async () => {
           }
         }
 
-        // if(transaction.txn.amount!=undefined){
-        //   formattedTransaction.value.amount = transaction.txn.amount;
-        // }
+        if (transaction.txn.driveSize) {
+          // prepare BC drive
+          formattedTransaction.value.driveSize = transaction.txn.driveSize.lower;
+          formattedTransaction.value.replicatorCount = transaction.txn.replicatorCount;
+          formattedTransaction.value.verificationFeeAmount = Helper.convertToExact(
+            transaction.txn.verificationFeeAmount.lower,
+            AppState.nativeToken.divisibility
+          )          
+        }
+
+        if(transaction.txn.driveKey){
+          // drive closure
+          formattedTransaction.value.driveKey = transaction.txn.driveKey.publicKey;
+          if (transaction.txn.downloadDataCdi) {
+            // data modification
+            formattedTransaction.value.downloadDataCdi = transaction.txn.downloadDataCdi;
+            formattedTransaction.value.uploadSize = transaction.txn.uploadSize.lower;
+            formattedTransaction.value.feedbackFeeAmount = Helper.convertToExact(
+              transaction.txn.feedbackFeeAmount.lower,
+              AppState.nativeToken.divisibility
+            );
+          }
+          if (transaction.txn.downloadSize) {
+            // download
+            formattedTransaction.value.downloadSize = transaction.txn.downloadSize.lower;
+            formattedTransaction.value.listOfPublicKeys = transaction.txn.listOfPublicKeys;
+            formattedTransaction.value.feedbackFeeAmount = Helper.convertToExact(
+              transaction.txn.feedbackFeeAmount.lower,
+              AppState.nativeToken.divisibility
+            );
+          }
+        }
+
+        if (transaction.txn.downloadChannelId) {
+          // finish download
+          formattedTransaction.value.downloadChannelId = transaction.txn.downloadChannelId;
+          formattedTransaction.value.feedbackFeeAmount = Helper.convertToExact(
+              transaction.txn.feedbackFeeAmount.lower,
+              AppState.nativeToken.divisibility
+          );
+        }
 
         innerTransaction.value = transaction.txn.innerTransactions;
       } else {

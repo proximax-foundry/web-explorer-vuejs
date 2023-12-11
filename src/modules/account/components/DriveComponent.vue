@@ -4,8 +4,8 @@
       <div
         class="grid grid-cols-6 bg-gray-100 font-semibold text-gray-600 px-3"
       >
-        <div class="px-2 py-3 col-span-4">Multisig</div>
-        <div class="px-2 py-3 col-span-1">Driver Size (MB)</div>
+        <div class="px-2 py-3 col-span-4">Drive Key</div>
+        <div class="px-2 py-3 col-span-1">Drive Size (MB)</div>
         <div class="px-2 py-3 col-span-1">Replicators</div>
       </div>
       <div
@@ -13,7 +13,15 @@
         class="grid grid-cols-6 px-3 py-6 gray-line"
       >
         <div class="col-span-4 px-2 py-6">
-          {{ driveInfo.multisig }}
+          <router-link
+            :to="{
+              name: 'ViewTransaction',
+              params: { hash: driveInfo.multisig },
+            }"
+            class="text-blue-600 hover:text-blue-primary hover:underline"
+          >
+            {{ driveInfo.multisig }}
+          </router-link>
         </div>
         <div class="col-span-1 px-2 py-6">
           {{ driveInfo.size.lower }}
@@ -25,15 +33,21 @@
     </div>
     <div v-for="driveInfo in bcDrivesInfo" class="lg:hidden px-5 gray-line">
       <div class="text-xs py-4">
-        <div class="font-semibold text-gray-600 bg-gray-100">Multisig</div>
-        <div class="break-all">
+        <div class="font-semibold text-gray-600 bg-gray-100">Drive Key</div>
+        <router-link
+          :to="{
+            name: 'ViewTransaction',
+            params: { hash: driveInfo.multisig },
+          }"
+          class="text-blue-600 hover:text-blue-primary hover:underline break-all"
+        >
           {{ driveInfo.multisig }}
-        </div>
+        </router-link>
       </div>
       <div class="grid grid-cols-2 text-xs pb-4">
         <div class="col-span-1">
           <div class="font-semibold text-gray-600 bg-gray-100">
-            Driver Size (MB)
+            Drive Size (MB)
           </div>
           <div>{{ driveInfo.size.lower }}</div>
         </div>
@@ -46,7 +60,7 @@
       </div>
     </div>
     <div
-      v-if="totalPages > 1"
+      v-if="bcDrivesInfo.length > 10"
       class="ml-5 mr-5 sm:flex sm:justify-between my-5"
     >
       <div class="text-xs text-gray-700 mb-3 sm:mb-0 text-center sm:text-left">
@@ -121,24 +135,25 @@
 
 <script lang="ts" setup>
 import { AppState } from "@/state/appState";
-import { DriveQueryParams } from "tsjs-xpx-chain-sdk";
+import { DriveQueryParams, UInt64 } from "tsjs-xpx-chain-sdk";
 import { ref, computed } from "vue";
 import type { DriveInfo } from "tsjs-xpx-chain-sdk";
+import { faPrescriptionBottleMedical } from "@fortawesome/free-solid-svg-icons";
 
 const props = defineProps({
   publicKey: String,
 });
 
-const emit = defineEmits(["showAllDrivers"]);
+const emit = defineEmits(["showAllDrives"]);
 
 const bcDrivesInfo = ref<DriveInfo[]>([]);
 const pageSize = ref(10);
 const currentPage = ref(1);
 const totalPages = ref(0);
 
-const loadDriverInfo = async () => {
+const loadDriveInfo = async () => {
   if (!AppState.isReady) {
-    setTimeout(loadDriverInfo, 1000);
+    setTimeout(loadDriveInfo, 1000);
     return;
   }
   if (!props.publicKey) {
@@ -152,17 +167,17 @@ const loadDriverInfo = async () => {
     .searchBcDrives(qp)
     .then((bcDrives) => {
       bcDrivesInfo.value = bcDrives.drivesInfo;
-      emit("showAllDrivers", bcDrivesInfo.value);
+      emit("showAllDrives", bcDrivesInfo.value);
       totalPages.value = bcDrives.pagination.totalPages;
     })
     .catch(() => {
-      // no drivers
+      // no drives
     });
 };
 
 const changeRows = () => {
   currentPage.value = 1;
-  loadDriverInfo();
+  loadDriveInfo();
 };
 
 const enableFirstPage = computed(() => {
@@ -183,8 +198,8 @@ const enableLastPage = computed(() => {
 
 const naviPage = (pageNo: number) => {
   currentPage.value = pageNo;
-  loadDriverInfo();
+  loadDriveInfo();
 };
 
-loadDriverInfo();
+loadDriveInfo();
 </script>

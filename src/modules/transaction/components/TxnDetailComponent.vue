@@ -155,6 +155,11 @@
     " />
   <SdaExchangeDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.PLACE_SDA_EXCHANGE_OFFER ||
     txnType == TransactionType.REMOVE_SDA_EXCHANGE_OFFER" />
+  <PrepareBcDriveDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.Prepare_Bc_Drive"/>
+  <DriveClosureDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.Drive_Closure"/>
+  <DataModificationDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.Data_Modification"/>
+  <DownloadDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.Download"/>
+  <FinishDownloadDetailComponent  :txnDetail="txnDetail" v-if="txnType == TransactionType.Finish_Download"/>
   <div class="cosignerDetails " v-if="txnDetail.group == 'partial'">
     <div>
       <div>Cosigner List</div>
@@ -199,13 +204,20 @@ import AccountDetailComponent from "@/modules/transaction/components/transaction
 import MetadataDetailComponent from "@/modules/transaction/components/transactionDetails/MetadataDetailComponent.vue";
 import SdaExchangeDetailComponent from "@/modules/transaction/components/transactionDetails/SdaExchangeDetailComponent.vue";
 import UnknownDataDetailComponent from "@/modules/transaction/components/transactionDetails/UnknownDataDetailComponent.vue";
+import DataModificationDetailComponent from "@/modules/transaction/components/transactionDetails/DataModificationDetailComponent.vue";
+import DownloadDetailComponent from "./transactionDetails/DownloadDetailComponent.vue";
+import PrepareBcDriveDetailComponent from "./transactionDetails/PrepareBcDriveDetailComponent.vue";
+import FinishDownloadDetailComponent from "./transactionDetails/FinishDownloadDetailComponent.vue";
+import DriveClosureDetailComponent from "./transactionDetails/DriveClosureDetailComponent.vue"
 import { AggregateTransaction, PublicAccount, TransactionType } from "tsjs-xpx-chain-sdk";
 import { MultisigUtils } from '@/util/multisigUtils'
+import { TransactionUtils } from "@/util/transactionUtils";
 
 const props = defineProps({
   txnDetail: Object,
   txnType: Number,
 });
+
 const toast = useToast();
 const nativeTokenNamespace = AppState.nativeToken.label;
 const maxFee = computed(() => {
@@ -323,8 +335,6 @@ onMounted(async () => {
 
   }
 })
-
-
 
 const copy = (id) => {
   let element = document.getElementById(id);

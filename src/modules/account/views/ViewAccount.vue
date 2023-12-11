@@ -78,15 +78,14 @@
         <div
           class="w-18 text-center"
           :class="`${
-            currentComponent == 'driver'
+            currentComponent == 'drive'
               ? 'border-yellow-500 border-b-2'
               : 'cursor-pointer'
           }`"
-          @click="setCurrentComponent('driver')"
-          @showAllDrivers="updateBcDrivers"
-          v-if="bcDriversLength > 0"
+          @click="setCurrentComponent('drive')"
+          v-if="bcDrivesLength > 0"
         >
-          Drivers
+          Drives
         </div>
       </div>
       <div class="mb-20" v-if="!isFetching">
@@ -115,10 +114,10 @@
           v-else-if="currentComponent == 'txn'"
           :accountParam="strAddress || strPublicKey"
         />
-        <DriverComponent
+        <DriveComponent
           :publicKey="strPublicKey"
-          v-show="currentComponent == 'driver'"
-          @show-all-drivers="updateBcDrivers"
+          v-show="currentComponent == 'drive'"
+          @show-all-drives="updateBcDrives"
         />
       </div>
     </div>
@@ -133,7 +132,7 @@ import NamespaceComponent from "@/modules/account/components/NamespaceComponent.
 import MetadataComponent from "@/modules/account/components/MetadataComponent.vue";
 import MultisigComponent from "@/modules/account/components/MultisigComponent.vue";
 import TransactionComponent from "@/modules/account/components/TransactionComponent.vue";
-import DriverComponent from "../components/DriverComponent.vue";
+import DriveComponent from "../components/DriveComponent.vue";
 import { networkState } from "@/state/networkState";
 import { AppState } from "@/state/appState";
 import { Helper } from "@/util/typeHelper";
@@ -162,7 +161,7 @@ const strAddress = ref("");
 const strPublicKey = ref("");
 const multisigLength = ref(0);
 const cosignatoriesLength = ref(0);
-const bcDriversLength = ref(0);
+const bcDrivesLength = ref(0);
 const isFetching = ref(true);
 const isHarvester = ref(false)
 const accountAssets = ref<{ id: string; amount: number }[]>([]);
@@ -365,8 +364,8 @@ const generateMultisigInfoBelowLevelZero = async (strAddress: string) => {
 
 generateMultisigInfoBelowLevelZero(strAddress.value);
 
-const updateBcDrivers = (data: DriveInfo[]) => {
-  bcDriversLength.value = data.length;
+const updateBcDrives = (data: DriveInfo[]) => {
+  bcDrivesLength.value = data.length;
 }
 
 const networkName = computed(() => {
