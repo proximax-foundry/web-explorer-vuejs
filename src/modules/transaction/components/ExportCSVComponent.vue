@@ -49,24 +49,24 @@
               <div class="mr-4">
                 <label for="startBlock" class="font-bold block mb-2"> Start Block</label>
                 <div class="border border-gray-200 px-2 py-1 focus:outline-none">
-                  <input type="number" v-model="startBlock" class="focus:outline-none" placeholder="0" />
+                  <input type="number" v-model="startBlock" class="focus:outline-none" placeholder="0" min="0" oninput="validity.valid||(value='');"/>
                 </div>
               </div>
               <div>
                 <label for="endBlock" class="font-bold block mb-2"> End Block </label>
                 <div class="border border-gray-200 px-2 py-1 focus:outline-none">
-                  <input type="number" v-model="endBlock" class="focus:outline-none" placeholder="0" />
+                  <input type="number" v-model="endBlock" class="focus:outline-none" placeholder="0" min="0" oninput="validity.valid||(value='');"/>
                 </div>
               </div>
             </div>
           </div>
           <div v-else>
-            <div class="py-3">Please enter the number of days:</div>
+            <div class="py-3">Download latest transactions:</div>
             <div class="flex justify-center items-center">
               <div class="mr-4">
-                <label for="startBlock" class="font-bold block mb-2">Days</label>
+                <label for="inputDay" class="font-bold block mb-2">Days</label>
                 <div class="border border-gray-200 px-2 py-1 focus:outline-none">
-                  <input type="number" v-model="startBlock" class="focus:outline-none" placeholder="0" />
+                  <input type="number" v-model="inputDay" class="focus:outline-none" placeholder="Enter the number of days" min="0" oninput="validity.valid||(value='');"/>
                 </div>
               </div>
             </div>
@@ -112,6 +112,7 @@ const checkTransactions = ref(false)
 const isDisabledValidate = ref<boolean>(true)
 const startBlock = ref<number | null>(null)
 const endBlock = ref<number | null>(null)
+const inputDay = ref<number | null>(null)
 const transactions = ref<any[] | undefined>([]);
 const totalPage = ref<number>(0);
 const selectedTxnType = ref("all");
@@ -248,13 +249,13 @@ let loadTransactions = async () => {
     }
   }
   else{
-    if(startBlock.value){
+    if(inputDay.value){
       const chainConfig = new ChainProfileConfig(networkState.chainNetworkName);
       chainConfig.init();
       let blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
       let blockTargetTimeByDay = (60 * 60 * 24) / blockTargetTime;
       endBlock.value = await AppState.chainAPI.chainAPI.getBlockchainHeight()
-      txnQueryParams.fromHeight = endBlock.value -  Math.floor(startBlock.value * blockTargetTimeByDay)
+      txnQueryParams.fromHeight = endBlock.value -  Math.floor(inputDay.value * blockTargetTimeByDay)
     }
   }
   if (!selectedTxnType.value || selectedTxnType.value == "all") {
@@ -421,6 +422,7 @@ const clearInput = () => {
   checkTransactions.value = false
   startBlock.value = null
   endBlock.value = null
+  inputDay.value = null
   transactions.value = []
 }
 
@@ -761,24 +763,23 @@ const exportValue = async () => {
 };
 
 watch([startBlock, endBlock], async ([newStartBlock, newEndBlock]) => {
-  if(option.value === "blockNumber"){
-    if(!newStartBlock || !newEndBlock){
-      isDisabledValidate.value = true
-    }
-    else if(newStartBlock > newEndBlock){
-      isDisabledValidate.value = true
-    }
-    else{
-      isDisabledValidate.value = false
-    }
+  if(!newStartBlock || !newEndBlock){
+    isDisabledValidate.value = true
+  }
+  else if(newStartBlock > newEndBlock){
+    isDisabledValidate.value = true
   }
   else{
-    if(newStartBlock !== null){
-      isDisabledValidate.value = false
-    }
-    else{
-      isDisabledValidate.value = true
-    }
+    isDisabledValidate.value = false
+  }
+})
+
+watch(inputDay, (newInputDay) => {
+  if(!newInputDay){
+    isDisabledValidate.value = true
+  }
+  else{
+    isDisabledValidate.value = false
   }
 })
 </script>
