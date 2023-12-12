@@ -32,18 +32,42 @@
               <div>{{ accPublicKey }}</div>
             </div>
           </div>
-          <div class="py-3">Please enter a range:</div>
+          <div class="py-3">Choose download option:</div>
           <div class="flex">
-            <div class="mr-4">
-              <label for="startBlock" class="font-bold block mb-2"> Start Block</label>
-              <div class="border border-gray-200 px-2 py-1 focus:outline-none">
-                <input type="number" v-model="startBlock" class="focus:outline-none" placeholder="0" />
-              </div>
+            <div class="mr-3">
+              <input type="radio" id="blockNumber" value="blockNumber" class="mr-1" v-model="option" />
+              <label for="blockNumber">Block Number</label>
             </div>
             <div>
-              <label for="endBlock" class="font-bold block mb-2"> End Block </label>
-              <div class="border border-gray-200 px-2 py-1 focus:outline-none">
-                <input type="number" v-model="endBlock" class="focus:outline-none" placeholder="0" />
+              <input type="radio" id="day" value="day" class="mr-1" v-model="option" />
+              <label for="date">Day</label>
+            </div>
+          </div>
+          <div v-if="option === 'blockNumber'">
+            <div class="py-3">Please enter a range:</div>
+            <div class="flex">
+              <div class="mr-4">
+                <label for="startBlock" class="font-bold block mb-2"> Start Block</label>
+                <div class="border border-gray-200 px-2 py-1 focus:outline-none">
+                  <input type="number" v-model="startBlock" class="focus:outline-none" placeholder="0" />
+                </div>
+              </div>
+              <div>
+                <label for="endBlock" class="font-bold block mb-2"> End Block </label>
+                <div class="border border-gray-200 px-2 py-1 focus:outline-none">
+                  <input type="number" v-model="endBlock" class="focus:outline-none" placeholder="0" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else>
+            <div class="py-3">Please enter the number of days:</div>
+            <div class="flex justify-center items-center">
+              <div class="mr-4">
+                <label for="startBlock" class="font-bold block mb-2">Days</label>
+                <div class="border border-gray-200 px-2 py-1 focus:outline-none">
+                  <input type="number" v-model="startBlock" class="focus:outline-none" placeholder="0" />
+                </div>
               </div>
             </div>
           </div>
@@ -72,6 +96,8 @@ import { computed, ref, watch } from "vue";
 import { AccountUtils } from "@/util/accountUtil";
 import { TransactionUtils } from "@/util/transactionUtils";
 import type { Transaction } from "tsjs-xpx-chain-sdk";
+import { ChainProfileConfig } from "@/models/stores";
+import { networkState } from "@/state/networkState";
 
 const props = defineProps({
   accPublicKey: {
@@ -80,6 +106,7 @@ const props = defineProps({
   }
 });
 
+const option = ref('blockNumber')
 const onExport = ref(false)
 const checkTransactions = ref(false)
 const isDisabledValidate = ref<boolean>(true)
@@ -214,9 +241,21 @@ let loadTransactions = async () => {
       }
     }
   }
-  if(startBlock.value && endBlock.value){
-    txnQueryParams.fromHeight = startBlock.value;
-    txnQueryParams.toHeight = endBlock.value;
+  if(option.value === "blockNumber"){
+    if(startBlock.value && endBlock.value){
+      txnQueryParams.fromHeight = startBlock.value;
+      txnQueryParams.toHeight = endBlock.value;
+    }
+  }
+  else{
+    if(startBlock.value){
+      const chainConfig = new ChainProfileConfig(networkState.chainNetworkName);
+      chainConfig.init();
+      let blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
+      let blockTargetTimeByDay = (60 * 60 * 24) / blockTargetTime;
+      endBlock.value = await AppState.chainAPI.chainAPI.getBlockchainHeight()
+      txnQueryParams.fromHeight = endBlock.value -  Math.floor(startBlock.value * blockTargetTimeByDay)
+    }
   }
   if (!selectedTxnType.value || selectedTxnType.value == "all") {
     txnQueryParams.embedded = false;
@@ -224,7 +263,7 @@ let loadTransactions = async () => {
     txnQueryParams.embedded = true;
   }
 
-  if (QueryParamsType.value) {
+  if (QueryParamsType.value) { 
     txnQueryParams.type = QueryParamsType.value;
   }
   txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
@@ -722,14 +761,24 @@ const exportValue = async () => {
 };
 
 watch([startBlock, endBlock], async ([newStartBlock, newEndBlock]) => {
-  if(!newStartBlock || !newEndBlock){
-    isDisabledValidate.value = true
-  }
-  else if(newStartBlock > newEndBlock){
-    isDisabledValidate.value = true
+  if(option.value === "blockNumber"){
+    if(!newStartBlock || !newEndBlock){
+      isDisabledValidate.value = true
+    }
+    else if(newStartBlock > newEndBlock){
+      isDisabledValidate.value = true
+    }
+    else{
+      isDisabledValidate.value = false
+    }
   }
   else{
-    isDisabledValidate.value = false
+    if(newStartBlock !== null){
+      isDisabledValidate.value = false
+    }
+    else{
+      isDisabledValidate.value = true
+    }
   }
 })
 </script>
