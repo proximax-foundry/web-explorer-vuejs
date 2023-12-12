@@ -49,13 +49,13 @@
               <div class="mr-4">
                 <label for="startBlock" class="font-bold block mb-2"> Start Block</label>
                 <div class="border border-gray-200 px-2 py-1 focus:outline-none">
-                  <input type="number" v-model="startBlock" class="focus:outline-none" placeholder="0" min="1" oninput="validity.valid||(value='');"/>
+                  <input type="number" v-model="startBlock" class="focus:outline-none" placeholder="0" min="1"/>
                 </div>
               </div>
               <div>
                 <label for="endBlock" class="font-bold block mb-2"> End Block </label>
                 <div class="border border-gray-200 px-2 py-1 focus:outline-none">
-                  <input type="number" v-model="endBlock" class="focus:outline-none" placeholder="0" min="1" oninput="validity.valid||(value='');"/>
+                  <input type="number" v-model="endBlock" class="focus:outline-none" placeholder="0" min="1"/>
                 </div>
               </div>
             </div>
@@ -769,7 +769,7 @@ const exportValue = async () => {
 };
 
 watch([startBlock, endBlock], async ([newStartBlock, newEndBlock]) => {
-  if(!newStartBlock || !newEndBlock){
+  if(!newStartBlock || !newEndBlock || newStartBlock <= 0 || newEndBlock <= 0){
     isDisabledValidate.value = true
   }
   else if(newStartBlock > newEndBlock){
@@ -781,7 +781,7 @@ watch([startBlock, endBlock], async ([newStartBlock, newEndBlock]) => {
 })
 
 watch(inputDay, (newInputDay) => {
-  if(!newInputDay){
+  if(!newInputDay || newInputDay <= 0){
     isDisabledValidate.value = true
   }
   else{
