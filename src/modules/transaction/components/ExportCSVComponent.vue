@@ -49,13 +49,13 @@
               <div class="mr-4">
                 <label for="startBlock" class="font-bold block mb-2"> Start Block</label>
                 <div class="border border-gray-200 px-2 py-1 focus:outline-none">
-                  <input type="number" v-model="startBlock" class="focus:outline-none" placeholder="0" min="0" oninput="validity.valid||(value='');"/>
+                  <input type="number" v-model="startBlock" class="focus:outline-none" placeholder="0" min="1" oninput="validity.valid||(value='');"/>
                 </div>
               </div>
               <div>
                 <label for="endBlock" class="font-bold block mb-2"> End Block </label>
                 <div class="border border-gray-200 px-2 py-1 focus:outline-none">
-                  <input type="number" v-model="endBlock" class="focus:outline-none" placeholder="0" min="0" oninput="validity.valid||(value='');"/>
+                  <input type="number" v-model="endBlock" class="focus:outline-none" placeholder="0" min="1" oninput="validity.valid||(value='');"/>
                 </div>
               </div>
             </div>
@@ -66,7 +66,7 @@
               <div class="mr-4">
                 <label for="inputDay" class="font-bold block mb-2">Days</label>
                 <div class="border border-gray-200 px-2 py-1 focus:outline-none">
-                  <input type="number" v-model="inputDay" class="focus:outline-none" placeholder="Enter the number of days" min="0" oninput="validity.valid||(value='');"/>
+                  <input type="number" v-model="inputDay" class="focus:outline-none" placeholder="Enter the number of days" min="1" oninput="validity.valid||(value='');"/>
                 </div>
               </div>
             </div>
@@ -255,7 +255,13 @@ let loadTransactions = async () => {
       let blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
       let blockTargetTimeByDay = (60 * 60 * 24) / blockTargetTime;
       endBlock.value = await AppState.chainAPI.chainAPI.getBlockchainHeight()
-      txnQueryParams.fromHeight = endBlock.value -  Math.floor(inputDay.value * blockTargetTimeByDay)
+      const calculateHeight = endBlock.value -  Math.floor(inputDay.value * blockTargetTimeByDay)
+      if(calculateHeight<0){
+        txnQueryParams.fromHeight = 1
+      }
+      else{
+        txnQueryParams.fromHeight = calculateHeight
+      }
     }
   }
   if (!selectedTxnType.value || selectedTxnType.value == "all") {
