@@ -256,7 +256,7 @@ let loadTransactions = async () => {
       let blockTargetTimeByDay = (60 * 60 * 24) / blockTargetTime;
       endBlock.value = await AppState.chainAPI.chainAPI.getBlockchainHeight()
       const calculateHeight = endBlock.value -  Math.floor(inputDay.value * blockTargetTimeByDay)
-      if(calculateHeight<0){
+      if(calculateHeight<=0){
         txnQueryParams.fromHeight = 1
       }
       else{
