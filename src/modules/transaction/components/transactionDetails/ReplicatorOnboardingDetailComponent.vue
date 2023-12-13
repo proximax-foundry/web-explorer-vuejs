@@ -1,18 +1,8 @@
 <template>
   <div class="details">
     <div>
-      <div>Drive Key</div>
-      <div>
-        <router-link
-          :to="{
-            name: 'ViewAccount',
-            params: { accountParam: txnDetail.signer },
-          }"
-          class="text-blue-600 hover:text-blue-primary hover:underline"
-        >
-          {{ txnDetail.driveKey }}
-        </router-link>
-      </div>
+      <div>Capacity</div>
+      <div>{{ txnDetail.capacity }} MB</div>
     </div>
   </div>
 </template>
@@ -38,7 +28,7 @@ defineProps({
     }
 
     > div:nth-child(2) {
-      @apply w-full break-all;
+      @apply w-full;
     }
   }
 

@@ -15,53 +15,52 @@
       </div>
     </div>
     <div>
-      <div>Upload Size</div>
-      <div>{{ txnDetail.uploadSize }} MB</div>
+      <div>Verification Trigger</div>
+      <div>{{ txnDetail.verificationTrigger }}</div>
     </div>
     <div>
-      <div>Feedback Fee</div>
+      <div>Opinions</div>
+      <div>{{ txnDetail.opinions }}</div>
+    </div>
+    <div>
+      <div>Shard ID</div>
+      <div>{{ txnDetail.shardId }}</div>
+    </div>
+    <div>
+      <div>Public Keys</div>
       <div>
-        <span class="font-bold">
-          {{ feedbackFee[0] }}
-        </span>
-        <span
-          >{{ feedbackFee[1] > 0 ? "." : ""
-          }}<span class="text-xxs">{{ feedbackFee[1] }}</span>
-        </span>
-        <img
-          src="@/assets/img/icon-xpx.svg"
-          class="ml-1 mr-2 inline-block"
-          style="top: -1px; width: 14px"
-        /><span class="font-bold">{{ nativeTokenNamespace }}</span>
+        <div
+          class="py-1 text-blue-600 hover:text-blue-primary hover:underline"
+          v-for="pk in txnDetail.keys"
+        >
+          <router-link
+            :to="{
+              name: 'ViewAccount',
+              params: { accountParam: pk.publicKey },
+            }"
+          >
+            {{ pk.publicKey }}
+          </router-link>
+        </div>
       </div>
     </div>
     <div>
-      <div>Download Data CDI</div>
+      <div>Signatures</div>
       <div>
-        {{ txnDetail.downloadDataCdi }}
+        <div class="py-1" v-for="signature in txnDetail.signatures">
+          {{ signature }}
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { AppState } from "@/state/appState";
-import { computed } from "vue";
-
-const nativeTokenNamespace = AppState.nativeToken.label;
-
-const props = defineProps({
+defineProps({
   txnDetail: {
     type: Object,
     required: true,
   },
-});
-
-const feedbackFee = computed(() => {
-  if (!props.txnDetail) {
-    return "";
-  }
-  return props.txnDetail.feedbackFeeAmount.toString().split(".");
 });
 </script>
 
@@ -77,7 +76,7 @@ const feedbackFee = computed(() => {
     }
 
     > div:nth-child(2) {
-      @apply w-full break-all;
+      @apply w-full flex flex-wrap break-all;
     }
   }
 

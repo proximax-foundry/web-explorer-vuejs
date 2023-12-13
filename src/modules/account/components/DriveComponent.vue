@@ -12,19 +12,11 @@
         v-for="driveInfo in bcDrivesInfo"
         class="grid grid-cols-6 px-3 py-6 gray-line"
       >
-        <div class="col-span-4 px-2 py-6">
-          <router-link
-            :to="{
-              name: 'ViewTransaction',
-              params: { hash: driveInfo.multisig },
-            }"
-            class="text-blue-600 hover:text-blue-primary hover:underline"
-          >
-            {{ driveInfo.multisig }}
-          </router-link>
+        <div class="col-span-4 px-2 py-6 text-blue-600">
+          {{ driveInfo.multisig }}
         </div>
         <div class="col-span-1 px-2 py-6">
-          {{ driveInfo.size.lower }}
+          {{ driveInfo.size.toBigInt() }}
         </div>
         <div class="col-span-1 px-2 py-6">
           {{ driveInfo.replicatorCount }}
@@ -34,22 +26,14 @@
     <div v-for="driveInfo in bcDrivesInfo" class="lg:hidden px-5 gray-line">
       <div class="text-xs py-4">
         <div class="font-semibold text-gray-600 bg-gray-100">Drive Key</div>
-        <router-link
-          :to="{
-            name: 'ViewTransaction',
-            params: { hash: driveInfo.multisig },
-          }"
-          class="text-blue-600 hover:text-blue-primary hover:underline break-all"
-        >
-          {{ driveInfo.multisig }}
-        </router-link>
+        <div class="text-blue-600 break-all">{{ driveInfo.multisig }}</div>
       </div>
       <div class="grid grid-cols-2 text-xs pb-4">
         <div class="col-span-1">
           <div class="font-semibold text-gray-600 bg-gray-100">
             Drive Size (MB)
           </div>
-          <div>{{ driveInfo.size.lower }}</div>
+          <div>{{ driveInfo.size.toBigInt() }}</div>
         </div>
         <div class="col-span-1">
           <div class="font-semibold text-gray-600 pb-1 bg-gray-100">
@@ -138,7 +122,6 @@ import { AppState } from "@/state/appState";
 import { DriveQueryParams, UInt64 } from "tsjs-xpx-chain-sdk";
 import { ref, computed } from "vue";
 import type { DriveInfo } from "tsjs-xpx-chain-sdk";
-import { faPrescriptionBottleMedical } from "@fortawesome/free-solid-svg-icons";
 
 const props = defineProps({
   publicKey: String,

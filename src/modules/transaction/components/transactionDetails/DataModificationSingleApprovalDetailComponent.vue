@@ -15,32 +15,34 @@
       </div>
     </div>
     <div>
-      <div>Download Size</div>
-      <div>{{ txnDetail.downloadSize }} MB</div>
-    </div>
-    <div>
-      <div>Feedback Fee</div>
+      <div>Data Modification ID</div>
       <div>
-        <span class="font-bold">
-          {{ feedbackFee[0] }}
-        </span>
-        <span
-          >{{ feedbackFee[1] > 0 ? "." : ""
-          }}<span class="text-xxs">{{ feedbackFee[1] }}</span>
-        </span>
-        <img
-          src="@/assets/img/icon-xpx.svg"
-          class="ml-1 mr-2 inline-block"
-          style="top: -1px; width: 14px"
-        /><span class="font-bold">{{ nativeTokenNamespace }}</span>
+        <router-link
+          :to="{
+            name: 'ViewTransaction',
+            params: { hash: txnDetail.dataModificationId },
+          }"
+          class="text-blue-600 hover:text-blue-primary hover:underline break-all"
+        >
+          {{ txnDetail.dataModificationId }}
+        </router-link>
       </div>
     </div>
-    <div v-if="txnDetail.listOfPublicKeys.length > 0">
+    <div v-if="txnDetail.opinions.length > 0">
+      <div>Opinions</div>
+      <div class="inline-flex">
+        <div v-for="(opinion, i) in txnDetail.opinions">
+          {{ opinion.toBigInt()
+          }}<span v-if="i < txnDetail.opinions.length - 1">,</span>
+        </div>
+      </div>
+    </div>
+    <div>
       <div>Public Keys</div>
       <div>
         <div
-          class="py-1 text-blue-600 hover:text-blue-primary hover:underline"
-          v-for="pk in txnDetail.listOfPublicKeys"
+          class="py-1 text-blue-600 hover:text-blue-primary hover:underline break-all"
+          v-for="pk in txnDetail.publicKeys"
         >
           <router-link
             :to="{
@@ -57,23 +59,11 @@
 </template>
 
 <script lang="ts" setup>
-import { AppState } from "@/state/appState";
-import { computed } from "vue";
-
-const nativeTokenNamespace = AppState.nativeToken.label;
-
 const props = defineProps({
   txnDetail: {
     type: Object,
     required: true,
   },
-});
-
-const feedbackFee = computed(() => {
-  if (!props.txnDetail) {
-    return "";
-  }
-  return props.txnDetail.feedbackFeeAmount.toString().split(".");
 });
 </script>
 
