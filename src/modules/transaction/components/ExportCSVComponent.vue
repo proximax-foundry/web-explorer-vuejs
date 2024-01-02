@@ -1,27 +1,355 @@
 <template>
   <button
     class="mr-10 w-32 blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto"
-    @click="downloadCSV"
+    @click="onExport = !onExport"
   >
     Export CSV
   </button>
+  <div v-if="onExport">
+    <div class="overlay">
+        <div class="modal">
+          <div class="py-3">Select export type</div>
+          <div>
+            <select
+              v-model="selectedTxnType"
+              @change="changeSearchTxnType"
+              class="border border-gray-200 px-2 py-1 w-full focus:outline-none"
+            >
+              <option value="all" class="text-sm">All</option>
+              <option
+                v-bind:key="txnType.value"
+                v-for="txnType in txnTypeList"
+                :value="txnType.value"
+                class="text-sm"
+              >
+                {{ txnType.label }}
+              </option>
+            </select>
+          </div>
+          <div v-if="accPublicKey">
+            <div class="py-3">Filter by:</div>
+            <div class="border border-gray-200 px-2 py-1 focus:outline-none">
+              <div>{{ accPublicKey }}</div>
+            </div>
+          </div>
+          <div class="py-3">Choose download option:</div>
+          <div class="flex">
+            <div class="mr-3">
+              <input type="radio" id="blockNumber" value="blockNumber" class="mr-1" v-model="option" />
+              <label for="blockNumber">Block Number</label>
+            </div>
+            <div>
+              <input type="radio" id="day" value="day" class="mr-1" v-model="option" />
+              <label for="date">Day</label>
+            </div>
+          </div>
+          <div v-if="option === 'blockNumber'">
+            <div class="py-3">Please enter a range:</div>
+            <div class="flex">
+              <div class="mr-4">
+                <label for="startBlock" class="font-bold block mb-2"> Start Block</label>
+                <div class="border border-gray-200 px-2 py-1 focus:outline-none">
+                  <input type="number" v-model="startBlock" class="focus:outline-none" placeholder="0" min="1"/>
+                </div>
+              </div>
+              <div>
+                <label for="endBlock" class="font-bold block mb-2"> End Block </label>
+                <div class="border border-gray-200 px-2 py-1 focus:outline-none">
+                  <input type="number" v-model="endBlock" class="focus:outline-none" placeholder="0" min="1"/>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else>
+            <div class="py-3">Download latest transactions:</div>
+            <div class="flex justify-center items-center">
+              <div class="mr-4">
+                <label for="inputDay" class="font-bold block mb-2">Days</label>
+                <div class="border border-gray-200 px-2 py-1 focus:outline-none">
+                  <input type="number" v-model="inputDay" class="focus:outline-none" placeholder="Enter the number of days" min="1" oninput="validity.valid||(value='');"/>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mt-10 text-center">
+              <button @click="onExport = !onExport, clearInput()" class="text-black font-bold text-xs mr-1 sm:mr-5 mt-2 focus:outline-none disabled:opacity-50">Cancel</button>
+              <button type="submit" v-if="!checkTransactions" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledValidate" @click="downloadCSV">Download</button>
+              <button type="button" v-if="checkTransactions" class="default-btn focus:outline-none disabled:opacity-50" >
+                <div class="flex">
+                  <div class="animate-spin rounded-full h-3.5 w-4 border-b-2"></div>
+                </div>
+              </button>
+          </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import type { TxnExchangeOffer } from "@/models/transactions/exchangeOffer";
 import type { RestrictionModification } from "@/models/transactions/restrictionModification";
 import type { SDA } from "@/models/transactions/sda";
-import type { TxnList } from "@/models/transactions/transaction";
+import { TransactionFilterType, TransactionFilterTypes, type TxnList } from "@/models/transactions/transaction";
 import { AppState } from "@/state/appState";
 import { Helper } from "@/util/typeHelper";
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
+import { AccountUtils } from "@/util/accountUtil";
+import { TransactionUtils } from "@/util/transactionUtils";
+import type { Transaction } from "tsjs-xpx-chain-sdk";
+import { ChainProfileConfig } from "@/models/stores";
+import { networkState } from "@/state/networkState";
 
 const props = defineProps({
-  selectedTxnType: String,
-  transactions: Array<any>,
+  accPublicKey: {
+    type: String,
+    required:false
+  }
 });
 
+const option = ref('blockNumber')
+const onExport = ref(false)
+const checkTransactions = ref(false)
+const isDisabledValidate = ref<boolean>(true)
+const startBlock = ref<number | null>(null)
+const endBlock = ref<number | null>(null)
+const inputDay = ref<number | null>(null)
+const transactions = ref<any[] | undefined>([]);
+const totalPage = ref<number>(0);
+const selectedTxnType = ref("all");
+const txnTypeList = Object.entries(TransactionFilterType).map(
+  ([label, value]) => ({ label, value })
+);
+const QueryParamsType = ref<number[] | undefined>(undefined);
+const transactionGroupType = Helper.getTransactionGroupType();
+const blockDescOrderSortingField = Helper.createTransactionFieldOrder(
+  Helper.getTransactionSortField().BLOCK,
+  Helper.getQueryParamOrder_v2().DESC
+);
 const nativeTokenName = computed(() => AppState.nativeToken.label);
+
+const formatConfirmedTransaction = async (transactions: Transaction[]) => {
+  let formattedTxns = [];
+
+  switch (selectedTxnType.value) {
+    case TransactionFilterType.TRANSFER:
+      formattedTxns = await TransactionUtils.formatConfirmedMixedTxns(
+        transactions
+      );
+      break;
+    case TransactionFilterType.ACCOUNT:
+      formattedTxns = await TransactionUtils.formatConfirmedAccountTransaction(
+        transactions
+      );
+      break;
+    case TransactionFilterType.AGGREGATE:
+      formattedTxns =
+        await TransactionUtils.formatConfirmedAggregateTransaction(
+          transactions
+        );
+      break;
+    case TransactionFilterType.RESTRICTION:
+      formattedTxns =
+        await TransactionUtils.formatConfirmedRestrictionTransaction(
+          transactions
+        );
+      break;
+    case TransactionFilterType.SECRET:
+      formattedTxns = await TransactionUtils.formatConfirmedSecretTransaction(
+        transactions
+      );
+      break;
+    case TransactionFilterType.ALIAS:
+      formattedTxns = await TransactionUtils.formatConfirmedAliasTransaction(
+        transactions
+      );
+      break;
+    case TransactionFilterType.ASSET:
+      formattedTxns = await TransactionUtils.formatConfirmedAssetTransaction(
+        transactions
+      );
+      break;
+    case TransactionFilterType.METADATA:
+      formattedTxns = await TransactionUtils.formatConfirmedMetadataTransaction(
+        transactions
+      );
+      break;
+    case TransactionFilterType.CHAIN:
+      formattedTxns = await TransactionUtils.formatConfirmedChainTransaction(
+        transactions
+      );
+      break;
+    case TransactionFilterType.EXCHANGE:
+      formattedTxns = await TransactionUtils.formatConfirmedExchangeTransaction(
+        transactions
+      );
+      break;
+    case TransactionFilterType.LINK:
+      formattedTxns = await TransactionUtils.formatConfirmedLinkTransaction(
+        transactions
+      );
+      break;
+    case TransactionFilterType.LOCK:
+      formattedTxns = await TransactionUtils.formatConfirmedLockTransaction(
+        transactions
+      );
+      break;
+    case TransactionFilterType.NAMESPACE:
+      formattedTxns =
+        await TransactionUtils.formatConfirmedNamespaceTransaction(
+          transactions
+        );
+      break;
+    case TransactionFilterType['SDA EXCHANGE']:
+      formattedTxns =
+        await TransactionUtils.formatConfirmedSdaExchangeTransaction(
+          transactions
+        );
+      break;
+    default:
+      formattedTxns = await TransactionUtils.formatConfirmedMixedTxns(
+        transactions
+      );
+      break;
+  }
+  return formattedTxns;
+};
+
+let loadTransactions = async () => {
+  if (!AppState.isReady) {
+    setTimeout(loadTransactions, 1000);
+    return;
+  }
+  if (!AppState.chainAPI) {
+    return;
+  }
+  checkTransactions.value = true
+  let txnQueryParams = Helper.createTransactionQueryParams();
+
+  if(props.accPublicKey){
+    let isPublicKey = props.accPublicKey.length === 64;
+    if (props.accPublicKey !== "" && !isPublicKey) {
+      const account = await AccountUtils.getAccountFromAddress(
+        props.accPublicKey
+      );
+      if (account) {
+        txnQueryParams.publicKey = account.publicKey;
+      }
+    } else {
+      const publicKey = props.accPublicKey;
+      const address = AccountUtils.getAddressFromPublicKey(publicKey);
+      if (address) {
+        txnQueryParams.publicKey = publicKey;
+      }
+    }
+  }
+  if(option.value === "blockNumber"){
+    if(startBlock.value && endBlock.value){
+      txnQueryParams.fromHeight = startBlock.value;
+      txnQueryParams.toHeight = endBlock.value;
+    }
+  }
+  else{
+    if(inputDay.value){
+      const chainConfig = new ChainProfileConfig(networkState.chainNetworkName);
+      chainConfig.init();
+      let blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
+      let blockTargetTimeByDay = (60 * 60 * 24) / blockTargetTime;
+      endBlock.value = await AppState.chainAPI.chainAPI.getBlockchainHeight()
+      const calculateHeight = endBlock.value -  Math.floor(inputDay.value * blockTargetTimeByDay)
+      if(calculateHeight<=0){
+        txnQueryParams.fromHeight = 1
+      }
+      else{
+        txnQueryParams.fromHeight = calculateHeight
+      }
+    }
+  }
+  if (!selectedTxnType.value || selectedTxnType.value == "all") {
+    txnQueryParams.embedded = false;
+  } else {
+    txnQueryParams.embedded = true;
+  }
+
+  if (QueryParamsType.value) { 
+    txnQueryParams.type = QueryParamsType.value;
+  }
+  txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
+  let transactionSearchResult = await TransactionUtils.searchTxns(
+    transactionGroupType.CONFIRMED,
+    txnQueryParams
+  );
+  if (transactionSearchResult.transactions.length > 0) {
+    totalPage.value = transactionSearchResult.pagination.totalPages;
+    if(totalPage.value >= 1){
+      for(let i = 1; i<=totalPage.value;i++){
+        txnQueryParams.pageNumber = i;
+        let transactionSearchAllResult = await TransactionUtils.searchTxns(transactionGroupType.CONFIRMED, txnQueryParams);
+        if(transactionSearchAllResult.transactions.length > 0){
+          let formattedTxns = await formatConfirmedTransaction(transactionSearchAllResult.transactions);
+          for(let j = 0; j<20;j++){
+            if(formattedTxns[j] != undefined){
+              transactions.value!.push(formattedTxns[j])
+            }
+          }
+        }
+      }
+    }
+  } else {
+    transactions.value = []
+  }
+};
+
+const changeSearchTxnType = () => {
+  transactions.value = [];
+  let txnFilterGroup = selectedTxnType.value;
+  switch (txnFilterGroup) {
+    case TransactionFilterType.TRANSFER:
+      QueryParamsType.value = TransactionFilterTypes.getTransferTypes();
+      break;
+    case TransactionFilterType.ACCOUNT:
+      QueryParamsType.value = TransactionFilterTypes.getAccountTypes();
+      break;
+    case TransactionFilterType.ASSET:
+      QueryParamsType.value = TransactionFilterTypes.getAssetTypes();
+      break;
+    case TransactionFilterType.ALIAS:
+      QueryParamsType.value = TransactionFilterTypes.getAliasTypes();
+      break;
+    case TransactionFilterType.NAMESPACE:
+      QueryParamsType.value = TransactionFilterTypes.getNamespaceTypes();
+      break;
+    case TransactionFilterType.METADATA:
+      QueryParamsType.value = TransactionFilterTypes.getMetadataTypes();
+      break;
+    case TransactionFilterType.CHAIN:
+      QueryParamsType.value = TransactionFilterTypes.getChainTypes();
+      break;
+    case TransactionFilterType.EXCHANGE:
+      QueryParamsType.value = TransactionFilterTypes.getExchangeTypes();
+      break;
+    case TransactionFilterType.AGGREGATE:
+      QueryParamsType.value = TransactionFilterTypes.getAggregateTypes();
+      break;
+    case TransactionFilterType.LINK:
+      QueryParamsType.value = TransactionFilterTypes.getLinkTypes();
+      break;
+    case TransactionFilterType.LOCK:
+      QueryParamsType.value = TransactionFilterTypes.getLockTypes();
+      break;
+    case TransactionFilterType.SECRET:
+      QueryParamsType.value = TransactionFilterTypes.getSecretTypes();
+      break;
+    case TransactionFilterType.RESTRICTION:
+      QueryParamsType.value = TransactionFilterTypes.getRestrictionTypes();
+      break;
+    case TransactionFilterType['SDA EXCHANGE']:
+      QueryParamsType.value = TransactionFilterTypes.getSdaExchangeTypes();
+      break;
+    default:
+      QueryParamsType.value = undefined;
+      break;
+  }
+};
 
 const displayAssetDiv = (sda: SDA) => {
   let asset_div;
@@ -94,8 +422,18 @@ const displayModification = (data: RestrictionModification[]) => {
   }
   return modification_rows.join("  ");
 };
-const downloadCSV = () => {
-  let objArray = exportValue();
+
+const clearInput = () => {
+  onExport.value = false
+  checkTransactions.value = false
+  startBlock.value = null
+  endBlock.value = null
+  inputDay.value = null
+  transactions.value = []
+}
+
+const downloadCSV = async () => {
+  let objArray = await exportValue();
   const array = typeof objArray !== "object" ? JSON.parse(objArray) : objArray;
   let str = "";
   let csvData = "";
@@ -112,7 +450,7 @@ const downloadCSV = () => {
   let uniqueChars = [...new Set(header)];
   csvData += uniqueChars.join(",") + "\r\n";
   csvData += str;
-  const exportedFilenmae = props.selectedTxnType + '.csv' || 'export.csv'; // eslint-disable-line
+  const exportedFilenmae = selectedTxnType.value + '.csv' || 'export.csv'; // eslint-disable-line
   const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
   if (navigator.msSaveBlob) {
     // IE 10+
@@ -129,15 +467,17 @@ const downloadCSV = () => {
       document.body.removeChild(link);
     }
   }
+  clearInput()
 };
 
-const exportValue = () => {
+const exportValue = async () => {
+  await loadTransactions()
   let export_Value: any[] = [];
-  if (!props.transactions) {
+  if (!transactions.value) {
     return "";
   }
-  props.transactions.forEach((data) => {
-    switch (props.selectedTxnType) {
+  transactions.value.forEach((data) => {
+    switch (selectedTxnType.value) {
       case "Transfer":
         export_Value.push({
           TxHash: data.hash,
@@ -427,4 +767,51 @@ const exportValue = () => {
   let export_Json = JSON.stringify(export_Value);
   return export_Json;
 };
+
+watch([startBlock, endBlock], async ([newStartBlock, newEndBlock]) => {
+  if(!newStartBlock || !newEndBlock || newStartBlock <= 0 || newEndBlock <= 0){
+    isDisabledValidate.value = true
+  }
+  else if(newStartBlock > newEndBlock){
+    isDisabledValidate.value = true
+  }
+  else{
+    isDisabledValidate.value = false
+  }
+})
+
+watch(inputDay, (newInputDay) => {
+  if(!newInputDay || newInputDay <= 0){
+    isDisabledValidate.value = true
+  }
+  else{
+    isDisabledValidate.value = false
+  }
+})
 </script>
+
+<style scoped lang="scss">
+.overlay {
+  position: fixed;
+  z-index: 9998;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, .5);
+}
+.modal {
+  position: relative;
+  width: 550px;
+  z-index: 9999;
+  margin: 102px auto;
+  padding: 20px 30px;
+  background-color: #fff;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+</style>

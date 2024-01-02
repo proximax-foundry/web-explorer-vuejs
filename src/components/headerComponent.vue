@@ -4,30 +4,61 @@
       <div class="container mx-auto py-2">
         <div class="md:flex md:justify-between">
           <div class="flex items-center justify-center mb-3 md:mb-0">
-            <router-link :to="{ name: 'Home' }"><img src="@/assets/img/sirius-explorer-logo-whitetext.svg"
-                class="w-40 mr-7"></router-link>
+            <router-link :to="{ name: 'Home' }"
+              ><img
+                src="@/assets/img/sirius-explorer-logo-whitetext.svg"
+                class="w-40 mr-7"
+            /></router-link>
           </div>
           <div class="mx-3 md:mx-0">
             <div class="border border-gray-300 my-1 searchbar flex bg-white">
-              <selectFilter :selected="searchFilter" class="inline-block border-r border-gray-300"
-                @selected-filter="updateFilter" />
-              <input type="text" :placeholder="searchPlaceHolder" v-model="searchText"
-                class="text-tsm sm:w-48 lg:w-96 outline-none px-2 py-1 flex-grow" @keyup.enter="search" />
-              <div v-if="isSearching" class="flex justify-center items-center w-10">
+              <selectFilter
+                :selected="searchFilter"
+                class="inline-block border-r border-gray-300"
+                @selected-filter="updateFilter"
+              />
+              <input
+                type="text"
+                :placeholder="searchPlaceHolder"
+                v-model="searchText"
+                class="text-tsm sm:w-48 lg:w-96 outline-none px-2 py-1 flex-grow"
+                @keyup.enter="search"
+              />
+              <div
+                v-if="isSearching"
+                class="flex justify-center items-center w-10"
+              >
                 <div class="flex justify-center items-center border-gray-400">
-                  <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-navy-primary mr-2"></div>
+                  <div
+                    class="animate-spin rounded-full h-5 w-5 border-b-2 border-navy-primary mr-2"
+                  ></div>
                 </div>
               </div>
-              <div v-else class="hover:bg-blue-100 cursor-pointer flex justify-center items-center w-10">
-                <img src="@/assets/img/icon-search.svg" class="w-4 inline-block search" @click="search" />
+              <div
+                v-else
+                class="hover:bg-blue-100 cursor-pointer flex justify-center items-center w-10"
+              >
+                <img
+                  src="@/assets/img/icon-search.svg"
+                  class="w-4 inline-block search"
+                  @click="search"
+                />
               </div>
             </div>
             <div class="flex items-center justify-end">
-              <router-link :to="{ name: 'Home' }"><img src="@/assets/img/icon-home.svg"
-                  class="h-5 w-5 mr-4" /></router-link>
+              <router-link :to="{ name: 'Home' }"
+                ><img src="@/assets/img/icon-home.svg" class="h-5 w-5 mr-4"
+              /></router-link>
               <div class="header-links">
-                <router-link :to="{ name: 'ViewBlockList' }">Blocks</router-link>
-                <router-link :to="{ name: 'ViewTransactionList' }">Transactions</router-link>
+                <router-link :to="{ name: 'ViewBlockList' }"
+                  >Blocks</router-link
+                >
+                <router-link :to="{ name: 'ViewTransactionList' }"
+                  >Transactions</router-link
+                >
+                <router-link :to="{ name: 'ViewHarvesterList' }"
+                  >Harvesters</router-link
+                >
                 <!-- <a href="#">Accounts</a> -->
               </div>
               <selectNetwork class="ml-5" />

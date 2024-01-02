@@ -88,6 +88,27 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
+    path: "/metadata/:compositeHash",
+    name: "ViewMetadata",
+    props: true,
+    component: () => import("@/modules/metadata/views/ViewMetadata.vue"),
+    meta: {
+      title: "View Metadata",
+    },
+  },
+
+  {
+    path: "/tx",
+    name: "ViewAccountTransactionList",
+    props: route => ({ accountParam: route.query.a }),
+    component: () =>
+      import("@/modules/transaction/views/ViewTransactionList.vue"),
+    meta: {
+      title: "View Account Transactions",
+    },
+  },
+
+  {
     path: "/tx",
     name: "ViewTransactionList",
     props: true,
@@ -125,6 +146,16 @@ const routes: RouteRecordRaw[] = [
     component: () => import("@/modules/block/views/ViewBlock.vue"),
     meta: {
       title: "View Block",
+    },
+  },
+
+  {
+    path: "/harvester",
+    name: "ViewHarvesterList",
+    props: true,
+    component: () => import("@/modules/harvester/views/ViewHarvesterList.vue"),
+    meta: {
+      title: "View Harvesters",
     },
   },
 

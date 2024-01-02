@@ -23,7 +23,14 @@
                     Scoped Metadata Key
                   </div>
                   <div class="text-xs" v-if="data.scopedMetadataKeyHex">
-                    {{ data.scopedMetadataKeyHex }}
+                    <router-link
+                    :to="{
+                      name: 'ViewMetadata',
+                      params: { compositeHash: data.compositeHash },
+                    }"
+                    class="text-blue-600 hover:text-blue-primary uppercase hover:underline"
+                    >{{ data.scopedMetadataKeyHex }}
+                  </router-link>
                     <div class="inline-block text-xs ml-2 text-gray-400">
                       hex
                     </div>
@@ -54,7 +61,14 @@
         >
           <template #body="{ data }">
             <div class="text-xs" v-if="data.scopedMetadataKeyHex">
-              {{ data.scopedMetadataKeyHex }}
+              <router-link
+                    :to="{
+                      name: 'ViewMetadata',
+                      params: { compositeHash: data.compositeHash },
+                    }"
+                    class="text-blue-600 hover:text-blue-primary uppercase hover:underline"
+                    >{{ data.scopedMetadataKeyHex }}
+                  </router-link>
               <div class="inline-block ml-2 font-semibold text-gray-400">
                 hex
               </div>

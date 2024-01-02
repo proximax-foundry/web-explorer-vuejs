@@ -1,4 +1,5 @@
 import { AppState } from "@/state/appState";
+import { Buffer } from "buffer";
 import {
   Convert,
   MetadataQueryParams,
@@ -9,8 +10,21 @@ import {
 import isValidUTF8 from "utf-8-validate";
 
 export interface MetadataObj {
+  compositeHash: string;
   scopedMetadataKeyUtf8: string | null;
   scopedMetadataKeyHex: string;
+  value: string;
+}
+
+export interface MetadataHistoryObj {
+  block: number;
+  timestamp: string;
+  scopedMetadataKeyHex: string;
+  scopedMetadataKeyUtf8: string;
+  accPublicKey: string;
+  assetId: string | null;
+  namespace: string | null;
+  type: string;
   value: string;
 }
 
@@ -49,6 +63,7 @@ export class MetadataUtils {
 
       fetchMetadata.metadataEntries.forEach((metadataEntry) => {
         accountMetadata = {
+          compositeHash: metadataEntry.compositeHash,
           scopedMetadataKeyUtf8:
             metadataEntry.scopedMetadataKey.toHex() ==
             this.convertUtf8(metadataEntry.scopedMetadataKey.toHex())
@@ -80,6 +95,7 @@ export class MetadataUtils {
       );
       fetchMetadata.metadataEntries.forEach((metadataEntry) => {
         assetMetadata = {
+          compositeHash: metadataEntry.compositeHash,
           scopedMetadataKeyUtf8:
             metadataEntry.scopedMetadataKey.toHex() ==
             this.convertUtf8(metadataEntry.scopedMetadataKey.toHex())
@@ -114,6 +130,7 @@ export class MetadataUtils {
 
       fetchMetadata.metadataEntries.forEach((metadataEntry) => {
         namespaceMetadata = {
+          compositeHash: metadataEntry.compositeHash,
           scopedMetadataKeyUtf8:
             metadataEntry.scopedMetadataKey.toHex() ==
             this.convertUtf8(metadataEntry.scopedMetadataKey.toHex())
