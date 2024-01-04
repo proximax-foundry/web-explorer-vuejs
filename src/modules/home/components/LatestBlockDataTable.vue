@@ -63,7 +63,7 @@
                   ><span class="text-ellipsis overflow-hidden w-44">{{
                     data.signer.publicKey
                   }}</span
-                  >...</router-link
+                  ></router-link
                 >
               </div>
               <div class="text-xs text-gray-500 mb-4 mt-1">

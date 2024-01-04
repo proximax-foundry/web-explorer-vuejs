@@ -32,7 +32,7 @@
                 class="uppercase font-bold text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex w-20"
                 ><span class="text-ellipsis overflow-hidden">
                   {{ data.hash }}</span
-                >...</router-link
+                ></router-link
               >
               <div class="text-xs text-gray-500 mb-4 mt-1">
                 {{ countDuration(data.timestamp) }} ago
