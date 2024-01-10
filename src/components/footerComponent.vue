@@ -15,7 +15,7 @@
                 <a href="http://t.me/ProximaXio" target="_new"
                   ><font-awesome-icon :icon="faTelegramPlane" class="w-4 h-4"
                 /></a>
-                <a href="https://twitter.com/ProximaXio" target="_new"
+                <a href="https://twitter.com/SiriusXPX" target="_new"
                   ><font-awesome-icon :icon="faTwitter" class="w-4 h-4"
                 /></a>
                 <a href="https://github.com/proximax-storage" target="_new"
@@ -65,10 +65,10 @@
             <a href="https://bcdocs.xpxsirius.io/" target="=_new"
               >Getting Started</a
             >
-            <a href="https://www.proximax.io/en/wallet" target="=_new"
+            <a href="https://www.siriuschain.io/discover##sirius-wallet" target="=_new"
               >Create Sirius Wallet Account</a
             >
-            <a href="https://www.proximax.io/en#Tokenomics" target="=_new"
+            <a href="https://www.siriuschain.io/tools-and-staking##about-xpx" target="=_new"
               >Learn More About XPX</a
             >
             <a href="https://www.proximax.io/en#Participate" target="=_new"
@@ -80,7 +80,7 @@
           <div class="text-white text-xs md:text-tsm mb-4">Company</div>
           <div class="links">
             <a
-              href="https://www.proximax.io/technology/#Architecture"
+              href="https://www.proximax.ltd/en/technology#Architecture"
               target="_new"
               >Platform</a
             >
