@@ -65,10 +65,10 @@
             <a href="https://bcdocs.xpxsirius.io/" target="=_new"
               >Getting Started</a
             >
-            <a href="https://www.siriuschain.io/discover##sirius-wallet" target="=_new"
+            <a href="https://www.siriuschain.io/discover#sirius-wallet" target="=_new"
               >Create Sirius Wallet Account</a
             >
-            <a href="https://www.siriuschain.io/tools-and-staking##about-xpx" target="=_new"
+            <a href="https://www.siriuschain.io/tools-and-staking#about-xpx" target="=_new"
               >Learn More About XPX</a
             >
             <a href="https://www.proximax.io/en#Participate" target="=_new"
