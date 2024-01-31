@@ -1,6 +1,6 @@
 <template>
-  <div v-if="assets">
-    <div class="text-gray-500 mb-5 font-bold" v-if="assets.name">
+  <div>
+    <div class="text-gray-500 mb-5 font-bold" v-if="assets && assets.name">
       <div class="text-blue-primary text-md font-bold uppercase">
         {{ assets.name }}
       </div>
@@ -9,12 +9,7 @@
     <div v-else>
       <p class="text-gray-500 mb-5 text-sm font-bold">Asset Details</p>
     </div>
-    <div v-if="isShowInvalid">
-      <div class="p-3 bg-yellow-100 text-yellow-700">
-        Asset is not available in {{ networkName }}
-      </div>
-    </div>
-    <div v-else-if="!isShowInvalid  && !assets">
+    <div v-if="!isShowInvalid && !assets">
       <div class="flex justify-center items-center border-gray-400 mt-10 mb-20">
         <div
           class="animate-spin rounded-full h-5 w-5 border-b-2 border-navy-primary mr-2"
@@ -22,7 +17,7 @@
         <span class="text-tsm">Fetching Asset Details</span>
       </div>
     </div>
-    <div v-else>
+    <div v-else-if="assets">
       <div class="md:grid md:grid-cols-2">
         <div class="filter shadow-xl border border-gray-50 p-5 mb-15 md:mr-2">
           <div class="text-xs font-bold mb-5 ml-2">Overview</div>
@@ -173,6 +168,11 @@
         </transition>
       </div>
     </div>
+    <div v-else>
+      <div class="p-3 bg-yellow-100 text-yellow-700">
+        Asset is not available in {{ networkName }}
+      </div>
+    </div>
   </div>
 </template>
 
@@ -184,7 +184,7 @@ import { AppState } from "@/state/appState";
 import { AssetUtils } from "@/util/assetUtil";
 import { Helper } from "@/util/typeHelper";
 import { networkState } from "@/state/networkState";
-import { Address, NamespaceId, RichlistEntry } from "tsjs-xpx-chain-sdk";
+import { NamespaceId, RichlistEntry } from "tsjs-xpx-chain-sdk";
 import { NamespaceUtils } from "@/util/namespaceUtil";
 import { MetadataUtils, type MetadataObj } from "@/util/metadataUtil";
 import type { AssetObj } from "@/util/assetUtil";
@@ -202,7 +202,6 @@ const isShowInvalid = ref(false);
 const richList = ref<RichlistEntry[]>([]);
 const metadata = ref<MetadataObj[]>([]);
 const assets = ref<AssetObj | null>(null);
-const accPublicKey= ref<string>('');
 const setCurrentComponent = (page: string) => {
   currentComponent.value = page;
 };
@@ -212,55 +211,58 @@ const networkName = computed(() => {
 });
 
 const loadAsset = async () => {
-  try{
-  if (!AppState.isReady && !networkName.value) {
-    setTimeout(loadAsset, 1000);
-    return;
-  }
-  const accountMetadata = await MetadataUtils.getAssetMetadata(props.id);
-  metadata.value = accountMetadata;
-  const asset = await AssetUtils.getAssetProperties(props.id);
-  const richlist = await AssetUtils.getRichList(props.id);
+  try {
+    if (!AppState.isReady && !networkName.value) {
+      setTimeout(loadAsset, 1000);
+      return;
+    }
+    const accountMetadata = await MetadataUtils.getAssetMetadata(props.id);
+    metadata.value = accountMetadata;
+    const asset = await AssetUtils.getAssetProperties(props.id);
+    const richlist = await AssetUtils.getRichList(props.id);
 
-  if (asset) {
-    isShowInvalid.value = false;
-    assets.value = asset;
-    richList.value = richlist;
-    return;
-  } else {
-    let ns = new NamespaceId(props.id.toLowerCase());
-    const namespaceInfo = await NamespaceUtils.fetchNamespaceInfo(ns.toHex());
-
-    if (namespaceInfo) {
+    if (asset) {
       isShowInvalid.value = false;
-      if (namespaceInfo.alias.type == 1) {
-        const assetAlias = await AssetUtils.getAssetProperties(
-          namespaceInfo.alias.id
-        );
-        const richlistAlias = await AssetUtils.getRichList(
-          namespaceInfo.alias.id
-        );
-        if (assetAlias) {
-          assets.value = assetAlias;
-          richList.value = richlistAlias;
+      assets.value = asset;
+      richList.value = richlist;
+      return;
+    } else {
+      let ns = new NamespaceId(props.id.toLowerCase());
+      const namespaceInfo = await NamespaceUtils.fetchNamespaceInfo(ns.toHex());
+
+      if (namespaceInfo) {
+        isShowInvalid.value = false;
+        if (namespaceInfo.alias.type == 1) {
+          const assetAlias = await AssetUtils.getAssetProperties(
+            namespaceInfo.alias.id
+          );
+          const richlistAlias = await AssetUtils.getRichList(
+            namespaceInfo.alias.id
+          );
+          if (assetAlias) {
+            assets.value = assetAlias;
+            richList.value = richlistAlias;
+          }
+        } else {
+          assets.value = null;
+          isShowInvalid.value = true;
         }
       } else {
+        assets.value = null;
         isShowInvalid.value = true;
       }
-    } else {
-      isShowInvalid.value = true;
     }
+  } catch (e) {
+    assets.value = null;
+    isShowInvalid.value = true;
+    console.log(e);
   }
-}
-catch(e){
-  isShowInvalid.value = true;
-  console.log(e)
-}
 };
 loadAsset();
 
 emitter.on("CHANGE_NETWORK", (payload: boolean) => {
   if (payload) {
+    assets.value = null;
     isShowInvalid.value = false;
     loadAsset();
   }
