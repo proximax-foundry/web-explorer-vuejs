@@ -3,12 +3,14 @@
     <div class="bg-blue-theme">
       <div class="container mx-auto py-2">
         <div class="md:flex md:justify-between">
-          <div class="flex items-center justify-center mb-3 md:mb-0">
+          <div class="flex items-center justify-center mx-5 mb-3 md:mb-0">
             <router-link :to="{ name: 'Home' }"
               ><img
                 src="@/assets/img/sirius-explorer-logo-whitetext.svg"
-                class="w-40 mr-7"
+                class="w-40 pr-3"
             /></router-link>
+            <selectNetwork class="visible xs:hidden"/>
+
           </div>
           <div class="mx-3 md:mx-0">
             <div class="border border-gray-300 my-1 searchbar flex bg-white">
@@ -45,7 +47,7 @@
                 />
               </div>
             </div>
-            <div class="flex items-center justify-end">
+            <div class="flex justify-center items-center md:justify-end">
               <router-link :to="{ name: 'Home' }"
                 ><img src="@/assets/img/icon-home.svg" class="h-5 w-5 mr-4"
               /></router-link>
@@ -61,7 +63,7 @@
                 >
                 <!-- <a href="#">Accounts</a> -->
               </div>
-              <selectNetwork class="ml-5" />
+              <selectNetwork class="hidden xs:block md:ml-5" />
             </div>
           </div>
         </div>
