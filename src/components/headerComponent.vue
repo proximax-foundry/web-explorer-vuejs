@@ -46,26 +46,23 @@
               </div>
             </div>
             <div
-              class="flex items-center sm:justify-end justify-center flex-wrap xs:flex-nowrap"
+              class="flex items-center xs:justify-end justify-between flex-wrap xs:flex-nowrap"
             >
               <router-link :to="{ name: 'Home' }"
                 ><img
                   src="@/assets/img/icon-home.svg"
-                  class="h-5 w-5 sm:mr-4 mr-2"
+                  class="h-5 w-5 sm:mr-4 xs:mr-2"
               /></router-link>
-              <div class="header-links flex items-center justify-end">
-                <router-link :to="{ name: 'ViewBlockList' }"
-                  >Blocks</router-link
-                >
-                <router-link :to="{ name: 'ViewTransactionList' }"
-                  >Transactions</router-link
-                >
-                <router-link :to="{ name: 'ViewHarvesterList' }"
-                  >Harvesters</router-link
-                >
-              </div>
+              <router-link :to="{ name: 'ViewBlockList' }"
+                ><span class="header-link">Blocks</span></router-link
+              >
+              <router-link :to="{ name: 'ViewTransactionList' }"
+                ><span class="header-link">Transactions</span></router-link
+              >
+              <router-link :to="{ name: 'ViewHarvesterList' }"
+                ><span class="header-link">Harvesters</span></router-link
+              >
               <selectNetwork class="md:ml-5" />
-              <!-- <a href="#">Accounts</a> -->
             </div>
           </div>
         </div>
@@ -170,11 +167,8 @@ const searchPlaceHolder = computed(() => {
 </script>
 
 <style lang="scss">
-.header-links {
-  @apply my-2;
-  a {
-    @apply mr-1.5 sm:mr-4 duration-200 transition-all text-xs text-gray-200;
-  }
+.header-link {
+  @apply xs:mr-1.5 sm:mr-4 duration-200 transition-all text-xs text-gray-200;
 }
 
 .searchbar {
