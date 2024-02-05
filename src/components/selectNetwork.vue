@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="w-52">
     <div
       @click="toggleSelection = !toggleSelection"
       class="ml-auto mr-auto py-1 cursor-pointer"

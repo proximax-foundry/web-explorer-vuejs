@@ -1,16 +1,14 @@
 <template>
   <header class="z-10 fixed w-full">
     <div class="bg-blue-theme">
-      <div class="container mx-auto py-2">
+      <div class="md:container mx-auto py-2">
         <div class="md:flex md:justify-between">
           <div class="flex items-center justify-center mx-5 mb-3 md:mb-0">
             <router-link :to="{ name: 'Home' }"
               ><img
                 src="@/assets/img/sirius-explorer-logo-whitetext.svg"
-                class="w-40 pr-3"
+                class="w-40 mr-7"
             /></router-link>
-            <selectNetwork class="visible xs:hidden"/>
-
           </div>
           <div class="mx-3 md:mx-0">
             <div class="border border-gray-300 my-1 searchbar flex bg-white">
@@ -23,7 +21,7 @@
                 type="text"
                 :placeholder="searchPlaceHolder"
                 v-model="searchText"
-                class="text-tsm sm:w-48 lg:w-96 outline-none px-2 py-1 flex-grow"
+                class="truncate ... text-tsm outline-none px-2 py-1 flex-grow"
                 @keyup.enter="search"
               />
               <div
@@ -47,11 +45,15 @@
                 />
               </div>
             </div>
-            <div class="flex justify-center items-center md:justify-end">
+            <div
+              class="flex items-center sm:justify-end justify-center flex-wrap xs:flex-nowrap"
+            >
               <router-link :to="{ name: 'Home' }"
-                ><img src="@/assets/img/icon-home.svg" class="h-5 w-5 mr-4"
+                ><img
+                  src="@/assets/img/icon-home.svg"
+                  class="h-5 w-5 sm:mr-4 mr-2"
               /></router-link>
-              <div class="header-links">
+              <div class="header-links flex items-center justify-end">
                 <router-link :to="{ name: 'ViewBlockList' }"
                   >Blocks</router-link
                 >
@@ -61,9 +63,9 @@
                 <router-link :to="{ name: 'ViewHarvesterList' }"
                   >Harvesters</router-link
                 >
-                <!-- <a href="#">Accounts</a> -->
               </div>
-              <selectNetwork class="hidden xs:block md:ml-5" />
+              <selectNetwork class="md:ml-5" />
+              <!-- <a href="#">Accounts</a> -->
             </div>
           </div>
         </div>
@@ -170,9 +172,8 @@ const searchPlaceHolder = computed(() => {
 <style lang="scss">
 .header-links {
   @apply my-2;
-
   a {
-    @apply mr-4 duration-200 transition-all text-xs text-gray-200;
+    @apply mr-1.5 sm:mr-4 duration-200 transition-all text-xs text-gray-200;
   }
 }
 
