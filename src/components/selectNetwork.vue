@@ -1,11 +1,11 @@
 <template>
-  <div class="w-52">
+  <div class="w-full xs:w-52">
     <div
       @click="toggleSelection = !toggleSelection"
-      class="ml-auto mr-auto py-1 cursor-pointer"
+      class="py-1 cursor-pointer"
     >
       <div class="flex justify-between">
-        <div class="flex flex-col ml-2 text-left">
+        <div class="flex flex-col ml-1 text-left">
           <div
             v-if="selectedNetwork.name != ''"
             class="mt-1 text-xs text-white"
