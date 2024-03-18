@@ -195,7 +195,7 @@
           <span
             class="text-xs font-bold"
             v-tooltip.left="
-              { value: `<tiptext>Approximately ${durationTime(data.duration)} Day${(durationTime(data.duration) > 1 ? 's' : '')}</tiptext>` , escape: true }
+              { value: `<tiptext>` + `Approximately ${durationTime(data.duration)} Day${(durationTime(data.duration) > 1 ? 's' : '')}` + `</tiptext>` , escape: true }
             "
             >{{
               data.duration

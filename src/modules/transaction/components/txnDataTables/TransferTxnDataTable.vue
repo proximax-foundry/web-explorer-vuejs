@@ -294,8 +294,8 @@
             <img
               src="@/modules/transaction/img/icon-message.svg"
               v-tooltip.left="
-                { value: `<tiptitle>${data.messageTypeTitle}</tiptitle>`+
-                 `<tiptext>${data.message}</tiptext>`, escape: true }
+                { value: `<tiptitle>` + `${data.messageTypeTitle}` + `</tiptitle>`+
+                 `<tiptext>` + `${data.message}` + `</tiptext>`, escape: true }
               "
               class="inline-block"
               v-if="data.message && data.messageType !== 1"
