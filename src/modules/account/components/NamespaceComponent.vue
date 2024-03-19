@@ -69,15 +69,15 @@
               namespace.expiringRelativeTime == 'undefined NaN undefined NaN'
             "
             v-tooltip.bottom="
-              { value: `<tiptitle>` + `End Block:${namespace.endHeight}` + `</tiptitle>` +
-              `<tiptext>` + `No expiry` + `</tiptext>`, escape: true }
+              { value: `<tiptitle>End Block:${namespace.endHeight}</tiptitle>` +
+              `<tiptext>No expiry</tiptext>`, escape: true }
             "
             >{{ namespace.endHeight }}</span
           ><span
             v-else
             v-tooltip.bottom="
-              { value: `<tiptitle>` + `End Block:${namespace.endHeight}` + `</tiptitle>` +
-              `<tiptext>` + `Estimated expiring on ${namespace.expiringRelativeTime}` + `</tiptext>`, escape: true }
+              { value: `<tiptitle>End Block:${namespace.endHeight}</tiptitle>` +
+              `<tiptext>Estimated expiring on ${namespace.expiringRelativeTime} </tiptext>`, escape: true }
             "
             >{{ namespace.endHeight }}</span
           >
@@ -135,15 +135,15 @@
               namespace.expiringRelativeTime == 'undefined NaN undefined NaN'
             "
             v-tooltip.bottom="
-              { value: `<tiptitle>` + `End Block:${namespace.endHeight}` + `</tiptitle>` +
-              `<tiptext>` + `No expiry` + `</tiptext>`, escape: true }
+              { value: `<tiptitle>End Block:${namespace.endHeight}</tiptitle>` +
+              `<tiptext>No expiry</tiptext>`, escape: true }
             "
             >{{ namespace.endHeight }}</span
           ><span
             v-else
             v-tooltip.bottom="
-              { value: `<tiptitle>` + `End Block:${namespace.endHeight}` + `</tiptitle>` +
-              `<tiptext>` + `Estimated expiring on ${namespace.expiringRelativeTime}` + `</tiptext>`, escape: true }
+              { value: `<tiptitle>End Block:${namespace.endHeight}</tiptitle>` +
+              `<tiptext>Estimated expiring on ${namespace.expiringRelativeTime} </tiptext>`, escape: true }
             "
             >{{ namespace.endHeight }}</span
           >
