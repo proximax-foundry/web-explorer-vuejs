@@ -234,7 +234,7 @@
               src="@/modules/transaction/img/icon-message.svg"
               v-tooltip.left="
                 { value: `<tiptitle>Secret</tiptitle>` +
-              `<tiptext>${data.secret}</tiptext>`, escape: true }
+              `<tiptext>${data.secret}</tiptext>`, escape: false }
               "
               class="inline-block"
             />
@@ -253,7 +253,7 @@
               v-if="data.proof"
               v-tooltip.left="
                 { value: `<tiptitle>Proof</tiptitle>` +
-              `<tiptext>${data.proof}</tiptext>`, escape: true }
+              `<tiptext>${data.proof}</tiptext>`, escape: false }
               "
               class="inline-block"
             />
@@ -273,7 +273,7 @@
               class="inline-block w-4/6"
               v-tooltip.left="
                 { value: `<tiptitle>Sirius Digital Asset</tiptitle>` +
-              `<tiptext>${constructSDA(data.assetId, data.amount, data.namespaceName)}</tiptext>`, escape: true }
+              `<tiptext>${constructSDA(data.assetId, data.amount, data.namespaceName)}</tiptext>`, escape: false }
               "
             />
           </div>

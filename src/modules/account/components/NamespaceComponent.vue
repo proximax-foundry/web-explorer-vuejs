@@ -70,14 +70,14 @@
             "
             v-tooltip.bottom="
               { value: `<tiptitle>End Block:${namespace.endHeight}</tiptitle>` +
-              `<tiptext>No expiry</tiptext>`, escape: true }
+              `<tiptext>No expiry</tiptext>`, escape: false }
             "
             >{{ namespace.endHeight }}</span
           ><span
             v-else
             v-tooltip.bottom="
               { value: `<tiptitle>End Block:${namespace.endHeight}</tiptitle>` +
-              `<tiptext>Estimated expiring on ${namespace.expiringRelativeTime} </tiptext>`, escape: true }
+              `<tiptext>Estimated expiring on ${namespace.expiringRelativeTime} </tiptext>`, escape: false }
             "
             >{{ namespace.endHeight }}</span
           >
@@ -136,14 +136,14 @@
             "
             v-tooltip.bottom="
               { value: `<tiptitle>End Block:${namespace.endHeight}</tiptitle>` +
-              `<tiptext>No expiry</tiptext>`, escape: true }
+              `<tiptext>No expiry</tiptext>`, escape: false }
             "
             >{{ namespace.endHeight }}</span
           ><span
             v-else
             v-tooltip.bottom="
               { value: `<tiptitle>End Block:${namespace.endHeight}</tiptitle>` +
-              `<tiptext>Estimated expiring on ${namespace.expiringRelativeTime} </tiptext>`, escape: true }
+              `<tiptext>Estimated expiring on ${namespace.expiringRelativeTime} </tiptext>`, escape: false }
             "
             >{{ namespace.endHeight }}</span
           >
