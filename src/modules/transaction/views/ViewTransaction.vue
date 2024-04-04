@@ -4,7 +4,7 @@
     <div v-if="!isFetching">
       <div
         class="filter shadow-xl border border-gray-50 p-5 mb-15"
-        v-if="formattedTransaction.isFound === true"
+        v-if="isFound"
       >
         <div class="flex items-center mb-4 border-b border-gray-100 relative">
           <div
@@ -23,7 +23,7 @@
             class="w-32 font-bold text-xs text-center p-2 relative"
             :class="`${currentPage != 'inner' ? 'cursor-pointer' : ''}`"
             @click="currentPage = 'inner'"
-            v-if="innerTransaction"
+            v-if="innerTransaction !== null"
           >
             Inner Txns
             <div
@@ -39,14 +39,14 @@
           :txnType="txnType"
         />
         <InnerTxnComponent
-          v-else
+          v-else-if="innerTransaction"
           :innerTxn="innerTransaction"
           :txn="txn"
           :txnGroup="formattedTransaction.group"
         />
       </div>
       <div
-        v-else-if="formattedTransaction.isFound === 'error'"
+        v-else-if="!isFound"
         class="p-3 bg-yellow-100 text-yellow-700"
       >
         Transaction not found in {{ networkName }}
@@ -75,6 +75,7 @@ import TxnFailedComponent from "@/modules/transaction/components/TxnFailedCompon
 import { AppState } from "@/state/appState";
 import { Helper } from "@/util/typeHelper";
 import { TransactionUtils } from "@/util/transactionUtils";
+import { TransactionType } from "tsjs-xpx-chain-sdk";
 
 const props = defineProps({
   hash: {
@@ -88,13 +89,14 @@ const currentPage = ref("detail");
 const txnType = ref(0);
 const isFetching = ref(true);
 const isTxnFailed = ref(false);
+const isFound = ref(false);
 const failedStatus = ref("");
 const failedTxnDetails = ref(
   <{ networkName: string; txnHash: string; errMsg: string }[]>[]
 );
 const txn = ref({});
 const formattedTransaction = ref<any>({});
-const innerTransaction = ref({});
+const innerTransaction = ref<Object | null>(null);
 
 const networkName = computed(() => {
   return networkState.chainNetworkName;
@@ -132,8 +134,13 @@ const loadTxn = async () => {
 
   if (isTxnFailed.value === false) {
     let transaction = await TransactionUtils.getTransaction(props.hash);
+    isFound.value = transaction.isFound ? true : false;
+
     if (transaction.isFound == "error") {
       formattedTransaction.value = transaction;
+      isFetching.value = false;
+      return;
+    } else if (!transaction.isFound) {
       isFetching.value = false;
       return;
     } else {
@@ -168,7 +175,7 @@ const loadTxn = async () => {
               AppState.nativeToken.divisibility
             ),
             signature: transaction.txn.signature,
-            signer: transaction.txn.signer.address.address,
+            signer: transaction.txn.signerAddress,
             version: transaction.txn.version,
             isMissingSignature: transaction.txn.hasMissingSignatures(),
             detail: transaction.txn.detail,
@@ -205,131 +212,85 @@ const loadTxn = async () => {
               ]);
               formattedTransaction.value.assetName = nsNames[0].name;
             }
-          } else {
-            formatStorageTxns(transaction);
+          }
+            
+          if(transaction.txn.innerTransactions && 
+            transaction.txn.innerTransactions.length){
+            innerTransaction.value = transaction.txn.innerTransactions;
+          }
+          else{
+            innerTransaction.value = null;
           }
 
-          innerTransaction.value = transaction.txn.innerTransactions;
-        } else {
-          formattedTransaction.value = transaction;
+          formattedTransaction.value = Object.assign(
+            transaction.txn, formattedTransaction.value
+          );
+
+          formatStorageTxns(transaction, formattedTransaction);
         }
       }
     }
-  }
   isFetching.value = false;
+  }
 };
 loadTxn();
 
-const formatStorageTxns = (transaction: any) => {
+const formatStorageTxns = (transaction: any, data: any) => {
+  // let txnType = transaction.txn.type;
+
   if (transaction.txn.driveSize) {
     // prepare BC drive
-    formattedTransaction.value.driveSize = transaction.txn.driveSize.toBigInt();
-    formattedTransaction.value.replicatorCount =
-      transaction.txn.replicatorCount;
-    formattedTransaction.value.verificationFeeAmount = Helper.convertToExact(
-      transaction.txn.verificationFeeAmount.compact(),
-      AppState.nativeToken.divisibility
-    );
-  } else if (transaction.txn.capacity) {
-    // replicator onboarding
-    formattedTransaction.value.capacity = transaction.txn.capacity.toBigInt();
-  } else if (transaction.txn.driveKey) {
-    // drive closure
-    formattedTransaction.value.driveKey = transaction.txn.driveKey.publicKey;
-    if (transaction.txn.downloadDataCdi) {
-      // data modification
-      formattedTransaction.value.downloadDataCdi =
-        transaction.txn.downloadDataCdi;
-      formattedTransaction.value.uploadSize =
-        transaction.txn.uploadSize.toBigInt();
-      formattedTransaction.value.feedbackFeeAmount = Helper.convertToExact(
-        transaction.txn.feedbackFeeAmount.compact(),
+    data.value.driveSize = data.value.driveSize.toBigInt();
+    data.value.verificationFeeAmount = Helper.convertToExact(
+      data.value.verificationFeeAmount.compact(),
         AppState.nativeToken.divisibility
       );
-    } else if (transaction.txn.keys) {
-      // end drive verification v2
-      formattedTransaction.value.keys =
-        transaction.txn.keys;
-      formattedTransaction.value.opinions =
-        transaction.txn.opinions;
-      formattedTransaction.value.shardId = 
-        transaction.txn.shardId;
-      formattedTransaction.value.signatures =
-        transaction.txn.signatures;
-      formattedTransaction.value.verificationTrigger =
-        transaction.txn.verificationTrigger;
+  }else if (transaction.txn.capacity) {
+    // replicator onboarding
+    data.value.capacity = transaction.txn.capacity.toBigInt();
+  } else if (transaction.txn.driveKey) {
+    // drive closure
+    data.value.driveKey = data.value.driveKey.publicKey;
+    if (transaction.txn.downloadDataCdi) {
+      // data modification
+      data.value.uploadSize = data.value.uploadSize.toBigInt();
+      data.value.feedbackFeeAmount = Helper.convertToExact(
+        data.value.feedbackFeeAmount.compact(),
+        AppState.nativeToken.divisibility
+      );
     } else if (transaction.txn.downloadSize) {
       // download
-      formattedTransaction.value.downloadSize =
-        transaction.txn.downloadSize.toBigInt();
-      formattedTransaction.value.listOfPublicKeys =
-        transaction.txn.listOfPublicKeys;
-      const feedbackFeeAmount = transaction.txn.feedbackFeeAmount.compact();
-      formattedTransaction.value.feedbackFeeAmount = Helper.convertToExact(
+      data.value.downloadSize = data.value.downloadSize.toBigInt();
+      
+      const feedbackFeeAmount = data.value.feedbackFeeAmount.compact();
+      data.value.feedbackFeeAmount = Helper.convertToExact(
         feedbackFeeAmount,
         AppState.nativeToken.divisibility
       );
     } else if (transaction.txn.dataModificationId) {
       // data modification single approval
-      formattedTransaction.value.dataModificationId =
-        transaction.txn.dataModificationId;
-      formattedTransaction.value.opinions = transaction.txn.opinions;
-      formattedTransaction.value.publicKeys = transaction.txn.publicKeys;
+
       if (transaction.txn.fileStructureCdi) {
         // data modification approval
-        formattedTransaction.value.fileStructureCdi =
-          transaction.txn.fileStructureCdi;
-        formattedTransaction.value.fileStructureSizeBytes =
-          transaction.txn.fileStructureSizeBytes.toBigInt();
-        formattedTransaction.value.judgedKeysCount =
-          transaction.txn.judgedKeysCount;
-        formattedTransaction.value.judgingKeysCount =
-          transaction.txn.judgingKeysCount;
-        formattedTransaction.value.metaFilesSizeBytes =
-          transaction.txn.metaFilesSizeBytes.toBigInt();
-        formattedTransaction.value.modificationStatus =
-          transaction.txn.modificationStatus;
-        formattedTransaction.value.overlappingKeysCount =
-          transaction.txn.overlappingKeysCount;
-        formattedTransaction.value.presentOpinions =
-          transaction.txn.presentOpinions;
-        formattedTransaction.value.signatures = transaction.txn.signatures;
-        formattedTransaction.value.usedDriveSizeBytes =
-          transaction.txn.usedDriveSizeBytes.toBigInt();
+        data.value.fileStructureSizeBytes = data.value.fileStructureSizeBytes.toBigInt();
+        data.value.metaFilesSizeBytes = data.value.metaFilesSizeBytes.toBigInt();
+        data.value.usedDriveSizeBytes = data.value.usedDriveSizeBytes.toBigInt();
       }
     }
   } else if (transaction.txn.downloadChannelId) {
-    formattedTransaction.value.downloadChannelId =
-      transaction.txn.downloadChannelId;
+    
     if (transaction.txn.feedbackFeeAmount) {
       // finish download
-      formattedTransaction.value.feedbackFeeAmount = Helper.convertToExact(
-        transaction.txn.feedbackFeeAmount.compact(),
+      data.value.feedbackFeeAmount = Helper.convertToExact(
+        data.value.feedbackFeeAmount.compact(),
         AppState.nativeToken.divisibility
       );
     } else {
       // download approval
-      formattedTransaction.value.approvalTrigger =
-        transaction.txn.approvalTrigger;
-      formattedTransaction.value.judgedKeysCount =
-        transaction.txn.judgedKeysCount;
-      formattedTransaction.value.judgingKeysCount =
-        transaction.txn.judgingKeysCount;
-      formattedTransaction.value.opinionElementCount =
-        transaction.txn.opinionElementCount;
-      formattedTransaction.value.opinions = transaction.txn.opinions;
-      formattedTransaction.value.overlappingKeysCount =
-        transaction.txn.overlappingKeysCount;
-      formattedTransaction.value.presentOpinions =
-        transaction.txn.presentOpinions;
-      formattedTransaction.value.publicKeys = transaction.txn.publicKeys;
-      formattedTransaction.value.signatures = transaction.txn.signatures;
+      
     }
-  } else if (transaction.txn.unknownPayload) {
-    // data modification cancel
-    formattedTransaction.value.unknownPayload = transaction.txn.unknownPayload;
-  }
-};
+  } 
+}
 
 emitter.on("CHANGE_NETWORK", (payload: boolean) => {
   if (payload) {

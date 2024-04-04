@@ -87,7 +87,7 @@
         <img src="@/assets/img/icon-copy.svg" @click="copy('signerAddress')" class="cursor-pointer" />
       </div>
     </div>
-    <div v-if="txnDetail.cosigners.length > 0">
+    <div v-if="txnDetail.cosigners && txnDetail.cosigners.length > 0">
       <div>Cosigner{{ txnDetail.cosigners.length > 1 ? "s" : "" }}</div>
       <div>
         <div v-for="(cosigner, item) in txnDetail.cosigners" :key="item" class="flex items-center mb-3">
@@ -157,9 +157,9 @@
   <DataModificationSingleApprovalDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.Data_Modification_Single_Approval"/>
   <DataModificationApprovalDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.Data_Modification_Approval"/>
   <EndDriveVerificationV2DetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.End_Drive_Verification_V2"/>
-  <div v-if="Object.keys(txnDetail.unknownData).length">
-    <DataModificationCancelDetailComponent v-if="txnType == TransactionType.Data_Modification_Cancel" :txnDetail="txnDetail"/>
-    <UnknownDataDetailComponent v-else :txnDetail="txnDetail" />
+  <DataModificationCancelDetailComponent v-if="txnType == TransactionType.Data_Modification_Cancel" :txnDetail="txnDetail"/>
+  <div v-if="txnDetail.unknownData && Object.keys(txnDetail.unknownData).length">
+    <UnknownDataDetailComponent :txnDetail="txnDetail" />
   </div>
   <div class="cosignerDetails " v-if="txnDetail.group == 'partial'">
     <div>

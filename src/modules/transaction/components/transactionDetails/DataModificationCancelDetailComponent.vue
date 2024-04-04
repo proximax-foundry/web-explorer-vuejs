@@ -6,11 +6,11 @@
         <router-link
           :to="{
             name: 'ViewAccount',
-            params: { accountParam: txnDetail.unknownData.driveKey },
+            params: { accountParam: txnDetail.driveKey },
           }"
           class="text-blue-600 hover:text-blue-primary hover:underline break-all"
         >
-          {{ txnDetail.unknownData.driveKey }}
+          {{ txnDetail.driveKey }}
         </router-link>
       </div>
     </div>
@@ -20,21 +20,13 @@
         <router-link
           :to="{
             name: 'ViewTransaction',
-            params: { hash: txnDetail.unknownData.dataModificationId },
+            params: { hash: txnDetail.dataModificationId },
           }"
           class="text-blue-600 hover:text-blue-primary hover:underline break-all"
         >
-          {{ txnDetail.unknownData.dataModificationId }}
+          {{ txnDetail.dataModificationId }}
         </router-link>
       </div>
-    </div>
-    <div>
-      <div>Data Size</div>
-      <div>{{ txnDetail.unknownData.size }}</div>
-    </div>
-    <div v-if="txnDetail.unknownPayload">
-      <div>Payload</div>
-      <div>{{ txnDetail.unknownPayload }}</div>
     </div>
   </div>
 </template>

@@ -264,7 +264,7 @@ const loadAccountInfo = async () => {
 
 loadAccountInfo();
 
-const generateMultisigInfoBelowLevelZero = async (strAddress: string) => {
+const generateMultisigInfoBelowLevelZero = async () => {
   if (!AppState.isReady) {
     setTimeout(generateMultisigInfoBelowLevelZero, 1000);
     return;
@@ -272,25 +272,32 @@ const generateMultisigInfoBelowLevelZero = async (strAddress: string) => {
   if (!AppState.chainAPI) {
     return;
   }
-  let address = Address.createFromRawAddress(strAddress);
-  let graphInfo =
-    await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(address);
+  let address = Address.createFromRawAddress(strAddress.value);
+
   let multisigInfos: MultisigInfo[] = [];
-  graphInfo.multisigAccounts.forEach((value, key) => {
-    const level = key;
-    for (let i = 0; i < value.length; ++i) {
-      let multiInfo = value[i];
-      let newMultisigInfo = new MultisigInfo(
-        multiInfo.account.publicKey,
-        level,
-        multiInfo.cosignatories.map((cosign) => cosign.publicKey),
-        multiInfo.multisigAccounts.map((cosign) => cosign.publicKey),
-        multiInfo.minApproval,
-        multiInfo.minRemoval
-      );
-      multisigInfos.push(newMultisigInfo);
-    }
-  });
+  try {
+    let graphInfo =
+      await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(address);
+  
+    graphInfo.multisigAccounts.forEach((value, key) => {
+      const level = key;
+      for (let i = 0; i < value.length; ++i) {
+        let multiInfo = value[i];
+        let newMultisigInfo = new MultisigInfo(
+          multiInfo.account.publicKey,
+          level,
+          multiInfo.cosignatories.map((cosign) => cosign.publicKey),
+          multiInfo.multisigAccounts.map((cosign) => cosign.publicKey),
+          multiInfo.minApproval,
+          multiInfo.minRemoval
+        );
+        multisigInfos.push(newMultisigInfo);
+      }
+    });
+  } catch (error) {
+    
+  }
+  
   var multisigAccounts: multisigLayer[] = [];
   var indexNo = 0
   multisigAccounts.push({
@@ -362,7 +369,7 @@ const generateMultisigInfoBelowLevelZero = async (strAddress: string) => {
   multisigLength.value = multisigAccBelowLevelZero.length;
 };
 
-generateMultisigInfoBelowLevelZero(strAddress.value);
+generateMultisigInfoBelowLevelZero();
 
 const updateBcDrives = (data: DriveInfo[]) => {
   bcDrivesLength.value = data.length;
@@ -377,4 +384,5 @@ emitter.on("CHANGE_NETWORK", (payload: boolean) => {
     loadAccountInfo();
   }
 });
+
 </script>

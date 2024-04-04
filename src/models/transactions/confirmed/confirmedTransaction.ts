@@ -1,13 +1,13 @@
-import { CommonTransaction } from "../commonTransaction";
+import { TransactionCommon } from "../transactionCommon";
 
-export class ConfirmedTransaction extends CommonTransaction {
+export class ConfirmedTransaction extends TransactionCommon {
   timestamp: string = "";
   block: number = 0;
   fee: number | null = 0;
-  groupType: string = "confirmed";
+  feeMultiplier: number = 0;
 
   constructor(txnHash: string) {
-    super(txnHash);
+    super(txnHash, "confirmed");
   }
 
   static convertToSubClass(
