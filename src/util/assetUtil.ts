@@ -18,6 +18,9 @@ export interface AssetObj {
   divisibility: number;
   supplyMutable: boolean;
   transferable: boolean;
+  restrictable: boolean;
+  supplyForceMutable: boolean;
+  disableLocking: boolean;
   name: string;
   namespaceId: NamespaceName[];
 }
@@ -76,6 +79,9 @@ export class AssetUtils {
         divisibility: asset.divisibility,
         supplyMutable: asset.isSupplyMutable(),
         transferable: asset.isTransferable(),
+        restrictable: asset.isRestrictable(),
+        supplyForceMutable: asset.isSupplyForceImmutable(),
+        disableLocking: asset.isDisableLocking(),
         name: assetName[0],
         namespaceId: namespaceInfo,
       };

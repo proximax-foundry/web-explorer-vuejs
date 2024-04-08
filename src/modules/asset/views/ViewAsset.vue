@@ -124,6 +124,22 @@
                 {{ assets.transferable }}
               </div>
             </div>
+            <div class="py-4 text-xs grid grid-cols-4 border-b border-gray-100">
+              <div>Restrictable</div>
+              <div class="font-bold text-green-600 w-24 ml-10">
+                {{ assets.restrictable }}
+              </div>
+              <div>Supply Force Immutable</div>
+              <div class="font-bold text-green-600 w-24 ml-5">
+                {{ assets.supplyForceMutable }}
+              </div>
+            </div>
+            <div class="py-4 text-xs grid grid-cols-4 border-b border-gray-100">
+              <div>Disable Locking</div>
+              <div class="font-bold text-green-600 w-24 ml-10">
+                {{ assets.disableLocking }}
+              </div>
+            </div>
           </div>
         </div>
       </div>
