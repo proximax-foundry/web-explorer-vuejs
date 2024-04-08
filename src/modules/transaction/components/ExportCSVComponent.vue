@@ -32,18 +32,42 @@
               <div>{{ accPublicKey }}</div>
             </div>
           </div>
-          <div class="py-3">Please enter a range:</div>
+          <div class="py-3">Choose download option:</div>
           <div class="flex">
-            <div class="mr-4">
-              <label for="startBlock" class="font-bold block mb-2"> Start Block</label>
-              <div class="border border-gray-200 px-2 py-1 focus:outline-none">
-                <input type="number" v-model="startBlock" class="focus:outline-none" placeholder="0" />
-              </div>
+            <div class="mr-3">
+              <input type="radio" id="blockNumber" value="blockNumber" class="mr-1" v-model="option" />
+              <label for="blockNumber">Block Number</label>
             </div>
             <div>
-              <label for="endBlock" class="font-bold block mb-2"> End Block </label>
-              <div class="border border-gray-200 px-2 py-1 focus:outline-none">
-                <input type="number" v-model="endBlock" class="focus:outline-none" placeholder="0" />
+              <input type="radio" id="day" value="day" class="mr-1" v-model="option" />
+              <label for="date">Day</label>
+            </div>
+          </div>
+          <div v-if="option === 'blockNumber'">
+            <div class="py-3">Please enter a range:</div>
+            <div class="flex">
+              <div class="mr-4">
+                <label for="startBlock" class="font-bold block mb-2"> Start Block</label>
+                <div class="border border-gray-200 px-2 py-1 focus:outline-none">
+                  <input type="number" v-model="startBlock" class="focus:outline-none" placeholder="0" min="1"/>
+                </div>
+              </div>
+              <div>
+                <label for="endBlock" class="font-bold block mb-2"> End Block </label>
+                <div class="border border-gray-200 px-2 py-1 focus:outline-none">
+                  <input type="number" v-model="endBlock" class="focus:outline-none" placeholder="0" min="1"/>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else>
+            <div class="py-3">Download latest transactions:</div>
+            <div class="flex justify-center items-center">
+              <div class="mr-4">
+                <label for="inputDay" class="font-bold block mb-2">Days</label>
+                <div class="border border-gray-200 px-2 py-1 focus:outline-none">
+                  <input type="number" v-model="inputDay" class="focus:outline-none" placeholder="Enter the number of days" min="1" oninput="validity.valid||(value='');"/>
+                </div>
               </div>
             </div>
           </div>
@@ -72,6 +96,8 @@ import { computed, ref, watch } from "vue";
 import { AccountUtils } from "@/util/accountUtil";
 import { TransactionUtils } from "@/util/transactionUtils";
 import type { Transaction } from "tsjs-xpx-chain-sdk";
+import { ChainProfileConfig } from "@/models/stores";
+import { networkState } from "@/state/networkState";
 
 const props = defineProps({
   accPublicKey: {
@@ -80,11 +106,13 @@ const props = defineProps({
   }
 });
 
+const option = ref('blockNumber')
 const onExport = ref(false)
 const checkTransactions = ref(false)
 const isDisabledValidate = ref<boolean>(true)
 const startBlock = ref<number | null>(null)
 const endBlock = ref<number | null>(null)
+const inputDay = ref<number | null>(null)
 const transactions = ref<any[] | undefined>([]);
 const totalPage = ref<number>(0);
 const selectedTxnType = ref("all");
@@ -214,9 +242,27 @@ let loadTransactions = async () => {
       }
     }
   }
-  if(startBlock.value && endBlock.value){
-    txnQueryParams.fromHeight = startBlock.value;
-    txnQueryParams.toHeight = endBlock.value;
+  if(option.value === "blockNumber"){
+    if(startBlock.value && endBlock.value){
+      txnQueryParams.fromHeight = startBlock.value;
+      txnQueryParams.toHeight = endBlock.value;
+    }
+  }
+  else{
+    if(inputDay.value){
+      const chainConfig = new ChainProfileConfig(networkState.chainNetworkName);
+      chainConfig.init();
+      let blockTargetTime = parseInt(chainConfig.blockGenerationTargetTime);
+      let blockTargetTimeByDay = (60 * 60 * 24) / blockTargetTime;
+      endBlock.value = await AppState.chainAPI.chainAPI.getBlockchainHeight()
+      const calculateHeight = endBlock.value -  Math.floor(inputDay.value * blockTargetTimeByDay)
+      if(calculateHeight<=0){
+        txnQueryParams.fromHeight = 1
+      }
+      else{
+        txnQueryParams.fromHeight = calculateHeight
+      }
+    }
   }
   if (!selectedTxnType.value || selectedTxnType.value == "all") {
     txnQueryParams.embedded = false;
@@ -224,7 +270,7 @@ let loadTransactions = async () => {
     txnQueryParams.embedded = true;
   }
 
-  if (QueryParamsType.value) {
+  if (QueryParamsType.value) { 
     txnQueryParams.type = QueryParamsType.value;
   }
   txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
@@ -382,6 +428,7 @@ const clearInput = () => {
   checkTransactions.value = false
   startBlock.value = null
   endBlock.value = null
+  inputDay.value = null
   transactions.value = []
 }
 
@@ -722,10 +769,19 @@ const exportValue = async () => {
 };
 
 watch([startBlock, endBlock], async ([newStartBlock, newEndBlock]) => {
-  if(!newStartBlock || !newEndBlock){
+  if(!newStartBlock || !newEndBlock || newStartBlock <= 0 || newEndBlock <= 0){
     isDisabledValidate.value = true
   }
   else if(newStartBlock > newEndBlock){
+    isDisabledValidate.value = true
+  }
+  else{
+    isDisabledValidate.value = false
+  }
+})
+
+watch(inputDay, (newInputDay) => {
+  if(!newInputDay || newInputDay <= 0){
     isDisabledValidate.value = true
   }
   else{

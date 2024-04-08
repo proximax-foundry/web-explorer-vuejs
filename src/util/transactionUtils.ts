@@ -3239,11 +3239,8 @@ export class TransactionUtils {
     txnDetails.signerAddress = registerNSTxn.signer.address.plain();
     txnDetails.type = registerNSTxn.transactionName;
     txnDetails.namespaceName = registerNSTxn.namespaceName;
-    if (!registerNSTxn.duration) {
-      throw new Error("Service Unavailable");
-    }
     if (registerNSTxn.namespaceType === NamespaceType.RootNamespace) {
-      txnDetails.duration = registerNSTxn.duration.compact();
+      txnDetails.duration = registerNSTxn.duration!.compact();
       txnDetails.registerType = NamespaceType.RootNamespace;
       txnDetails.registerTypeName = "Root namespace";
 

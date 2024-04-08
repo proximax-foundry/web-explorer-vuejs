@@ -1,7 +1,7 @@
 <template>
   <header class="z-10 fixed w-full">
     <div class="bg-blue-theme">
-      <div class="container mx-auto py-2">
+      <div class="md:container mx-auto py-2">
         <div class="md:flex md:justify-between">
           <div class="flex items-center justify-center mb-3 md:mb-0">
             <router-link :to="{ name: 'Home' }"
@@ -21,7 +21,7 @@
                 type="text"
                 :placeholder="searchPlaceHolder"
                 v-model="searchText"
-                class="text-tsm sm:w-48 lg:w-96 outline-none px-2 py-1 flex-grow"
+                class="truncate ... text-tsm outline-none px-2 py-1 flex-grow"
                 @keyup.enter="search"
               />
               <div
@@ -45,23 +45,24 @@
                 />
               </div>
             </div>
-            <div class="flex items-center justify-end">
+            <div
+              class="flex items-center xs:justify-end justify-between flex-wrap xs:flex-nowrap"
+            >
               <router-link :to="{ name: 'Home' }"
-                ><img src="@/assets/img/icon-home.svg" class="h-5 w-5 mr-4"
+                ><img
+                  src="@/assets/img/icon-home.svg"
+                  class="h-5 w-5 sm:mr-4 xs:mr-2"
               /></router-link>
-              <div class="header-links">
-                <router-link :to="{ name: 'ViewBlockList' }"
-                  >Blocks</router-link
-                >
-                <router-link :to="{ name: 'ViewTransactionList' }"
-                  >Transactions</router-link
-                >
-                <router-link :to="{ name: 'ViewHarvesterList' }"
-                  >Harvesters</router-link
-                >
-                <!-- <a href="#">Accounts</a> -->
-              </div>
-              <selectNetwork class="ml-5" />
+              <router-link :to="{ name: 'ViewBlockList' }"
+                ><span class="header-link">Blocks</span></router-link
+              >
+              <router-link :to="{ name: 'ViewTransactionList' }"
+                ><span class="header-link">Transactions</span></router-link
+              >
+              <router-link :to="{ name: 'ViewHarvesterList' }"
+                ><span class="header-link">Harvesters</span></router-link
+              >
+              <selectNetwork class="md:ml-5" />
             </div>
           </div>
         </div>
@@ -166,12 +167,8 @@ const searchPlaceHolder = computed(() => {
 </script>
 
 <style lang="scss">
-.header-links {
-  @apply my-2;
-
-  a {
-    @apply mr-4 duration-200 transition-all text-xs text-gray-200;
-  }
+.header-link {
+  @apply xs:mr-1.5 sm:mr-4 duration-200 transition-all text-xs text-gray-200;
 }
 
 .searchbar {

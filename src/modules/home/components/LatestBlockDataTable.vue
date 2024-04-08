@@ -63,7 +63,7 @@
                   ><span class="text-ellipsis overflow-hidden w-44">{{
                     data.signer.publicKey
                   }}</span
-                  >...</router-link
+                  ></router-link
                 >
               </div>
               <div class="text-xs text-gray-500 mb-4 mt-1">
@@ -76,7 +76,7 @@
             </div>
           </template>
         </Column>
-        <Column style="width: 100px" v-if="!wideScreen">
+        <Column style="width: 130px" v-if="!wideScreen">
           <template #body="{ data }">
             <div>
               <div class="uppercase text-xs text-gray-300 font-bold -mt-2 ml-1">
@@ -114,7 +114,7 @@
                     name: 'ViewBlock',
                     params: { blockHeight: data.height.compact() },
                   }"
-                  class="truncate inline-block text-xs break-all text-blue-600 hover:text-blue-primary hover:underline"
+                  class="truncate inline-block text-xs break-all text-blue-600 hover:text-blue-primary hover:underline w-28 mr-2"
                   ><span class="text-xs" v-tooltip.bottom="data.hash">{{
                     data.height.compact()
                   }}</span></router-link
@@ -133,7 +133,7 @@
           </template>
         </Column>
         <Column
-          style="width: 20px; padding-bottom: 0rem; padding-top: 0rem"
+          style="width: 50px; padding-bottom: 0rem; padding-top: 0rem"
           field="Validator"
           header="VALIDATOR"
           v-if="wideScreen"
@@ -141,7 +141,7 @@
           <template #body="{ data }">
             <div>
               <div
-                class="uppercase text-xs text-blue-primary inline-flex w-72 pt-3"
+                class="uppercase text-xs text-blue-primary inline-flex w-72 pt-3 mr-5"
               >
                 <router-link
                   :to="{
@@ -153,7 +153,7 @@
                     class="text-xs text-ellipsis overflow-hidden w-72"
                     v-tooltip.bottom="data.signer.publicKey"
                     >{{ data.signer.publicKey }}</span
-                  >...</router-link
+                  ></router-link
                 >
               </div>
               <div class="text-txs text-gray-500 mb-4 mt-1">
@@ -168,7 +168,7 @@
         </Column>
         <Column
           style="
-            width: 110px;
+            width: 100px;
             padding-bottom: 0rem;
             padding-top: 0rem;
             padding-right: 1rem;

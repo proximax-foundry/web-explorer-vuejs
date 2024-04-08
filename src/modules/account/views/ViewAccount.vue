@@ -174,13 +174,17 @@ const accountMetadata = ref<MetadataObj[]>([]);
 const multisigAddress = ref<multisigLayer[]>([]);
 const matchedNamespace = ref<MatchedNamespace[]>([]);
 
+const networkName = computed(() => {
+  return networkState.chainNetworkName;
+});
+
 const setCurrentComponent = (page: string) => {
   currentComponent.value = page;
 };
 
 const loadAccountInfo = async () => {
   let account: false | AccountInfo = false;
-  if (!AppState.isReady) {
+  if (!AppState.isReady && !networkName.value) {
     setTimeout(loadAccountInfo, 1000);
     return;
   }
@@ -215,6 +219,7 @@ const loadAccountInfo = async () => {
     let address = Address.createFromRawAddress(props.accountParam);
     strAddress.value = address.pretty();
     account = await AccountUtils.getAccountFromAddress(props.accountParam);
+
     if (account) {
       strPublicKey.value = account.publicKey;
       delegatePublicKey.value = account.linkedAccountKey;
@@ -224,6 +229,7 @@ const loadAccountInfo = async () => {
           amount: mosaic.amount.compact(),
         };
       });
+
     } else {
       isShowInvalid.value = true;
       return;
@@ -244,6 +250,7 @@ const loadAccountInfo = async () => {
   let linkedNamespaceToAccount = await AccountUtils.fetchLinkedAccountNamespace(
     strAddress.value
   );
+  
   matchedNamespace.value = linkedNamespaceToAccount;
   const multisigInfo = await AccountUtils.getMultisig(strAddress.value);
   if (multisigInfo) {
@@ -255,9 +262,13 @@ const loadAccountInfo = async () => {
   }
 
   const address = Address.createFromRawAddress(strAddress.value);
-  const harvesterInfo = await AppState.chainAPI!.harvesterAPI.getAccountHarvestingHarvesterInfo(address);
-  if (harvesterInfo.length > 0) {
-    isHarvester.value = true;
+  try {
+    const harvesterInfo = await AppState.chainAPI!.harvesterAPI.getAccountHarvestingHarvesterInfo(address);
+    if (harvesterInfo.length > 0) {
+      isHarvester.value = true;
+    }
+  } catch (e) {
+    console.log(e)
   }
   isFetching.value = false;
 };
@@ -272,7 +283,14 @@ const generateMultisigInfoBelowLevelZero = async () => {
   if (!AppState.chainAPI) {
     return;
   }
+
   let address = Address.createFromRawAddress(strAddress.value);
+  try {
+    var graphInfo =
+      await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(address);
+  } catch {
+    return
+  }
 
   let multisigInfos: MultisigInfo[] = [];
   try {
@@ -375,12 +393,10 @@ const updateBcDrives = (data: DriveInfo[]) => {
   bcDrivesLength.value = data.length;
 }
 
-const networkName = computed(() => {
-  return networkState.chainNetworkName;
-});
-
 emitter.on("CHANGE_NETWORK", (payload: boolean) => {
   if (payload) {
+    isShowInvalid.value = false;
+    currentComponent.value = 'asset'
     loadAccountInfo();
   }
 });
