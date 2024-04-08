@@ -19,7 +19,7 @@ export interface AssetObj {
   supplyMutable: boolean;
   transferable: boolean;
   restrictable: boolean;
-  supplyForceMutable: boolean;
+  supplyForceImmutable: boolean;
   disableLocking: boolean;
   name: string;
   namespaceId: NamespaceName[];
@@ -80,7 +80,7 @@ export class AssetUtils {
         supplyMutable: asset.isSupplyMutable(),
         transferable: asset.isTransferable(),
         restrictable: asset.isRestrictable(),
-        supplyForceMutable: asset.isSupplyForceImmutable(),
+        supplyForceImmutable: asset.isSupplyForceImmutable(),
         disableLocking: asset.isDisableLocking(),
         name: assetName[0],
         namespaceId: namespaceInfo,

@@ -1847,6 +1847,30 @@ export class TransactionUtils {
 
           infos.push(assetSupplyMutableInfo);
 
+          const assetRestrictableInfo: TxnDetails = {
+            type: MsgType.INFO,
+            label: "Restrictable",
+            value: assetDefFormat.supplyMutable ? "Yes" : "No",
+          };
+
+          infos.push(assetRestrictableInfo);
+
+          const assetSupplyForceImmutableInfo: TxnDetails = {
+            type: MsgType.INFO,
+            label: "Supply Force Immutable",
+            value: assetDefFormat.supplyForceImmutable ? "Yes" : "No",
+          };
+
+          infos.push(assetSupplyForceImmutableInfo);
+
+          const assetDisableLockingInfo: TxnDetails = {
+            type: MsgType.INFO,
+            label: "Disable Locking",
+            value: assetDefFormat.disableLocking ? "Yes" : "No",
+          };
+
+          infos.push(assetDisableLockingInfo);
+
           if (assetDefFormat.duration) {
             const assetDurationInfo: TxnDetails = {
               type: MsgType.INFO,
@@ -3116,6 +3140,9 @@ export class TransactionUtils {
       : undefined;
     txnDetails.transferable = assetDefTxn.mosaicProperties.transferable;
     txnDetails.supplyMutable = assetDefTxn.mosaicProperties.supplyMutable;
+    txnDetails.restrictable = assetDefTxn.mosaicProperties.restrictable;
+    txnDetails.supplyForceImmutable = assetDefTxn.mosaicProperties.supplyForceImmutable;
+    txnDetails.disableLocking = assetDefTxn.mosaicProperties.disableLocking;
     txnDetails.nonce = assetDefTxn.mosaicNonce.toNumber();
     return txnDetails;
   }
@@ -5303,6 +5330,9 @@ export class TransactionUtils {
         : undefined;
       txn.transferable = assetDefinitionTxn.mosaicProperties.transferable;
       txn.supplyMutable = assetDefinitionTxn.mosaicProperties.supplyMutable;
+      txn.restrictable = assetDefinitionTxn.mosaicProperties.restrictable;
+      txn.supplyForceImmutable = assetDefinitionTxn.mosaicProperties.supplyForceImmutable;
+      txn.disableLocking = assetDefinitionTxn.mosaicProperties.disableLocking;
       txn.nonce = assetDefinitionTxn.mosaicNonce.toNumber();
     } else if (transaction.type === TransactionType.MOSAIC_SUPPLY_CHANGE) {
       const assetSupplyChangeTxn = transaction as MosaicSupplyChangeTransaction;
@@ -5405,6 +5435,9 @@ export class TransactionUtils {
           : undefined;
         txn.transferable = assetDefinitionTxn.mosaicProperties.transferable;
         txn.supplyMutable = assetDefinitionTxn.mosaicProperties.supplyMutable;
+        txn.restrictable = assetDefinitionTxn.mosaicProperties.restrictable;
+        txn.supplyForceImmutable = assetDefinitionTxn.mosaicProperties.supplyForceImmutable;
+        txn.disableLocking = assetDefinitionTxn.mosaicProperties.disableLocking;
         txn.nonce = assetDefinitionTxn.mosaicNonce.toNumber();
       } else if (txns[i].type === TransactionType.MOSAIC_SUPPLY_CHANGE) {
         const assetSupplyChangeTxn = txns[i] as MosaicSupplyChangeTransaction;
@@ -5511,6 +5544,9 @@ export class TransactionUtils {
           : undefined;
         txn.transferable = assetDefinitionTxn.mosaicProperties.transferable;
         txn.supplyMutable = assetDefinitionTxn.mosaicProperties.supplyMutable;
+        txn.restrictable = assetDefinitionTxn.mosaicProperties.restrictable;
+        txn.supplyForceImmutable = assetDefinitionTxn.mosaicProperties.supplyForceImmutable;
+        txn.disableLocking = assetDefinitionTxn.mosaicProperties.disableLocking;
         txn.nonce = assetDefinitionTxn.mosaicNonce.toNumber();
       } else if (txns[i].type === TransactionType.MOSAIC_SUPPLY_CHANGE) {
         const assetSupplyChangeTxn = txns[i] as MosaicSupplyChangeTransaction;
@@ -5617,6 +5653,9 @@ export class TransactionUtils {
           : undefined;
         txn.transferable = assetDefinitionTxn.mosaicProperties.transferable;
         txn.supplyMutable = assetDefinitionTxn.mosaicProperties.supplyMutable;
+        txn.restrictable = assetDefinitionTxn.mosaicProperties.restrictable;
+        txn.supplyForceImmutable = assetDefinitionTxn.mosaicProperties.supplyForceImmutable;
+        txn.disableLocking = assetDefinitionTxn.mosaicProperties.disableLocking;
         txn.nonce = assetDefinitionTxn.mosaicNonce.toNumber();
       } else if (txns[i].type === TransactionType.MOSAIC_SUPPLY_CHANGE) {
         const assetSupplyChangeTxn = txns[i] as MosaicSupplyChangeTransaction;

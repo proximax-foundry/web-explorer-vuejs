@@ -30,6 +30,18 @@
       <div>{{ txnDetail.detail.supplyMutable ? "Yes" : "No" }}</div>
     </div>
     <div>
+      <div>Restrictable</div>
+      <div>{{ txnDetail.detail.restrictable ? "Yes" : "No" }}</div>
+    </div>
+    <div>
+      <div>Supply Force Immutable</div>
+      <div>{{ txnDetail.detail.supplyForceImmutable ? "Yes" : "No" }}</div>
+    </div>
+    <div>
+      <div>Disable Locking</div>
+      <div>{{ txnDetail.detail.disableLocking ? "Yes" : "No" }}</div>
+    </div>
+    <div>
       <div>Nonce</div>
       <div>{{ txnDetail.detail.nonce }}</div>
     </div>

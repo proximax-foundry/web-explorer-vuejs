@@ -131,7 +131,7 @@
               </div>
               <div>Supply Force Immutable</div>
               <div class="font-bold text-green-600 w-24 ml-5">
-                {{ assets.supplyForceMutable }}
+                {{ assets.supplyForceImmutable }}
               </div>
             </div>
             <div class="py-4 text-xs grid grid-cols-4 border-b border-gray-100">

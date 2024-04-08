@@ -583,12 +583,27 @@ const exportValue = async () => {
               ? "Transferable: " +
                 (data.transferable == true ? "Yes" : "No") +
                 "  "
-              : "") +
+              : "") + 
             (data.supplyMutable !== null
               ? "Supply Mutable: " +
                 (data.supplyMutable == true ? "Yes" : "No") +
                 "  "
+              : "") + 
+            (data.supplyForceImmutable !== null
+            ? "Supply Force Immutable: " +
+              (data.supplyForceImmutable == true ? "Yes" : "No") +
+              "  "
+            : "") +
+            (data.restrictable !== null
+              ? "Restrictable: " +
+                (data.restrictable == true ? "Yes" : "No") +
+                "  "
               : "") +
+            (data.disableLocking !== null
+            ? "Disable Locking: " +
+              (data.disableLocking == true ? "Yes" : "No") +
+              "  "
+            : "") +
             (data.duration > 0 ? "Duration: " + data.duration + "  " : "") +
             (data.supplyDelta
               ? "Supply: " + " +" + data.supplyDelta + "  "

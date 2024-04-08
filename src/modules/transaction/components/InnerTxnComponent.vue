@@ -443,6 +443,45 @@
         v-if="
           innerTxnExtractedData[index].infoInfoList.length > 0 &&
           item.type == supplyDefinitionTxnType ">
+        <div>Supply Force Immutable</div>
+        <div>
+          {{
+            innerTxnExtractedData[index].infoInfoList
+              .map((info) => (info.label == "Supply Force Immutable" ? info.value : ""))
+              .join("")
+          }}
+        </div>
+      </div>
+      <div
+        v-if="
+          innerTxnExtractedData[index].infoInfoList.length > 0 &&
+          item.type == supplyDefinitionTxnType ">
+        <div>Restrictable</div>
+        <div>
+          {{
+            innerTxnExtractedData[index].infoInfoList
+              .map((info) => (info.label == "Restrictable" ? info.value : ""))
+              .join("")
+          }}
+        </div>
+      </div>
+      <div
+        v-if="
+          innerTxnExtractedData[index].infoInfoList.length > 0 &&
+          item.type == supplyDefinitionTxnType ">
+        <div>Disable Locking</div>
+        <div>
+          {{
+            innerTxnExtractedData[index].infoInfoList
+              .map((info) => (info.label == "Disable Locking" ? info.value : ""))
+              .join("")
+          }}
+        </div>
+      </div>
+      <div
+        v-if="
+          innerTxnExtractedData[index].infoInfoList.length > 0 &&
+          item.type == supplyDefinitionTxnType ">
         <div>Divisibility</div>
         <div>
           {{

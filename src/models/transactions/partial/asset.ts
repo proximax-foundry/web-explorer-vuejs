@@ -13,8 +13,11 @@ export class PartialAssetTransaction extends PartialTransaction {
   supplyDelta?: number | null = null;
   supplyDirection?: number | null = null;
   divisibility?: number | null = null;
-  transferable?: boolean | null = null;
   supplyMutable?: boolean | null = null;
+  transferable?: boolean | null = null;
+  restrictable?: boolean | null = null;
+  supplyForceImmutable?: boolean | null = null;
+  disableLocking?: boolean | null = null;
   duration?: number | null = null;
 
   constructor(txnHash: string) {
