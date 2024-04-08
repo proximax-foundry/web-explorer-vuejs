@@ -8,7 +8,6 @@ import {
   ChainProfilePreferences,
 } from "../../models/stores/";
 import { ChainAPICall } from "@/models/REST/chainAPICall";
-import { BuildTransactions } from "@/util/buildTransactions";
 import { ChainUtils } from "@/util/chainUtils";
 const sessionNetworkName = "networkName";
 const sessionNetworkIndex = "network";
@@ -66,10 +65,6 @@ export class NetworkStateUtils {
     const chainProfile = new ChainProfile(networkState.chainNetworkName);
     chainProfile.init();
     networkState.currentNetworkProfile = chainProfile;
-    AppState.buildTxn = new BuildTransactions(
-      chainProfile.network.type,
-      chainProfile.generationHash
-    );
     if (chainProfile.network.currency.assetId) {
       AppState.nativeToken.assetId = chainProfile.network.currency.assetId;
     }
