@@ -29,7 +29,7 @@ defineProps({
     @apply flex items-center border-b border-gray-100 py-4;
 
     > div:first-child {
-      @apply w-40 text-xs pl-4;
+      @apply w-40 text-xs px-4;
     }
 
     > div:nth-child(2) {

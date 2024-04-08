@@ -75,6 +75,18 @@
         >
           Transactions
         </div>
+        <div
+          class="w-18 text-center"
+          :class="`${
+            currentComponent == 'drive'
+              ? 'border-yellow-500 border-b-2'
+              : 'cursor-pointer'
+          }`"
+          @click="setCurrentComponent('drive')"
+          v-if="bcDrivesLength > 0"
+        >
+          Drives
+        </div>
       </div>
       <div class="mb-20" v-if="!isFetching">
         <AssetComponent
@@ -102,6 +114,11 @@
           v-else-if="currentComponent == 'txn'"
           :accountParam="strAddress || strPublicKey"
         />
+        <DriveComponent
+          :publicKey="strPublicKey"
+          v-show="currentComponent == 'drive'"
+          @show-all-drives="updateBcDrives"
+        />
       </div>
     </div>
   </div>
@@ -115,6 +132,7 @@ import NamespaceComponent from "@/modules/account/components/NamespaceComponent.
 import MetadataComponent from "@/modules/account/components/MetadataComponent.vue";
 import MultisigComponent from "@/modules/account/components/MultisigComponent.vue";
 import TransactionComponent from "@/modules/account/components/TransactionComponent.vue";
+import DriveComponent from "../components/DriveComponent.vue";
 import { networkState } from "@/state/networkState";
 import { AppState } from "@/state/appState";
 import { Helper } from "@/util/typeHelper";
@@ -126,6 +144,7 @@ import {
 import { MetadataUtils, type MetadataObj } from "@/util/metadataUtil";
 import { AccountInfo, Address } from "tsjs-xpx-chain-sdk";
 import { MultisigInfo } from "@/models/multisigInfo";
+import type { DriveInfo } from "tsjs-xpx-chain-sdk";
 
 interface multisigLayer {
   key: string, label: string, selectable: boolean, children: { key: string, label: string, data:string, selectable: boolean }[]
@@ -142,6 +161,7 @@ const strAddress = ref("");
 const strPublicKey = ref("");
 const multisigLength = ref(0);
 const cosignatoriesLength = ref(0);
+const bcDrivesLength = ref(0);
 const isFetching = ref(true);
 const isHarvester = ref(false)
 const accountAssets = ref<{ id: string; amount: number }[]>([]);
@@ -255,15 +275,16 @@ const loadAccountInfo = async () => {
 
 loadAccountInfo();
 
-const generateMultisigInfoBelowLevelZero = async (strAddress: string) => {
-  if (!AppState.isReady && !networkName.value) {
+const generateMultisigInfoBelowLevelZero = async () => {
+  if (!AppState.isReady) {
     setTimeout(generateMultisigInfoBelowLevelZero, 1000);
     return;
   }
   if (!AppState.chainAPI) {
     return;
   }
-  let address = Address.createFromRawAddress(strAddress);
+
+  let address = Address.createFromRawAddress(strAddress.value);
   try {
     var graphInfo =
       await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(address);
@@ -272,21 +293,29 @@ const generateMultisigInfoBelowLevelZero = async (strAddress: string) => {
   }
 
   let multisigInfos: MultisigInfo[] = [];
-  graphInfo.multisigAccounts.forEach((value, key) => {
-    const level = key;
-    for (let i = 0; i < value.length; ++i) {
-      let multiInfo = value[i];
-      let newMultisigInfo = new MultisigInfo(
-        multiInfo.account.publicKey,
-        level,
-        multiInfo.cosignatories.map((cosign) => cosign.publicKey),
-        multiInfo.multisigAccounts.map((cosign) => cosign.publicKey),
-        multiInfo.minApproval,
-        multiInfo.minRemoval
-      );
-      multisigInfos.push(newMultisigInfo);
-    }
-  });
+  try {
+    let graphInfo =
+      await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(address);
+  
+    graphInfo.multisigAccounts.forEach((value, key) => {
+      const level = key;
+      for (let i = 0; i < value.length; ++i) {
+        let multiInfo = value[i];
+        let newMultisigInfo = new MultisigInfo(
+          multiInfo.account.publicKey,
+          level,
+          multiInfo.cosignatories.map((cosign) => cosign.publicKey),
+          multiInfo.multisigAccounts.map((cosign) => cosign.publicKey),
+          multiInfo.minApproval,
+          multiInfo.minRemoval
+        );
+        multisigInfos.push(newMultisigInfo);
+      }
+    });
+  } catch (error) {
+    
+  }
+  
   var multisigAccounts: multisigLayer[] = [];
   var indexNo = 0
   multisigAccounts.push({
@@ -358,7 +387,11 @@ const generateMultisigInfoBelowLevelZero = async (strAddress: string) => {
   multisigLength.value = multisigAccBelowLevelZero.length;
 };
 
-generateMultisigInfoBelowLevelZero(strAddress.value);
+generateMultisigInfoBelowLevelZero();
+
+const updateBcDrives = (data: DriveInfo[]) => {
+  bcDrivesLength.value = data.length;
+}
 
 emitter.on("CHANGE_NETWORK", (payload: boolean) => {
   if (payload) {
@@ -367,4 +400,5 @@ emitter.on("CHANGE_NETWORK", (payload: boolean) => {
     loadAccountInfo();
   }
 });
+
 </script>

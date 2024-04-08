@@ -1,29 +1,28 @@
 <template>
   <div class="details">
     <div>
-      <div>Action</div>
-      <div>{{ txnDetail.detail.action }}</div>
-    </div>
-    <div>
-      <div>Remote Public Key</div>
+      <div>Drive Key</div>
       <div>
         <router-link
           :to="{
             name: 'ViewAccount',
-            params: { accountParam: txnDetail.detail.remotePublicKey },
+            params: { accountParam: txnDetail.signer },
           }"
           class="text-blue-600 hover:text-blue-primary hover:underline"
         >
-          {{ txnDetail.detail.remotePublicKey }}
+          {{ txnDetail.driveKey }}
         </router-link>
       </div>
     </div>
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 defineProps({
-  txnDetail: Object,
+  txnDetail: {
+    type: Object,
+    required: true,
+  },
 });
 </script>
 
@@ -35,11 +34,11 @@ defineProps({
     @apply flex items-center border-b border-gray-100 py-4;
 
     > div:first-child {
-      @apply w-40 text-xs px-4;
+      @apply w-40 px-4 break-words;
     }
 
     > div:nth-child(2) {
-      @apply text-xs w-full;
+      @apply w-full break-all;
     }
   }
 

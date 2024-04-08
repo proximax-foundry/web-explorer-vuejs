@@ -138,6 +138,11 @@
       :selectedGroupType="transactionGroupType.CONFIRMED"
       v-else-if="selectedTxnType === TransactionFilterType['SDA EXCHANGE']"
     />
+    <StorageTxnDataTable
+      :transactions="storageTransactions"
+      :pages="pages"
+      v-else-if="selectedTxnType == TransactionFilterType.STORAGE"
+    />
     <div class="my-5 mb-15" v-if="totalPages > 1">
       <button
         v-if="!viewAllTransactions"
@@ -257,6 +262,7 @@ import RestrictionTxnDataTable from "@/modules/transaction/components/txnDataTab
 import SecretTxnDataTable from "@/modules/transaction/components/txnDataTables/SecretTxnDataTable.vue";
 import ChainTxnDataTable from "@/modules/transaction/components/txnDataTables/ChainTxnDataTable.vue";
 import SdaExchangeTxnDataTable from "@/modules/transaction/components/txnDataTables/SdaExchangeTxnDataTable.vue";
+import StorageTxnDataTable from "@/modules/transaction/components/txnDataTables/StorageTxnDataTable.vue";
 import {
   TransactionFilterType,
   TransactionFilterTypes,
@@ -393,6 +399,9 @@ const changeSearchTxnType = () => {
     case TransactionFilterType['SDA EXCHANGE']:
       QueryParamsType.value = TransactionFilterTypes.getSdaExchangeTypes();
       break;
+    case TransactionFilterType.STORAGE:
+      QueryParamsType.value = TransactionFilterTypes.getStorageTypes();
+      break;
     default:
       QueryParamsType.value = undefined;
       break;
@@ -416,6 +425,7 @@ const restrictionTransactions = ref<any[]>([]);
 const secretTransactions = ref<any[]>([]);
 const chainTransactions = ref<any[]>([]);
 const sdaExchangeTransactions = ref<any[]>([]);
+const storageTransactions = ref<any[]>([]);
 let transactionGroupType = Helper.getTransactionGroupType();
 let blockDescOrderSortingField = Helper.createTransactionFieldOrder(
   Helper.getTransactionSortField().BLOCK,
@@ -484,47 +494,50 @@ let loadAccountTransactions = async () => {
     if (selectedTxnType.value == "all") {
       mixedTransactions.value = formattedTxns;
     }
-    if (selectedTxnType.value == TransactionFilterType.TRANSFER) {
+    else if (selectedTxnType.value == TransactionFilterType.TRANSFER) {
       transferTransactions.value = formattedTxns;
     }
-    if (selectedTxnType.value == TransactionFilterType.ACCOUNT) {
+    else if (selectedTxnType.value == TransactionFilterType.ACCOUNT) {
       accountTransactions.value = formattedTxns;
     }
-    if (selectedTxnType.value == TransactionFilterType.AGGREGATE) {
+    else if (selectedTxnType.value == TransactionFilterType.AGGREGATE) {
       aggregateTransactions.value = formattedTxns;
     }
-    if (selectedTxnType.value == TransactionFilterType.ALIAS) {
+    else if (selectedTxnType.value == TransactionFilterType.ALIAS) {
       aliasTransactions.value = formattedTxns;
     }
-    if (selectedTxnType.value == TransactionFilterType.ASSET) {
+    else if (selectedTxnType.value == TransactionFilterType.ASSET) {
       assetTransactions.value = formattedTxns;
     }
-    if (selectedTxnType.value == TransactionFilterType.NAMESPACE) {
+    else if (selectedTxnType.value == TransactionFilterType.NAMESPACE) {
       namespaceTransactions.value = formattedTxns;
     }
-    if (selectedTxnType.value == TransactionFilterType.METADATA) {
+    else if (selectedTxnType.value == TransactionFilterType.METADATA) {
       metadataTransactions.value = formattedTxns;
     }
-    if (selectedTxnType.value == TransactionFilterType.EXCHANGE) {
+    else if (selectedTxnType.value == TransactionFilterType.EXCHANGE) {
       exchangeTransactions.value = formattedTxns;
     }
-    if (selectedTxnType.value == TransactionFilterType.LOCK) {
+    else if (selectedTxnType.value == TransactionFilterType.LOCK) {
       lockTransactions.value = formattedTxns;
     }
-    if (selectedTxnType.value == TransactionFilterType.LINK) {
+    else if (selectedTxnType.value == TransactionFilterType.LINK) {
       linkTransactions.value = formattedTxns;
     }
-    if (selectedTxnType.value == TransactionFilterType.RESTRICTION) {
+    else if (selectedTxnType.value == TransactionFilterType.RESTRICTION) {
       restrictionTransactions.value = formattedTxns;
     }
-    if (selectedTxnType.value == TransactionFilterType.SECRET) {
+    else if (selectedTxnType.value == TransactionFilterType.SECRET) {
       secretTransactions.value = formattedTxns;
     }
-    if (selectedTxnType.value == TransactionFilterType.CHAIN) {
+    else if (selectedTxnType.value == TransactionFilterType.CHAIN) {
       chainTransactions.value = formattedTxns;
     }
-    if (selectedTxnType.value == TransactionFilterType['SDA EXCHANGE']) {
+    else if (selectedTxnType.value == TransactionFilterType['SDA EXCHANGE']) {
       sdaExchangeTransactions.value = formattedTxns;
+    }
+    else if (selectedTxnType.value == TransactionFilterType.STORAGE) {
+      storageTransactions.value = formattedTxns;
     }
   } else {
     transactions.value = [];
