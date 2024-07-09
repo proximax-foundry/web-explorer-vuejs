@@ -545,7 +545,6 @@ let loadAccountTransactions = async () => {
   totalPages.value = transactionSearchResult.pagination.totalPages;
   isFetching.value = false;
 };
-loadAccountTransactions();
 
 const formatConfirmedTransaction = async (transactions: Transaction[]) => {
   let formattedTxns = [];
