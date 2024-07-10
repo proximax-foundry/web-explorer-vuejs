@@ -143,6 +143,12 @@
       :pages="pages"
       v-else-if="selectedTxnType == TransactionFilterType.STORAGE"
     />
+    <TraceTxnDataTable
+      :transactions="traceTransactions"
+      :pages="10000"
+      :selectedGroupType="transactionGroupType.CONFIRMED"
+      v-else-if="selectedTxnType === TransactionFilterType['TRACE']"
+    />
     <div class="my-5 mb-15" v-if="totalPages > 1">
       <button
         v-if="!viewAllTransactions"
@@ -263,12 +269,13 @@ import SecretTxnDataTable from "@/modules/transaction/components/txnDataTables/S
 import ChainTxnDataTable from "@/modules/transaction/components/txnDataTables/ChainTxnDataTable.vue";
 import SdaExchangeTxnDataTable from "@/modules/transaction/components/txnDataTables/SdaExchangeTxnDataTable.vue";
 import StorageTxnDataTable from "@/modules/transaction/components/txnDataTables/StorageTxnDataTable.vue";
+import TraceTxnDataTable from "@/modules/transaction/components/txnDataTables/TraceTxnDataTable.vue";
 import {
   TransactionFilterType,
   TransactionFilterTypes,
 } from "@/models/transactions/transaction";
 import { AccountUtils } from "@/util/accountUtil";
-import type { Transaction } from "tsjs-xpx-chain-sdk";
+import { Transaction, MosaicId, NamespaceId, Order_v2 } from "tsjs-xpx-chain-sdk";
 
 const props = defineProps({
   accountParam: {
@@ -402,6 +409,9 @@ const changeSearchTxnType = () => {
     case TransactionFilterType.STORAGE:
       QueryParamsType.value = TransactionFilterTypes.getStorageTypes();
       break;
+    case TransactionFilterType['TRACE']:
+      QueryParamsType.value = TransactionFilterTypes.getTransferTypes();
+      break;
     default:
       QueryParamsType.value = undefined;
       break;
@@ -426,6 +436,7 @@ const secretTransactions = ref<any[]>([]);
 const chainTransactions = ref<any[]>([]);
 const sdaExchangeTransactions = ref<any[]>([]);
 const storageTransactions = ref<any[]>([]);
+const traceTransactions = ref<any[]>([]);
 let transactionGroupType = Helper.getTransactionGroupType();
 let blockDescOrderSortingField = Helper.createTransactionFieldOrder(
   Helper.getTransactionSortField().BLOCK,
@@ -442,7 +453,12 @@ let loadAccountTransactions = async () => {
     return;
   }
   let txnQueryParams = Helper.createTransactionQueryParams();
-  txnQueryParams.pageSize = pages.value;
+  if(selectedTxnType.value === 'Trace'){
+    txnQueryParams.pageSize = 10000
+  }
+  else{
+    txnQueryParams.pageSize = pages.value;
+  }
 
   let isPublicKey = props.accountParam.length === 64;
   if (props.accountParam !== "" && !isPublicKey) {
@@ -536,8 +552,8 @@ let loadAccountTransactions = async () => {
     else if (selectedTxnType.value == TransactionFilterType['SDA EXCHANGE']) {
       sdaExchangeTransactions.value = formattedTxns;
     }
-    else if (selectedTxnType.value == TransactionFilterType.STORAGE) {
-      storageTransactions.value = formattedTxns;
+    else if (selectedTxnType.value == TransactionFilterType['TRACE']) {
+      traceTransactions.value = formattedTxns;
     }
   } else {
     transactions.value = [];
@@ -551,7 +567,7 @@ const formatConfirmedTransaction = async (transactions: Transaction[]) => {
   let formattedTxns = [];
 
   switch (selectedTxnType.value) {
-    case TransactionFilterType.TRANSFER:
+    case TransactionFilterType.TRANSFER || TransactionFilterType['TRACE']:
       formattedTxns = await TransactionUtils.formatConfirmedMixedTxns(
         transactions
       );

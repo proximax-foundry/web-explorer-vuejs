@@ -116,5 +116,6 @@ export enum TransactionFilterType {
   SECRET = "Secret",
   CHAIN = "Chain",
   'SDA EXCHANGE' = "SDA Exchange",
-  STORAGE = "Storage"
+  STORAGE = "Storage",
+  'TRACE' = "Trace",
 }
