@@ -2,10 +2,7 @@
     <div>
       <DataTable
         :value="transactions"
-        :paginator="false"
-        :rows="Number(pages)"
         scrollDirection="horizontal"
-        :alwaysShowPaginator="false"
         responsiveLayout="scroll"
         paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
         currentPageReportTemplate=""
@@ -21,12 +18,12 @@
               </div>
               <router-link
                 class="uppercase font-bold text-xs block text-blue-600 hover:text-blue-primary hover:underline"
-                :to="{ name: 'ViewTransaction', params: { hash: data.hash } }"
+                :to="{ name: 'ViewTransaction', params: { hash: data.transactionInfo.hash } }"
               >
                 <span
                   class="text-xs truncate inline-flex break-all hover:underline hover:text-blue-primary text-ellipsis overflow-hidden w-44"
-                  v-tooltip.right="data.hash"
-                  >{{ data.hash }}</span
+                  v-tooltip.right="data.transactionInfo.hash"
+                  >{{ data.transactionInfo.hash }}</span
                 >...
               </router-link>
             </div>
@@ -43,7 +40,7 @@
                     src="@/modules/transaction/img/icon-txn-out.svg"
                     class="inline-block"
                     v-if="
-                      data.sender === Helper.createAddress(accountAddress).plain()
+                      data.signer.address.address.plain() === Helper.createAddress(accountAddress).plain()
                     "
                   />
                   <img
@@ -60,18 +57,18 @@
               </div>
               <div class="uppercase font-bold text-xs">
                 <span
-                  v-if="data.recipient === '' || data.recipient === null"
-                ></span>
+                  v-if="data.recipient.address === '' || data.recipient.address === null"
+                >-</span>
                 <router-link
                   :to="{
                     name: 'ViewAccount',
-                    params: { accountParam: data.recipient },
+                    params: { accountParam: data.recipient.address },
                   }"
-                  v-tooltip.right="Helper.createAddress(data.recipient).pretty()"
+                  v-tooltip.right="Helper.createAddress(data.recipient.address).pretty()"
                   v-else
                   class="truncate inline-flex text-xs break-all text-blue-600 hover:text-blue-primary hover:underline w-44"
                   ><span class="text-ellipsis overflow-hidden">{{
-                    Helper.createAddress(data.recipient).pretty()
+                    Helper.createAddress(data.recipient.address).pretty()
                   }}</span
                   >...</router-link
                 >
@@ -86,17 +83,17 @@
                 From
               </div>
               <div class="uppercase font-bold text-xs">
-                <span v-if="data.sender === '' || data.sender === null"></span>
+                <span v-if="data.signer.address.address === '' || data.signer.address.address === null">-</span>
                 <router-link
                   :to="{
                     name: 'ViewAccount',
-                    params: { accountParam: data.sender },
+                    params: { accountParam: data.signer.address.address },
                   }"
                   v-else
-                  v-tooltip.bottom="Helper.createAddress(data.sender).pretty()"
+                  v-tooltip.bottom="Helper.createAddress(data.signer.address.address).pretty()"
                   class="truncate inline-flex w-44 text-xs break-all text-blue-600 hover:text-blue-primary hover:underline"
                   ><span class="text-ellipsis overflow-hidden">{{
-                    Helper.createAddress(data.sender).pretty()
+                    Helper.createAddress(data.signer.address.address).pretty()
                   }}</span
                   >...</router-link
                 >
@@ -121,30 +118,6 @@
           </template>
         </Column>
         <Column
-          field="In/Out"
-          header="IN/OUT"
-          headerStyle="width:100px"
-          v-if="wideScreen && accountAddress"
-        >
-          <template #body="{ data }">
-            <div class="ml-2">
-              <img
-                src="@/modules/transaction/img/icon-txn-out.svg"
-                class="inline-block"
-                v-if="
-                  Helper.createAddress(data.sender).plain() ===
-                  Helper.createAddress(accountAddress).plain()
-                "
-              />
-              <img
-                src="@/modules/transaction/img/icon-txn-in.svg"
-                class="inline-block"
-                v-else
-              />
-            </div>
-          </template>
-        </Column>
-        <Column
           field="hash"
           header="TX HASH"
           headerStyle="width:50px"
@@ -152,11 +125,11 @@
         >
           <template #body="{ data }">
             <router-link
-              :to="{ name: 'ViewTransaction', params: { hash: data.hash } }"
+              :to="{ name: 'ViewTransaction', params: { hash: data.transactionInfo.hash } }"
               class="text-xs text-blue-600 hover:text-blue-primary hover:underline inline-flex"
-              v-tooltip.bottom="data.hash"
+              v-tooltip.bottom="data.transactionInfo.hash"
               ><span class="text-ellipsis overflow-hidden w-20">{{
-                data.hash
+                data.transactionInfo.hash
               }}</span
               >...
             </router-link>
@@ -180,9 +153,9 @@
         >
           <template #body="{ data }">
             <router-link
-              :to="{ name: 'ViewBlock', params: { blockHeight: data.block } }"
+              :to="{ name: 'ViewBlock', params: { blockHeight: data.transactionInfo.height.compact() } }"
               class="text-blue-600 hover:text-blue-primary hover:underline text-xs"
-              >{{ data.block }}</router-link
+              >{{ data.transactionInfo.height.compact() }}</router-link
             >
           </template>
         </Column>
@@ -193,14 +166,14 @@
           v-if="wideScreen"
         >
           <template #body="{ data }">
-            <span v-if="data.sender === '' || data.sender === null"></span>
+            <span v-if="data.signer.address.address === '' || data.signer.address.address === null">-</span>
             <router-link
-              :to="{ name: 'ViewAccount', params: { accountParam: data.sender } }"
+              :to="{ name: 'ViewAccount', params: { accountParam: data.signer.address.address } }"
               v-else
-              v-tooltip.bottom="Helper.createAddress(data.sender).pretty()"
+              v-tooltip.bottom="Helper.createAddress(data.signer.address.address).pretty()"
               class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-32"
               ><span class="text-ellipsis overflow-hidden"
-                >{{ Helper.createAddress(data.sender).pretty() }} </span
+                >{{ Helper.createAddress(data.signer.address.address).pretty() }} </span
               >...
             </router-link>
           </template>
@@ -212,59 +185,30 @@
           v-if="wideScreen"
         >
           <template #body="{ data }">
-            <span v-if="data.recipient === '' || data.recipient === null"></span>
+            <span v-if="data.recipient.address === '' || data.recipient.address === null">-</span>
             <router-link
               :to="{
                 name: 'ViewAccount',
-                params: { accountParam: data.recipient },
+                params: { accountParam: data.recipient.address },
               }"
-              v-tooltip.bottom="Helper.createAddress(data.recipient).pretty()"
+              v-tooltip.bottom="Helper.createAddress(data.recipient.address).pretty()"
               v-else
               class="truncate inline-flex text-xs text-blue-600 hover:text-blue-primary hover:underline w-32"
             >
               <span class="text-ellipsis overflow-hidden">{{
-                Helper.createAddress(data.recipient).pretty()
+                Helper.createAddress(data.recipient.address).pretty()
               }}</span
               >...
             </router-link>
           </template>
         </Column>
-        <Column header="TX FEE" v-if="wideScreen" headerStyle="width:110px">
+        <Column :header="'AMOUNT(' + nativeTokenName + ')'" headerStyle="width:10px" v-if="wideScreen">
           <template #body="{ data }">
-            <div class="text-xs">
-              {{ data.fee }}
-              <b v-if="data.fee == 0 || data.fee > 0">{{ nativeTokenName }}</b>
-            </div>
-          </template>
-        </Column>
-        <Column :header="'AMOUNT(' + nativeTokenName + ')'" headerStyle="width:110px" v-if="wideScreen">
-          <template #body="{ data }">
-            <div class="text-xs" v-if="data.amountTransfer">
-              {{
-                Helper.toCurrencyFormat(data.amountTransfer, currencyDivisibility)
-              }}
-            </div>
-            <div v-if="checkOtherAsset(data.sda)">
-              <div v-for="(sda, index) in displaySDAs(data.sda)" :key="index">
-                {{ Helper.toCurrencyFormat(sda.amount, sda.divisibility) }}
+            <div v-if="data.signer.address.address === Helper.createAddress(accountAddress!).plain()" class="inline-block font-bold py-1 px-2 my-1 mx-1 rounded bg-red-200 text-red-700">{{ data.transactionInfo.size* }}</div>
+            <div v-for="mosaic of data.mosaics">
+              <div v-if="mosaic.id.toHex().toUpperCase() === '13BFC518E40549D7' || mosaic.id.toHex().toUpperCase() === 'BFFB42A19116BDF6'"  class="inline-block font-bold py-1 px-2 my-1 mx-1 rounded" :class="data.signer.address.address === Helper.createAddress(accountAddress!).plain() ? 'bg-red-200 text-red-700' : 'bg-green-200 text-green-700'">
+                {{ TransactionUtils.convertToExactNativeAmount(mosaic.amount.compact()) }}
               </div>
-            </div>
-          </template>
-        </Column>
-        <Column header="SDA" headerStyle="width:150px" v-if="wideScreen">
-          <template #body="{ data }">
-            <div v-if="checkOtherAsset(data.sda)">
-              <span
-                v-for="(sdaName, index) in displaySDAs(data.sda)"
-                :key="index"
-              >
-                <router-link
-                  :to="{ name: 'ViewAsset', params: { id: sdaName.name } }"
-                  class="text-blue-600 hover:text-blue-primary flex hover:underline"
-                  >{{ sdaName.name }}</router-link
-                >
-                {{ data.sda.length }}
-              </span>
             </div>
           </template>
         </Column>
@@ -281,7 +225,8 @@
   import { Helper } from "@/util/typeHelper";
   import { AppState } from "@/state/appState";
   import type { SDA } from "@/models/transactions/sda";
-  import { TransactionType } from "tsjs-xpx-chain-sdk";
+  import { TransactionUtils } from "@/util/transactionUtils";
+  import { TransactionType, MosaicId, NamespaceId } from "tsjs-xpx-chain-sdk";
   
   defineProps({
     transactions: Array,
@@ -308,50 +253,12 @@
   });
   const nativeTokenName = computed(() => AppState.nativeToken.label);
   
-  const countDecimals = function (amount: number) {
-    if (Math.floor(amount) === amount) return 0;
-    return amount.toString().split(".")[1].length || 0;
-  };
-  
-  const displaySDAs = (sdas: SDA[]) => {
-    let sda_rows: { name: string; amount: number; divisibility: number }[] = [];
-    if (sdas.length > 0) {
-      for (const sda of sdas) {
-        if (sda.currentAlias && sda.currentAlias.length) {
-          if (sda.currentAlias[0].name) {
-            sda_rows.push({
-              amount: sda.amount,
-              name: sda.currentAlias[0].name,
-              divisibility: countDecimals(sda.amount),
-            });
-          }
-        } else {
-          sda_rows.push({
-            amount: sda.amount,
-            name: sda.id,
-            divisibility: countDecimals(sda.amount),
-          });
-        }
-      }
-      return sda_rows;
-    }
-  };
-  
-  const checkOtherAsset = (assets: SDA[]) => {
-    if (assets) {
-      if (assets.length > 0) {
-        return true;
-      }
-    }
-    return false;
-  };
-  
   const currencyDivisibility = computed(() => {
     return AppState.nativeToken.divisibility;
   });
 
   const  formatTypeWord = (txnType: string) => {
-  return txnType.replace(/\b\w+\b/g, type => {
+  return txnType.replace(/_/g, ' ').replace(/\b\w+\b/g, type => {
     return type.charAt(0) + type.slice(1).toLowerCase();
   });
 }
