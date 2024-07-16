@@ -248,9 +248,9 @@
         :selectedGroupType="transactionGroupType.CONFIRMED"
       />
     </div>
-    <div class="my-5 mb-15">
+    <div class="mb-15">
       <button
-      v-if="strAddress && viewAllTransactions"
+        v-if="switchTrace && height !== 1"
         class="text-sm text-blue-primary py-2 bg-gray-200 w-full"
         @click="loadTraceTransactionsXpx(100000)"
       >
@@ -316,12 +316,14 @@ let selectedTxnType = ref("all");
 let txnTypeList = Object.entries(TransactionFilterType).map(
   ([label, value]) => ({ label, value })
 );
+const nativeToken = computed(() => AppState.nativeToken);
 const isFetching = ref(true);
 const wideScreen = ref(false);
 const pages = ref(20);
 const currentPage = ref(1);
 const totalPages = ref(0);
 const strAddress = ref("");
+const height = ref(1);
 const totalTrace = ref(100000);
 const switchTrace = ref(false);
 const QueryParamsType = ref<number[] | undefined>(undefined);
@@ -540,11 +542,9 @@ let loadAccountTransactions = async () => {
     }
     else if (selectedTxnType.value == TransactionFilterType.ASSET) {
       assetTransactions.value = formattedTxns;
-      console.log(transactionSearchResult.transactions)
     }
     else if (selectedTxnType.value == TransactionFilterType.NAMESPACE) {
       namespaceTransactions.value = formattedTxns;
-      console.log(transactionSearchResult.transactions)
     }
     else if (selectedTxnType.value == TransactionFilterType.METADATA) {
       metadataTransactions.value = formattedTxns;
@@ -611,31 +611,34 @@ let loadTraceTransactionsXpx = async (loadMore: number) => {
 
   const blockHeight = await AppState.chainAPI.chainAPI.getBlockchainHeight();
   totalTrace.value = totalTrace.value + loadMore
-  let fromHeight = blockHeight - totalTrace.value;
-  console.log(fromHeight)
-  if (fromHeight <= 0) {
-    fromHeight = 1;
+  height.value = blockHeight - totalTrace.value;
+  if (height.value <= 0) {
+    height.value = 1;
   }
-  txnQueryParams.fromHeight = fromHeight;
+  txnQueryParams.fromHeight = height.value;
 
   txnQueryParams.updateFieldOrder(blockDescOrderSortingField);
-  txnQueryParams.transferMosaicIdFilters = Helper.createTransactionMosaicSearchFilters(new MosaicId('13BFC518E40549D7'))
+  let transactionSearchResultMixed = await TransactionUtils.searchTxns(
+    transactionGroupType.CONFIRMED,
+    txnQueryParams
+  );
+  transactionSearchResultMixed.transactions = transactionSearchResultMixed.transactions.filter((txn) => txn.type !== 16724)
+  txnQueryParams.transferMosaicIdFilters = Helper.createTransactionMosaicSearchFilters(new MosaicId(nativeToken.value.assetId))
   let transactionSearchResultFilterByAssetId = await TransactionUtils.searchTxns(
     transactionGroupType.CONFIRMED,
     txnQueryParams
   );
 
-  txnQueryParams.transferMosaicIdFilters = Helper.createTransactionMosaicSearchFilters(new NamespaceId('prx.xpx'))
+  txnQueryParams.transferMosaicIdFilters = Helper.createTransactionMosaicSearchFilters(new NamespaceId(nativeToken.value.fullNamespace))
   let transactionSearchResultFilterByNamespaceId = await TransactionUtils.searchTxns(
     transactionGroupType.CONFIRMED,
     txnQueryParams
   );
-  let mergedArray = transactionSearchResultFilterByAssetId.transactions.concat(transactionSearchResultFilterByNamespaceId.transactions);
-  let transactionSearchResult = [...new Set(mergedArray)];
+  let transactionSearchResult = transactionSearchResultMixed.transactions.concat(transactionSearchResultFilterByAssetId.transactions,transactionSearchResultFilterByNamespaceId.transactions);
   if (transactionSearchResult.length > 0) {
     traceTransactions.value = transactionSearchResult
   } else {
-    transactions.value = [];
+    traceTransactions.value = [];
   }
   isFetching.value = false;
 };
