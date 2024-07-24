@@ -78,6 +78,17 @@
         <div
           class="w-18 text-center"
           :class="`${
+            currentComponent == 'trace'
+              ? 'border-yellow-500 border-b-2'
+              : 'cursor-pointer'
+          }`"
+          @click="setCurrentComponent('trace')"
+        >
+          Trace XPX
+        </div>
+        <div
+          class="w-18 text-center"
+          :class="`${
             currentComponent == 'drive'
               ? 'border-yellow-500 border-b-2'
               : 'cursor-pointer'
@@ -114,6 +125,10 @@
           v-else-if="currentComponent == 'txn'"
           :accountParam="strAddress || strPublicKey"
         />
+        <TraceComponent
+          v-else-if="currentComponent == 'trace'"
+          :accountParam="strAddress || strPublicKey"
+        />
         <DriveComponent
           :publicKey="strPublicKey"
           v-show="currentComponent == 'drive'"
@@ -132,6 +147,7 @@ import NamespaceComponent from "@/modules/account/components/NamespaceComponent.
 import MetadataComponent from "@/modules/account/components/MetadataComponent.vue";
 import MultisigComponent from "@/modules/account/components/MultisigComponent.vue";
 import TransactionComponent from "@/modules/account/components/TransactionComponent.vue";
+import TraceComponent from "@/modules/account/components/TraceComponent.vue";
 import DriveComponent from "../components/DriveComponent.vue";
 import { networkState } from "@/state/networkState";
 import { AppState } from "@/state/appState";

@@ -27,7 +27,8 @@ import {
   Order_v2,
   MosaicQueryParams,
   AggregateTransaction,
-  Convert
+  Convert,
+  TransactionMosaicSearchFilters
 } from "tsjs-xpx-chain-sdk";
 import type { InnerTransaction } from "tsjs-xpx-chain-sdk";
 import { DateTime } from "luxon";
@@ -153,6 +154,10 @@ export class Helper {
 
   static createMetadataQueryParams(): MetadataQueryParams {
     return new MetadataQueryParams();
+  }
+
+  static createTransactionMosaicSearchFilters(id: string | MosaicId | NamespaceId) {
+    return new TransactionMosaicSearchFilters(id);
   }
 
   static createTransactionFieldOrder(
