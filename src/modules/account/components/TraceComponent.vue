@@ -32,7 +32,7 @@ import { AppState } from "@/state/appState";
 import { Helper } from "@/util/typeHelper";
 import { AccountUtils } from "@/util/accountUtil";
 import { TransactionUtils } from "@/util/transactionUtils";
-import { MosaicId, NamespaceId } from "tsjs-xpx-chain-sdk";
+import { Address, BalanceTransferReceipt, MosaicId, NamespaceId, ReceiptType, TransactionType, TransferTransaction } from "tsjs-xpx-chain-sdk";
 
 const props = defineProps({
   accountParam: {
@@ -40,6 +40,16 @@ const props = defineProps({
     required: true,
   },
 });
+
+interface TraceTransaction {
+    hash: string | undefined,
+    type: string,
+    block: number,
+    sender: string | null,
+    recipient: string | null,
+    amount: { fee?: number, xpx?: number},
+    getXpxOffer?: boolean,
+  }
 
 const nativeToken = computed(() => AppState.nativeToken);
 const isFetching = ref(true);
@@ -64,12 +74,116 @@ onMounted(() => {
   window.addEventListener("resize", screenResizeHandler);
 });
 
-const traceTransactions = ref<any[]>([]);
+const traceTransactions = ref<TraceTransaction[]>([]);
 let transactionGroupType = Helper.getTransactionGroupType();
 let blockDescOrderSortingField = Helper.createTransactionFieldOrder(
   Helper.getTransactionSortField().BLOCK,
   Helper.getQueryParamOrder_v2().DESC
 );
+
+const  formatTypeWord = (txnType: string) => {
+    return txnType.replace(/_/g, ' ').replace(/\b\w+\b/g, type => {
+      return type.charAt(0) + type.slice(1).toLowerCase();
+    });
+  }
+
+const storeTxnDetails = (hash: string | undefined, type: number, blockHeight: number, signer: string  | null, recipient: string | null, fee: number | null, xpx: number | null) => {
+  traceTransactions.value.push({
+    hash: hash,
+    type: formatTypeWord(TransactionType[type]),
+    block: blockHeight,
+    sender: signer,
+    recipient: recipient,
+    amount: { fee:TransactionUtils.convertToExactNativeAmount(fee!), xpx: TransactionUtils.convertToExactNativeAmount(xpx!)},
+  })
+}
+
+const getBlockReceiptDetail = async (txn: any, currentAddress: string, fee: number | null) => {
+  const blockReceipts = await AppState.chainAPI!.blockAPI.getBlockReceipts(txn.transactionInfo.height.compact());
+  const {transactionStatements,} = blockReceipts;
+  for(const statement of transactionStatements){
+    for(const receipt of statement.receipts){
+      if (receipt instanceof BalanceTransferReceipt) {
+        const { type, version, size, ...val } = receipt;
+        if((txn.type === TransactionType.REGISTER_NAMESPACE && type === ReceiptType.Namespace_Rental_Fee) || (txn.type === TransactionType.MOSAIC_DEFINITION && type === ReceiptType.Mosaic_Rental_Fee)){
+          if(val.mosaicId.toHex() === nativeToken.value.assetId){
+            if(val.sender.address.plain() === currentAddress){
+              if(val.recipient instanceof Address){
+                storeTxnDetails(txn.transactionInfo.hash? txn.transactionInfo.hash : txn.transactionInfo.aggregateHash, txn.type, txn.transactionInfo.height.compact(), txn.signer ? txn.signer.address.address : null,val.recipient? val.recipient.plain() : null, fee, val.amount.compact());
+              }
+              else{
+                storeTxnDetails(txn.transactionInfo.hash? txn.transactionInfo.hash : txn.transactionInfo.aggregateHash, txn.type, txn.transactionInfo.height.compact(), txn.signer ? txn.signer.address.address : null,txn.recipient? txn.recipient.address : null, fee, val.amount.compact());
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+const getTransactionDetails = async (transactions: any[]) => {
+  if(!AppState.chainAPI){
+    return;
+  }
+  traceTransactions.value = []
+  const currentAddress = Helper.createAddress(props.accountParam).plain();
+  for(const transaction of transactions){
+    let txn = transaction as any
+    let txnBytes: number
+    if(!txn.transactionInfo.size){
+      let convertTxn = txn as TransferTransaction
+      txnBytes = convertTxn.size
+    }
+    else{
+      txnBytes = txn.transactionInfo.size
+    }
+    const blockInfo = await AppState.chainAPI.blockAPI.getBlockByHeight(
+      txn.transactionInfo.height.compact()
+    );
+    const txnSize = txnBytes * blockInfo.feeMultiplier;
+    if(txn.type === TransactionType.AGGREGATE_BONDED_V1 || txn.type === TransactionType.AGGREGATE_COMPLETE_V1){
+      if(txn.signer.address.address === currentAddress){
+        storeTxnDetails(txn.transactionInfo.hash? txn.transactionInfo.hash : txn.transactionInfo.aggregateHash, txn.type, txn.transactionInfo.height.compact(), txn.signer ? txn.signer.address.address : null,txn.recipient? txn.recipient.address : null, txnSize, null);
+      }
+      let getTxn = await TransactionUtils.getTransaction(txn.transactionInfo.hash? txn.transactionInfo.hash : txn.transactionInfo.aggregateHash);
+      const filterTransaction = getTxn.txn.innerTransactions.filter((txn: { type: number; }) => txn.type === TransactionType.TRANSFER || txn.type === TransactionType.REGISTER_NAMESPACE || txn.type === TransactionType.MOSAIC_DEFINITION);
+      if(getTxn.isFound){
+        for(const txn of filterTransaction){
+          if(txn.signer ? txn.signer.address.address === currentAddress : false || txn.recipient? txn.recipient.address === currentAddress : false){
+            if(txn.type === TransactionType.TRANSFER){
+              for(const mosaic of txn.mosaics){
+                if(mosaic.id.toHex() === nativeToken.value.assetId || mosaic.id.toHex() === new NamespaceId(nativeToken.value.fullNamespace).toHex()){
+                  storeTxnDetails(txn.transactionInfo.hash? txn.transactionInfo.hash : txn.transactionInfo.aggregateHash, txn.type, txn.transactionInfo.height.compact(), txn.signer ? txn.signer.address.address : null,txn.recipient? txn.recipient.address : null, null, mosaic.amount.compact());
+                }
+              }
+            }
+            else if(txn.type === TransactionType.REGISTER_NAMESPACE || txn.type === TransactionType.MOSAIC_DEFINITION){
+              await getBlockReceiptDetail(txn, currentAddress, null);
+            }
+            else{
+              storeTxnDetails(txn.transactionInfo.hash? txn.transactionInfo.hash : txn.transactionInfo.aggregateHash, txn.type, txn.transactionInfo.height.compact(), txn.signer ? txn.signer.address.address : null,txn.recipient? txn.recipient.address : null, txnSize, null);
+            }
+          }
+        }
+      }
+    }
+    else if(txn.type === TransactionType.TRANSFER){
+      for(const mosaic of txn.mosaics){
+        if(mosaic.id.toHex() === nativeToken.value.assetId || mosaic.id.toHex() === new NamespaceId(nativeToken.value.fullNamespace).toHex()){
+          storeTxnDetails(txn.transactionInfo.hash? txn.transactionInfo.hash : txn.transactionInfo.aggregateHash, txn.type, txn.transactionInfo.height.compact(), txn.signer ? txn.signer.address.address : null,txn.recipient? txn.recipient.address : null, txnSize, mosaic.amount.compact());
+        }
+      }
+    }
+    else if(txn.type === TransactionType.REGISTER_NAMESPACE || txn.type === TransactionType.MOSAIC_DEFINITION){
+      await getBlockReceiptDetail(txn, currentAddress, txnSize);
+    }
+    else{
+      storeTxnDetails(txn.transactionInfo.hash? txn.transactionInfo.hash : txn.transactionInfo.aggregateHash, txn.type, txn.transactionInfo.height.compact(), txn.signer ? txn.signer.address.address : null,txn.recipient? txn.recipient.address : null, txnSize, null);
+    }
+  }
+  traceTransactions.value.sort((a,b) => b.block - a.block)
+}
 
 let loadTraceTransactionsXpx = async (loadMore: number) => {
   isFetching.value = true;
@@ -128,7 +242,7 @@ let loadTraceTransactionsXpx = async (loadMore: number) => {
   );
   let transactionSearchResult = transactionSearchResultMixed.transactions.concat(transactionSearchResultFilterByAssetId.transactions,transactionSearchResultFilterByNamespaceId.transactions);
   if (transactionSearchResult.length > 0) {
-    traceTransactions.value = transactionSearchResult
+    getTransactionDetails(transactionSearchResult)
   } else {
     traceTransactions.value = [];
   }
