@@ -449,9 +449,13 @@ let loadAccountTransactions = async () => {
     const account = await AccountUtils.getAccountFromAddress(
       props.accountParam
     );
-    if (account) {
+    if (account && account.publicKey !== "00".repeat(32)) {
       strAddress.value = Helper.createAddress(props.accountParam).pretty();
       txnQueryParams.publicKey = account.publicKey;
+    }
+    else if(account){
+      strAddress.value = Helper.createAddress(props.accountParam).pretty();
+      txnQueryParams.recipientAddress = Helper.createAddress(props.accountParam).plain();;
     }
   } else {
     const publicKey = props.accountParam;
@@ -545,7 +549,7 @@ let loadAccountTransactions = async () => {
   totalPages.value = transactionSearchResult.pagination.totalPages;
   isFetching.value = false;
 };
-loadAccountTransactions();
+// loadAccountTransactions();
 
 const formatConfirmedTransaction = async (transactions: Transaction[]) => {
   let formattedTxns = [];
