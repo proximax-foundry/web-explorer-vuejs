@@ -1,4 +1,4 @@
-export class CommonTransaction{
+export class TransactionCommon{
   
     hash: string;
     type: number = 0;
@@ -9,8 +9,14 @@ export class CommonTransaction{
     signerName: string = "";
     deadline: number | null = null;
     unknownData: Object = {};
+    groupType: string;
+    version: number = 0;
+    derivationScheme: number = 0;
   
-    constructor(txnHash: string){
+    constructor(txnHash: string, groupType: string){
       this.hash = txnHash;
+      this.groupType = groupType;
     }
+
+    
 }

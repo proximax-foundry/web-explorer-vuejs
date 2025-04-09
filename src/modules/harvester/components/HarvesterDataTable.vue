@@ -32,7 +32,7 @@
             <router-link
               :to="{
                 name: 'ViewBlock',
-                params: { blockHeight: data.lastSigningBlockHeight.lower },
+                params: { blockHeight: data.lastSigningBlockHeight.compact() },
               }"
               class="text-xs text-blue-primary hover:underline hover:text-blue-primary"
             >
@@ -54,8 +54,10 @@
             <div class="flex gap-1">
               <div>
                 {{
-                  data.effectiveBalance.compact() /
-                  Math.pow(10, AppState.nativeToken.divisibility)
+                  Helper.convertToCurrency(
+                    data.effectiveBalance.compact(),
+                    AppState.nativeToken.divisibility
+                  )
                 }}
               </div>
 
@@ -94,7 +96,7 @@
           <router-link
             :to="{
               name: 'ViewBlock',
-              params: { blockHeight: data.lastSigningBlockHeight.lower },
+              params: { blockHeight: data.lastSigningBlockHeight.compact() },
             }"
             class="text-xs text-blue-primary hover:underline hover:text-blue-primary"
           >
@@ -121,8 +123,10 @@
         <div class="flex gap-1">
           <div>
             {{
-              data.effectiveBalance.compact() /
-              Math.pow(10, AppState.nativeToken.divisibility)
+              Helper.convertToCurrency(
+                data.effectiveBalance.compact(),
+                AppState.nativeToken.divisibility
+              )
             }}
           </div>
 
@@ -139,6 +143,7 @@ import Column from "primevue/column";
 import { defineProps } from "vue";
 import type { HarvesterMetaInfo } from "tsjs-xpx-chain-sdk";
 import { AppState } from "@/state/appState";
+import { Helper } from "@/util/typeHelper";
 
 defineProps<{
   harvesters: HarvesterMetaInfo[];

@@ -4,7 +4,7 @@
       class="xl:grid xl:grid-cols-2 xl:mb-10 md:grid md:grid-cols-2 md:mb-5 sm:mb-5 sm:grid-cols-1 px-4 gap-4"
     >
       <div>
-        <div class="text-base font-bold justify-center mb-4">
+        <div class="mt-5 xs:mt-0 text-base font-bold justify-center mb-4">
           The Sirius Explorer
         </div>
         <div class="text-justify text-xs sm:mb-4">

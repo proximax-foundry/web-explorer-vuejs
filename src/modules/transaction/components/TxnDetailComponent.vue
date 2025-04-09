@@ -87,7 +87,7 @@
         <img src="@/assets/img/icon-copy.svg" @click="copy('signerAddress')" class="cursor-pointer" />
       </div>
     </div>
-    <div v-if="txnDetail.cosigners.length > 0">
+    <div v-if="txnDetail.cosigners && txnDetail.cosigners.length > 0">
       <div>Cosigner{{ txnDetail.cosigners.length > 1 ? "s" : "" }}</div>
       <div>
         <div v-for="(cosigner, item) in txnDetail.cosigners" :key="item" class="flex items-center mb-3">
@@ -106,14 +106,6 @@
         </div>
       </div>
     </div>
-    <div v-if="Object.keys(txnDetail.unknownData).length" class="bg-gray-200">
-      <div class="unknownDetails-col">Unknown Data</div>
-      <div class="unknownDetails">
-        <pre>{{ JSON.stringify(txnDetail.unknownData, undefined, 2) }}</pre>
-      </div>
-    </div>
-
-
   </div>
 
   <TransferDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.TRANSFER" />
@@ -155,6 +147,20 @@
     " />
   <SdaExchangeDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.PLACE_SDA_EXCHANGE_OFFER ||
     txnType == TransactionType.REMOVE_SDA_EXCHANGE_OFFER" />
+  <PrepareBcDriveDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.Prepare_Bc_Drive"/>
+  <DriveClosureDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.Drive_Closure"/>
+  <DataModificationDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.Data_Modification"/>
+  <DownloadDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.Download"/>
+  <FinishDownloadDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.Finish_Download"/>
+  <DownloadApprovalDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.Download_Approval"/>
+  <ReplicatorOnboardingDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.Replicator_Onboarding"/>
+  <DataModificationSingleApprovalDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.Data_Modification_Single_Approval"/>
+  <DataModificationApprovalDetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.Data_Modification_Approval"/>
+  <EndDriveVerificationV2DetailComponent :txnDetail="txnDetail" v-if="txnType == TransactionType.End_Drive_Verification_V2"/>
+  <DataModificationCancelDetailComponent v-if="txnType == TransactionType.Data_Modification_Cancel" :txnDetail="txnDetail"/>
+  <div v-if="txnDetail.unknownData && Object.keys(txnDetail.unknownData).length">
+    <UnknownDataDetailComponent :txnDetail="txnDetail" />
+  </div>
   <div class="cosignerDetails " v-if="txnDetail.group == 'partial'">
     <div>
       <div>Cosigner List</div>
@@ -199,6 +205,17 @@ import AccountDetailComponent from "@/modules/transaction/components/transaction
 import MetadataDetailComponent from "@/modules/transaction/components/transactionDetails/MetadataDetailComponent.vue";
 import SdaExchangeDetailComponent from "@/modules/transaction/components/transactionDetails/SdaExchangeDetailComponent.vue";
 import UnknownDataDetailComponent from "@/modules/transaction/components/transactionDetails/UnknownDataDetailComponent.vue";
+import DataModificationDetailComponent from "@/modules/transaction/components/transactionDetails/DataModificationDetailComponent.vue";
+import DownloadDetailComponent from "./transactionDetails/DownloadDetailComponent.vue";
+import PrepareBcDriveDetailComponent from "./transactionDetails/PrepareBcDriveDetailComponent.vue";
+import FinishDownloadDetailComponent from "./transactionDetails/FinishDownloadDetailComponent.vue";
+import DriveClosureDetailComponent from "./transactionDetails/DriveClosureDetailComponent.vue"
+import DownloadApprovalDetailComponent from "./transactionDetails/DownloadApprovalDetailComponent.vue";
+import ReplicatorOnboardingDetailComponent from "./transactionDetails/ReplicatorOnboardingDetailComponent.vue";
+import DataModificationApprovalDetailComponent from "./transactionDetails/DataModificationApprovalDetailComponent.vue";
+import DataModificationSingleApprovalDetailComponent from "./transactionDetails/DataModificationSingleApprovalDetailComponent.vue";
+import DataModificationCancelDetailComponent from "./transactionDetails/DataModificationCancelDetailComponent.vue";
+import EndDriveVerificationV2DetailComponent from "./transactionDetails/EndDriveVerificationV2DetailComponent.vue";
 import { AggregateTransaction, PublicAccount, TransactionType } from "tsjs-xpx-chain-sdk";
 import { MultisigUtils } from '@/util/multisigUtils'
 
@@ -206,6 +223,7 @@ const props = defineProps({
   txnDetail: Object,
   txnType: Number,
 });
+
 const toast = useToast();
 const nativeTokenNamespace = AppState.nativeToken.label;
 const maxFee = computed(() => {
@@ -324,8 +342,6 @@ onMounted(async () => {
   }
 })
 
-
-
 const copy = (id) => {
   let element = document.getElementById(id);
   if (element) {
@@ -355,7 +371,7 @@ const copy = (id) => {
     @apply flex items-center border-b border-gray-100 py-4;
 
     >div:first-child {
-      @apply w-40 text-xs pl-4;
+      @apply w-40 text-xs px-4;
     }
 
     >div:nth-child(2) {
@@ -405,7 +421,7 @@ const copy = (id) => {
     @apply flex items-center border-t border-gray-100 py-4;
 
     >div:first-child {
-      @apply w-40 text-xs pl-4;
+      @apply w-40 text-xs px-4;
     }
 
     >div:nth-child(2) {

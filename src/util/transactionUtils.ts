@@ -66,7 +66,7 @@ import {
   TransactionStatus,
   HashLockTransaction,
   PlaceSdaExchangeOfferTransaction,
-  RemoveSdaExchangeOfferTransaction
+  RemoveSdaExchangeOfferTransaction,
 } from "tsjs-xpx-chain-sdk";
 import type { InnerTransaction } from "tsjs-xpx-chain-sdk";
 import { networkState } from "@/state/networkState";
@@ -647,12 +647,19 @@ export class TransactionUtils {
     if (!AppState.chainAPI) {
       throw new Error("Service unavailable");
     }
+
+    let txn: any;
+    let txnStatus: TransactionStatus;
+
     try {
-      let txn: any = {};
-      let txnStatus: TransactionStatus;
       txnStatus = await AppState.chainAPI.transactionAPI.getTransactionStatus(
         hash
       );
+    }catch(e){
+      return { txn: {}, txnStatus: null, isFound: false };
+    }
+
+    try{
       if (txnStatus.group == "unconfirmed") {
         txn = await AppState.chainAPI.transactionAPI.getUnconfirmedTransaction(
           hash
@@ -671,7 +678,7 @@ export class TransactionUtils {
       }
       // get fee
       const transactionInfo: TransactionInfo | AggregateTransactionInfo =
-        txn.transactionInfo;
+        txn.transactionInfo!;
       let txnHash =
         transactionInfo instanceof AggregateTransactionInfo
           ? transactionInfo.aggregateHash
@@ -680,6 +687,11 @@ export class TransactionUtils {
       let blockHeight: number = 0;
       let txnBytes: number = 0;
       let deadline = null;
+
+      let signer: PublicAccount = txn.signer;
+
+      // txn.signer = signer.publicKey;
+      txn.signerAddress = signer.address.plain();
 
       if (transactionInfo instanceof AggregateTransactionInfo) {
         //let aggregateTxn = await TransactionUtils.autoFindAggregateTransaction(txnHash);
@@ -713,7 +725,7 @@ export class TransactionUtils {
         blockHeight = transactionInfo.height.compact();
         
         try {
-          txnBytes = txn.transactionInfo.size ? txn.transactionInfo.size: txn.serialize().length / 2;
+          txnBytes = transactionInfo.size ? transactionInfo.size: txn.serialize().length / 2;
         } catch (error) {
           console.error(error);
         }
@@ -844,11 +856,34 @@ export class TransactionUtils {
             txnStatus.group
           );
           break;
+        case TransactionType.Prepare_Bc_Drive:
+        case TransactionType.Download_Approval:
+        case TransactionType.Download:
+        case TransactionType.Download_Payment:
+        case TransactionType.Replicator_Onboarding:
+        case TransactionType.Replicator_Offboarding:
+        case TransactionType.Data_Modification:
+        case TransactionType.Data_Modification_Approval:
+        case TransactionType.Data_Modification_Cancel:
+        case TransactionType.Data_Modification_Single_Approval:
+        case TransactionType.Storage_Payment:
+        case TransactionType.Finish_Download:
+        case TransactionType.Verification_Payment:
+        case TransactionType.End_Drive_Verification_V2:
+        case TransactionType.Drive_Closure:
+          break;
+        case TransactionType.ADD_HARVESTER:
+        case TransactionType.REMOVE_HARVESTER:
+          break;
+        case TransactionType.Create_Liquidity_Provider:
+        case TransactionType.Manual_Rate_Change:
+          break;
       }
       // console.log(txn)
       return { txn, txnStatus, isFound: true };
     } catch (e) {
       console.error(e);
+      console.trace();
       return { isFound: "error" };
     }
   }
@@ -1811,6 +1846,30 @@ export class TransactionUtils {
           };
 
           infos.push(assetSupplyMutableInfo);
+
+          const assetRestrictableInfo: TxnDetails = {
+            type: MsgType.INFO,
+            label: "Restrictable",
+            value: assetDefFormat.supplyMutable ? "Yes" : "No",
+          };
+
+          infos.push(assetRestrictableInfo);
+
+          const assetSupplyForceImmutableInfo: TxnDetails = {
+            type: MsgType.INFO,
+            label: "Supply Force Immutable",
+            value: assetDefFormat.supplyForceImmutable ? "Yes" : "No",
+          };
+
+          infos.push(assetSupplyForceImmutableInfo);
+
+          const assetDisableLockingInfo: TxnDetails = {
+            type: MsgType.INFO,
+            label: "Disable Locking",
+            value: assetDefFormat.disableLocking ? "Yes" : "No",
+          };
+
+          infos.push(assetDisableLockingInfo);
 
           if (assetDefFormat.duration) {
             const assetDurationInfo: TxnDetails = {
@@ -3081,6 +3140,9 @@ export class TransactionUtils {
       : undefined;
     txnDetails.transferable = assetDefTxn.mosaicProperties.transferable;
     txnDetails.supplyMutable = assetDefTxn.mosaicProperties.supplyMutable;
+    txnDetails.restrictable = assetDefTxn.mosaicProperties.restrictable;
+    txnDetails.supplyForceImmutable = assetDefTxn.mosaicProperties.supplyForceImmutable;
+    txnDetails.disableLocking = assetDefTxn.mosaicProperties.disableLocking;
     txnDetails.nonce = assetDefTxn.mosaicNonce.toNumber();
     return txnDetails;
   }
@@ -3204,11 +3266,8 @@ export class TransactionUtils {
     txnDetails.signerAddress = registerNSTxn.signer.address.plain();
     txnDetails.type = registerNSTxn.transactionName;
     txnDetails.namespaceName = registerNSTxn.namespaceName;
-    if (!registerNSTxn.duration) {
-      throw new Error("Service Unavailable");
-    }
     if (registerNSTxn.namespaceType === NamespaceType.RootNamespace) {
-      txnDetails.duration = registerNSTxn.duration.compact();
+      txnDetails.duration = registerNSTxn.duration!.compact();
       txnDetails.registerType = NamespaceType.RootNamespace;
       txnDetails.registerTypeName = "Root namespace";
 
@@ -5271,6 +5330,9 @@ export class TransactionUtils {
         : undefined;
       txn.transferable = assetDefinitionTxn.mosaicProperties.transferable;
       txn.supplyMutable = assetDefinitionTxn.mosaicProperties.supplyMutable;
+      txn.restrictable = assetDefinitionTxn.mosaicProperties.restrictable;
+      txn.supplyForceImmutable = assetDefinitionTxn.mosaicProperties.supplyForceImmutable;
+      txn.disableLocking = assetDefinitionTxn.mosaicProperties.disableLocking;
       txn.nonce = assetDefinitionTxn.mosaicNonce.toNumber();
     } else if (transaction.type === TransactionType.MOSAIC_SUPPLY_CHANGE) {
       const assetSupplyChangeTxn = transaction as MosaicSupplyChangeTransaction;
@@ -5373,6 +5435,9 @@ export class TransactionUtils {
           : undefined;
         txn.transferable = assetDefinitionTxn.mosaicProperties.transferable;
         txn.supplyMutable = assetDefinitionTxn.mosaicProperties.supplyMutable;
+        txn.restrictable = assetDefinitionTxn.mosaicProperties.restrictable;
+        txn.supplyForceImmutable = assetDefinitionTxn.mosaicProperties.supplyForceImmutable;
+        txn.disableLocking = assetDefinitionTxn.mosaicProperties.disableLocking;
         txn.nonce = assetDefinitionTxn.mosaicNonce.toNumber();
       } else if (txns[i].type === TransactionType.MOSAIC_SUPPLY_CHANGE) {
         const assetSupplyChangeTxn = txns[i] as MosaicSupplyChangeTransaction;
@@ -5479,6 +5544,9 @@ export class TransactionUtils {
           : undefined;
         txn.transferable = assetDefinitionTxn.mosaicProperties.transferable;
         txn.supplyMutable = assetDefinitionTxn.mosaicProperties.supplyMutable;
+        txn.restrictable = assetDefinitionTxn.mosaicProperties.restrictable;
+        txn.supplyForceImmutable = assetDefinitionTxn.mosaicProperties.supplyForceImmutable;
+        txn.disableLocking = assetDefinitionTxn.mosaicProperties.disableLocking;
         txn.nonce = assetDefinitionTxn.mosaicNonce.toNumber();
       } else if (txns[i].type === TransactionType.MOSAIC_SUPPLY_CHANGE) {
         const assetSupplyChangeTxn = txns[i] as MosaicSupplyChangeTransaction;
@@ -5585,6 +5653,9 @@ export class TransactionUtils {
           : undefined;
         txn.transferable = assetDefinitionTxn.mosaicProperties.transferable;
         txn.supplyMutable = assetDefinitionTxn.mosaicProperties.supplyMutable;
+        txn.restrictable = assetDefinitionTxn.mosaicProperties.restrictable;
+        txn.supplyForceImmutable = assetDefinitionTxn.mosaicProperties.supplyForceImmutable;
+        txn.disableLocking = assetDefinitionTxn.mosaicProperties.disableLocking;
         txn.nonce = assetDefinitionTxn.mosaicNonce.toNumber();
       } else if (txns[i].type === TransactionType.MOSAIC_SUPPLY_CHANGE) {
         const assetSupplyChangeTxn = txns[i] as MosaicSupplyChangeTransaction;
@@ -9290,8 +9361,8 @@ export class TransactionUtils {
     if (!txn.signer) {
       throw new Error("Service unavailable");
     }
-    formattedTxn.signer = txn.signer.publicKey;
-    formattedTxn.signerAddress = txn.signer.address.plain();
+    // formattedTxn.signer = txn.signer.publicKey;
+    // formattedTxn.signerAddress = txn.signer.address.plain();
 
     let deadline = null;
 
@@ -9347,8 +9418,8 @@ export class TransactionUtils {
     if (!txn.signer) {
       throw new Error("Service unavailable");
     }
-    formattedTxn.signer = txn.signer.publicKey;
-    formattedTxn.signerAddress = txn.signer.address.plain();
+    // formattedTxn.signer = txn.signer.publicKey;
+    // formattedTxn.signerAddress = txn.signer.address.plain();
 
     let deadline = null;
 

@@ -27,6 +27,7 @@ import {
   Order_v2,
   MosaicQueryParams,
   AggregateTransaction,
+  Convert
 } from "tsjs-xpx-chain-sdk";
 import type { InnerTransaction } from "tsjs-xpx-chain-sdk";
 import { DateTime } from "luxon";
@@ -109,8 +110,9 @@ export class Helper {
     return newInnerTransaction;
   }
 
-  static createAddress(address: string): Address {
-    return Address.createFromRawAddress(address);
+  static createAddress(address: string | PublicAccount): Address {
+
+    return address instanceof PublicAccount ? address.address : Address.createFromRawAddress(address);
   }
 
   static checkAddressNetwork(address: Address, networkType: NetworkType) {
@@ -273,6 +275,58 @@ export class Helper {
 
     return data.trim().replaceAll("_", " ").toLowerCase().replace(searchString, replaceString).split(" ")
                 .map(word => word.charAt(0).toUpperCase() + word.substring(1)).join(" ");
+  }
+
+  static simplifyData(data: any): any{
+    let returnData: any;
+    switch (data.constructor) {
+      case UInt64: {
+        let tempData = data as UInt64;
+        returnData = tempData.toBigInt();
+      }  
+        break;
+      case PublicAccount: {
+          let tempData = data as PublicAccount;
+          returnData = tempData.publicKey;
+      }  
+        break;
+      case Deadline: {
+        let tempData = data as Deadline;
+        returnData = new Date(tempData.value!.toJSON()).toJSON();
+      }  
+        break;
+      case Address: {
+        let tempData = data as Address;
+        returnData = tempData.pretty();
+      }  
+        break;
+      case NamespaceId: {
+        let tempData = data as NamespaceId;
+        returnData = tempData.toHex();
+      }  
+        break;
+      case MosaicId: {
+        let tempData = data as NamespaceId;
+        returnData = tempData.toHex();
+      }  
+        break;
+      case Uint8Array: {
+        let tempData = data as Uint8Array;
+        returnData = "0x" + Convert.uint8ArrayToHex(tempData);
+      }  
+        break;
+      case MosaicNonce: {
+        let tempData = data as MosaicNonce;
+        returnData = tempData.toNumber().toString();
+      }  
+        break;
+    
+      default:
+        returnData = data;
+        break;
+    }
+
+    return returnData;
   }
 }
 

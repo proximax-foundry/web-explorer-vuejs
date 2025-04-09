@@ -69,7 +69,7 @@
               v-for="(item, index) in data.sdaExchange"
               :key="index"
               v-tooltip.left="
-                { value: `<tiptext>Approximately ${durationTime(item.duration)} Day${(durationTime(item.duration) > 1 ? 's' : '')}</tiptext>`, disabled:Boolean(item.duration === undefined) , escape: true }
+                { value: `<tiptext>Approximately ${durationTime(item.duration)} Day${(durationTime(item.duration) > 1 ? 's' : '')}</tiptext>`, disabled:Boolean(item.duration === undefined) , escape: false }
               "
             >
               <div>
@@ -197,7 +197,7 @@
               v-for="(item, index) in data.sdaExchange"
               :key="index"
               v-tooltip.left="
-                { value: `<tiptext>Approximately ${durationTime(item.duration)} Day${(durationTime(item.duration) > 1 ? 's' : '')}</tiptext>`, disabled:Boolean(item.duration === undefined) , escape: true }
+                { value: `<tiptext>Approximately ${durationTime(item.duration)} Day${(durationTime(item.duration) > 1 ? 's' : '')}</tiptext>`, disabled:Boolean(item.duration === undefined) , escape: false }
               "
             >
               <div>

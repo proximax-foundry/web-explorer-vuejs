@@ -1,8 +1,8 @@
 {
   "Sirius Mainnet": {
-    "version": "0.7.2",
+    "version": "1.6.0",
     "apiNodes":[
-      "betelgeuse.xpxsirius.io"
+      "arcturus.xpxsirius.io"
     ],
     "httpPort": 3000,
     "network":{

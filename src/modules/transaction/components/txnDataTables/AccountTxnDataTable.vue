@@ -100,7 +100,7 @@
             <div class="inline-grid grid-cols-1 gap-2 break-all">
               <div
                 v-bind:key="cosigner"
-                v-tooltip.bottom="'Adding account:<br><br>' + cosigner"
+                v-tooltip.bottom="{ value: 'Adding account:<br><br>' + cosigner, escape: false }"
                 v-for="cosigner in data.addedCosigner"
                 class="truncate inline-flex bg-green-200 font-bold text-green-700 text-xs rounded py-1 px-2 my-1 mr-1"
               >
@@ -111,7 +111,7 @@
               </div>
               <div
                 v-bind:key="cosigner"
-                v-tooltip.bottom="'Removing account:<br><br>' + cosigner"
+                v-tooltip.bottom="{ value: 'Removing account:<br><br>' + cosigner, escape: false }"
                 v-for="cosigner in data.removedCosigner"
                 class="truncate inline-block bg-red-200 font-bold text-red-700 text-xs py-1 px-2 my-1 mr-1"
               >
@@ -255,7 +255,7 @@
         <template #body="{ data }">
           <div
             v-bind:key="cosigner"
-            v-tooltip.bottom="'Adding account:<br><br>' + cosigner"
+            v-tooltip.bottom="{ value: 'Adding account:<br><br>' + cosigner, escape: false }"
             v-for="cosigner in data.addedCosigner"
             class="truncate inline-flex bg-green-200 font-bold text-green-700 text-xs rounded py-1 px-2 my-1 mx-1"
           >
@@ -265,7 +265,7 @@
           </div>
           <div
             v-bind:key="cosigner"
-            v-tooltip.bottom="'Removing account:<br><br>' + cosigner"
+            v-tooltip.bottom="{ value: 'Removing account:<br><br>' + cosigner, escape: false }"
             v-for="cosigner in data.removedCosigner"
             class="truncate inline-flex bg-red-200 font-bold text-red-700 text-xs rounded py-1 px-2 my-1 mx-1"
           >

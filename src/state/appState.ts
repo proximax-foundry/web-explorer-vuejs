@@ -1,5 +1,4 @@
 import { reactive } from "vue";
-import type { BuildTransactions } from "../util/buildTransactions";
 import type { ChainAPICall } from "../models/REST/chainAPICall";
 import { NetworkType } from "tsjs-xpx-chain-sdk";
 
@@ -16,7 +15,6 @@ interface RegisteredToken {
 }
 
 interface appStateInterface {
-  buildTxn: BuildTransactions | null;
   nativeToken: NativeToken;
   registeredToken: RegisteredToken[];
   chainAPI: ChainAPICall | null;
@@ -30,7 +28,6 @@ interface appStateInterface {
 }
 
 export const AppState = reactive<appStateInterface>({
-  buildTxn: null,
   nativeToken: {
     assetId: "",
     divisibility: 6,

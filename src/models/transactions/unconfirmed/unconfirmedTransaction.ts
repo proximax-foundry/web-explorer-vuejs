@@ -1,10 +1,8 @@
-import { CommonTransaction } from "../commonTransaction";
+import { TransactionCommon } from "../transactionCommon";
 
-export class UnconfirmedTransaction extends CommonTransaction {
-  groupType: string = "unconfirmed";
-
+export class UnconfirmedTransaction extends TransactionCommon {
   constructor(txnHash: string) {
-    super(txnHash);
+    super(txnHash, "unconfirmed");
   }
 
   static convertToSubClass(

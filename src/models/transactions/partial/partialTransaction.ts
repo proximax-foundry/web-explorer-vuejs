@@ -1,13 +1,12 @@
-import { CommonTransaction } from "../commonTransaction";
+import { TransactionCommon } from "../transactionCommon";
 
-export class PartialTransaction extends CommonTransaction {
+export class PartialTransaction extends TransactionCommon {
   cosignedPublickKey: string[] = [];
   allCosignerPublicKey: string[] = [];
   pendingCosignPublicKey: string[] = [];
-  groupType: string = "partial";
 
   constructor(txnHash: string) {
-    super(txnHash);
+    super(txnHash, "partial");
   }
 
   static convertToSubClass(

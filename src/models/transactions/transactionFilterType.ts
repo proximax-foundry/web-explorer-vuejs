@@ -79,6 +79,26 @@ export class TransactionFilterTypes {
       TransactionType.REMOVE_SDA_EXCHANGE_OFFER,
     ];
   }
+
+  static getStorageTypes() {
+    return [
+      TransactionType.Replicator_Onboarding,
+      TransactionType.Prepare_Bc_Drive,
+      TransactionType.Data_Modification,
+      TransactionType.Data_Modification_Approval,
+      TransactionType.Data_Modification_Single_Approval,
+      TransactionType.Data_Modification_Cancel,
+      TransactionType.Storage_Payment,
+      TransactionType.Download_Payment,
+      TransactionType.Download,
+      TransactionType.Finish_Download,
+      TransactionType.Verification_Payment,
+      TransactionType.End_Drive_Verification_V2,
+      TransactionType.Download_Approval,
+      TransactionType.Drive_Closure,
+      TransactionType.Replicator_Offboarding,
+    ];
+  }
 }
 
 export enum TransactionFilterType {
@@ -96,4 +116,5 @@ export enum TransactionFilterType {
   SECRET = "Secret",
   CHAIN = "Chain",
   'SDA EXCHANGE' = "SDA Exchange",
+  STORAGE = "Storage"
 }

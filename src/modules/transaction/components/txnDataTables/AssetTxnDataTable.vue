@@ -121,6 +121,63 @@
                 Supply Mutable
               </div>
               <div
+                v-bind:class="[
+                  'inline-block',
+                  'text-black',
+                  'py-1',
+                  'px-2',
+                  'my-1',
+                  'mr-1',
+                  'text-xs',
+                  'font-bold',
+                  'rounded',
+                  data.restrictable
+                    ? 'bg-green-200 text-green-700'
+                    : 'bg-red-200 text-red-700',
+                ]"
+                v-if="data.restrictable !== null"
+              >
+                Restrictable
+              </div>
+              <div
+                v-bind:class="[
+                  'inline-block',
+                  'text-black',
+                  'py-1',
+                  'px-2',
+                  'my-1',
+                  'mr-1',
+                  'text-xs',
+                  'font-bold',
+                  'rounded',
+                  data.supplyForceImmutable
+                    ? 'bg-green-200 text-green-700'
+                    : 'bg-red-200 text-red-700',
+                ]"
+                v-if="data.supplyForceImmutable !== null"
+              >
+                Supply Force Immutable
+              </div>
+              <div
+                v-bind:class="[
+                  'inline-block',
+                  'text-black',
+                  'py-1',
+                  'px-2',
+                  'my-1',
+                  'mr-1',
+                  'text-xs',
+                  'font-bold',
+                  'rounded',
+                  data.disableLocking
+                    ? 'bg-green-200 text-green-700'
+                    : 'bg-red-200 text-red-700',
+                ]"
+                v-if="data.disableLocking !== null"
+              >
+                Disable Locking
+              </div>
+              <div
                 class="inline-block bg-blue-100 text-blue-700 font-bold text-xs py-1 px-2 my-1 mr-1 rounded"
                 v-if="data.duration"
               >
@@ -304,6 +361,60 @@
             ]"
             v-if="data.supplyMutable !== null"
             >Supply Mutable</span
+          >
+          <span
+            v-bind:class="[
+              'inline-block',
+              'text-black',
+              'py-1',
+              'px-2',
+              'my-1',
+              'mx-1',
+              'text-xs',
+              'font-bold',
+              'rounded',
+              data.restrictable
+                ? 'bg-green-200 text-green-700'
+                : 'bg-red-200 text-red-700',
+            ]"
+            v-if="data.restrictable !== null"
+            >Restrictable</span
+          >
+          <span
+            v-bind:class="[
+              'inline-block',
+              'text-black',
+              'py-1',
+              'px-2',
+              'my-1',
+              'mx-1',
+              'text-xs',
+              'font-bold',
+              'rounded',
+              data.supplyForceImmutable
+                ? 'bg-green-200 text-green-700'
+                : 'bg-red-200 text-red-700',
+            ]"
+            v-if="data.supplyForceImmutable !== null"
+            >Supply Force Immutable</span
+          >
+          <span
+            v-bind:class="[
+              'inline-block',
+              'text-black',
+              'py-1',
+              'px-2',
+              'my-1',
+              'mx-1',
+              'text-xs',
+              'font-bold',
+              'rounded',
+              data.disableLocking
+                ? 'bg-green-200 text-green-700'
+                : 'bg-red-200 text-red-700',
+            ]"
+            v-if="data.disableLocking !== null"
+            >Disable Locking</span
           >
           <span
             class="inline-block bg-blue-100 text-blue-700 font-bold text-xs py-1 px-2 my-1 mx-1 rounded"
